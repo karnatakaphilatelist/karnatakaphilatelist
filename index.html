@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Philatelic Passport Tracker - Karnataka</title>
+    <!-- Tailwind CSS for modern UI -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Leaflet CSS for Maps -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <!-- Supabase JS Client -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        #map { height: calc(100vh - 4rem); }
+    </style>
+</head>
+<body class="bg-slate-50 font-sans antialiased">
+
+    <!-- Top Navigation Bar -->
+    <header class="bg-indigo-900 text-white shadow-md h-16 flex items-center justify-between px-4 md:px-8">
+        <div class="flex items-center space-x-2">
+            <span class="text-2xl">🪪</span>
+            <h1 class="font-bold text-lg tracking-wide">Philately Passport Tracker</h1>
+        </div>
+        <div id="auth-section" class="flex items-center space-x-4">
+            <span id="user-display" class="text-xs bg-indigo-800 px-3 py-1 rounded-full text-indigo-200">Collector: Guest</span>
+            <button onclick="toggleAuth()" id="auth-btn" class="text-xs bg-amber-500 hover:bg-amber-600 text-white font-semibold px-3 py-1.5 rounded transition">Login / Sign Up</button>
+        </div>
+    </header>
+
+    <!-- Main Workspace -->
+    <main class="flex flex-col md:flex-row relative">
+        
+        <!-- Sidebar / Search Panel -->
+        <aside class="w-full md:w-96 bg-white border-r border-slate-200 p-4 h-auto md:h-[calc(100vh-4rem)] overflow-y-auto z-10 shadow-sm">
+            
+            <!-- Proximity Search Button -->
+            <button 
+                onclick="findStationsNearMe()" 
+                class="w-full mb-3 py-2.5 px-3 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded-lg shadow-sm transition flex items-center justify-center space-x-1"
+            >
+                <span>📍 Find Passport Stations Near Me</span>
+            </button>
+
+            <div class="mb-4">
+                <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Search Post Office / Pincode</label>
+                <div class="relative">
+                    <input type="text" id="search-input" placeholder="e.g. Madikeri or 571201..." class="w-full p-2.5 pl-9 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none" oninput="handleSearch()">
+                    <span class="absolute left-3 top-3 text-slate-400 text-sm">🔍</span>
+                </div>
+                <!-- Search Suggestions Dropdown -->
+                <div id="suggestions-box" class="absolute w-full bg-white border border-slate-200 rounded-b-lg shadow-lg mt-1 hidden max-h-48 overflow-y-auto z-50"></div>
+            </div>
+
+            <!-- Progress Card -->
+            <div class="bg-indigo-50 border border-indigo-100 rounded-xl p-4 mb-4">
+                <div class="flex justify-between text-sm font-medium text-indigo-900 mb-1">
+                    <span>Karnataka Progress</span>
+                    <span id="progress-count">0 Visited</span>
+                </div>
+                <div class="w-full bg-indigo-200 h-2.5 rounded-full overflow-hidden">
+                    <div id="progress-bar" class="bg-amber-500 h-2.5 transition-all duration-500" style="width: 0%;"></div>
+                </div>
+            </div>
+
+            <!-- List of Post Offices View -->
+            <h2 class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Karnataka Directory</h2>
+            <div id="po-list" class="space-y-2">
+                <!-- Dynamically populated cards go here -->
+            </div>
+        </aside>
+
+        <!-- Map Container -->
+        <div class="flex-1 relative">
+            <div id="map"></div>
+        </div>
+    </main>
+
+    <!-- Leaflet JS Library -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        // Supabase Configuration
+        const SUPABASE_URL = 'https://yboveezqovgvphvpeelq.supabase.co';
+        const SUPABASE_ANON_KEY = 'sb_publishable_TL6E_mR_zx_RXF0lZaHoEA_Va4wmREY';
+        
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        let postOffices = [];
+        let isLoggedIn = false;
+        let map, markers = {};
+
+        // Initialize Map centered over Karnataka
+        async function initMap() {
+            map = L.map('map').setView([15.3173, 75.7139], 7);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; OpenStreetMap contributors'
+            }).addTo(map);
+
+            await loadPostOfficesFromSupabase();
+        }
+
+        // Fetch Master List from Supabase Table
+        async function loadPostOfficesFromSupabase() {
+            const { data, error } = await supabaseClient
+                .from('post_office')
+                .select('*');
+
+            if (error) {
+                console.error('Error fetching post offices:', error);
+                return;
+            }
+
+            postOffices = data.map(po => ({
+                id: po.id,
+                name: po.name,
+                pincode: po.pincode,
+                district: po.district,
+                lat: po.lat,
+                lng: po.long,
+                visited: false
+            }));
+
+            renderMapPins();
+            renderSidebarList();
+            updateProgress();
+        }
+
+        // Create Custom Icons (Orange for Unexplored, Green Check for Visited)
+        function getCustomIcon(visited) {
+            const color = visited ? '#10B981' : '#F97316';
+            const symbol = visited ? '✓' : '📍';
+            return L.divIcon({
+                className: 'custom-pin',
+                html: `<div style="background-color: ${color}; color: white; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; border-radius: 50%; font-weight: bold; box-shadow: 0 4px 6px rgba(0,0,0,0.2); border: 2px solid white;">${symbol}</div>`,
+                iconSize: [30, 30],
+                iconAnchor: [15, 15]
+            });
+        }
+
+        // Render Map Pins
+        function renderMapPins() {
+            Object.values(markers).forEach(m => map.removeLayer(m));
+            markers = {};
+
+            postOffices.forEach(po => {
+                if (!po.lat || !po.lng) return;
+
+                const marker = L.marker([po.lat, po.lng], { icon: getCustomIcon(po.visited) }).addTo(map);
+                
+                const distBadge = po.distance_meters 
+                    ? `<p class="text-xs text-indigo-600 font-semibold mt-1">📍 ${(po.distance_meters / 1000).toFixed(1)} km away</p>` 
+                    : '';
+
+                marker.bindPopup(`
+                    <div class="p-2">
+                        <h3 class="font-bold text-slate-800">${po.name}</h3>
+                        <p class="text-xs text-slate-500">Pincode: ${po.pincode} | ${po.district}</p>
+                        ${distBadge}
+                        <button onclick="toggleVisit(${po.id})" class="mt-2 w-full text-xs py-1.5 px-3 rounded font-medium ${po.visited ? 'bg-slate-200 text-slate-700' : 'bg-indigo-600 text-white'} transition">
+                            ${po.visited ? 'Mark as Unexplored' : 'Mark as Visited ✓'}
+                        </button>
+                    </div>
+                `);
+                markers[po.id] = marker;
+            });
+        }
+
+        // Render Sidebar List
+        function renderSidebarList() {
+            const container = document.getElementById('po-list');
+            container.innerHTML = '';
+
+            postOffices.forEach(po => {
+                const card = document.createElement('div');
+                card.className = `p-3 rounded-xl border transition flex items-center justify-between cursor-pointer ${po.visited ? 'bg-emerald-50 border-emerald-200' : 'bg-white border-slate-200 hover:border-indigo-300'}`;
+                card.onclick = () => {
+                    map.setView([po.lat, po.lng], 13);
+                    if (markers[po.id]) markers[po.id].openPopup();
+                };
+
+                const distText = po.distance_meters 
+                    ? `<span class="text-[10px] text-indigo-600 block font-semibold">📍 ${(po.distance_meters / 1000).toFixed(1)} km away</span>` 
+                    : '';
+
+                card.innerHTML = `
+                    <div>
+                        <h4 class="text-xs font-bold text-slate-800">${po.name}</h4>
+                        <p class="text-[11px] text-slate-500">${po.district} • ${po.pincode}</p>
+                        ${distText}
+                    </div>
+                    <span class="text-xs px-2 py-1 rounded font-semibold ${po.visited ? 'bg-emerald-200 text-emerald-800' : 'bg-amber-100 text-amber-800'}">
+                        ${po.visited ? 'Visited ✓' : 'Pending'}
+                    </span>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        // Proximity "Passport Stations Near Me" Trigger
+        function findStationsNearMe() {
+            if (!navigator.geolocation) {
+                alert("Geolocation is not supported by your browser.");
+                return;
+            }
+
+            navigator.geolocation.getCurrentPosition(async (position) => {
+                const { latitude, longitude } = position.coords;
+
+                const { data, error } = await supabaseClient.rpc('get_nearby_passport_stations', {
+                    user_lat: latitude,
+                    user_long: longitude,
+                    radius_meters: 50000
+                });
+
+                if (error) {
+                    console.error("RPC Error:", error);
+                    alert("Could not calculate nearby stations.");
+                    return;
+                }
+
+                postOffices = data.map(po => ({
+                    id: po.id,
+                    name: po.name,
+                    pincode: po.pincode,
+                    district: po.district,
+                    lat: po.lat,
+                    lng: po.long,
+                    distance_meters: po.distance_meters,
+                    visited: false
+                }));
+
+                renderMapPins();
+                renderSidebarList();
+                map.setView([latitude, longitude], 10);
+            }, (err) => {
+                alert("Unable to retrieve location. Please check browser permissions.");
+            });
+        }
+
+        // Toggle Visited Status
+        function toggleVisit(id) {
+            if (!isLoggedIn) {
+                alert("Please log in or sign up first to track your passport progress!");
+                return;
+            }
+            const po = postOffices.find(p => p.id === id);
+            if (po) {
+                po.visited = !po.visited;
+                renderMapPins();
+                renderSidebarList();
+                updateProgress();
+                if (markers[id]) markers[id].openPopup();
+            }
+        }
+
+        // Progress Counter Update
+        function updateProgress() {
+            const visitedCount = postOffices.filter(p => p.visited).length;
+            const total = postOffices.length;
+            const percentage = total > 0 ? (visitedCount / total) * 100 : 0;
+
+            document.getElementById('progress-count').innerText = `${visitedCount} / ${total} Visited`;
+            document.getElementById('progress-bar').style.width = `${percentage}%`;
+        }
+
+        // Mock Account Auth Trigger
+        function toggleAuth() {
+            isLoggedIn = !isLoggedIn;
+            const btn = document.getElementById('auth-btn');
+            const display = document.getElementById('user-display');
+            if (isLoggedIn) {
+                btn.innerText = "Logout";
+                btn.className = "text-xs bg-rose-500 hover:bg-rose-600 text-white font-semibold px-3 py-1.5 rounded transition";
+                display.innerText = "Collector: Active";
+            } else {
+                btn.innerText = "Login / Sign Up";
+                btn.className = "text-xs bg-amber-500 hover:bg-amber-600 text-white font-semibold px-3 py-1.5 rounded transition";
+                display.innerText = "Collector: Guest";
+            }
+        }
+
+        // Live Search Autocomplete
+        function handleSearch() {
+            const query = document.getElementById('search-input').value.toLowerCase().trim();
+            const box = document.getElementById('suggestions-box');
+            
+            if (query === "") {
+                box.classList.add('hidden');
+                return;
+            }
+
+            const matches = postOffices.filter(po => 
+                po.name.toLowerCase().includes(query) || 
+                po.pincode.toString().includes(query) || 
+                po.district.toLowerCase().includes(query)
+            );
+
+            if (matches.length > 0) {
+                box.innerHTML = matches.map(m => `
+                    <div onclick="selectSuggestion(${m.lat}, ${m.lng}, ${m.id})" class="p-2.5 text-xs hover:bg-slate-100 cursor-pointer border-b border-slate-100 flex justify-between items-center">
+                        <div>
+                            <span class="font-bold text-slate-800">${m.name}</span>
+                            <span class="text-slate-400 block">${m.district} - ${m.pincode}</span>
+                        </div>
+                        <span class="text-indigo-600 font-medium">Go &rarr;</span>
+                    </div>
+                `).join('');
+                box.classList.remove('hidden');
+            } else {
+                box.innerHTML = `<div class="p-2.5 text-xs text-slate-400">No matching post office found.</div>`;
+                box.classList.remove('hidden');
+            }
+        }
+
+        function selectSuggestion(lat, lng, id) {
+            map.setView([lat, lng], 13);
+            if (markers[id]) markers[id].openPopup();
+            document.getElementById('suggestions-box').classList.add('hidden');
+            document.getElementById('search-input').value = '';
+        }
+
+        window.onload = initMap;
+    </script>
+</body>
+</html>

@@ -1,14 +1,15 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { FilterChips, type StatusFilter } from "@/components/explore/FilterChips";
+import { ExploreControls } from "@/components/explore/ExploreControls";
+import type { StatusFilter } from "@/components/explore/FilterChips";
 import { OfficeList } from "@/components/explore/OfficeList";
 import { LazyOfficeMap } from "@/components/map/LazyOfficeMap";
 import { OfficeDetail } from "@/components/office/OfficeDetail";
 import { VisitDialog } from "@/components/office/VisitDialog";
 import { useToast } from "@/components/providers/ToastProvider";
 import { useVisits } from "@/components/providers/VisitsProvider";
-import { LocateIcon, SearchIcon } from "@/components/ui/icons";
+import { LocateIcon } from "@/components/ui/icons";
 import { sortByDistance, withStatus } from "@/lib/office-status";
 import type { Coordinates, PostOffice } from "@/types";
 
@@ -88,22 +89,17 @@ export function ExploreView({ offices, initialSelectedId }: ExploreViewProps) {
         aria-label="Post offices"
         className="flex h-[44%] min-h-0 flex-col border-t border-line bg-white md:h-auto md:w-[26rem] md:shrink-0 md:border-r md:border-t-0"
       >
-        <div className="shrink-0 space-y-1 px-4 pt-4">
-          <div className="relative">
-            <label htmlFor="office-search" className="sr-only">
-              Search by post office, district or pincode
-            </label>
-            <SearchIcon className="pointer-events-none absolute left-3.5 top-3.5 size-5 text-muted" />
-            <input
-              id="office-search"
-              type="search"
-              value={query}
-              onChange={(event) => setQuery(event.target.value)}
-              placeholder="Search post office, district or pincode"
-              className="h-12 w-full rounded-xl border border-line-strong bg-paper pl-11 pr-3 text-base"
+        <div className="shrink-0 space-y-1 px-4 pt-3 md:pt-4">
+          {/* On phones the controls live over the map instead, so the detail sheet never covers them. */}
+          <div className="hidden space-y-1 md:block">
+            <ExploreControls
+              idSuffix="desktop"
+              query={query}
+              onQueryChange={setQuery}
+              filter={filter}
+              onFilterChange={setFilter}
             />
           </div>
-          <FilterChips value={filter} onChange={setFilter} />
           <div className="flex items-center justify-between pb-2">
             <p className="text-sm text-muted" aria-live="polite">
               {visibleOffices.length} of {offices.length} post offices
@@ -130,6 +126,15 @@ export function ExploreView({ offices, initialSelectedId }: ExploreViewProps) {
       </aside>
 
       <section aria-label="Map" className="relative isolate min-h-0 flex-1">
+        <div className="absolute inset-x-0 top-0 z-[1100] space-y-1 bg-white/95 px-4 pb-1 pt-3 shadow-sm md:hidden">
+          <ExploreControls
+            idSuffix="mobile"
+            query={query}
+            onQueryChange={setQuery}
+            filter={filter}
+            onFilterChange={setFilter}
+          />
+        </div>
         <LazyOfficeMap
           offices={visibleOffices}
           selectedId={selectedId}

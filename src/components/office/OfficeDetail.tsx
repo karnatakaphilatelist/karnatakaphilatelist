@@ -43,7 +43,7 @@ export function OfficeDetail({
     <div
       role="region"
       aria-label={`${office.name} details`}
-      className="fixed inset-x-0 bottom-0 z-20 flex max-h-[85dvh] animate-rise flex-col rounded-t-3xl bg-white shadow-[0_-8px_30px_rgb(43_43_43/0.18)] md:absolute md:inset-x-auto md:bottom-auto md:left-4 md:top-4 md:max-h-[calc(100%-2rem)] md:w-96 md:rounded-2xl md:shadow-xl"
+      className="fixed inset-x-0 bottom-0 z-[1100] flex max-h-[85dvh] animate-rise flex-col rounded-t-3xl bg-white shadow-[0_-8px_30px_rgb(43_43_43/0.18)] md:absolute md:inset-x-auto md:bottom-auto md:left-14 md:top-4 md:max-h-[calc(100%-2rem)] md:w-96 md:rounded-2xl md:shadow-xl"
     >
       <div className="min-h-0 flex-1 overflow-y-auto px-5 pb-2 pt-4">
         <div className="flex items-start justify-between gap-3">

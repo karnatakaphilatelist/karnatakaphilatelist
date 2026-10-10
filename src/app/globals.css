@@ -128,3 +128,10 @@ body {
     0 0 0 5px rgb(214 58 43 / 0.28),
     0 2px 8px rgb(0 0 0 / 0.25);
 }
+
+/* On phones the search and filters sit over the top of the map; keep the zoom buttons below them. */
+@media (max-width: 767px) {
+  .leaflet-top {
+    margin-top: 7.5rem;
+  }
+}

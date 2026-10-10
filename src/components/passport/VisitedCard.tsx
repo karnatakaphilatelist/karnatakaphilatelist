@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { StampThumb } from "@/components/office/StampThumb";
 import { CameraIcon, GlobeIcon, LockIcon } from "@/components/ui/icons";
 import { usePhotoUrl } from "@/hooks/usePhotoUrl";
 import type { PostOffice, Visit } from "@/types";
@@ -17,10 +18,11 @@ export function VisitedCard({ office, visit, onEdit }: VisitedCardProps) {
   return (
     <li className="rounded-2xl bg-white p-4 shadow-sm">
       <div className="flex items-start gap-3">
+        <StampThumb path={office.stampImagePath} status="visited" className="size-12" />
         <div className="min-w-0 flex-1">
           <h3 className="text-base font-semibold">{office.name}</h3>
           <p className="text-sm text-muted">
-            {office.district} · {visit.visitedAt}
+            {office.district} · <span className="whitespace-nowrap">{visit.visitedAt}</span>
           </p>
         </div>
         <span className="flex shrink-0 items-center gap-1 rounded-[10px] bg-sand px-2 py-1 text-xs font-semibold text-muted">

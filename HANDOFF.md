@@ -30,10 +30,9 @@ Clickable design canvas (mobile and desktop): https://claude.ai/artifact/Rd59uog
 
 ## Done since the first handoff
 - "post offices" wording, progress ring/count alignment, and the detail card closing when the filter or search hides its post office are applied in the real app.
-- Per-post-office stamp images: migration `20261011010000_post_office_stamp_images.sql`, `StampThumb` (greyscale until visited, mail-icon fallback), shown in the list and detail card. `getPostOffices` still works if the migration has not been run. Not done: stamp in the map pins and the passport visited cards.
+- Per-post-office stamp images: migration `20261011010000_post_office_stamp_images.sql`, `StampThumb` (greyscale until visited, mail-icon fallback), shown in the list and detail card. `getPostOffices` still works if the migration has not been run. Also on passport visited cards. Deliberately not on map pins (30px is too small; status glyphs keep pins readable without colour).
 
 ## Next tasks
-1. Run the app locally and fix visual or behavioural bugs (test at phone width). The UI has still never been seen in a real browser.
+1. The explore and passport flows were smoke-tested in headless Chromium (phone and desktop) against a stub of the Supabase data; real Supabase, Google sign-in, photo upload and map tiles (blocked in the sandbox) are still untested. On phones, search and filters sit over the top of the map so the detail sheet never covers them.
 2. Run both migrations, then upload stamp photos named by id and fill `stamp_image_path`. Confirm the stamp artwork may be published.
-3. Optionally show stamps on map pins and visited cards.
-4. Deploy a Vercel preview from the PR.
+3. Deploy a Vercel preview from the PR.

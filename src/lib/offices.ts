@@ -10,7 +10,13 @@ interface PostOfficeRow {
   district: string | null;
   lat: number | null;
   long: number | null;
+  /** Absent until the stamp-images migration has been run. */
+  stamp_image_path?: string | null;
 }
+
+const BASE_COLUMNS = "id, name, pincode, district, lat, long";
+/** Postgres error code for "column does not exist". */
+const UNDEFINED_COLUMN = "42703";
 
 function toPostOffice(row: PostOfficeRow): PostOffice {
   return {
@@ -20,7 +26,16 @@ function toPostOffice(row: PostOfficeRow): PostOffice {
     district: row.district ?? "Unknown district",
     lat: row.lat,
     lng: row.long,
+    stampImagePath: row.stamp_image_path ?? null,
   };
+}
+
+async function selectPostOffices(columns: string) {
+  return createSupabasePublicClient()
+    .from("post_office")
+    .select(columns)
+    .order("name")
+    .overrideTypes<PostOfficeRow[], { merge: false }>();
 }
 
 /**
@@ -32,14 +47,14 @@ export async function getPostOffices(): Promise<PostOffice[]> {
   cacheLife("hours");
   cacheTag("post-offices");
 
-  const { data, error } = await createSupabasePublicClient()
-    .from("post_office")
-    .select("id, name, pincode, district, lat, long")
-    .order("name")
-    .overrideTypes<PostOfficeRow[], { merge: false }>();
-
-  if (error) {
-    throw new Error(`Could not load post offices: ${error.message}`);
+  let result = await selectPostOffices(`${BASE_COLUMNS}, stamp_image_path`);
+  // Keep the app working before the stamp-images migration has been run.
+  if (result.error?.code === UNDEFINED_COLUMN) {
+    result = await selectPostOffices(BASE_COLUMNS);
   }
-  return data.map(toPostOffice);
+
+  if (result.error) {
+    throw new Error(`Could not load post offices: ${result.error.message}`);
+  }
+  return result.data.map(toPostOffice);
 }

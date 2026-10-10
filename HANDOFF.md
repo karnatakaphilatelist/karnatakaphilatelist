@@ -28,12 +28,12 @@ Clickable design canvas (mobile and desktop): https://claude.ai/artifact/Rd59uog
 - Map pin name label is part of the clickable pin.
 - The post office card closes automatically when the selected post office drops out of the active filter (Not visited / Planned / Visited).
 
+## Done since the first handoff
+- "post offices" wording, progress ring/count alignment, and the detail card closing when the filter or search hides its post office are applied in the real app.
+- Per-post-office stamp images: migration `20261011010000_post_office_stamp_images.sql`, `StampThumb` (greyscale until visited, mail-icon fallback), shown in the list and detail card. `getPostOffices` still works if the migration has not been run. Not done: stamp in the map pins and the passport visited cards.
+
 ## Next tasks
-1. Run the app locally and fix visual or behavioural bugs (test at phone width).
-2. Apply the design feedback above and the "post offices" wording to the real app.
-3. Per-post-office stamp images (owner will photograph the stamps from the book):
-   - Add nullable `stamp_image_path` to `post_office` and a public Storage bucket (e.g. `office-stamps`), files named by id (e.g. `123.webp`), square about 512px.
-   - Show the stamp in the list thumbnail, map pin and detail card; fall back to the current icon when missing.
-   - Unvisited stamps greyscale, full colour once visited. Keep the official stamp separate from a visitor's own stamp photo.
-   - Confirm the owner is happy to publish the stamp artwork (own photos of the stamps are safest).
+1. Run the app locally and fix visual or behavioural bugs (test at phone width). The UI has still never been seen in a real browser.
+2. Run both migrations, then upload stamp photos named by id and fill `stamp_image_path`. Confirm the stamp artwork may be published.
+3. Optionally show stamps on map pins and visited cards.
 4. Deploy a Vercel preview from the PR.

@@ -14,7 +14,7 @@ export function ProgressRing({ visited, total }: ProgressRingProps) {
     <div className="relative size-28 shrink-0">
       <svg
         role="img"
-        aria-label={`${visited} of ${total} offices stamped`}
+        aria-label={`${visited} of ${total} post offices stamped`}
         viewBox="0 0 112 112"
         fill="none"
         className="size-full"
@@ -33,7 +33,7 @@ export function ProgressRing({ visited, total }: ProgressRingProps) {
           className="transition-[stroke-dashoffset] duration-500"
         />
       </svg>
-      <div className="absolute inset-0 grid place-items-center font-display text-2xl font-bold">
+      <div className="absolute inset-0 flex items-center justify-center whitespace-nowrap font-display text-2xl font-bold leading-none">
         {percent}%
       </div>
     </div>

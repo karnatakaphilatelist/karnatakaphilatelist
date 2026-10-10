@@ -57,11 +57,11 @@ export function PassportView({ offices }: { offices: PostOffice[] }) {
         >
           <ProgressRing visited={visitedOffices.length} total={total} />
           <div>
-            <p className="font-display text-4xl font-bold leading-10">
-              {visitedOffices.length}{" "}
+            <p className="flex items-baseline gap-1.5 whitespace-nowrap font-display font-bold leading-none">
+              <span className="text-4xl">{visitedOffices.length}</span>
               <span className="text-lg font-semibold text-muted">of {total}</span>
             </p>
-            <p className="text-sm text-muted">offices stamped</p>
+            <p className="mt-1 text-sm text-muted">post offices stamped</p>
             <p className="mt-2 text-sm font-semibold text-visited-ink">
               {total - visitedOffices.length} to go
             </p>
@@ -93,7 +93,7 @@ export function PassportView({ offices }: { offices: PostOffice[] }) {
           </h2>
           {visitedOffices.length === 0 ? (
             <div className="mt-2.5 rounded-2xl bg-white p-6 text-center text-muted">
-              <p>No stamps yet. Find an office and tap Mark as visited.</p>
+              <p>No stamps yet. Find a post office and tap Mark as visited.</p>
               <Link
                 href="/"
                 className="mt-3.5 inline-flex min-h-12 items-center rounded-full bg-postal px-6 text-base font-semibold text-white"

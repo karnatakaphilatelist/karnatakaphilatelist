@@ -1,5 +1,6 @@
 "use client";
 
+import { StampThumb } from "@/components/office/StampThumb";
 import { StatusBadge } from "@/components/office/StatusBadge";
 import { useVisits } from "@/components/providers/VisitsProvider";
 import {
@@ -46,21 +47,28 @@ export function OfficeDetail({
     >
       <div className="min-h-0 flex-1 overflow-y-auto px-5 pb-2 pt-4">
         <div className="flex items-start justify-between gap-3">
-          <div>
-            <h2 className="font-display text-2xl font-bold leading-tight tracking-tight">
-              {office.name}
-            </h2>
-            <p className="mt-0.5 text-sm text-muted">
-              {office.district} district
-              {office.distanceKm !== null
-                ? ` · ${formatDistance(office.distanceKm)} away`
-                : ""}
-            </p>
+          <div className="flex min-w-0 items-center gap-3">
+            <StampThumb
+              path={office.stampImagePath}
+              status={office.status}
+              className="size-16"
+            />
+            <div className="min-w-0">
+              <h2 className="font-display text-2xl font-bold leading-tight tracking-tight">
+                {office.name}
+              </h2>
+              <p className="mt-0.5 text-sm text-muted">
+                {office.district} district
+                {office.distanceKm !== null
+                  ? ` · ${formatDistance(office.distanceKm)} away`
+                  : ""}
+              </p>
+            </div>
           </div>
           <button
             type="button"
             onClick={onClose}
-            aria-label="Close office details"
+            aria-label="Close post office details"
             className="-mr-2 -mt-1 grid size-11 shrink-0 place-items-center rounded-full bg-sand"
           >
             <CloseIcon className="size-5" />

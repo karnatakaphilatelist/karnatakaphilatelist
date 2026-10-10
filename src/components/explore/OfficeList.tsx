@@ -1,5 +1,5 @@
 import { StatusBadge } from "@/components/office/StatusBadge";
-import { MailIcon } from "@/components/ui/icons";
+import { StampThumb } from "@/components/office/StampThumb";
 import { formatDistance } from "@/lib/geo";
 import type { OfficeWithStatus } from "@/types";
 
@@ -32,9 +32,7 @@ export function OfficeList({ offices, selectedId, onSelect }: OfficeListProps) {
                 selected ? "border-postal bg-postal-soft/50" : "border-transparent"
               }`}
             >
-              <span className="grid size-[52px] shrink-0 place-items-center rounded-xl bg-sand text-muted">
-                <MailIcon className="size-[22px]" />
-              </span>
+              <StampThumb path={office.stampImagePath} status={office.status} />
               <span className="min-w-0 flex-1">
                 <span className="block truncate text-base font-semibold">
                   {office.name}

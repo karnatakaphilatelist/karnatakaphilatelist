@@ -32,7 +32,14 @@ npm run dev                  # http://localhost:3000
    editor (or with `supabase db push`). It creates the `visits` table, the private
    `stamp-photos` storage bucket, and the row level security policies that keep every
    user's data their own.
-3. **Sign-in.** In Supabase, go to Authentication:
+3. **Stamp images (optional).** Run
+   `supabase/migrations/20261011010000_post_office_stamp_images.sql`. It adds
+   `post_office.stamp_image_path` and a public `office-stamps` bucket. Upload each stamp
+   photo (square, about 512px, WebP or PNG) named by post office id, e.g. `123.webp`, then set
+   that file name in `stamp_image_path`. Post offices without one keep the mail icon, and the
+   app works before this migration is run. After editing, the cached list refreshes within
+   an hour. Stamps show in greyscale until the post office is visited.
+4. **Sign-in.** In Supabase, go to Authentication:
    - Providers: enable **Google** (add your Google OAuth client ID and secret).
    - URL Configuration: set the **Site URL** to your production URL and add
      `http://localhost:3000/auth/callback` and `https://<your-domain>/auth/callback`

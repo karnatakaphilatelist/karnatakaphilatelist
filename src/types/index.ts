@@ -7,6 +7,8 @@ export interface PostOffice {
   /** Null when the office has no coordinates yet; such offices are listed but not mapped. */
   lat: number | null;
   lng: number | null;
+  /** Path of the official stamp image in the public `office-stamps` bucket; null until uploaded. */
+  stampImagePath: string | null;
 }
 
 export interface Coordinates {

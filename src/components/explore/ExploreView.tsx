@@ -48,7 +48,9 @@ export function ExploreView({ offices, initialSelectedId }: ExploreViewProps) {
     return userLocation ? sortByDistance(matches) : matches;
   }, [allOffices, filter, query, userLocation]);
 
-  const selectedOffice = allOffices.find((office) => office.id === selectedId) ?? null;
+  // The detail card follows the filter and search: it closes by itself when the
+  // selected post office drops out of the visible list.
+  const selectedOffice = visibleOffices.find((office) => office.id === selectedId) ?? null;
   const editingOffice = offices.find((office) => office.id === editingId) ?? null;
 
   async function handleMarkVisited(officeId: number) {
@@ -89,7 +91,7 @@ export function ExploreView({ offices, initialSelectedId }: ExploreViewProps) {
         <div className="shrink-0 space-y-1 px-4 pt-4">
           <div className="relative">
             <label htmlFor="office-search" className="sr-only">
-              Search by office, district or pincode
+              Search by post office, district or pincode
             </label>
             <SearchIcon className="pointer-events-none absolute left-3.5 top-3.5 size-5 text-muted" />
             <input
@@ -97,14 +99,14 @@ export function ExploreView({ offices, initialSelectedId }: ExploreViewProps) {
               type="search"
               value={query}
               onChange={(event) => setQuery(event.target.value)}
-              placeholder="Search office, district or pincode"
+              placeholder="Search post office, district or pincode"
               className="h-12 w-full rounded-xl border border-line-strong bg-paper pl-11 pr-3 text-base"
             />
           </div>
           <FilterChips value={filter} onChange={setFilter} />
           <div className="flex items-center justify-between pb-2">
             <p className="text-sm text-muted" aria-live="polite">
-              {visibleOffices.length} of {offices.length} offices
+              {visibleOffices.length} of {offices.length} post offices
               {userLocation ? " · nearest first" : ""}
             </p>
             <button

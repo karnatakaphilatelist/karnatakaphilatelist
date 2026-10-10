@@ -14,6 +14,7 @@ const office = (id: number, lat: number | null, lng: number | null): PostOffice 
   district: "Bengaluru Urban",
   lat,
   lng,
+  stampImagePath: null,
 });
 
 const visit = (officeId: number): Visit => ({

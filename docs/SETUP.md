@@ -39,7 +39,12 @@ npm run dev                  # http://localhost:3000
    that file name in `stamp_image_path`. Post offices without one keep the mail icon, and the
    app works before this migration is run. After editing, the cached list refreshes within
    an hour. Stamps show in greyscale until the post office is visited.
-4. **Sign-in.** In Supabase, go to Authentication:
+4. **User profiles.** Run `supabase/migrations/20261018000000_profiles.sql`. It creates
+   `public.profiles` and a trigger so every new person who signs up (Google or email) gets a
+   profile row automatically with their name, email and photo, and it fills in anyone who
+   already signed up. The trigger can never block a signup. View all users under Table
+   Editor, then `profiles` (or Authentication, then Users).
+5. **Sign-in.** In Supabase, go to Authentication:
    - Providers: enable **Google** (add your Google OAuth client ID and secret).
    - URL Configuration: set the **Site URL** to your production URL and add
      `http://localhost:3000/auth/callback` and `https://<your-domain>/auth/callback`

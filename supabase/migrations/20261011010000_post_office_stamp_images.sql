@@ -2,10 +2,10 @@
 -- Files live in a public bucket (they are the project's own assets, not user
 -- uploads) and are named by post office id, e.g. "123.webp".
 
-alter table public.post_office
+alter table public.post_offices
   add column if not exists stamp_image_path text;
 
-comment on column public.post_office.stamp_image_path is
+comment on column public.post_offices.stamp_image_path is
   'Path inside the public office-stamps storage bucket, e.g. 123.webp. Null until a stamp photo is uploaded.';
 
 insert into storage.buckets (id, name, public)

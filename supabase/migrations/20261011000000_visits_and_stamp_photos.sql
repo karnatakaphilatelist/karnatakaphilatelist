@@ -1,6 +1,6 @@
 -- Visits and stamp photos for the Karnataka Philatelic Passport.
 --
--- Assumes the existing public.post_office table has a numeric primary key `id`
+-- Assumes the existing public.post_offices table has a numeric primary key `id`
 -- (integer or bigint). Apply this file in the Supabase SQL editor, or with
 -- `supabase db push` if you use the Supabase CLI.
 
@@ -12,7 +12,7 @@ create table if not exists public.visits (
   user_id        uuid not null default auth.uid()
                    references auth.users (id) on delete cascade,
   post_office_id bigint not null
-                   references public.post_office (id) on delete cascade,
+                   references public.post_offices (id) on delete cascade,
   visited_at     date not null default current_date,
   note           text not null default '' check (char_length(note) <= 1000),
   -- Path inside the private `stamp-photos` bucket, e.g. "<user id>/<office id>-<timestamp>.jpg"

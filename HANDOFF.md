@@ -9,7 +9,7 @@ Always say "post offices", never just "offices" (user feedback: "offices" is con
 
 ## Decisions already made
 - Next.js 16 App Router + TypeScript + Tailwind v4, in this repo.
-- Supabase: existing table `post_office` (`id`, `name`, `pincode`, `district`, `lat`, `long`), plus new `visits` table and private `stamp-photos` bucket (see `supabase/migrations/`).
+- Supabase: existing table `post_offices` (`id` bigint, `name`, `pincode`, `district`, `lat`, `lng`, `location`; 99 rows). An unused `user_progress` table also exists; the app uses `visits` instead, plus new `visits` table and private `stamp-photos` bucket (see `supabase/migrations/`).
 - Map: Leaflet + OpenStreetMap (free; billing for Google Maps is not possible for now). Map code is isolated in `src/components/map/` so it can be swapped.
 - English first, structure ready for Kannada. Bright theme. Palette: postal red `#D63A2B`, visited green `#17794B`, planned gold `#FFC94D`, background `#FFFBF5`, ink `#2B2B2B`, muted `#6B6560`.
 - Deferred past v1: leaderboards, district shading, public profile/gallery.

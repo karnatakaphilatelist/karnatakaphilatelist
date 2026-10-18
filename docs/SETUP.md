@@ -24,8 +24,8 @@ npm run dev                  # http://localhost:3000
 
 ## Supabase setup
 
-1. **Post offices.** The app reads the `post_office` table: `id`, `name`, `pincode`,
-   `district`, `lat`, `long`. It needs public (anon) `select` access through row level
+1. **Post offices.** The app reads the `post_offices` table: `id`, `name`, `pincode`,
+   `district`, `lat`, `lng`. It needs public (anon) `select` access through row level
    security. After editing the table, the app refreshes its cached copy within an hour.
 2. **Visits and photos.** Run
    `supabase/migrations/20261011000000_visits_and_stamp_photos.sql` in the Supabase SQL
@@ -34,7 +34,7 @@ npm run dev                  # http://localhost:3000
    user's data their own.
 3. **Stamp images (optional).** Run
    `supabase/migrations/20261011010000_post_office_stamp_images.sql`. It adds
-   `post_office.stamp_image_path` and a public `office-stamps` bucket. Upload each stamp
+   `post_offices.stamp_image_path` and a public `office-stamps` bucket. Upload each stamp
    photo (square, about 512px, WebP or PNG) named by post office id, e.g. `123.webp`, then set
    that file name in `stamp_image_path`. Post offices without one keep the mail icon, and the
    app works before this migration is run. After editing, the cached list refreshes within

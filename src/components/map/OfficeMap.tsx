@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   CircleMarker,
   MapContainer,
@@ -67,6 +67,30 @@ function MapViewport({
   return null;
 }
 
+const CARTO_TILES = "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png";
+const OSM_TILES = "https://tile.openstreetmap.org/{z}/{x}/{y}.png";
+
+/** Soft CARTO tiles, falling back to plain OpenStreetMap if CARTO keeps failing to load. */
+function BaseTiles() {
+  const [useFallback, setUseFallback] = useState(false);
+  const failures = useRef(0);
+  return (
+    <TileLayer
+      key={useFallback ? "osm" : "carto"}
+      attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+      url={useFallback ? OSM_TILES : CARTO_TILES}
+      subdomains={useFallback ? "abc" : "abcd"}
+      maxZoom={19}
+      eventHandlers={{
+        tileerror: () => {
+          failures.current += 1;
+          if (failures.current >= 4) setUseFallback(true);
+        },
+      }}
+    />
+  );
+}
+
 export function OfficeMap({
   offices,
   selectedId,
@@ -80,12 +104,7 @@ export function OfficeMap({
       className="kp-map size-full"
       zoomControl
     >
-      <TileLayer
-        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
-        url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
-        subdomains="abcd"
-        maxZoom={19}
-      />
+      <BaseTiles />
       <MapViewport
         offices={offices}
         selectedId={selectedId}

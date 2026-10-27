@@ -11,7 +11,7 @@
 }
 
 .kpl-scroller {
-  height: 420vh;
+  height: 520vh;
 }
 .kpl-stage {
   position: sticky;
@@ -155,22 +155,6 @@
   font-weight: 500;
   font-size: 18px;
 }
-.kpl-tag {
-  left: 52%;
-  right: var(--pad);
-  top: calc(var(--row-top) + clamp(72px, 10vh, 120px));
-  font-size: clamp(32px, 3.4vw, 48px);
-  line-height: 1.08;
-  font-weight: 400;
-  letter-spacing: -0.02em;
-  transition-delay: 0.15s;
-}
-.kpl-tag em {
-  display: block;
-  font-family: var(--font-display);
-  font-style: italic;
-  font-weight: 400;
-}
 .kpl-time {
   left: 24px;
   bottom: 20px;
@@ -207,135 +191,285 @@
     justify-self: start;
     font-size: 16px;
   }
-  .kpl-tag {
-    left: var(--pad);
-    top: calc(var(--row-top) + 128px);
-    font-size: 30px;
-  }
   .kpl-time,
   .kpl-open {
     display: none;
   }
 }
 
-/* ---------------------------------------------------------------- the map card */
-.kpl-box {
+/* ---------------------------------------------------------------- the postcards */
+/* A row of postcards that slides across the screen, one direction, as the page scrolls. */
+.kpl-track {
+  --gap: 20px;
+  --top0: calc(var(--row-top) + 84px);
   position: absolute;
-  left: 50%;
-  --h0: clamp(150px, 26dvh, 240px);
-  bottom: calc(48px * (1 - var(--p)));
-  width: calc(min(340px, 86vw) + (100vw - min(340px, 86vw)) * var(--p));
-  height: calc(var(--h0) + (100dvh - var(--h0)) * var(--p));
-  transform: translate(-50%, var(--rise, 100%));
-  background: #f1e8d3;
+  left: 0;
+  top: calc(var(--top0) + (96px - var(--top0)) * var(--p));
+  bottom: 84px;
+  width: max-content;
+  display: flex;
+  gap: var(--gap);
+  padding: 0 var(--pad);
+  align-items: stretch;
+  min-height: 230px;
+  transform: translateX(calc(-1 * var(--p) * (100% - 100vw)));
+  opacity: 0;
+  transition: opacity 0.8s ease 0.2s;
+}
+.kpl.in .kpl-track {
+  opacity: 1;
+}
+.kpl-card {
+  position: relative;
+  flex: none;
+  width: clamp(250px, 26vw, 360px);
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  overflow: hidden;
   border: 1px solid var(--color-line-strong);
-  border-radius: calc(14px * (1 - var(--p)));
-  box-shadow: 0 18px 40px -18px rgb(28 43 107 / 0.35);
+  border-radius: 14px;
+  background: var(--color-paper);
+  color: var(--color-ink);
+  box-shadow: 0 14px 32px -20px rgb(28 43 107 / 0.45);
+}
+.kpl-card h2 {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 600;
+  font-size: clamp(34px, 4vw, 52px);
+  line-height: 1;
+}
+.kpl-card p {
+  font-size: 15px;
+  line-height: 22px;
+  color: var(--color-muted);
+}
+.kpl-kicker {
+  font:
+    500 12px/1.4 ui-monospace,
+    SFMono-Regular,
+    Menlo,
+    monospace !important;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-postal) !important;
+}
+.kpl-card--hero {
+  width: clamp(560px, 58vw, 860px);
+  flex-direction: row;
+  gap: 20px;
+  padding: 0;
+}
+.kpl-hero-copy {
+  flex: 1 1 55%;
+  padding: 26px 0 26px 26px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 14px;
+}
+.kpl-card--hero h1 {
+  font-size: clamp(24px, 2.7vw, 40px);
+  line-height: 1.1;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  color: var(--color-ink);
+}
+.kpl-card--hero h1 span {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 600;
+  color: var(--color-postal);
+}
+.kpl-btns {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.kpl-btn {
+  display: inline-flex;
+  min-height: 48px;
+  padding: 0 22px;
+  align-items: center;
+  border-radius: 9999px;
+  font-weight: 600;
+  font-size: 15px;
+}
+.kpl-btn--red {
+  background: var(--color-postal);
+  color: #fff;
+}
+.kpl-btn--line {
+  border: 1.5px solid var(--color-line-strong);
+  background: #fff;
+  color: var(--color-ink);
+}
+.kpl-coral {
+  position: relative;
+  flex: 1 1 45%;
+  margin: 12px 12px 12px 0;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  background: var(--color-coral);
   overflow: hidden;
+}
+.kpl-stampart {
+  --stamp: #f1e8d3;
+  width: min(62%, 190px);
+  aspect-ratio: 120 / 150;
+  padding: 6px;
+  transform: rotate(-6deg);
+  filter: drop-shadow(0 8px 10px rgb(28 43 107 / 0.3));
+}
+.kpl-postmark {
+  position: absolute;
+  right: 8%;
+  bottom: 8%;
+  opacity: 0.75;
+  transform: rotate(-10deg);
+}
+.kpl-card--progress {
+  justify-content: center;
+}
+.kpl-big {
+  font-size: clamp(22px, 2.4vw, 30px) !important;
+  line-height: 1.15 !important;
+  color: var(--color-ink) !important;
+}
+.kpl-big b {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 1.9em;
+  color: var(--color-postal);
+}
+.kpl-bar {
+  height: 12px;
+  border-radius: 9999px;
+  background: var(--color-sand);
+  overflow: hidden;
+  border: 1px solid var(--color-line);
+}
+.kpl-bar i {
   display: block;
-  color: inherit;
-  text-decoration: none;
+  height: 100%;
+  background: var(--color-postal);
 }
-.kpl.in .kpl-box {
-  --rise: 0%;
-  transition: transform 1s cubic-bezier(0.2, 0.8, 0.2, 1);
+.kpl-card--step {
+  justify-content: space-between;
 }
-.kpl-map {
-  position: absolute;
-  inset: 0;
-  overflow: hidden;
+.kpl-card--map {
+  width: clamp(280px, 30vw, 420px);
+  padding: 12px;
 }
-.kpl-map::before {
-  content: "";
-  position: absolute;
-  inset: 0;
+.kpl-minimap {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  border-radius: 8px;
+  background: var(--color-sand);
   background-image:
-    repeating-linear-gradient(0deg, #0000 0 31px, #e3d6b9 31px 32px),
-    repeating-linear-gradient(90deg, #0000 0 31px, #e3d6b9 31px 32px);
+    repeating-linear-gradient(0deg, #0000 0 31px, var(--color-line) 31px 32px),
+    repeating-linear-gradient(90deg, #0000 0 31px, var(--color-line) 31px 32px);
+}
+.kpl-card--map .kpl-kicker,
+.kpl-card--map .kpl-note {
+  padding: 0 4px;
 }
 .kpl-pin {
   position: absolute;
-  width: 12px;
-  height: 12px;
-  margin: -6px 0 0 -6px;
+  width: 11px;
+  height: 11px;
+  margin: -5px 0 0 -5px;
   background: #fff;
   border: 2px solid var(--color-postal);
   border-radius: 3px;
   outline: 2px dotted rgb(207 24 48 / 0.5);
   outline-offset: 1px;
-  transform: scale(calc(1 + var(--p) * 0.5));
 }
 .kpl-pin--v {
   background: var(--color-visited);
   border-color: var(--color-visited);
   outline-color: rgb(23 121 75 / 0.5);
 }
-.kpl-panel {
-  position: absolute;
-  left: 16px;
-  top: 16px;
-  width: min(320px, calc(100% - 32px));
-  max-height: calc(100% - 32px);
-  overflow: hidden;
-  background: #fff;
-  border-radius: 14px;
-  padding: 18px;
-  color: var(--color-ink);
-  opacity: calc((var(--p) - 0.8) * 5);
-  pointer-events: none;
-  transform: translateX(calc((1 - var(--p)) * -40px));
-}
-.kpl-box[data-open="true"] .kpl-panel {
-  pointer-events: auto;
-}
-.kpl-panel h2 {
-  font-family: var(--font-display);
-  font-style: italic;
-  font-weight: 600;
-  font-size: 26px;
-  line-height: 30px;
-}
-.kpl-panel p {
-  margin-top: 4px;
-  font-size: 14px;
-  line-height: 20px;
-  color: var(--color-muted);
-}
-.kpl-panel .cta {
-  display: flex;
-  min-height: 52px;
-  margin-top: 14px;
-  align-items: center;
+.kpl-card--foot {
   justify-content: center;
+}
+.kpl-card--foot .kpl-fine {
+  font-size: 13px;
+  line-height: 19px;
+}
+.kpl-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+}
+.kpl-links a {
+  min-height: 28px;
+  display: inline-flex;
+  align-items: center;
+  color: var(--color-ink);
+  text-decoration: underline;
+  font-size: 14px;
+}
+
+/* The one button that stays put while the cards slide past. */
+.kpl-open-map {
+  position: absolute;
+  left: 50%;
+  bottom: 18px;
+  z-index: 5;
+  transform: translateX(-50%);
+  display: inline-flex;
+  min-height: 52px;
+  padding: 0 28px;
+  align-items: center;
   border-radius: 9999px;
   background: var(--color-postal);
   color: #fff;
-  font-weight: 600;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  box-shadow: 0 10px 24px -8px rgb(207 24 48 / 0.6);
+  opacity: 0;
+  transition: opacity 0.8s ease 0.4s;
 }
-.kpl-panel .fine {
-  margin-top: 14px;
-  font-size: 12px;
-  line-height: 17px;
+.kpl.in .kpl-open-map {
+  opacity: 1;
 }
-.kpl-panel .fine a {
-  display: inline-flex;
-  min-height: 24px;
-  align-items: center;
-  text-decoration: underline;
-}
-.kpl-cap {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 14px;
-  width: max-content;
-  margin: 0 auto;
-  padding: 6px 12px;
-  border-radius: 9999px;
-  background: var(--color-ink);
-  color: #fff;
-  text-align: center;
-  opacity: calc(1 - var(--p) * 3);
+
+@media (max-width: 640px) {
+  .kpl-track {
+    --top0: calc(var(--row-top) + 108px);
+    bottom: 84px;
+  }
+  .kpl-card--hero {
+    width: min(86vw, 340px);
+    flex-direction: column;
+    gap: 0;
+  }
+  .kpl-hero-copy {
+    padding: 20px 20px 12px;
+    gap: 10px;
+  }
+  .kpl-hero-copy p {
+    display: none;
+  }
+  .kpl-coral {
+    margin: 0 12px 12px;
+    min-height: 90px;
+  }
+  .kpl-stampart {
+    width: 64px;
+  }
+  .kpl-postmark {
+    width: 64px;
+    height: 64px;
+  }
+  .kpl-card {
+    width: min(70vw, 280px);
+  }
 }
 
 /* ---------------------------------------------------------------- the intro */
@@ -423,7 +557,7 @@ html[data-intro-seen] .kpl-intro {
   background: #fff;
   width: 0;
 }
-.kpl-card {
+.kpl-flycard {
   position: absolute;
   top: 62%;
   left: 0;
@@ -435,7 +569,7 @@ html[data-intro-seen] .kpl-intro {
   box-shadow: 0 4px 10px rgb(0 0 0 / 0.25);
   opacity: 0;
 }
-.kpl-card::before {
+.kpl-flycard::before {
   content: "";
   position: absolute;
   right: 5px;
@@ -446,7 +580,7 @@ html[data-intro-seen] .kpl-intro {
   outline: 2px dotted var(--color-postal);
   outline-offset: 1px;
 }
-.kpl-card::after {
+.kpl-flycard::after {
   content: "";
   position: absolute;
   left: 6px;

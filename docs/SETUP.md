@@ -50,9 +50,12 @@ npm run dev                  # http://localhost:3000
      `http://localhost:3000/auth/callback` and `https://<your-domain>/auth/callback`
      to **Redirect URLs**.
    - Email sign-in links work out of the box once the redirect URLs are set.
-   - Email templates, **Magic Link**: include `{{ .Token }}` (for example
-     "Or enter this code: {{ .Token }}") so people who open the email on another device
-     can type the 6-digit code into the sign-in dialog instead.
+   - Email and password: enabled by default under Providers, Email. Decide **Confirm email**:
+     on means new people must click a link before they can sign in (needs working email
+     delivery: Supabase's built-in sender allows only a few emails per hour, so set up custom
+     SMTP first); off lets people sign up and start straight away. The app handles both.
+   - The "Forgot password? Email me a sign-in link" button uses the same email delivery.
+     Editing email templates also needs custom SMTP, so the default templates are used.
    - The sign-in dialog checks `/auth/v1/settings` and hides the Google button, with an
      explanation, while the Google provider is switched off.
    - Google Cloud Console: the OAuth client's authorized redirect URI is
@@ -103,13 +106,15 @@ supabase/migrations/      Database schema, versioned as SQL
   the database cannot be reached (for example a paused free project), so builds and page
   views do not fail; it is cached for minutes instead of hours. Refresh it after editing
   the table by exporting `id, name, pincode, district, lat, lng` as JSON.
-- **Free Supabase projects pause** after about a week without activity. Upgrade the plan
-  or ping the project regularly.
+- **Free Supabase projects pause** after about a week without activity. `vercel.json`
+  schedules a daily call to `/api/keep-alive`, which runs one small query so the project
+  stays awake. Optionally set `CRON_SECRET` in Vercel so only the scheduler can call it.
+  Check Vercel, Cron Jobs, to see it running.
 - **Deleting a user** removes their rows but not their files in the `stamp-photos`
   bucket; delete the `<user id>/` folder too.
-- **Data quality** (not changed in the database): district spellings such as
-  "vjaypura", "shivmogga", "yadagiri" and "kalaburagi"/"kalaburgi" are inconsistent. The
-  app tidies capitalisation only, not spelling.
+- **Data quality:** migration `20261027000000_fix_district_spellings.sql` corrected three
+  district spellings. Post office names are left as India Post spells them (for example
+  "kalaburgi ho"); the app only tidies capitalisation.
 - Next.js is pinned to 16.4.3 (earlier 16.x releases have published security advisories).
 
 ## Known limitations

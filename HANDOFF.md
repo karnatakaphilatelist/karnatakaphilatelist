@@ -32,12 +32,14 @@ Clickable design canvas (mobile and desktop): https://claude.ai/artifact/Rd59uog
 - "post offices" wording, progress ring/count alignment, and the detail card closing when the filter or search hides its post office are applied in the real app.
 - Per-post-office stamp images: migration `20261011010000_post_office_stamp_images.sql`, `StampThumb` (greyscale until visited, mail-icon fallback), shown in the list and detail card. `getPostOffices` still works if the migration has not been run. Also on passport visited cards. Deliberately not on map pins (30px is too small; status glyphs keep pins readable without colour).
 
-- QA review fixes (branch `fix/qa-review-fixes`): guest-merge and identity-switch safety in `VisitsProvider`, no overwrite of existing notes, callback error reasons shown to the user, Google button state/detection, email 6-digit code, toast above dialogs, deferred guest sign-in prompt, hardened migrations, privacy/terms pages, bundled post office fallback, Next 16.4.3. Unit tests: `npm test`.
+- QA review fixes (branch `fix/qa-review-fixes`): guest-merge and identity-switch safety in `VisitsProvider`, no overwrite of existing notes, callback error reasons shown to the user, Google button state/detection, toast above dialogs, deferred guest sign-in prompt, hardened migrations, privacy/terms pages, bundled post office fallback, Next 16.4.3. Unit tests: `npm test`.
+
+- Email and password sign-in (plus Google, plus a sign-in link for forgotten passwords); daily `/api/keep-alive` cron against the free-tier pause; district spelling migration `20261027000000`. Google provider and all four migrations are live on Supabase.
 
 ## Next tasks
 1. The explore and passport flows were smoke-tested in headless Chromium (phone and desktop) against a stub of the Supabase data; real Supabase, Google sign-in, photo upload and map tiles (blocked in the sandbox) are still untested. On phones, search and filters sit over the top of the map so the detail sheet never covers them.
 2. Run both migrations, then upload stamp photos named by id and fill `stamp_image_path`. Confirm the stamp artwork may be published.
 3. ~~Deploy to Vercel~~ Done: live at https://karnatakaphilatelist.vercel.app (Vercel project `karnatakaphilatelist`, framework Next.js, env vars `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` set, Vercel Authentication off so the site is public). Every push to `main` redeploys.
-4. Run all three migrations in `supabase/migrations/` on Supabase (NOT yet applied: attempts through the connector were cancelled; paste each file into the Supabase SQL editor in order: visits_and_stamp_photos, post_office_stamp_images, profiles), set Supabase Site URL and Redirect URLs to the Vercel domain, enable the Google provider (Client ID and secret go straight into the Supabase dashboard), add `{{ .Token }}` to the Magic Link email template. See docs/SETUP.md.
+4. ~~Run migrations / enable Google~~ Done on 2026-10-27 (all four migrations applied through the Supabase connector; Google provider on and published). Remaining: decide Confirm email and custom SMTP (see docs/SETUP.md), stamp images, domain name, legal text review.
 
 Note: the free Supabase project pauses after about a week of inactivity and must be restored (it was restored on 2026-10-18).

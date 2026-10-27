@@ -13,6 +13,12 @@ import {
 } from "react";
 import { AuthDialog, type SignInReason } from "@/components/auth/AuthDialog";
 import { fetchGoogleEnabled } from "@/lib/auth-settings";
+import {
+  friendlyPasswordError,
+  interpretSignUp,
+  type PasswordMode,
+  type PasswordOutcome,
+} from "@/lib/password-auth";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 
 interface AuthContextValue {
@@ -76,10 +82,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (error) throw error;
   }, [supabase]);
 
-  const verifyEmailCode = useCallback(
-    async (email: string, token: string) => {
-      const { error } = await supabase.auth.verifyOtp({ email, token, type: "email" });
-      if (error) throw error;
+  const signInWithPassword = useCallback(
+    async (mode: PasswordMode, email: string, password: string): Promise<PasswordOutcome> => {
+      if (mode === "signin") {
+        const { error } = await supabase.auth.signInWithPassword({ email, password });
+        if (error) throw new Error(friendlyPasswordError(error, mode));
+        return "signed-in";
+      }
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: { emailRedirectTo: buildRedirectUrl() },
+      });
+      if (error) throw new Error(friendlyPasswordError(error, mode));
+      const outcome = interpretSignUp(data);
+      if (outcome === "exists") {
+        throw new Error(friendlyPasswordError({ code: "user_already_exists" }, mode));
+      }
+      return outcome;
     },
     [supabase],
   );
@@ -113,7 +133,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         googleAvailable={googleEnabled !== false}
         onGoogle={signInWithGoogle}
         onEmail={signInWithEmail}
-        onVerifyCode={verifyEmailCode}
+        onPassword={signInWithPassword}
       />
     </AuthContext.Provider>
   );

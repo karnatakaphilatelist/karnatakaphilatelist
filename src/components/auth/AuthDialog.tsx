@@ -4,6 +4,12 @@ import Link from "next/link";
 import { useEffect, useState, type FormEvent } from "react";
 import { GoogleIcon } from "@/components/ui/icons";
 import { Sheet } from "@/components/ui/Sheet";
+import {
+  MIN_PASSWORD_LENGTH,
+  validatePassword,
+  type PasswordMode,
+  type PasswordOutcome,
+} from "@/lib/password-auth";
 
 export type SignInReason = "manual" | "save-progress";
 
@@ -13,8 +19,9 @@ interface AuthDialogProps {
   /** False when Google sign-in is known to be switched off for this project. */
   googleAvailable: boolean;
   onGoogle: () => Promise<void>;
+  /** Sends a one-time sign-in link; also how someone who forgot their password gets back in. */
   onEmail: (email: string) => Promise<void>;
-  onVerifyCode: (email: string, code: string) => Promise<void>;
+  onPassword: (mode: PasswordMode, email: string, password: string) => Promise<PasswordOutcome>;
 }
 
 const COPY: Record<SignInReason, { title: string; description: string }> = {
@@ -29,8 +36,7 @@ const COPY: Record<SignInReason, { title: string; description: string }> = {
   },
 };
 
-/** Email codes are numeric; Supabase allows 6 to 10 digits. */
-const CODE_PATTERN = /^\d{6,10}$/;
+type Notice = { kind: "link-sent" | "confirm-email"; email: string };
 
 export function AuthDialog({
   reason,
@@ -38,16 +44,18 @@ export function AuthDialog({
   googleAvailable,
   onGoogle,
   onEmail,
-  onVerifyCode,
+  onPassword,
 }: AuthDialogProps) {
+  const [mode, setMode] = useState<PasswordMode>("signin");
   const [email, setEmail] = useState("");
-  const [code, setCode] = useState("");
-  const [status, setStatus] = useState<"idle" | "sending" | "sent">("idle");
-  const [isCheckingCode, setIsCheckingCode] = useState(false);
+  const [password, setPassword] = useState("");
+  const [isBusy, setIsBusy] = useState(false);
   const [isOpeningGoogle, setIsOpeningGoogle] = useState(false);
+  const [notice, setNotice] = useState<Notice | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const copy = COPY[reason ?? "manual"];
+  const isSignUp = mode === "signup";
 
   // Coming back to this page with the browser's Back button restores it from the
   // cache, so a button left on "Opening Google…" must be re-enabled.
@@ -59,35 +67,46 @@ export function AuthDialog({
     return () => window.removeEventListener("pageshow", reset);
   }, []);
 
-  async function handleEmailSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handlePasswordSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setStatus("sending");
+    if (isBusy) return;
+    const trimmedEmail = email.trim();
+    if (isSignUp) {
+      const problem = validatePassword(password);
+      if (problem) {
+        setError(problem);
+        return;
+      }
+    }
+    setIsBusy(true);
     setError(null);
     try {
-      await onEmail(email.trim());
-      setStatus("sent");
+      const outcome = await onPassword(mode, trimmedEmail, password);
+      if (outcome === "confirm-email") setNotice({ kind: "confirm-email", email: trimmedEmail });
+      // When signed in, the provider closes this dialog; nothing more to do here.
     } catch (caught) {
-      setStatus("idle");
-      setError(caught instanceof Error ? caught.message : "Could not send the link.");
+      setError(caught instanceof Error ? caught.message : "Something went wrong. Please try again.");
+    } finally {
+      setIsBusy(false);
     }
   }
 
-  async function handleCodeSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    const trimmed = code.replace(/\s/g, "");
-    if (!CODE_PATTERN.test(trimmed)) {
-      setError("Enter the 6-digit code from the email.");
+  async function handleSendLink() {
+    if (isBusy) return;
+    const trimmedEmail = email.trim();
+    if (!trimmedEmail) {
+      setError("Enter your email address first, then ask for the link.");
       return;
     }
-    setIsCheckingCode(true);
+    setIsBusy(true);
     setError(null);
     try {
-      await onVerifyCode(email.trim(), trimmed);
-      // Signing in closes this dialog; nothing more to do here.
-    } catch {
-      setError("That code did not work. Check it, or go back and ask for a new one.");
+      await onEmail(trimmedEmail);
+      setNotice({ kind: "link-sent", email: trimmedEmail });
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : "Could not send the link.");
     } finally {
-      setIsCheckingCode(false);
+      setIsBusy(false);
     }
   }
 
@@ -104,9 +123,13 @@ export function AuthDialog({
     }
   }
 
-  function handleUseDifferentEmail() {
-    setStatus("idle");
-    setCode("");
+  function switchMode(next: PasswordMode) {
+    setMode(next);
+    setError(null);
+  }
+
+  function backToForm() {
+    setNotice(null);
     setError(null);
   }
 
@@ -117,90 +140,112 @@ export function AuthDialog({
       title={copy.title}
       description={copy.description}
     >
-      {googleAvailable ? (
-        <>
-          <button
-            type="button"
-            onClick={handleGoogle}
-            disabled={isOpeningGoogle}
-            className="flex min-h-13 w-full items-center justify-center gap-3 rounded-full border-[1.5px] border-line-strong bg-white text-base font-semibold disabled:opacity-60"
-          >
-            <GoogleIcon className="size-5" />
-            {isOpeningGoogle ? "Opening Google…" : "Continue with Google"}
-          </button>
-
-          <div className="my-4 flex items-center gap-3 text-xs text-muted">
-            <span className="h-px flex-1 bg-line" />
-            or use your email
-            <span className="h-px flex-1 bg-line" />
-          </div>
-        </>
-      ) : (
-        <p className="mb-4 rounded-2xl bg-planned-soft p-3.5 text-sm text-[#4a3600]">
-          Google sign-in is not available right now. You can still sign in with your email below.
-        </p>
-      )}
-
-      {status === "sent" ? (
+      {notice ? (
         <div>
           <p role="status" className="rounded-2xl bg-visited-soft p-4 text-sm text-visited-ink">
-            Check your inbox. We sent a sign-in link to <strong>{email}</strong>.
+            {notice.kind === "link-sent" ? (
+              <>
+                Check your inbox. We sent a sign-in link to <strong>{notice.email}</strong>. Open it
+                on this device to finish signing in.
+              </>
+            ) : (
+              <>
+                Almost there. We sent a confirmation link to <strong>{notice.email}</strong>. Open it
+                to activate your account, then sign in.
+              </>
+            )}
           </p>
-
-          <form onSubmit={handleCodeSubmit} className="mt-4 space-y-3">
-            <label htmlFor="auth-code" className="block text-sm font-semibold">
-              Opened the email on another device or browser? Enter the 6-digit code from it.
-            </label>
-            <input
-              id="auth-code"
-              inputMode="numeric"
-              autoComplete="one-time-code"
-              maxLength={11}
-              value={code}
-              onChange={(event) => setCode(event.target.value)}
-              placeholder="123456"
-              className="h-12 w-full rounded-xl border border-line-strong px-4 text-base tracking-widest"
-            />
-            <button
-              type="submit"
-              disabled={isCheckingCode}
-              className="min-h-13 w-full rounded-full bg-ink text-base font-semibold text-white disabled:opacity-60"
-            >
-              {isCheckingCode ? "Checking…" : "Sign in with code"}
-            </button>
-          </form>
-
           <button
             type="button"
-            onClick={handleUseDifferentEmail}
+            onClick={backToForm}
             className="mt-2 min-h-12 w-full text-base font-semibold text-focus"
           >
-            Use a different email
+            Back
           </button>
         </div>
       ) : (
-        <form onSubmit={handleEmailSubmit} className="space-y-3">
-          <label htmlFor="auth-email" className="block text-sm font-semibold">
-            Email address
-          </label>
-          <input
-            id="auth-email"
-            type="email"
-            required
-            autoComplete="email"
-            value={email}
-            onChange={(event) => setEmail(event.target.value)}
-            placeholder="you@example.com"
-            className="h-12 w-full rounded-xl border border-line-strong px-4 text-base"
-          />
-          <button
-            type="submit"
-            disabled={status === "sending"}
-            className="min-h-13 w-full rounded-full bg-ink text-base font-semibold text-white disabled:opacity-60"
-          >
-            {status === "sending" ? "Sending link…" : "Email me a sign-in link"}
-          </button>
-        </form>
+        <>
+          {googleAvailable ? (
+            <>
+              <button
+                type="button"
+                onClick={handleGoogle}
+                disabled={isOpeningGoogle}
+                className="flex min-h-13 w-full items-center justify-center gap-3 rounded-full border-[1.5px] border-line-strong bg-white text-base font-semibold disabled:opacity-60"
+              >
+                <GoogleIcon className="size-5" />
+                {isOpeningGoogle ? "Opening Google…" : "Continue with Google"}
+              </button>
+
+              <div className="my-4 flex items-center gap-3 text-xs text-muted">
+                <span className="h-px flex-1 bg-line" />
+                or use your email
+                <span className="h-px flex-1 bg-line" />
+              </div>
+            </>
+          ) : (
+            <p className="mb-4 rounded-2xl bg-planned-soft p-3.5 text-sm text-[#4a3600]">
+              Google sign-in is not available right now. You can still sign in with your email below.
+            </p>
+          )}
+
+          <form onSubmit={handlePasswordSubmit} className="space-y-3">
+            <label htmlFor="auth-email" className="block text-sm font-semibold">
+              Email address
+            </label>
+            <input
+              id="auth-email"
+              type="email"
+              required
+              autoComplete="email"
+              value={email}
+              onChange={(event) => setEmail(event.target.value)}
+              placeholder="you@example.com"
+              className="h-12 w-full rounded-xl border border-line-strong px-4 text-base"
+            />
+
+            <label htmlFor="auth-password" className="block text-sm font-semibold">
+              Password
+            </label>
+            <input
+              id="auth-password"
+              type="password"
+              required
+              autoComplete={isSignUp ? "new-password" : "current-password"}
+              minLength={isSignUp ? MIN_PASSWORD_LENGTH : undefined}
+              value={password}
+              onChange={(event) => setPassword(event.target.value)}
+              placeholder={isSignUp ? `At least ${MIN_PASSWORD_LENGTH} characters` : "Your password"}
+              className="h-12 w-full rounded-xl border border-line-strong px-4 text-base"
+            />
+
+            <button
+              type="submit"
+              disabled={isBusy}
+              className="min-h-13 w-full rounded-full bg-ink text-base font-semibold text-white disabled:opacity-60"
+            >
+              {isBusy ? "Please wait…" : isSignUp ? "Create account" : "Sign in"}
+            </button>
+          </form>
+
+          <div className="mt-3 flex flex-col items-center gap-1 text-sm">
+            <button
+              type="button"
+              onClick={() => switchMode(isSignUp ? "signin" : "signup")}
+              className="min-h-11 font-semibold text-focus"
+            >
+              {isSignUp ? "Already have an account? Sign in" : "New here? Create an account"}
+            </button>
+            <button
+              type="button"
+              onClick={handleSendLink}
+              disabled={isBusy}
+              className="min-h-11 text-muted underline disabled:opacity-60"
+            >
+              {isSignUp ? "Skip the password: email me a sign-in link" : "Forgot password? Email me a sign-in link"}
+            </button>
+          </div>
+        </>
       )}
 
       {error ? (

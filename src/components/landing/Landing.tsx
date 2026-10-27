@@ -40,8 +40,14 @@ function rememberIntro(): void {
 function Wordmark({ white = false }: { white?: boolean }) {
   return (
     <>
-      <div className={`kpl-wm${white ? " kpl-wm--white" : ""}`} aria-hidden="true" />
-      <div className={`kpl-wm-stack${white ? " kpl-wm-stack--white" : ""}`} aria-hidden="true">
+      <div
+        className={`kpl-wm${white ? " kpl-wm--white" : ""}`}
+        aria-hidden="true"
+      />
+      <div
+        className={`kpl-wm-stack${white ? " kpl-wm-stack--white" : ""}`}
+        aria-hidden="true"
+      >
         <i />
         <i />
       </div>
@@ -76,7 +82,9 @@ export function Landing({ offices }: { offices: PostOffice[] }) {
 
   // The intro: runs once per session, skipped when motion is reduced or it was already seen.
   useEffect(() => {
-    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const reduced = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
     if (reduced || hasSeenIntro()) {
       // Mounting is the only moment we can learn this (it needs browser APIs).
       // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -115,14 +123,18 @@ export function Landing({ offices }: { offices: PostOffice[] }) {
         card.style.transform = `translateX(${progress * travel}px) rotate(${-6 + progress * 6}deg)`;
       }
       if (solidRef.current) {
-        solidRef.current.style.width = progress >= 1 ? "100%" : `${progress * travel + 30}px`;
+        solidRef.current.style.width =
+          progress >= 1 ? "100%" : `${progress * travel + 30}px`;
       }
-      if (countRef.current) countRef.current.textContent = formatCounter(progress, total);
+      if (countRef.current)
+        countRef.current.textContent = formatCounter(progress, total);
 
       if (seconds >= SPLIT_AT && !opened) {
         opened = true;
         setIntroState("open");
-        timers.push(setTimeout(() => setRevealed(true), SPLIT_DURATION_MS * 0.55));
+        timers.push(
+          setTimeout(() => setRevealed(true), SPLIT_DURATION_MS * 0.55),
+        );
         timers.push(setTimeout(finish, SPLIT_DURATION_MS));
         return;
       }
@@ -188,23 +200,25 @@ export function Landing({ offices }: { offices: PostOffice[] }) {
       <div ref={scrollerRef} className="kpl-scroller">
         <div className="kpl-stage">
           <Wordmark />
-          <p className="kpl-meta kpl-sub">Karnataka philatelic passport</p>
-          <nav className="kpl-meta kpl-nav" aria-label="Main">
-            <Link href="/explore">Explore</Link>
-            <Link href="/passport">Passport</Link>
-            {isLoading ? null : user ? (
-              <button type="button" onClick={() => void signOut()}>
-                Sign out
-              </button>
-            ) : (
-              <button type="button" onClick={() => openSignIn("manual")}>
-                Sign in
-              </button>
-            )}
-          </nav>
-          <a className="kpl-meta kpl-mail" href={`mailto:${CONTACT_EMAIL}`}>
-            {CONTACT_EMAIL}
-          </a>
+          <div className="kpl-row">
+            <p className="kpl-meta kpl-sub">Karnataka philatelic passport</p>
+            <nav className="kpl-meta kpl-nav" aria-label="Main">
+              <Link href="/explore">Explore</Link>
+              <Link href="/passport">Passport</Link>
+              {isLoading ? null : user ? (
+                <button type="button" onClick={() => void signOut()}>
+                  Sign out
+                </button>
+              ) : (
+                <button type="button" onClick={() => openSignIn("manual")}>
+                  Sign in
+                </button>
+              )}
+            </nav>
+            <a className="kpl-meta kpl-mail" href={`mailto:${CONTACT_EMAIL}`}>
+              {CONTACT_EMAIL}
+            </a>
+          </div>
           <h1 className="kpl-meta kpl-tag">
             Collect a stamp from
             <br />
@@ -227,7 +241,11 @@ export function Landing({ offices }: { offices: PostOffice[] }) {
                 />
               ))}
             </div>
-            <Link href="/explore" className="absolute inset-0" aria-label="Open the map">
+            <Link
+              href="/explore"
+              className="absolute inset-0"
+              aria-label="Open the map"
+            >
               <span className="kpl-mono kpl-cap">Scroll to open the map</span>
             </Link>
             <div className="kpl-panel">
@@ -241,15 +259,19 @@ export function Landing({ offices }: { offices: PostOffice[] }) {
                 Open the map
               </Link>
               <p className="fine">
-                {DISCLAIMER}{" "}
-                <Link href="/privacy">Privacy</Link> · <Link href="/terms">Terms</Link>
+                {DISCLAIMER} <Link href="/privacy">Privacy</Link> ·{" "}
+                <Link href="/terms">Terms</Link>
               </p>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="kpl-intro" data-state={introState} aria-hidden={introState === "done"}>
+      <div
+        className="kpl-intro"
+        data-state={introState}
+        aria-hidden={introState === "done"}
+      >
         <div className="kpl-top">
           <Wordmark white />
           <div className="kpl-route" />
@@ -273,14 +295,25 @@ export function Landing({ offices }: { offices: PostOffice[] }) {
           <div className="kpl-postbox">
             <svg viewBox="0 0 44 64" width="44" height="64">
               <rect x="4" y="6" width="36" height="56" rx="4" fill="#fbf5e9" />
-              <rect x="8" y="14" width="28" height="5" rx="2.5" fill="#1c2b6b" />
-              <rect x="14" y="30" width="16" height="3" fill="#be3037" />
+              <rect
+                x="8"
+                y="14"
+                width="28"
+                height="5"
+                rx="2.5"
+                fill="#1c2b6b"
+              />
+              <rect x="14" y="30" width="16" height="3" fill="#cf1830" />
               <rect x="0" y="2" width="44" height="8" rx="4" fill="#fbf5e9" />
             </svg>
           </div>
           <div ref={cardRef} className="kpl-card" />
         </div>
-        <button type="button" className="kpl-skip kpl-mono" onClick={() => skipRef.current()}>
+        <button
+          type="button"
+          className="kpl-skip kpl-mono"
+          onClick={() => skipRef.current()}
+        >
           Skip
         </button>
       </div>

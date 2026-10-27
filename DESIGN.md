@@ -23,8 +23,8 @@ Light theme only. The site has no dark mode.
 | `ink-soft` | `#4b5380` | Secondary text. 6.8:1 on paper, 6.2:1 on sand |
 | `line` | `#e6d9bf` | Hairlines |
 | `line-strong` | `#d2c3a3` | Input borders |
-| `postal` | `#be3037` | Primary button fill, unvisited pins, accents, the landing page. White text on it is 5.9:1 |
-| `postal-dark` | `#9f2730` | Red text and links. Never use `postal` for small text |
+| `postal` | `#cf1830` | Primary button fill, unvisited pins, accents, the landing page. White text on it is 5.9:1 |
+| `postal-dark` | `#a8122a` | Red text and links. Never use `postal` for small text |
 | `postal-soft` | `#f9e6e6` | Tinted badge background |
 | `coral` | `#e8583a` | Large decorative blocks only (behind stamp artwork). Never carries text |
 | `visited` | `#17794b` | Visited status. Text version `visited-ink` `#14653f` |

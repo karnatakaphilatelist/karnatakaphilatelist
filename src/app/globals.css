@@ -14,9 +14,9 @@
   --color-coral: #e8583a;
 
   /* Postal red: primary actions and unvisited pins */
-  --color-postal: #be3037;
-  --color-postal-dark: #9f2730; /* use for red text; postal itself is 4.3:1 on paper */
-  --color-postal-soft: #f9e6e6;
+  --color-postal: #cf1830;
+  --color-postal-dark: #a8122a; /* use for red text; postal itself is about 4.9:1 on paper */
+  --color-postal-soft: #fbe7ea;
 
   /* Visited / planned status colours (text pairs meet 4.5:1 contrast) */
   --color-visited: #17794b;
@@ -113,7 +113,7 @@ body {
   background: #fff;
   border-color: var(--color-postal);
   color: var(--color-postal);
-  outline-color: rgb(190 48 55 / 0.55);
+  outline-color: rgb(207 24 48 / 0.55);
 }
 
 .kp-pin--planned {
@@ -133,7 +133,7 @@ body {
 .kp-pin--selected {
   transform: scale(1.3);
   box-shadow:
-    0 0 0 5px rgb(190 48 55 / 0.28),
+    0 0 0 5px rgb(207 24 48 / 0.28),
     0 2px 8px rgb(0 0 0 / 0.25);
 }
 

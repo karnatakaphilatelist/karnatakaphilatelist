@@ -59,7 +59,7 @@ export function VisitedCard({ office, visit, onEdit }: VisitedCardProps) {
 
       <div className="mt-2 flex items-center justify-between">
         <Link
-          href={`/?office=${office.id}`}
+          href={`/explore?office=${office.id}`}
           className="flex min-h-11 items-center text-sm font-semibold text-focus"
         >
           View on map

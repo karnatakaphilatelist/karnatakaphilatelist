@@ -1,0 +1,289 @@
+"use client";
+
+import Link from "next/link";
+import { useEffect, useMemo, useRef, useState } from "react";
+import "./landing.css";
+import { useAuth } from "@/components/providers/AuthProvider";
+import { useVisits } from "@/components/providers/VisitsProvider";
+import { CONTACT_EMAIL, DISCLAIMER } from "@/lib/constants";
+import {
+  cardProgress,
+  formatCounter,
+  INTRO_SEEN_KEY,
+  projectPins,
+  scrollProgress,
+  SPLIT_AT,
+  SPLIT_DURATION_MS,
+} from "@/lib/landing";
+import { getFirstName } from "@/lib/user-display";
+import type { PostOffice } from "@/types";
+
+type IntroState = "playing" | "open" | "done";
+
+function hasSeenIntro(): boolean {
+  try {
+    return window.sessionStorage.getItem(INTRO_SEEN_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
+
+function rememberIntro(): void {
+  try {
+    window.sessionStorage.setItem(INTRO_SEEN_KEY, "1");
+  } catch {
+    // Without storage the intro simply plays again next time.
+  }
+}
+
+/** The wordmark in white (on the red intro) or red (on the page), as one line or stacked on phones. */
+function Wordmark({ white = false }: { white?: boolean }) {
+  return (
+    <>
+      <div className={`kpl-wm${white ? " kpl-wm--white" : ""}`} aria-hidden="true" />
+      <div className={`kpl-wm-stack${white ? " kpl-wm-stack--white" : ""}`} aria-hidden="true">
+        <i />
+        <i />
+      </div>
+    </>
+  );
+}
+
+/**
+ * The front door: a postcard posts itself into a post box, the page splits open, and
+ * scrolling grows the map card until it fills the screen. Plays once per browser
+ * session (never for people who ask for reduced motion) and can be skipped.
+ */
+export function Landing({ offices }: { offices: PostOffice[] }) {
+  const { user, isLoading, openSignIn, signOut } = useAuth();
+  const { visits } = useVisits();
+
+  const rootRef = useRef<HTMLDivElement>(null);
+  const scrollerRef = useRef<HTMLDivElement>(null);
+  const cardRef = useRef<HTMLDivElement>(null);
+  const solidRef = useRef<HTMLDivElement>(null);
+  const countRef = useRef<HTMLDivElement>(null);
+  const skipRef = useRef<() => void>(() => undefined);
+  const [introState, setIntroState] = useState<IntroState>("playing");
+  const [revealed, setRevealed] = useState(false);
+  const [clock, setClock] = useState("--:--:--");
+  const [mapOpen, setMapOpen] = useState(false);
+
+  const pins = useMemo(() => projectPins(offices), [offices]);
+  const total = offices.length;
+  const stamped = Object.keys(visits).length;
+  const firstName = user ? getFirstName(user) : null;
+
+  // The intro: runs once per session, skipped when motion is reduced or it was already seen.
+  useEffect(() => {
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduced || hasSeenIntro()) {
+      // Mounting is the only moment we can learn this (it needs browser APIs).
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setIntroState("done");
+      setRevealed(true);
+      return;
+    }
+
+    const html = document.documentElement;
+    html.setAttribute("data-intro-playing", "");
+    const timers: ReturnType<typeof setTimeout>[] = [];
+    let frame = 0;
+    let finished = false;
+
+    const finish = () => {
+      if (finished) return;
+      finished = true;
+      cancelAnimationFrame(frame);
+      timers.forEach(clearTimeout);
+      html.removeAttribute("data-intro-playing");
+      rememberIntro();
+      setIntroState("done");
+      setRevealed(true);
+    };
+    skipRef.current = finish;
+
+    const start = performance.now();
+    let opened = false;
+    const tick = (now: number) => {
+      const seconds = (now - start) / 1000;
+      const progress = cardProgress(seconds);
+      const travel = Math.max(0, window.innerWidth - 110);
+      const card = cardRef.current;
+      if (card) {
+        card.style.opacity = seconds > 0.4 && progress < 1 ? "1" : "0";
+        card.style.transform = `translateX(${progress * travel}px) rotate(${-6 + progress * 6}deg)`;
+      }
+      if (solidRef.current) {
+        solidRef.current.style.width = progress >= 1 ? "100%" : `${progress * travel + 30}px`;
+      }
+      if (countRef.current) countRef.current.textContent = formatCounter(progress, total);
+
+      if (seconds >= SPLIT_AT && !opened) {
+        opened = true;
+        setIntroState("open");
+        timers.push(setTimeout(() => setRevealed(true), SPLIT_DURATION_MS * 0.55));
+        timers.push(setTimeout(finish, SPLIT_DURATION_MS));
+        return;
+      }
+      frame = requestAnimationFrame(tick);
+    };
+    frame = requestAnimationFrame(tick);
+
+    return () => {
+      finished = true;
+      cancelAnimationFrame(frame);
+      timers.forEach(clearTimeout);
+      html.removeAttribute("data-intro-playing");
+    };
+  }, [total]);
+
+  // India time, ticking, as a small touch in the corner.
+  useEffect(() => {
+    const format = new Intl.DateTimeFormat("en-GB", {
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hour12: false,
+      timeZone: "Asia/Kolkata",
+    });
+    const update = () => setClock(format.format(new Date()));
+    update();
+    const id = setInterval(update, 1000);
+    return () => clearInterval(id);
+  }, []);
+
+  // The map card opens in step with the scroll, so its speed follows the person's hand.
+  useEffect(() => {
+    let frame = 0;
+    const update = () => {
+      frame = 0;
+      const scroller = scrollerRef.current;
+      const root = rootRef.current;
+      if (!scroller || !root) return;
+      const max = scroller.offsetHeight - window.innerHeight;
+      const p = scrollProgress(window.scrollY, max);
+      root.style.setProperty("--p", p.toFixed(4));
+      setMapOpen(p > 0.98);
+    };
+    const onScroll = () => {
+      if (!frame) frame = requestAnimationFrame(update);
+    };
+    update();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+      if (frame) cancelAnimationFrame(frame);
+    };
+  }, []);
+
+  return (
+    <div ref={rootRef} className={`kpl${revealed ? " in" : ""}`}>
+      <noscript>
+        <style>{".kpl-intro{display:none}"}</style>
+      </noscript>
+
+      <div ref={scrollerRef} className="kpl-scroller">
+        <div className="kpl-stage">
+          <Wordmark />
+          <p className="kpl-meta kpl-sub">Karnataka philatelic passport</p>
+          <nav className="kpl-meta kpl-nav" aria-label="Main">
+            <Link href="/explore">Explore</Link>
+            <Link href="/passport">Passport</Link>
+            {isLoading ? null : user ? (
+              <button type="button" onClick={() => void signOut()}>
+                Sign out
+              </button>
+            ) : (
+              <button type="button" onClick={() => openSignIn("manual")}>
+                Sign in
+              </button>
+            )}
+          </nav>
+          <a className="kpl-meta kpl-mail" href={`mailto:${CONTACT_EMAIL}`}>
+            {CONTACT_EMAIL}
+          </a>
+          <h1 className="kpl-meta kpl-tag">
+            Collect a stamp from
+            <br />
+            every post office in Karnataka
+            <em>one stamp at a time.</em>
+          </h1>
+          <p className="kpl-meta kpl-mono kpl-time">Local time {clock} (IST)</p>
+          <p className="kpl-meta kpl-mono kpl-open">
+            <span className="kpl-dot" />
+            {total} post offices
+          </p>
+
+          <div className="kpl-box" data-open={mapOpen}>
+            <div className="kpl-map" aria-hidden="true">
+              {pins.map((pin) => (
+                <i
+                  key={pin.id}
+                  className={`kpl-pin${visits[pin.id] ? " kpl-pin--v" : ""}`}
+                  style={{ left: `${pin.x}%`, top: `${pin.y}%` }}
+                />
+              ))}
+            </div>
+            <Link href="/explore" className="absolute inset-0" aria-label="Open the map">
+              <span className="kpl-mono kpl-cap">Scroll to open the map</span>
+            </Link>
+            <div className="kpl-panel">
+              <h2>{firstName ? `Namaskara, ${firstName}` : "Namaskara"}</h2>
+              <p>
+                {stamped > 0
+                  ? `${stamped} of ${total} post offices stamped.`
+                  : `${total} post offices are waiting for your first stamp.`}
+              </p>
+              <Link href="/explore" className="cta">
+                Open the map
+              </Link>
+              <p className="fine">
+                {DISCLAIMER}{" "}
+                <Link href="/privacy">Privacy</Link> · <Link href="/terms">Terms</Link>
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="kpl-intro" data-state={introState} aria-hidden={introState === "done"}>
+        <div className="kpl-top">
+          <Wordmark white />
+          <div className="kpl-route" />
+        </div>
+        <div className="kpl-bot">
+          <div className="kpl-route" />
+          <div className="kpl-dots" aria-hidden="true">
+            <span />
+            <span />
+            <span />
+            <span />
+            <span />
+          </div>
+        </div>
+        <div className="kpl-fx" aria-hidden="true">
+          <div ref={solidRef} className="kpl-solid" />
+          <div ref={countRef} className="kpl-mono kpl-count">
+            000
+          </div>
+          <div className="kpl-mono kpl-hint">Post here &raquo;</div>
+          <div className="kpl-postbox">
+            <svg viewBox="0 0 44 64" width="44" height="64">
+              <rect x="4" y="6" width="36" height="56" rx="4" fill="#fbf5e9" />
+              <rect x="8" y="14" width="28" height="5" rx="2.5" fill="#1c2b6b" />
+              <rect x="14" y="30" width="16" height="3" fill="#be3037" />
+              <rect x="0" y="2" width="44" height="8" rx="4" fill="#fbf5e9" />
+            </svg>
+          </div>
+          <div ref={cardRef} className="kpl-card" />
+        </div>
+        <button type="button" className="kpl-skip kpl-mono" onClick={() => skipRef.current()}>
+          Skip
+        </button>
+      </div>
+    </div>
+  );
+}

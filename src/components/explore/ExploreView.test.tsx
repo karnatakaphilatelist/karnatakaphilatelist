@@ -13,10 +13,19 @@ vi.mock("@/components/providers/ToastProvider", () => ({
   useToast: () => ({ showToast: vi.fn() }),
 }));
 
+const auth = vi.hoisted(() => ({
+  user: null as { email: string; user_metadata: Record<string, unknown> } | null,
+  openSignIn: vi.fn(),
+}));
+vi.mock("@/components/providers/AuthProvider", () => ({
+  useAuth: () => ({ user: auth.user, isLoading: false, openSignIn: auth.openSignIn }),
+}));
+
 const visits = vi.hoisted(() => ({ current: {} as Record<number, Visit> }));
 vi.mock("@/components/providers/VisitsProvider", () => ({
   useVisits: () => ({
     visits: visits.current,
+    isReady: true,
     plannedIds: new Set<number>(),
     markVisited: vi.fn(),
     removeVisit: vi.fn(),
@@ -84,5 +93,28 @@ describe("ExploreView selection", () => {
   it("ignores a link to an office that does not exist", () => {
     render(<ExploreView offices={offices} initialSelectedId={999} />);
     expect(detailCard()).toBeNull();
+  });
+});
+
+describe("ExploreView progress strip", () => {
+  it("greets a signed-in person and filters to unvisited post offices on Find next", () => {
+    visits.current = {};
+    auth.user = { email: "asha@example.com", user_metadata: { full_name: "Asha Rao" } };
+    render(<ExploreView offices={offices} initialSelectedId={null} />);
+
+    expect(screen.getByText("Namaskara, Asha")).toBeDefined();
+    fireEvent.click(screen.getByRole("button", { name: "Find next" }));
+    expect(screen.getAllByRole("button", { name: "Not visited" }).some(
+      (button) => button.getAttribute("aria-pressed") === "true",
+    )).toBe(true);
+    auth.user = null;
+  });
+
+  it("shows no strip to a guest who has not stamped anything", () => {
+    visits.current = {};
+    auth.user = null;
+    render(<ExploreView offices={offices} initialSelectedId={null} />);
+    expect(screen.queryByText(/Namaskara/)).toBeNull();
+    expect(screen.queryByText(/as a guest/)).toBeNull();
   });
 });

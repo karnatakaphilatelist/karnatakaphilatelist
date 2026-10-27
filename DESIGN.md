@@ -23,9 +23,9 @@ Light theme only. The site has no dark mode.
 | `ink-soft` | `#4b5380` | Secondary text. 6.8:1 on paper, 6.2:1 on sand |
 | `line` | `#e6d9bf` | Hairlines |
 | `line-strong` | `#d2c3a3` | Input borders |
-| `postal` | `#d63a2b` | Primary button fill, unvisited pins, accents. White text on it is 4.7:1 |
-| `postal-dark` | `#b92d20` | Red text and links (5.6:1 on paper). Never use `postal` for small text |
-| `postal-soft` | `#fdecea` | Tinted badge background |
+| `postal` | `#be3037` | Primary button fill, unvisited pins, accents, the landing page. White text on it is 5.9:1 |
+| `postal-dark` | `#9f2730` | Red text and links. Never use `postal` for small text |
+| `postal-soft` | `#f9e6e6` | Tinted badge background |
 | `coral` | `#e8583a` | Large decorative blocks only (behind stamp artwork). Never carries text |
 | `visited` | `#17794b` | Visited status. Text version `visited-ink` `#14653f` |
 | `planned` | `#ffc94d` | Planned status. Text version `planned-ink` `#6b4b00` |
@@ -36,7 +36,7 @@ view). Status is never shown by colour alone: pins and badges also change icon o
 
 ## Typography
 
-- Display: **Bricolage Grotesque** (variable) for headings, stamp numerals and the logo word-mark.
+- Display: **Fraunces** (variable, italic for accents such as "one stamp at a time.") for headings and stamp numerals. The PHILATELIST word-mark on the landing page is a PNG mask (`public/brand/wordmark*.png`).
 - Text: **Figtree** (variable) for everything else. **Noto Sans Kannada** is in both stacks as the
   fallback for Kannada text.
 - Scale (size / line height): 12/16 caption, 14/20 small, 16/24 body, 18/28 lead, 22/28 h3,
@@ -101,3 +101,13 @@ owners."
 ## Tagline
 
 "Namma Karnataka, one stamp at a time."
+
+## Landing page (`/`) and explorer (`/explore`)
+
+`/` is a full-screen front door with no app header. First visit in a session: red screen, a
+postcard glides along a dashed line (counter 000 to the number of post offices), drops into a
+post box, the screen splits open, the page appears in red-on-white and the five dots roll in.
+It plays once per browser session, is skipped for `prefers-reduced-motion`, and has a Skip
+button. Below it, scrolling grows the map card (scroll-driven `--p`) until it fills the screen
+with the Namaskara panel, the Open the map button and the India Post disclaimer. The explorer
+lives at `/explore`.

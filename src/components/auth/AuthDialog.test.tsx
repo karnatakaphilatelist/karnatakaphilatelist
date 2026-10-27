@@ -16,7 +16,7 @@ const handlers = {
   onClose: vi.fn(),
   onGoogle: vi.fn(),
   onEmail: vi.fn(),
-  onVerifyCode: vi.fn(),
+  onPassword: vi.fn(),
 };
 
 function renderDialog(googleAvailable = true) {
@@ -28,14 +28,6 @@ beforeEach(() => {
 });
 
 afterEach(cleanup);
-
-/** Types an email and requests the sign-in link, leaving the dialog on its "sent" step. */
-async function requestLink(email = "asha@example.com") {
-  handlers.onEmail.mockResolvedValue(undefined);
-  fireEvent.change(screen.getByLabelText("Email address"), { target: { value: email } });
-  fireEvent.click(screen.getByRole("button", { name: "Email me a sign-in link" }));
-  await screen.findByText(/We sent a sign-in link/);
-}
 
 describe("Google sign-in", () => {
   it("disables the button while the browser is on its way to Google, so it cannot be tapped twice", async () => {
@@ -69,57 +61,120 @@ describe("Google sign-in", () => {
   });
 });
 
-describe("email sign-in", () => {
-  it("offers the 6-digit code after the link is sent", async () => {
-    renderDialog();
-    await requestLink();
-    expect(screen.getByLabelText(/Enter the 6-digit code/)).toBeDefined();
-    expect(handlers.onEmail).toHaveBeenCalledWith("asha@example.com");
-  });
+function fill(label: string, value: string) {
+  fireEvent.change(screen.getByLabelText(label), { target: { value } });
+}
 
-  it("signs in with the code, ignoring spaces", async () => {
-    handlers.onVerifyCode.mockResolvedValue(undefined);
+describe("password sign-in", () => {
+  it("signs in with the email and password", async () => {
+    handlers.onPassword.mockResolvedValue("signed-in");
     renderDialog();
-    await requestLink();
 
-    fireEvent.change(screen.getByLabelText(/Enter the 6-digit code/), {
-      target: { value: "123 456" },
-    });
-    fireEvent.click(screen.getByRole("button", { name: "Sign in with code" }));
+    fill("Email address", " asha@example.com ");
+    fill("Password", "correct horse");
+    fireEvent.click(screen.getByRole("button", { name: "Sign in" }));
 
     await waitFor(() =>
-      expect(handlers.onVerifyCode).toHaveBeenCalledWith("asha@example.com", "123456"),
+      expect(handlers.onPassword).toHaveBeenCalledWith("signin", "asha@example.com", "correct horse"),
     );
   });
 
-  it("does not call the server for a code that is clearly wrong", async () => {
+  it("shows the reason when sign-in fails and lets the person try again", async () => {
+    handlers.onPassword.mockRejectedValue(new Error("That email and password do not match."));
     renderDialog();
-    await requestLink();
 
-    fireEvent.change(screen.getByLabelText(/Enter the 6-digit code/), { target: { value: "12ab" } });
-    fireEvent.click(screen.getByRole("button", { name: "Sign in with code" }));
+    fill("Email address", "asha@example.com");
+    fill("Password", "wrong-password");
+    fireEvent.click(screen.getByRole("button", { name: "Sign in" }));
 
-    expect((await screen.findByRole("alert")).textContent).toContain("6-digit code");
-    expect(handlers.onVerifyCode).not.toHaveBeenCalled();
+    expect((await screen.findByRole("alert")).textContent).toContain("do not match");
+    expect((screen.getByRole("button", { name: "Sign in" }) as HTMLButtonElement).disabled).toBe(false);
+  });
+});
+
+describe("creating an account", () => {
+  function openSignUp() {
+    fireEvent.click(screen.getByRole("button", { name: "New here? Create an account" }));
+  }
+
+  it("refuses a short password without calling the server", async () => {
+    renderDialog();
+    openSignUp();
+
+    fill("Email address", "asha@example.com");
+    fill("Password", "short");
+    fireEvent.submit(screen.getByRole("button", { name: "Create account" }).closest("form")!);
+
+    expect((await screen.findByRole("alert")).textContent).toContain("at least 8");
+    expect(handlers.onPassword).not.toHaveBeenCalled();
   });
 
-  it("shows a friendly message when the server rejects the code", async () => {
-    handlers.onVerifyCode.mockRejectedValue(new Error("Token has expired or is invalid"));
+  it("creates the account", async () => {
+    handlers.onPassword.mockResolvedValue("signed-in");
     renderDialog();
-    await requestLink();
+    openSignUp();
 
-    fireEvent.change(screen.getByLabelText(/Enter the 6-digit code/), { target: { value: "654321" } });
-    fireEvent.click(screen.getByRole("button", { name: "Sign in with code" }));
+    fill("Email address", "asha@example.com");
+    fill("Password", "long enough password");
+    fireEvent.click(screen.getByRole("button", { name: "Create account" }));
 
-    expect((await screen.findByRole("alert")).textContent).toContain("did not work");
+    await waitFor(() =>
+      expect(handlers.onPassword).toHaveBeenCalledWith(
+        "signup",
+        "asha@example.com",
+        "long enough password",
+      ),
+    );
   });
 
-  it("lets the person go back and use a different email", async () => {
+  it("asks the person to confirm their email when the project requires it", async () => {
+    handlers.onPassword.mockResolvedValue("confirm-email");
     renderDialog();
-    await requestLink();
+    openSignUp();
 
-    fireEvent.click(screen.getByRole("button", { name: "Use a different email" }));
+    fill("Email address", "asha@example.com");
+    fill("Password", "long enough password");
+    fireEvent.click(screen.getByRole("button", { name: "Create account" }));
+
+    expect((await screen.findByRole("status")).textContent).toContain("confirmation link");
+    fireEvent.click(screen.getByRole("button", { name: "Back" }));
     expect(screen.getByLabelText("Email address")).toBeDefined();
+  });
+
+  it("can switch back to signing in", () => {
+    renderDialog();
+    openSignUp();
+    fireEvent.click(screen.getByRole("button", { name: "Already have an account? Sign in" }));
+    expect(screen.getByRole("button", { name: "Sign in" })).toBeDefined();
+  });
+});
+
+describe("sign-in link", () => {
+  it("emails a link and says so, without any code box", async () => {
+    handlers.onEmail.mockResolvedValue(undefined);
+    renderDialog();
+
+    fill("Email address", "asha@example.com");
+    fireEvent.click(screen.getByRole("button", { name: /Forgot password/ }));
+
+    expect((await screen.findByRole("status")).textContent).toContain("sign-in link");
+    expect(handlers.onEmail).toHaveBeenCalledWith("asha@example.com");
+    expect(screen.queryByLabelText(/code/i)).toBeNull();
+  });
+
+  it("asks for an email address before sending a link", async () => {
+    renderDialog();
+    fireEvent.click(screen.getByRole("button", { name: /Forgot password/ }));
+    expect((await screen.findByRole("alert")).textContent).toContain("Enter your email");
+    expect(handlers.onEmail).not.toHaveBeenCalled();
+  });
+
+  it("shows an error when the link cannot be sent", async () => {
+    handlers.onEmail.mockRejectedValue(new Error("Email rate limit exceeded"));
+    renderDialog();
+    fill("Email address", "asha@example.com");
+    fireEvent.click(screen.getByRole("button", { name: /Forgot password/ }));
+    expect((await screen.findByRole("alert")).textContent).toContain("rate limit");
   });
 });
 

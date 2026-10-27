@@ -4,7 +4,7 @@ export type AuthFailureReason = "denied" | "other-device" | "expired" | "failed"
 export const AUTH_FAILURE_MESSAGES: Record<AuthFailureReason, string> = {
   denied: "Sign-in was cancelled. You can try again whenever you like.",
   "other-device":
-    "That sign-in link only works in the browser where you asked for it. Open it there, or ask for a new link and enter the 6-digit code instead.",
+    "That sign-in link only works in the browser where you asked for it. Open it there, or ask for a new link on this device.",
   expired: "That sign-in link has expired or was already used. Please ask for a new one.",
   failed: "Sign-in did not complete. Please try again.",
 };

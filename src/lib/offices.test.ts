@@ -124,6 +124,15 @@ describe("the bundled list", () => {
     expect(names).toEqual([...names].sort((a, b) => a.localeCompare(b, "en")));
     expect(offices.find((office) => office.id === 61)?.name).toBe("Agumbe SO");
     expect(offices.find((office) => office.id === 66)?.name).toBe("Karkala HO");
-    expect(offices.find((office) => office.id === 61)?.district).toBe("Shivmogga");
+    expect(offices.find((office) => office.id === 61)?.district).toBe("Shivamogga");
+  });
+});
+
+describe("district spellings in the bundled list", () => {
+  it("has none of the known misspellings", () => {
+    const districts = new Set(snapshot.map((office) => office.district.toLowerCase()));
+    for (const wrong of ["vjaypura", "shivmogga", "chikkamangaluru"]) {
+      expect(districts.has(wrong)).toBe(false);
+    }
   });
 });

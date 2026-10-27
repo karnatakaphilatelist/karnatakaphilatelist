@@ -18,6 +18,24 @@ import {
 import { getFirstName } from "@/lib/user-display";
 import type { PostOffice } from "@/types";
 
+const STEPS = [
+  {
+    n: 1,
+    title: "Find",
+    text: "Search or browse the map to spot post offices near you.",
+  },
+  {
+    n: 2,
+    title: "Visit",
+    text: "Go there. Plan your route and tick it off as you travel.",
+  },
+  {
+    n: 3,
+    title: "Stamp",
+    text: "Get your passport stamped and mark it visited to fill your collection.",
+  },
+];
+
 type IntroState = "playing" | "open" | "done";
 
 function hasSeenIntro(): boolean {
@@ -73,11 +91,13 @@ export function Landing({ offices }: { offices: PostOffice[] }) {
   const [introState, setIntroState] = useState<IntroState>("playing");
   const [revealed, setRevealed] = useState(false);
   const [clock, setClock] = useState("--:--:--");
-  const [mapOpen, setMapOpen] = useState(false);
 
   const pins = useMemo(() => projectPins(offices), [offices]);
   const total = offices.length;
   const stamped = Object.keys(visits).length;
+  // Until someone has a stamp of their own, show an example so the card still makes sense.
+  const isSample = stamped === 0;
+  const shownStamped = isSample ? 12 : stamped;
   const firstName = user ? getFirstName(user) : null;
 
   // The intro: runs once per session, skipped when motion is reduced or it was already seen.
@@ -174,9 +194,8 @@ export function Landing({ offices }: { offices: PostOffice[] }) {
       const root = rootRef.current;
       if (!scroller || !root) return;
       const max = scroller.offsetHeight - window.innerHeight;
-      const p = scrollProgress(window.scrollY, max);
+      const p = scrollProgress(window.scrollY, max, 0.92);
       root.style.setProperty("--p", p.toFixed(4));
-      setMapOpen(p > 0.98);
     };
     const onScroll = () => {
       if (!frame) frame = requestAnimationFrame(update);
@@ -219,51 +238,184 @@ export function Landing({ offices }: { offices: PostOffice[] }) {
               {CONTACT_EMAIL}
             </a>
           </div>
-          <h1 className="kpl-meta kpl-tag">
-            Collect a stamp from
-            <br />
-            every post office in Karnataka
-            <em>one stamp at a time.</em>
-          </h1>
           <p className="kpl-meta kpl-mono kpl-time">Local time {clock} (IST)</p>
           <p className="kpl-meta kpl-mono kpl-open">
             <span className="kpl-dot" />
             {total} post offices
           </p>
 
-          <div className="kpl-box" data-open={mapOpen}>
-            <div className="kpl-map" aria-hidden="true">
-              {pins.map((pin) => (
+          <div className="kpl-track">
+            <article className="kpl-card kpl-card--hero">
+              <div className="kpl-hero-copy">
+                <h1>
+                  Collect a stamp from every post office in Karnataka,{" "}
+                  <span>one stamp</span> at a time.
+                </h1>
+                <p>
+                  Find the {total} post offices of the Karnataka philatelic
+                  passport, visit them and keep every stamp in one place.
+                </p>
+                <div className="kpl-btns">
+                  <Link href="/explore" className="kpl-btn kpl-btn--red">
+                    Open the map
+                  </Link>
+                  <Link href="/passport" className="kpl-btn kpl-btn--line">
+                    My passport
+                  </Link>
+                </div>
+              </div>
+              <div className="kpl-coral" aria-hidden="true">
+                <div className="kp-perforated kpl-stampart">
+                  <svg viewBox="0 0 120 150" width="100%" height="100%">
+                    <rect
+                      x="10"
+                      y="10"
+                      width="100"
+                      height="100"
+                      fill="#f1e8d3"
+                      stroke="#1c2b6b"
+                      strokeWidth="2"
+                    />
+                    <path
+                      d="M25 90 L45 55 L62 78 L75 62 L95 90 Z"
+                      fill="#1c2b6b"
+                    />
+                    <circle cx="80" cy="34" r="9" fill="#cf1830" />
+                    <text
+                      x="60"
+                      y="132"
+                      textAnchor="middle"
+                      fontSize="13"
+                      fontWeight="700"
+                      fill="#1c2b6b"
+                    >
+                      KARNATAKA
+                    </text>
+                    <text
+                      x="60"
+                      y="145"
+                      textAnchor="middle"
+                      fontSize="9"
+                      fill="#1c2b6b"
+                    >
+                      INDIA · POST
+                    </text>
+                  </svg>
+                </div>
+                <svg
+                  className="kpl-postmark"
+                  viewBox="0 0 100 100"
+                  width="96"
+                  height="96"
+                >
+                  <circle
+                    cx="50"
+                    cy="50"
+                    r="46"
+                    fill="none"
+                    stroke="#1c2b6b"
+                    strokeWidth="2.5"
+                  />
+                  <circle
+                    cx="50"
+                    cy="50"
+                    r="38"
+                    fill="none"
+                    stroke="#1c2b6b"
+                    strokeWidth="1.5"
+                  />
+                  <text
+                    x="50"
+                    y="46"
+                    textAnchor="middle"
+                    fontSize="11"
+                    fontWeight="700"
+                    fill="#1c2b6b"
+                  >
+                    BENGALURU
+                  </text>
+                  <text
+                    x="50"
+                    y="60"
+                    textAnchor="middle"
+                    fontSize="9"
+                    fill="#1c2b6b"
+                  >
+                    STAMPED
+                  </text>
+                </svg>
+              </div>
+            </article>
+
+            <article className="kpl-card kpl-card--progress">
+              <p className="kpl-kicker">
+                {firstName ? `Namaskara, ${firstName}` : "Your passport"}
+              </p>
+              <p className="kpl-big">
+                <b>{shownStamped}</b> of {total} stamped
+              </p>
+              <div
+                className="kpl-bar"
+                role="progressbar"
+                aria-label="Stamps collected"
+                aria-valuenow={shownStamped}
+                aria-valuemin={0}
+                aria-valuemax={total}
+              >
                 <i
-                  key={pin.id}
-                  className={`kpl-pin${visits[pin.id] ? " kpl-pin--v" : ""}`}
-                  style={{ left: `${pin.x}%`, top: `${pin.y}%` }}
+                  style={{
+                    width: `${Math.round((shownStamped / Math.max(total, 1)) * 100)}%`,
+                  }}
                 />
-              ))}
-            </div>
-            <Link
-              href="/explore"
-              className="absolute inset-0"
-              aria-label="Open the map"
+              </div>
+              <p className="kpl-note">
+                {isSample
+                  ? "An example. Your own count appears here once you start collecting."
+                  : `${total - shownStamped} to go. Keep going.`}
+              </p>
+            </article>
+
+            {STEPS.map((step) => (
+              <article key={step.title} className="kpl-card kpl-card--step">
+                <p className="kpl-kicker">Step {step.n}</p>
+                <h2>{step.title}</h2>
+                <p>{step.text}</p>
+              </article>
+            ))}
+
+            <article
+              className="kpl-card kpl-card--map"
+              aria-label="Preview of the map"
             >
-              <span className="kpl-mono kpl-cap">Scroll to open the map</span>
-            </Link>
-            <div className="kpl-panel">
-              <h2>{firstName ? `Namaskara, ${firstName}` : "Namaskara"}</h2>
-              <p>
-                {stamped > 0
-                  ? `${stamped} of ${total} post offices stamped.`
-                  : `${total} post offices are waiting for your first stamp.`}
+              <div className="kpl-minimap" aria-hidden="true">
+                {pins.map((pin) => (
+                  <i
+                    key={pin.id}
+                    className={`kpl-pin${visits[pin.id] ? " kpl-pin--v" : ""}`}
+                    style={{ left: `${pin.x}%`, top: `${pin.y}%` }}
+                  />
+                ))}
+              </div>
+              <p className="kpl-kicker">The map</p>
+              <p className="kpl-note">
+                Every post office, pinned across Karnataka.
               </p>
-              <Link href="/explore" className="cta">
-                Open the map
-              </Link>
-              <p className="fine">
-                {DISCLAIMER} <Link href="/privacy">Privacy</Link> ·{" "}
+            </article>
+
+            <article className="kpl-card kpl-card--foot">
+              <p className="kpl-kicker">Good to know</p>
+              <p className="kpl-fine">{DISCLAIMER}</p>
+              <p className="kpl-links">
+                <Link href="/privacy">Privacy</Link>
                 <Link href="/terms">Terms</Link>
+                <a href={`mailto:${CONTACT_EMAIL}`}>Contact</a>
               </p>
-            </div>
+            </article>
           </div>
+
+          <Link href="/explore" className="kpl-open-map">
+            Open the map
+          </Link>
         </div>
       </div>
 
@@ -307,7 +459,7 @@ export function Landing({ offices }: { offices: PostOffice[] }) {
               <rect x="0" y="2" width="44" height="8" rx="4" fill="#fbf5e9" />
             </svg>
           </div>
-          <div ref={cardRef} className="kpl-card" />
+          <div ref={cardRef} className="kpl-flycard" />
         </div>
         <button
           type="button"

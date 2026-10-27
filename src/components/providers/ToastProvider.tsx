@@ -29,8 +29,35 @@ const ToastContext = createContext<ToastContextValue | null>(null);
 export function ToastProvider({ children }: { children: ReactNode }) {
   const [toast, setToast] = useState<ToastOptions | null>(null);
   const timerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
+  const toastRef = useRef<HTMLDivElement>(null);
 
   const dismiss = useCallback(() => setToast(null), []);
+
+  // Modal dialogs sit in the browser's "top layer", which no z-index can climb above,
+  // so a plain toast would be hidden behind them. Showing it as a popover puts it in
+  // the same layer, and it is lifted again whenever a dialog opens or closes after it.
+  useEffect(() => {
+    const element = toastRef.current;
+    if (!toast || !element || typeof element.showPopover !== "function") return;
+
+    const lift = () => {
+      try {
+        if (element.matches(":popover-open")) element.hidePopover();
+        element.showPopover();
+      } catch {
+        // Not supported or already detached: the toast still shows in the normal page.
+      }
+    };
+    lift();
+
+    const observer = new MutationObserver(lift);
+    observer.observe(document.body, {
+      subtree: true,
+      attributes: true,
+      attributeFilter: ["open"],
+    });
+    return () => observer.disconnect();
+  }, [toast]);
 
   const showToast = useCallback((options: ToastOptions) => {
     clearTimeout(timerRef.current);
@@ -47,8 +74,11 @@ export function ToastProvider({ children }: { children: ReactNode }) {
       {children}
       {toast ? (
         <div
+          ref={toastRef}
+          // "manual" keeps it open until we close it and never dismisses other popovers.
+          popover="manual"
           role="status"
-          className="fixed inset-x-4 bottom-20 z-[3000] flex animate-[rise_.2s_ease-out] items-center gap-2 rounded-2xl bg-ink py-1.5 pl-4 pr-1.5 text-white shadow-xl md:inset-x-auto md:bottom-6 md:right-6 md:w-96"
+          className="fixed inset-x-4 bottom-20 top-auto z-[3000] m-0 flex h-auto w-auto animate-[rise_.2s_ease-out] items-center gap-2 overflow-visible rounded-2xl border-0 bg-ink py-1.5 pl-4 pr-1.5 text-white shadow-xl md:inset-x-auto md:bottom-6 md:right-6 md:w-96"
         >
           <span className="flex-1 text-sm font-semibold">{toast.message}</span>
           {toast.actionLabel && toast.onAction ? (

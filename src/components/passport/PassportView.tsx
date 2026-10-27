@@ -123,6 +123,15 @@ export function PassportView({ offices }: { offices: PostOffice[] }) {
             <DistrictProgress offices={offices} visits={visits} />
           </div>
         </section>
+
+        <footer className="mt-8 flex justify-center gap-5 text-sm text-muted">
+          <Link href="/privacy" className="flex min-h-11 items-center underline">
+            Privacy
+          </Link>
+          <Link href="/terms" className="flex min-h-11 items-center underline">
+            Terms
+          </Link>
+        </footer>
       </div>
 
       <VisitDialog office={editingOffice} onClose={() => setEditingId(null)} />

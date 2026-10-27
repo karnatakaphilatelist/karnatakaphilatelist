@@ -6,9 +6,8 @@ import { useVisits } from "@/components/providers/VisitsProvider";
 import { CameraIcon, GlobeIcon, LockIcon } from "@/components/ui/icons";
 import { Sheet } from "@/components/ui/Sheet";
 import { usePhotoUrl } from "@/hooks/usePhotoUrl";
+import { MAX_NOTE_LENGTH } from "@/lib/visits/guest-visits";
 import type { PostOffice, Visit } from "@/types";
-
-const MAX_NOTE_LENGTH = 1000;
 
 interface VisitDialogProps {
   /** The office being edited, or null when the dialog is closed. */

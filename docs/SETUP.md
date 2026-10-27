@@ -50,6 +50,18 @@ npm run dev                  # http://localhost:3000
      `http://localhost:3000/auth/callback` and `https://<your-domain>/auth/callback`
      to **Redirect URLs**.
    - Email sign-in links work out of the box once the redirect URLs are set.
+   - Email templates, **Magic Link**: include `{{ .Token }}` (for example
+     "Or enter this code: {{ .Token }}") so people who open the email on another device
+     can type the 6-digit code into the sign-in dialog instead.
+   - The sign-in dialog checks `/auth/v1/settings` and hides the Google button, with an
+     explanation, while the Google provider is switched off.
+   - Google Cloud Console: the OAuth client's authorized redirect URI is
+     `https://<project-ref>.supabase.co/auth/v1/callback`. To let anyone (not just test
+     users) sign in, publish the app (Branding, then Audience). The privacy policy and
+     terms live at `/privacy` and `/terms`; have a person review that text (contact
+     address and date are in `src/lib/constants.ts`).
+6. **Run the migrations in order**: visits_and_stamp_photos, post_office_stamp_images,
+   profiles. They are safe to re-run.
 
 ## How it is organised
 
@@ -84,6 +96,21 @@ supabase/migrations/      Database schema, versioned as SQL
 - **The map is Leaflet with OpenStreetMap tiles** (free, no API key). The map lives
   behind `components/map/` so it can be replaced later without touching the rest.
 - **"Planned" offices are stored on the device only** for now.
+
+## Operations notes
+
+- **Bundled post office list.** `src/data/post-offices.snapshot.json` is used only when
+  the database cannot be reached (for example a paused free project), so builds and page
+  views do not fail; it is cached for minutes instead of hours. Refresh it after editing
+  the table by exporting `id, name, pincode, district, lat, lng` as JSON.
+- **Free Supabase projects pause** after about a week without activity. Upgrade the plan
+  or ping the project regularly.
+- **Deleting a user** removes their rows but not their files in the `stamp-photos`
+  bucket; delete the `<user id>/` folder too.
+- **Data quality** (not changed in the database): district spellings such as
+  "vjaypura", "shivmogga", "yadagiri" and "kalaburagi"/"kalaburgi" are inconsistent. The
+  app tidies capitalisation only, not spelling.
+- Next.js is pinned to 16.4.3 (earlier 16.x releases have published security advisories).
 
 ## Known limitations
 

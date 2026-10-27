@@ -52,6 +52,10 @@ export function ExploreView({ offices, initialSelectedId }: ExploreViewProps) {
   // The detail card follows the filter and search: it closes by itself when the
   // selected post office drops out of the visible list.
   const selectedOffice = visibleOffices.find((office) => office.id === selectedId) ?? null;
+  // Forget the selection once it is hidden, so clearing the filter or search later
+  // does not pop an old card back open. (Setting state while rendering is React's
+  // supported way to adjust state that is derived from other state.)
+  if (selectedId !== null && selectedOffice === null) setSelectedId(null);
   const editingOffice = offices.find((office) => office.id === editingId) ?? null;
 
   async function handleMarkVisited(officeId: number) {

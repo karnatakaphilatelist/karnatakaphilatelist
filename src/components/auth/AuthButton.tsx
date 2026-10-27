@@ -1,6 +1,7 @@
 "use client";
 
 import { useAuth } from "@/components/providers/AuthProvider";
+import { getAvatarUrl, getDisplayName, getInitial } from "@/lib/user-display";
 
 export function AuthButton() {
   const { user, isLoading, openSignIn, signOut } = useAuth();
@@ -20,13 +21,26 @@ export function AuthButton() {
     );
   }
 
+  const avatarUrl = getAvatarUrl(user);
+
   return (
     <div className="flex items-center gap-2">
       <span
-        title={user.email ?? undefined}
-        className="grid size-9 place-items-center rounded-full bg-visited-soft text-sm font-bold uppercase text-visited-ink"
+        title={getDisplayName(user) ?? undefined}
+        className="grid size-9 place-items-center overflow-hidden rounded-full bg-visited-soft text-sm font-bold text-visited-ink"
       >
-        {(user.email ?? "?").charAt(0)}
+        {avatarUrl ? (
+          // Google profile photos come from another host; a plain img with no referrer avoids hotlink blocks.
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={avatarUrl}
+            alt=""
+            referrerPolicy="no-referrer"
+            className="size-full object-cover"
+          />
+        ) : (
+          getInitial(user)
+        )}
       </span>
       <button
         type="button"

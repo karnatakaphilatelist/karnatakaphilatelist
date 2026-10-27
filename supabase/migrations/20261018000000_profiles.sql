@@ -2,16 +2,20 @@
 --
 -- Why: Supabase keeps sign-in accounts in the private auth.users table. This
 -- public.profiles table gives the app (and the project owner, in the dashboard)
--- a record of every user: name, email and photo from Google or the email link.
+-- a record of every user: name, email and photo from Google or the email code.
 --
 -- The trigger below must never block a signup, so it swallows its own errors.
 -- A missing profile can be repaired later; a failed signup cannot.
+--
+-- Name and photo come from sign-up metadata, which the person (or anyone calling
+-- the API) controls. They are trimmed, length-limited and the photo must be an
+-- https URL, so nothing unexpected is ever stored.
 
 create table if not exists public.profiles (
   id             uuid primary key references auth.users (id) on delete cascade,
   email          text,
-  full_name      text,
-  avatar_url     text,
+  full_name      text check (char_length(full_name) <= 200),
+  avatar_url     text check (char_length(avatar_url) <= 2048 and avatar_url ~* '^https://'),
   created_at     timestamptz not null default now(),
   updated_at     timestamptz not null default now()
 );
@@ -23,14 +27,14 @@ drop policy if exists "Users read own profile" on public.profiles;
 create policy "Users read own profile"
   on public.profiles for select
   to authenticated
-  using (auth.uid() = id);
+  using ((select auth.uid()) = id);
 
 drop policy if exists "Users update own profile" on public.profiles;
 create policy "Users update own profile"
   on public.profiles for update
   to authenticated
-  using (auth.uid() = id)
-  with check (auth.uid() = id);
+  using ((select auth.uid()) = id)
+  with check ((select auth.uid()) = id);
 
 -- Rows are created by the trigger only, so there is no insert policy.
 
@@ -40,14 +44,24 @@ language plpgsql
 security definer
 set search_path = ''
 as $$
+declare
+  display_name text;
+  photo_url    text;
 begin
+  display_name := nullif(left(btrim(coalesce(
+    new.raw_user_meta_data ->> 'full_name',
+    new.raw_user_meta_data ->> 'name'
+  )), 200), '');
+  photo_url := coalesce(
+    new.raw_user_meta_data ->> 'avatar_url',
+    new.raw_user_meta_data ->> 'picture'
+  );
+  if photo_url is null or photo_url !~* '^https://' or char_length(photo_url) > 2048 then
+    photo_url := null;
+  end if;
+
   insert into public.profiles (id, email, full_name, avatar_url)
-  values (
-    new.id,
-    new.email,
-    coalesce(new.raw_user_meta_data ->> 'full_name', new.raw_user_meta_data ->> 'name'),
-    coalesce(new.raw_user_meta_data ->> 'avatar_url', new.raw_user_meta_data ->> 'picture')
-  )
+  values (new.id, new.email, display_name, photo_url)
   on conflict (id) do nothing;
   return new;
 exception when others then
@@ -72,13 +86,31 @@ language plpgsql
 security definer
 set search_path = ''
 as $$
+declare
+  display_name text;
+  photo_url    text;
 begin
-  update public.profiles
-     set email      = new.email,
-         full_name  = coalesce(new.raw_user_meta_data ->> 'full_name', new.raw_user_meta_data ->> 'name', full_name),
-         avatar_url = coalesce(new.raw_user_meta_data ->> 'avatar_url', new.raw_user_meta_data ->> 'picture', avatar_url),
-         updated_at = now()
-   where id = new.id;
+  display_name := nullif(left(btrim(coalesce(
+    new.raw_user_meta_data ->> 'full_name',
+    new.raw_user_meta_data ->> 'name'
+  )), 200), '');
+  photo_url := coalesce(
+    new.raw_user_meta_data ->> 'avatar_url',
+    new.raw_user_meta_data ->> 'picture'
+  );
+  if photo_url is null or photo_url !~* '^https://' or char_length(photo_url) > 2048 then
+    photo_url := null;
+  end if;
+
+  -- Also covers accounts whose profile row is missing (for example a signup
+  -- that happened before this migration, or one the insert trigger skipped).
+  insert into public.profiles (id, email, full_name, avatar_url)
+  values (new.id, new.email, display_name, photo_url)
+  on conflict (id) do update
+    set email      = excluded.email,
+        full_name  = coalesce(excluded.full_name, public.profiles.full_name),
+        avatar_url = coalesce(excluded.avatar_url, public.profiles.avatar_url),
+        updated_at = now();
   return new;
 exception when others then
   raise warning 'handle_user_updated failed for %: %', new.id, sqlerrm;
@@ -98,7 +130,14 @@ insert into public.profiles (id, email, full_name, avatar_url)
 select
   u.id,
   u.email,
-  coalesce(u.raw_user_meta_data ->> 'full_name', u.raw_user_meta_data ->> 'name'),
-  coalesce(u.raw_user_meta_data ->> 'avatar_url', u.raw_user_meta_data ->> 'picture')
+  nullif(left(btrim(coalesce(
+    u.raw_user_meta_data ->> 'full_name',
+    u.raw_user_meta_data ->> 'name'
+  )), 200), ''),
+  case
+    when coalesce(u.raw_user_meta_data ->> 'avatar_url', u.raw_user_meta_data ->> 'picture') ~* '^https://'
+     and char_length(coalesce(u.raw_user_meta_data ->> 'avatar_url', u.raw_user_meta_data ->> 'picture')) <= 2048
+    then coalesce(u.raw_user_meta_data ->> 'avatar_url', u.raw_user_meta_data ->> 'picture')
+  end
 from auth.users u
 on conflict (id) do nothing;

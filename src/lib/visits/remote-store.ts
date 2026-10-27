@@ -3,6 +3,10 @@ import type { Visit } from "@/types";
 
 export const PHOTO_BUCKET = "stamp-photos";
 
+/** Postgres error code for a foreign key violation, e.g. a post office that no longer exists. */
+const FOREIGN_KEY_VIOLATION = "23503";
+const VISIT_CONFLICT_TARGET = "user_id,post_office_id";
+
 /** Shape of a row in the `visits` table (see supabase/migrations). */
 interface VisitRow {
   post_office_id: number;
@@ -48,31 +52,78 @@ export async function fetchVisits(
   return data.map(toVisit);
 }
 
-/** Inserts or updates the user's visit for one office. */
-export async function saveVisit(
+/**
+ * Records a first visit. If the user already has a visit for this office (for
+ * example it was stamped on another device or tab), the existing row, with its
+ * note and photo, is left exactly as it is.
+ */
+export async function insertVisitIfMissing(
   client: SupabaseClient,
   userId: string,
   visit: Visit,
 ): Promise<void> {
   const { error } = await client
     .from("visits")
-    .upsert(toRow(userId, visit), { onConflict: "user_id,post_office_id" });
+    .upsert(toRow(userId, visit), {
+      onConflict: VISIT_CONFLICT_TARGET,
+      ignoreDuplicates: true,
+    });
   if (error) throw new Error(error.message);
 }
 
-export async function saveVisits(
+/**
+ * Changes the note, photo and privacy of an existing visit. It never creates a
+ * row, so editing a visit that was removed elsewhere fails instead of silently
+ * bringing the visit back.
+ */
+export async function updateVisitDetails(
+  client: SupabaseClient,
+  userId: string,
+  visit: Visit,
+): Promise<void> {
+  const { data, error } = await client
+    .from("visits")
+    .update({
+      note: visit.note,
+      photo_path: visit.photoPath,
+      is_public: visit.isPublic,
+    })
+    .eq("user_id", userId)
+    .eq("post_office_id", visit.officeId)
+    .select("post_office_id");
+  if (error) throw new Error(error.message);
+  if (!data || data.length === 0) {
+    throw new Error("This visit was removed on another device. Reload to see your latest passport.");
+  }
+}
+
+/**
+ * Moves a guest's visits into their account without overwriting anything the
+ * account already has. If the batch is rejected because of one bad row (such as
+ * a post office that has since been removed), the rest are still saved.
+ */
+export async function mergeGuestVisits(
   client: SupabaseClient,
   userId: string,
   visits: Visit[],
 ): Promise<void> {
   if (visits.length === 0) return;
-  const { error } = await client
-    .from("visits")
-    .upsert(
-      visits.map((visit) => toRow(userId, visit)),
-      { onConflict: "user_id,post_office_id", ignoreDuplicates: true },
+
+  const upsertRows = (rows: Visit[]) =>
+    client.from("visits").upsert(
+      rows.map((visit) => toRow(userId, visit)),
+      { onConflict: VISIT_CONFLICT_TARGET, ignoreDuplicates: true },
     );
-  if (error) throw new Error(error.message);
+
+  const { error } = await upsertRows(visits);
+  if (!error) return;
+  if (error.code !== FOREIGN_KEY_VIOLATION) throw new Error(error.message);
+
+  const results = await Promise.all(visits.map((visit) => upsertRows([visit])));
+  const failure = results
+    .map((result) => result.error)
+    .find((rowError) => rowError && rowError.code !== FOREIGN_KEY_VIOLATION);
+  if (failure) throw new Error(failure.message);
 }
 
 export async function deleteVisit(

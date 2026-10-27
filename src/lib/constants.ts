@@ -10,3 +10,7 @@ export const GUEST_SIGN_IN_THRESHOLD = 3;
 
 export const KARNATAKA_CENTER: Coordinates = { lat: 15.3173, lng: 75.7139 };
 export const KARNATAKA_DEFAULT_ZOOM = 7;
+
+/** Where people write to ask about their data or report a problem. Shown on the legal pages. */
+export const CONTACT_EMAIL = "karnatakaphilatelist@gmail.com";
+export const LEGAL_LAST_UPDATED = "27 October 2026";

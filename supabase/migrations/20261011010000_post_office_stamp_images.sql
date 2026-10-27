@@ -12,9 +12,8 @@ insert into storage.buckets (id, name, public)
 values ('office-stamps', 'office-stamps', true)
 on conflict (id) do nothing;
 
--- Anyone can view the stamps. Uploads are done by the project owner from the
--- Supabase dashboard (or service role), so no insert/update policy is added.
+-- Files in a public bucket are served by their public URL without any policy.
+-- A select policy would only add the ability to LIST every file through the API,
+-- so none is created (and an earlier one is removed). Uploads are done by the
+-- project owner from the Supabase dashboard (or service role).
 drop policy if exists "Office stamps are publicly readable" on storage.objects;
-create policy "Office stamps are publicly readable"
-  on storage.objects for select
-  using (bucket_id = 'office-stamps');

@@ -7,10 +7,12 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from "react";
 import { AuthDialog, type SignInReason } from "@/components/auth/AuthDialog";
+import { fetchGoogleEnabled } from "@/lib/auth-settings";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 
 interface AuthContextValue {
@@ -34,6 +36,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [dialogReason, setDialogReason] = useState<SignInReason | null>(null);
+  /** Whether Google sign-in is switched on in Supabase; null until checked or when unknown. */
+  const [googleEnabled, setGoogleEnabled] = useState<boolean | null>(null);
+  const hasCheckedGoogle = useRef(false);
+
+  // Check once, the first time the sign-in dialog opens, so a switched-off provider
+  // is explained inside the dialog instead of ending on a raw error page.
+  useEffect(() => {
+    if (dialogReason === null || hasCheckedGoogle.current) return;
+    hasCheckedGoogle.current = true;
+    fetchGoogleEnabled().then(setGoogleEnabled);
+  }, [dialogReason]);
 
   useEffect(() => {
     // The listener fires INITIAL_SESSION on subscribe, so no separate getSession() call is needed.
@@ -53,10 +66,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signInWithGoogle = useCallback(async () => {
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
-      options: { redirectTo: buildRedirectUrl() },
+      options: {
+        redirectTo: buildRedirectUrl(),
+        // Always let the person pick the account, so someone signed in to several
+        // Google accounts (or on a shared device) is not signed in as the wrong one.
+        queryParams: { prompt: "select_account" },
+      },
     });
     if (error) throw error;
   }, [supabase]);
+
+  const verifyEmailCode = useCallback(
+    async (email: string, token: string) => {
+      const { error } = await supabase.auth.verifyOtp({ email, token, type: "email" });
+      if (error) throw error;
+    },
+    [supabase],
+  );
 
   const signInWithEmail = useCallback(
     async (email: string) => {
@@ -84,8 +110,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       <AuthDialog
         reason={user ? null : dialogReason}
         onClose={closeSignIn}
+        googleAvailable={googleEnabled !== false}
         onGoogle={signInWithGoogle}
         onEmail={signInWithEmail}
+        onVerifyCode={verifyEmailCode}
       />
     </AuthContext.Provider>
   );

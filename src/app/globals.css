@@ -137,11 +137,6 @@ body {
     0 2px 8px rgb(0 0 0 / 0.25);
 }
 
-/* Quiet, warm map: light tiles pulled toward the cream paper so pins stand out. */
-.kp-map .leaflet-tile-pane {
-  filter: sepia(0.32) saturate(0.75) contrast(0.96) brightness(1.03);
-}
-
 .kp-map {
   background: var(--color-sand);
 }

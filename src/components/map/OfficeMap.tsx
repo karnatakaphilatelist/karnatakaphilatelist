@@ -77,12 +77,14 @@ export function OfficeMap({
     <MapContainer
       center={[KARNATAKA_CENTER.lat, KARNATAKA_CENTER.lng]}
       zoom={KARNATAKA_DEFAULT_ZOOM}
-      className="size-full"
+      className="kp-map size-full"
       zoomControl
     >
       <TileLayer
-        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+        url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
+        subdomains="abcd"
+        maxZoom={19}
       />
       <MapViewport
         offices={offices}

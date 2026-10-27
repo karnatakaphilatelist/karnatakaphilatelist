@@ -4,13 +4,16 @@ import { useMemo, useState } from "react";
 import { ExploreControls } from "@/components/explore/ExploreControls";
 import type { StatusFilter } from "@/components/explore/FilterChips";
 import { OfficeList } from "@/components/explore/OfficeList";
+import { ProgressStrip } from "@/components/explore/ProgressStrip";
 import { LazyOfficeMap } from "@/components/map/LazyOfficeMap";
 import { OfficeDetail } from "@/components/office/OfficeDetail";
 import { VisitDialog } from "@/components/office/VisitDialog";
+import { useAuth } from "@/components/providers/AuthProvider";
 import { useToast } from "@/components/providers/ToastProvider";
 import { useVisits } from "@/components/providers/VisitsProvider";
 import { LocateIcon } from "@/components/ui/icons";
 import { sortByDistance, withStatus } from "@/lib/office-status";
+import { getFirstName } from "@/lib/user-display";
 import type { Coordinates, PostOffice } from "@/types";
 
 interface ExploreViewProps {
@@ -20,7 +23,8 @@ interface ExploreViewProps {
 }
 
 export function ExploreView({ offices, initialSelectedId }: ExploreViewProps) {
-  const { visits, plannedIds, markVisited } = useVisits();
+  const { user, isLoading: isAuthLoading, openSignIn } = useAuth();
+  const { visits, plannedIds, markVisited, isReady } = useVisits();
   const { showToast } = useToast();
 
   const [filter, setFilter] = useState<StatusFilter>("all");
@@ -104,6 +108,16 @@ export function ExploreView({ offices, initialSelectedId }: ExploreViewProps) {
               onFilterChange={setFilter}
             />
           </div>
+          {isReady ? (
+            <ProgressStrip
+              signedIn={isAuthLoading ? null : user !== null}
+              firstName={user ? getFirstName(user) : null}
+              stamped={Object.keys(visits).length}
+              total={offices.length}
+              onFindNext={() => setFilter("unvisited")}
+              onSignIn={() => openSignIn("manual")}
+            />
+          ) : null}
           <div className="flex items-center justify-between pb-2">
             <p className="text-sm text-muted" aria-live="polite">
               {visibleOffices.length} of {offices.length} post offices

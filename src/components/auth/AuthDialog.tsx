@@ -184,7 +184,7 @@ export function AuthDialog({
               </div>
             </>
           ) : (
-            <p className="mb-4 rounded-2xl bg-planned-soft p-3.5 text-sm text-[#4a3600]">
+            <p className="mb-4 rounded-2xl bg-planned-soft p-3.5 text-sm text-planned-ink">
               Google sign-in is not available right now. You can still sign in with your email below.
             </p>
           )}

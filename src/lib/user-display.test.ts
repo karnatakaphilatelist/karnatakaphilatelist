@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { getAvatarUrl, getDisplayName, getInitial } from "@/lib/user-display";
+import { getAvatarUrl, getDisplayName, getFirstName, getInitial } from "@/lib/user-display";
 
 const user = (email: string | null, meta: Record<string, unknown> = {}) => ({
   email: email ?? undefined,
@@ -46,5 +46,14 @@ describe("getInitial", () => {
     expect(getInitial(user("z@b.co", { full_name: "asha" }))).toBe("A");
     expect(getInitial(user("z@b.co"))).toBe("Z");
     expect(getInitial(user(null))).toBe("?");
+  });
+});
+
+describe("getFirstName", () => {
+  it("returns the first word of the name", () => {
+    expect(getFirstName(user("a@b.c", { full_name: "Asha Rao" }))).toBe("Asha");
+  });
+  it("returns null when only an email is known", () => {
+    expect(getFirstName(user("a@b.c"))).toBeNull();
   });
 });

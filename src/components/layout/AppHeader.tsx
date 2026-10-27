@@ -10,9 +10,9 @@ export function AppHeader() {
   const pathname = usePathname();
 
   return (
-    <header className="flex min-h-16 shrink-0 items-center justify-between gap-4 border-b border-line bg-white px-4 md:px-6">
+    <header className="flex min-h-16 shrink-0 items-center justify-between gap-4 border-b border-line bg-card px-4 md:px-6">
       <Link href="/" className="flex items-center gap-3">
-        <span className="grid size-9 place-items-center rounded-[10px] bg-postal text-white">
+        <span className="kp-perforated grid size-9 place-items-center bg-postal text-white">
           <MailIcon className="size-5" />
         </span>
         <span className="font-display text-base font-bold tracking-tight md:text-lg">

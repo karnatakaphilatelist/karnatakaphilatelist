@@ -8,6 +8,7 @@ import { ProgressRing } from "@/components/passport/ProgressRing";
 import { VisitedCard } from "@/components/passport/VisitedCard";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { useVisits } from "@/components/providers/VisitsProvider";
+import { DISCLAIMER } from "@/lib/constants";
 import type { PostOffice } from "@/types";
 
 const UP_NEXT_COUNT = 3;
@@ -38,7 +39,7 @@ export function PassportView({ offices }: { offices: PostOffice[] }) {
 
         {!user && !isAuthLoading ? (
           <div className="mt-4 flex items-center gap-3 rounded-2xl bg-planned-soft p-3.5">
-            <p className="flex-1 text-sm leading-[18px] text-[#4a3600]">
+            <p className="flex-1 text-sm leading-[18px] text-planned-ink">
               You&apos;re browsing as a guest. Sign in to keep your passport on every device.
             </p>
             <button
@@ -77,7 +78,7 @@ export function PassportView({ offices }: { offices: PostOffice[] }) {
               {upNext.map((office) => (
                 <Link
                   key={office.id}
-                  href={`/?office=${office.id}`}
+                  href={`/explore?office=${office.id}`}
                   className="flex min-h-11 items-center rounded-full border-[1.5px] border-postal bg-white px-4 text-sm font-semibold text-postal-dark"
                 >
                   {office.name}
@@ -95,7 +96,7 @@ export function PassportView({ offices }: { offices: PostOffice[] }) {
             <div className="mt-2.5 rounded-2xl bg-white p-6 text-center text-muted">
               <p>No stamps yet. Find a post office and tap Mark as visited.</p>
               <Link
-                href="/"
+                href="/explore"
                 className="mt-3.5 inline-flex min-h-12 items-center rounded-full bg-postal px-6 text-base font-semibold text-white"
               >
                 Open the map
@@ -124,13 +125,16 @@ export function PassportView({ offices }: { offices: PostOffice[] }) {
           </div>
         </section>
 
-        <footer className="mt-8 flex justify-center gap-5 text-sm text-muted">
-          <Link href="/privacy" className="flex min-h-11 items-center underline">
-            Privacy
-          </Link>
-          <Link href="/terms" className="flex min-h-11 items-center underline">
-            Terms
-          </Link>
+        <footer className="mt-8 text-center text-sm text-muted">
+          <div className="flex justify-center gap-5">
+            <Link href="/privacy" className="flex min-h-11 items-center underline">
+              Privacy
+            </Link>
+            <Link href="/terms" className="flex min-h-11 items-center underline">
+              Terms
+            </Link>
+          </div>
+          <p className="mx-auto mt-3 max-w-md text-xs leading-5">{DISCLAIMER}</p>
         </footer>
       </div>
 

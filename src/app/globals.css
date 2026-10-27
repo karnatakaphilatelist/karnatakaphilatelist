@@ -3,17 +3,20 @@
 
 @theme {
   /* Surfaces and text */
-  --color-paper: #fffbf5;
-  --color-sand: #f6f0e6;
-  --color-ink: #2b2b2b;
-  --color-muted: #6b6560;
-  --color-line: #eadfcf;
-  --color-line-strong: #d9cdb9;
+  /* Classic printed stamp: cream paper, indigo ink (see DESIGN.md). */
+  --color-paper: #fbf5e9;
+  --color-sand: #f3ead8;
+  --color-card: #ffffff;
+  --color-ink: #1c2b6b;
+  --color-muted: #4b5380;
+  --color-line: #e6d9bf;
+  --color-line-strong: #d2c3a3;
+  --color-coral: #e8583a;
 
   /* Postal red: primary actions and unvisited pins */
-  --color-postal: #d63a2b;
-  --color-postal-dark: #b92d20;
-  --color-postal-soft: #fdecea;
+  --color-postal: #be3037;
+  --color-postal-dark: #9f2730; /* use for red text; postal itself is 4.3:1 on paper */
+  --color-postal-soft: #f9e6e6;
 
   /* Visited / planned status colours (text pairs meet 4.5:1 contrast) */
   --color-visited: #17794b;
@@ -26,8 +29,7 @@
   --color-focus: #1b73b3;
 
   --font-sans: "Figtree Variable", "Noto Sans Kannada Variable", system-ui, sans-serif;
-  --font-display: "Bricolage Grotesque Variable", "Noto Sans Kannada Variable", system-ui,
-    sans-serif;
+  --font-display: "Fraunces Variable", "Noto Sans Kannada Variable", Georgia, serif;
 
   --animate-rise: rise 0.25s ease-out;
   --animate-thump: thump 0.4s cubic-bezier(0.2, 1.2, 0.4, 1);
@@ -91,11 +93,14 @@ body {
 .kp-pin {
   display: grid;
   place-items: center;
-  width: 30px;
-  height: 30px;
+  width: 28px;
+  height: 28px;
   border: 2px solid;
-  border-radius: 9999px;
-  box-shadow: 0 2px 6px rgb(0 0 0 / 0.25);
+  border-radius: 4px;
+  /* Dotted outline gives the pin a perforated, stamp-like edge. */
+  outline: 2px dotted;
+  outline-offset: 1.5px;
+  box-shadow: 0 2px 6px rgb(28 43 107 / 0.25);
   transition: transform 0.15s;
 }
 
@@ -108,25 +113,52 @@ body {
   background: #fff;
   border-color: var(--color-postal);
   color: var(--color-postal);
+  outline-color: rgb(190 48 55 / 0.55);
 }
 
 .kp-pin--planned {
   background: var(--color-planned);
   border-color: #c99a1a;
   color: var(--color-ink);
+  outline-color: rgb(201 154 26 / 0.7);
 }
 
 .kp-pin--visited {
   background: var(--color-visited);
   border-color: var(--color-visited);
   color: #fff;
+  outline-color: rgb(23 121 75 / 0.55);
 }
 
 .kp-pin--selected {
   transform: scale(1.3);
   box-shadow:
-    0 0 0 5px rgb(214 58 43 / 0.28),
+    0 0 0 5px rgb(190 48 55 / 0.28),
     0 2px 8px rgb(0 0 0 / 0.25);
+}
+
+/* Quiet, warm map: light tiles pulled toward the cream paper so pins stand out. */
+.kp-map .leaflet-tile-pane {
+  filter: sepia(0.32) saturate(0.75) contrast(0.96) brightness(1.03);
+}
+
+.kp-map {
+  background: var(--color-sand);
+}
+
+/*
+ * Perforated stamp edge: half-circle notches along all four sides. Set --stamp to the
+ * fill colour (default postal red). Notches are spaced about 16px apart and the
+ * "round" repeat nudges the spacing so they always fit the edge exactly.
+ */
+.kp-perforated {
+  --stamp: var(--color-postal);
+  background:
+    radial-gradient(circle at 50% 0, #0000 4px, var(--stamp) 4.5px) 0 0 / 16px 8px round no-repeat,
+    radial-gradient(circle at 50% 100%, #0000 4px, var(--stamp) 4.5px) 0 100% / 16px 8px round no-repeat,
+    radial-gradient(circle at 0 50%, #0000 4px, var(--stamp) 4.5px) 0 0 / 8px 16px no-repeat round,
+    radial-gradient(circle at 100% 50%, #0000 4px, var(--stamp) 4.5px) 100% 0 / 8px 16px no-repeat round,
+    linear-gradient(var(--stamp), var(--stamp)) 4px 4px / calc(100% - 8px) calc(100% - 8px) no-repeat;
 }
 
 /* On phones the search and filters sit over the top of the map; keep the zoom buttons below them. */

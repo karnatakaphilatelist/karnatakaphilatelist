@@ -31,3 +31,10 @@ export function getInitial(user: DisplayableUser): string {
   const label = getDisplayName(user);
   return label ? label.charAt(0).toUpperCase() : "?";
 }
+
+/** The first word of the person's name, for a friendly greeting. Null when there is only an email. */
+export function getFirstName(user: DisplayableUser): string | null {
+  const name = metadataString(user, "full_name", "name");
+  const first = name?.split(/\s+/)[0];
+  return first ? first.slice(0, 40) : null;
+}

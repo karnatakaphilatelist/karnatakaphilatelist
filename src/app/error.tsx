@@ -15,7 +15,7 @@ export default function ErrorPage({ retry }: ErrorPageProps) {
         <button
           type="button"
           onClick={() => retry()}
-          className="mt-4 min-h-12 rounded-sm bg-postal px-6 text-base font-semibold text-white"
+          className="mt-4 min-h-12 rounded-full bg-postal px-6 text-base font-semibold text-white"
         >
           Try again
         </button>

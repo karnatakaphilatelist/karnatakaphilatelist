@@ -78,7 +78,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
           // "manual" keeps it open until we close it and never dismisses other popovers.
           popover="manual"
           role="status"
-          className="fixed inset-x-4 bottom-20 top-auto z-[3000] m-0 flex h-auto w-auto animate-[rise_.2s_ease-out] items-center gap-2 overflow-visible rounded-sm border-0 bg-ink py-1.5 pl-4 pr-1.5 text-white shadow-xl md:inset-x-auto md:bottom-6 md:right-6 md:w-96"
+          className="fixed inset-x-4 bottom-20 top-auto z-[3000] m-0 flex h-auto w-auto animate-[rise_.2s_ease-out] items-center gap-2 overflow-visible rounded-2xl border-0 bg-ink py-1.5 pl-4 pr-1.5 text-white shadow-xl md:inset-x-auto md:bottom-6 md:right-6 md:w-96"
         >
           <span className="flex-1 text-sm font-semibold">{toast.message}</span>
           {toast.actionLabel && toast.onAction ? (
@@ -88,7 +88,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
                 toast.onAction?.();
                 dismiss();
               }}
-              className="min-h-11 rounded-sm bg-planned px-3.5 text-sm font-bold text-ink"
+              className="min-h-11 rounded-xl bg-planned px-3.5 text-sm font-bold text-ink"
             >
               {toast.actionLabel}
             </button>

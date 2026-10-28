@@ -38,14 +38,14 @@ export function PassportView({ offices }: { offices: PostOffice[] }) {
         <p className="mt-1 text-sm text-muted">Every stamp you collect, in one place.</p>
 
         {!user && !isAuthLoading ? (
-          <div className="mt-4 flex items-center gap-3 rounded-sm bg-planned-soft p-3.5">
+          <div className="mt-4 flex items-center gap-3 rounded-2xl bg-planned-soft p-3.5">
             <p className="flex-1 text-sm leading-[18px] text-planned-ink">
               You&apos;re browsing as a guest. Sign in to keep your passport on every device.
             </p>
             <button
               type="button"
               onClick={() => openSignIn("manual")}
-              className="min-h-11 shrink-0 rounded-sm bg-ink px-4 kp-label text-white"
+              className="min-h-11 shrink-0 rounded-full bg-ink px-4 text-sm font-semibold text-white"
             >
               Sign in
             </button>
@@ -54,7 +54,7 @@ export function PassportView({ offices }: { offices: PostOffice[] }) {
 
         <section
           aria-label="Overall progress"
-          className="mt-4 flex items-center gap-5 rounded-sm bg-white p-5 border border-ink"
+          className="mt-4 flex items-center gap-5 rounded-3xl bg-white p-5 shadow-sm"
         >
           <ProgressRing visited={visitedOffices.length} total={total} />
           <div>
@@ -79,7 +79,7 @@ export function PassportView({ offices }: { offices: PostOffice[] }) {
                 <Link
                   key={office.id}
                   href={`/explore?office=${office.id}`}
-                  className="flex min-h-11 items-center rounded-sm border-[1.5px] border-postal bg-white px-4 kp-label text-postal-dark"
+                  className="flex min-h-11 items-center rounded-full border-[1.5px] border-postal bg-white px-4 text-sm font-semibold text-postal-dark"
                 >
                   {office.name}
                 </Link>
@@ -93,11 +93,11 @@ export function PassportView({ offices }: { offices: PostOffice[] }) {
             Visited
           </h2>
           {visitedOffices.length === 0 ? (
-            <div className="mt-2.5 rounded-sm bg-white p-6 text-center text-muted">
+            <div className="mt-2.5 rounded-2xl bg-white p-6 text-center text-muted">
               <p>No stamps yet. Find a post office and tap Mark as visited.</p>
               <Link
                 href="/explore"
-                className="mt-3.5 inline-flex min-h-12 items-center rounded-sm bg-postal px-6 text-base font-semibold text-white"
+                className="mt-3.5 inline-flex min-h-12 items-center rounded-full bg-postal px-6 text-base font-semibold text-white"
               >
                 Open the map
               </Link>
@@ -120,7 +120,7 @@ export function PassportView({ offices }: { offices: PostOffice[] }) {
           <h2 id="districts-heading" className="font-display text-xl font-bold">
             By district
           </h2>
-          <div className="mt-3 rounded-sm bg-white p-4 border border-ink">
+          <div className="mt-3 rounded-2xl bg-white p-4 shadow-sm">
             <DistrictProgress offices={offices} visits={visits} />
           </div>
         </section>

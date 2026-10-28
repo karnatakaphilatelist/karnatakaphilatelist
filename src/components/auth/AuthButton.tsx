@@ -14,7 +14,7 @@ export function AuthButton() {
       <button
         type="button"
         onClick={() => openSignIn()}
-        className="min-h-11 whitespace-nowrap rounded-sm bg-ink px-5 kp-label text-white"
+        className="min-h-11 whitespace-nowrap rounded-full bg-ink px-5 text-sm font-semibold text-white"
       >
         Sign in
       </button>
@@ -45,7 +45,7 @@ export function AuthButton() {
       <button
         type="button"
         onClick={() => void signOut()}
-        className="min-h-11 rounded-sm px-3 kp-label text-muted"
+        className="min-h-11 rounded-full px-3 text-sm font-semibold text-muted"
       >
         Sign out
       </button>

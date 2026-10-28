@@ -21,10 +21,28 @@ export function getPinIcon(status: OfficeStatus, selected: boolean): L.DivIcon {
     icon = L.divIcon({
       className: "kp-marker",
       html: `<span class="kp-pin kp-pin--${status}${selected ? " kp-pin--selected" : ""}">${GLYPHS[status]}</span>`,
-      iconSize: [30, 30],
-      iconAnchor: [15, 15],
+      iconSize: [26, 26],
+      iconAnchor: [13, 13],
     });
     cache.set(key, icon);
+  }
+  return icon;
+}
+
+const clusterCache = new Map<number, L.DivIcon>();
+
+/** Returns a (cached) bubble icon showing how many post offices it stands for. */
+export function getClusterIcon(count: number): L.DivIcon {
+  let icon = clusterCache.get(count);
+  if (!icon) {
+    const size = count >= 20 ? 48 : count >= 8 ? 42 : 36;
+    icon = L.divIcon({
+      className: "kp-marker",
+      html: `<span class="kp-cluster" style="width:${size}px;height:${size}px">${count}</span>`,
+      iconSize: [size, size],
+      iconAnchor: [size / 2, size / 2],
+    });
+    clusterCache.set(count, icon);
   }
   return icon;
 }

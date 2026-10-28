@@ -29,7 +29,7 @@ export function FilterChips({ value, onChange }: FilterChipsProps) {
             className="min-h-11 px-1"
           >
             <span
-              className={`block rounded-sm border px-3 py-1.5 kp-label ${
+              className={`block rounded-full border px-3.5 py-1.5 text-sm font-semibold ${
                 active
                   ? "border-ink bg-ink text-white"
                   : "border-line-strong bg-white text-ink"

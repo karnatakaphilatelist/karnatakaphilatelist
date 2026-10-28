@@ -25,7 +25,7 @@ export function StampThumb({ path, status, className = "size-[52px]" }: StampThu
   return (
     <span
       aria-hidden="true"
-      className={`grid shrink-0 place-items-center overflow-hidden rounded-sm bg-sand text-muted ${className}`}
+      className={`grid shrink-0 place-items-center overflow-hidden rounded-xl bg-sand text-muted ${className}`}
     >
       {url ? (
         // Public bucket assets are already sized; a plain img avoids image-loader config.

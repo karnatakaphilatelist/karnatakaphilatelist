@@ -25,14 +25,14 @@ export function ProgressStrip({
   if (!signedIn) {
     if (stamped === 0) return null;
     return (
-      <div className="mb-2 flex items-center gap-3 rounded-sm bg-planned-soft p-3">
+      <div className="mb-2 flex items-center gap-3 rounded-2xl bg-planned-soft p-3">
         <p className="flex-1 text-sm leading-[18px] text-planned-ink">
           You have stamped {stamped} as a guest. Sign in so you do not lose {stamped === 1 ? "it" : "them"}.
         </p>
         <button
           type="button"
           onClick={onSignIn}
-          className="min-h-11 shrink-0 rounded-sm bg-ink px-4 kp-label text-white"
+          className="min-h-11 shrink-0 rounded-full bg-ink px-4 text-sm font-semibold text-white"
         >
           Sign in
         </button>
@@ -42,7 +42,7 @@ export function ProgressStrip({
 
   const percent = total > 0 ? Math.round((stamped / total) * 100) : 0;
   return (
-    <section aria-label="Your progress" className="mb-2 rounded-sm bg-sand p-3.5">
+    <section aria-label="Your progress" className="mb-2 rounded-2xl bg-sand p-3.5">
       <div className="flex items-center justify-between gap-3">
         <div>
           <p className="text-sm font-semibold">
@@ -57,7 +57,7 @@ export function ProgressStrip({
           <button
             type="button"
             onClick={onFindNext}
-            className="min-h-11 shrink-0 rounded-sm bg-postal px-4 kp-label text-white"
+            className="min-h-11 shrink-0 rounded-full bg-postal px-4 text-sm font-semibold text-white"
           >
             Find next
           </button>
@@ -69,9 +69,9 @@ export function ProgressStrip({
         aria-valuemin={0}
         aria-valuemax={total}
         aria-valuenow={stamped}
-        className="mt-2.5 h-2 overflow-hidden rounded-none bg-white"
+        className="mt-2.5 h-2 overflow-hidden rounded-full bg-white"
       >
-        <div className="h-full rounded-none bg-visited" style={{ width: `${percent}%` }} />
+        <div className="h-full rounded-full bg-visited" style={{ width: `${percent}%` }} />
       </div>
     </section>
   );

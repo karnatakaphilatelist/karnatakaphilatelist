@@ -83,9 +83,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [supabase]);
 
   const signInWithPassword = useCallback(
-    async (mode: PasswordMode, email: string, password: string): Promise<PasswordOutcome> => {
+    async (
+      mode: PasswordMode,
+      email: string,
+      password: string,
+    ): Promise<PasswordOutcome> => {
       if (mode === "signin") {
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
+        const { error } = await supabase.auth.signInWithPassword({
+          email,
+          password,
+        });
         if (error) throw new Error(friendlyPasswordError(error, mode));
         return "signed-in";
       }
@@ -97,7 +104,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (error) throw new Error(friendlyPasswordError(error, mode));
       const outcome = interpretSignUp(data);
       if (outcome === "exists") {
-        throw new Error(friendlyPasswordError({ code: "user_already_exists" }, mode));
+        throw new Error(
+          friendlyPasswordError({ code: "user_already_exists" }, mode),
+        );
       }
       return outcome;
     },
@@ -109,6 +118,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const { error } = await supabase.auth.signInWithOtp({
         email,
         options: { emailRedirectTo: buildRedirectUrl() },
+      });
+      if (error) throw error;
+    },
+    [supabase],
+  );
+
+  const resetPassword = useCallback(
+    async (email: string) => {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent("/account/password")}`,
       });
       if (error) throw error;
     },
@@ -133,6 +152,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         googleAvailable={googleEnabled !== false}
         onGoogle={signInWithGoogle}
         onEmail={signInWithEmail}
+        onReset={resetPassword}
         onPassword={signInWithPassword}
       />
     </AuthContext.Provider>

@@ -28,9 +28,15 @@ interface SignUpResult {
  * - A user with an empty identities list is how Supabase hides that the address
  *   already has an account (so sign-up cannot be used to discover who is registered).
  */
-export function interpretSignUp(result: SignUpResult): PasswordOutcome | "exists" {
+export function interpretSignUp(
+  result: SignUpResult,
+): PasswordOutcome | "exists" {
   if (result.session) return "signed-in";
-  if (result.user && Array.isArray(result.user.identities) && result.user.identities.length === 0) {
+  if (
+    result.user &&
+    Array.isArray(result.user.identities) &&
+    result.user.identities.length === 0
+  ) {
     return "exists";
   }
   return "confirm-email";
@@ -43,7 +49,11 @@ interface AuthErrorLike {
 }
 
 /** Turns a Supabase auth error into something a person can act on. */
-export function friendlyPasswordError(error: AuthErrorLike, mode: PasswordMode): string {
+export function friendlyPasswordError(
+  error: AuthErrorLike,
+  mode: PasswordMode,
+  action: "auth" | "update" = "auth",
+): string {
   switch (error.code) {
     case "invalid_credentials":
       return "That email and password do not match. Check them, or use the sign-in link below.";
@@ -59,7 +69,13 @@ export function friendlyPasswordError(error: AuthErrorLike, mode: PasswordMode):
       return "Too many attempts. Please wait a few minutes and try again.";
     case "signup_disabled":
       return "New accounts cannot be created right now.";
+    case "same_password":
+      return "Pick a password you have not used before.";
+    case "reauthentication_needed":
+      return "For safety, please sign in again and then set your password.";
     default:
+      if (action === "update")
+        return "Could not save your password. Please try again.";
       return mode === "signin"
         ? "Could not sign you in. Please try again."
         : "Could not create your account. Please try again.";

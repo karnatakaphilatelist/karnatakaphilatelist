@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { getAvatarUrl, getDisplayName, getInitial } from "@/lib/user-display";
 
@@ -42,6 +43,12 @@ export function AuthButton() {
           getInitial(user)
         )}
       </span>
+      <Link
+        href="/account/password"
+        className="hidden min-h-11 items-center rounded-full px-3 text-sm font-semibold text-muted md:flex"
+      >
+        Password
+      </Link>
       <button
         type="button"
         onClick={() => void signOut()}

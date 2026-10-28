@@ -123,3 +123,17 @@ export function GoogleIcon(props: IconProps) {
     </svg>
   );
 }
+
+export const ArrowRightIcon = (props: IconProps) => (
+  <Icon {...props}>
+    <path d="M5 12h14" />
+    <path d="M13 6l6 6-6 6" />
+  </Icon>
+);
+
+export const ArrowLeftIcon = (props: IconProps) => (
+  <Icon {...props}>
+    <path d="M19 12H5" />
+    <path d="M11 6l-6 6 6 6" />
+  </Icon>
+);

@@ -435,9 +435,6 @@
   opacity: 0;
   transition: opacity 0.8s ease 0.4s;
 }
-.kpl.in .kpl-open-map {
-  opacity: 1;
-}
 
 /* ---- editorial finish: hairlines, square corners, mono labels, no shadows ---- */
 .kpl-card {
@@ -570,10 +567,202 @@
   font-size: 16px;
 }
 
+/* ---- friendly finish: soft corners, sentence case, a clear primary action ---- */
+.kpl-track {
+  bottom: 124px;
+}
+.kpl-card {
+  border: 1px solid var(--color-line-strong);
+  border-radius: 18px;
+  box-shadow: 0 14px 30px -22px rgb(28 43 107 / 0.5);
+}
+.kpl-cardhead {
+  border-bottom: 1px solid var(--color-line);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--color-muted);
+}
+.kpl-cardhead span:first-child {
+  color: var(--color-postal);
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 15px;
+}
+.kpl-kicker {
+  font-family: inherit !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0 !important;
+  text-transform: none !important;
+}
+.kpl-coral {
+  border-radius: 12px;
+}
+.kpl-minimap {
+  border-radius: 12px;
+}
+.kpl-bar {
+  height: 10px;
+  border: 0;
+  border-radius: 9999px;
+  background: var(--color-sand);
+}
+.kpl-bar i {
+  border-radius: 9999px;
+}
+.kpl-btn {
+  border-radius: 9999px;
+  min-height: 48px;
+  padding: 0 22px;
+  font-family: inherit;
+  font-size: 15px;
+  letter-spacing: 0;
+  text-transform: none;
+  font-weight: 600;
+}
+.kpl-btn--line {
+  border: 1.5px solid var(--color-line-strong);
+}
+.kpl-sub,
+.kpl-nav {
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 500;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+/* The dock: tick marks, previous / next arrows and one unmistakable main button. */
+.kpl-dock {
+  position: absolute;
+  left: 50%;
+  bottom: 14px;
+  z-index: 5;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  opacity: 0;
+  transition: opacity 0.8s ease 0.4s;
+}
+.kpl.in .kpl-dock {
+  opacity: 1;
+}
+.kpl-ticks {
+  display: flex;
+  gap: 6px;
+}
+.kpl-ticks button {
+  position: relative;
+  width: 22px;
+  height: 20px;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+.kpl-ticks button::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 8px;
+  height: 4px;
+  border-radius: 9999px;
+  background: var(--color-line-strong);
+  transition:
+    background 0.2s,
+    transform 0.2s;
+}
+.kpl-ticks button.on::after {
+  background: var(--color-postal);
+  transform: scaleY(1.4);
+}
+.kpl-dockrow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px;
+  border-radius: 9999px;
+  background: #fff;
+  border: 1px solid var(--color-line-strong);
+  box-shadow: 0 16px 36px -14px rgb(28 43 107 / 0.55);
+}
+.kpl-arrow {
+  display: grid;
+  width: 48px;
+  height: 48px;
+  place-items: center;
+  border: 1.5px solid var(--color-line-strong);
+  border-radius: 9999px;
+  background: #fff;
+  color: var(--color-ink);
+  cursor: pointer;
+  transition:
+    background 0.15s,
+    transform 0.15s;
+}
+.kpl-arrow svg {
+  width: 20px;
+  height: 20px;
+}
+.kpl-arrow:hover:not(:disabled) {
+  background: var(--color-sand);
+}
+.kpl-arrow:active:not(:disabled) {
+  transform: scale(0.94);
+}
+.kpl-arrow:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+.kpl-open-map {
+  position: static;
+  transform: none;
+  display: inline-flex;
+  min-height: 56px;
+  padding: 0 30px 0 32px;
+  align-items: center;
+  gap: 10px;
+  border-radius: 9999px;
+  background: var(--color-postal);
+  color: #fff;
+  font-family: inherit;
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: 0;
+  text-transform: none;
+  box-shadow:
+    0 8px 20px -6px rgb(207 24 48 / 0.65),
+    inset 0 1px 0 rgb(255 255 255 / 0.25);
+  opacity: 1;
+  transition:
+    transform 0.15s,
+    background 0.15s;
+}
+.kpl-open-map svg {
+  width: 20px;
+  height: 20px;
+  transition: transform 0.2s;
+}
+.kpl-open-map:hover {
+  background: var(--color-postal-dark);
+}
+.kpl-open-map:hover svg {
+  transform: translateX(4px);
+}
+.kpl-open-map:active {
+  transform: scale(0.97);
+}
+
 @media (max-width: 640px) {
   .kpl-track {
     --top0: calc(var(--row-top) + 108px);
-    bottom: 84px;
+    bottom: 124px;
   }
   .kpl-card--hero {
     width: min(86vw, 340px);
@@ -594,9 +783,9 @@
     gap: 8px;
   }
   .kpl-btn {
-    padding: 0 12px;
-    min-height: 42px;
-    font-size: 11px;
+    padding: 0 16px;
+    min-height: 44px;
+    font-size: 14px;
   }
   .kpl-coral {
     margin: 0 12px 12px;
@@ -837,4 +1026,63 @@ html[data-intro-seen] .kpl-intro {
 /* While the intro plays the page does not scroll. */
 html[data-intro-playing] {
   overflow: hidden;
+}
+
+/* ---- last touches ---- */
+.kpl-nav a,
+.kpl-nav button {
+  text-transform: none;
+  letter-spacing: 0;
+  font-size: 15px;
+  font-weight: 500;
+}
+.kpl-btn,
+.kpl-open-map {
+  white-space: nowrap;
+}
+.kpl-bignum {
+  position: absolute;
+  right: 18px;
+  top: 44px;
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 700;
+  font-size: clamp(140px, 17vw, 220px);
+  line-height: 1;
+  color: var(--color-coral);
+  opacity: 0.22;
+  pointer-events: none;
+}
+.kpl-pin {
+  width: 12px;
+  height: 12px;
+  margin: -6px 0 0 -6px;
+  border: 2px solid #fff;
+  border-radius: 9999px;
+  background: var(--color-postal);
+  outline: 0;
+  box-shadow: 0 1px 3px rgb(28 43 107 / 0.4);
+}
+.kpl-pin--v {
+  background: var(--color-visited);
+  border-color: #fff;
+}
+@media (max-width: 640px) {
+  .kpl-dockrow {
+    gap: 8px;
+    padding: 6px;
+  }
+  .kpl-arrow {
+    width: 44px;
+    height: 44px;
+  }
+  .kpl-open-map {
+    min-height: 52px;
+    padding: 0 22px;
+    font-size: 16px;
+  }
+  .kpl-btn {
+    padding: 0 14px;
+    font-size: 14px;
+  }
 }

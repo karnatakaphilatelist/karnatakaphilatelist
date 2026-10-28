@@ -136,4 +136,20 @@ describe("Landing", () => {
     render(<Landing offices={offices} />);
     expect(screen.getByText("Namaskara, Asha")).toBeDefined();
   });
+
+  it("offers previous and next arrows, with previous disabled on the first card", () => {
+    render(<Landing offices={offices} />);
+    const prev = screen.getByRole("button", {
+      name: "Previous card",
+    }) as HTMLButtonElement;
+    expect(prev.disabled).toBe(true);
+    expect(screen.getByRole("button", { name: "Next card" })).toBeDefined();
+  });
+
+  it("has a progress tick for every card", () => {
+    render(<Landing offices={offices} />);
+    expect(
+      screen.getAllByRole("button", { name: /Go to card \d+ of \d+/ }).length,
+    ).toBeGreaterThan(0);
+  });
 });

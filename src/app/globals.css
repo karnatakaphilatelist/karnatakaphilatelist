@@ -151,6 +151,12 @@ body {
   box-shadow: 0 2px 8px rgb(28 43 107 / 0.45);
   transition: transform 0.15s;
 }
+.kp-cluster--some {
+  background: linear-gradient(135deg, var(--color-ink) 55%, var(--color-visited) 55%);
+}
+.kp-cluster--all {
+  background: var(--color-visited);
+}
 .kp-cluster:hover {
   transform: scale(1.08);
 }

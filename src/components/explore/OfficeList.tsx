@@ -28,7 +28,7 @@ export function OfficeList({ offices, selectedId, onSelect }: OfficeListProps) {
               type="button"
               onClick={() => onSelect(office.id)}
               aria-current={selected ? "true" : undefined}
-              className={`mb-1 flex min-h-[72px] w-full items-center gap-3 rounded-sm border px-2 py-2.5 text-left ${
+              className={`mb-1 flex min-h-[72px] w-full items-center gap-3 rounded-2xl border-[1.5px] px-2 py-2.5 text-left ${
                 selected ? "border-postal bg-postal-soft/50" : "border-transparent"
               }`}
             >

@@ -55,10 +55,10 @@ export function DistrictProgress({ offices, visits }: DistrictProgressProps) {
               aria-valuemin={0}
               aria-valuemax={total}
               aria-valuenow={visited}
-              className="mt-1.5 h-2 overflow-hidden rounded-none bg-sand"
+              className="mt-1.5 h-2 overflow-hidden rounded-full bg-sand"
             >
               <div
-                className="h-full rounded-none bg-visited"
+                className="h-full rounded-full bg-visited"
                 style={{ width: `${(visited / total) * 100}%` }}
               />
             </div>

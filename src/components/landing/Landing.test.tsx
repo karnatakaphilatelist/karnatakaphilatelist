@@ -21,6 +21,7 @@ const auth = vi.hoisted(() => ({
 vi.mock("@/components/providers/AuthProvider", () => ({
   useAuth: () => ({ ...auth, isLoading: false }),
 }));
+vi.mock("next/navigation", () => ({ useRouter: () => ({ replace: vi.fn() }) }));
 vi.mock("@/components/providers/VisitsProvider", () => ({
   useVisits: () => ({ visits: {} }),
 }));

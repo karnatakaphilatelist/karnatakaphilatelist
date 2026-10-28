@@ -9,32 +9,30 @@ export function AppHeader() {
   const pathname = usePathname();
 
   return (
-    <header className="flex min-h-16 shrink-0 items-center justify-between gap-4 border-b border-line bg-card px-4 md:px-6">
+    <header className="flex h-14 shrink-0 items-center justify-between gap-4 border-b border-line bg-card px-4 md:h-16 md:px-6">
       <Link href="/" className="flex min-h-11 items-center">
-        <span
-          className="kp-wordmark"
-          role="img"
-          aria-label="Philatelist"
-        />
+        <span className="kp-wordmark" role="img" aria-label="Philatelist" />
       </Link>
 
       <div className="flex items-center gap-2">
         <nav aria-label="Main" className="hidden items-center gap-1 md:flex">
-          {NAV_ITEMS.map(({ href, label }) => {
-            const active = isActivePath(pathname, href);
-            return (
-              <Link
-                key={href}
-                href={href}
-                aria-current={active ? "page" : undefined}
-                className={`flex min-h-11 items-center rounded-full px-4 text-sm font-semibold ${
-                  active ? "bg-postal-soft text-postal-dark" : "text-ink"
-                }`}
-              >
-                {label}
-              </Link>
-            );
-          })}
+          {NAV_ITEMS.filter((item) => !item.phoneOnly).map(
+            ({ href, label }) => {
+              const active = isActivePath(pathname, href);
+              return (
+                <Link
+                  key={href}
+                  href={href}
+                  aria-current={active ? "page" : undefined}
+                  className={`flex min-h-11 items-center rounded-full px-4 text-sm font-semibold ${
+                    active ? "bg-postal-soft text-postal-dark" : "text-ink"
+                  }`}
+                >
+                  {label}
+                </Link>
+              );
+            }
+          )}
         </nav>
         <AuthButton />
       </div>

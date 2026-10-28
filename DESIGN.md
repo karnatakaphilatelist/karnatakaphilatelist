@@ -142,3 +142,18 @@ The passport is multi-state. `post_offices.state_code` holds the code (KA, TN, .
 Passport show a state switcher (also lists states that are "coming soon"); the choice is kept on the
 device. Progress, totals and the map are per state. The landing page is national: "every post office
 in India", with the selected state shown in the sample progress card and stamp art.
+
+## Phones and the mobile apps
+
+Phones get their own patterns rather than a squeezed desktop layout:
+- **Explore is map-first.** The map fills the screen with a floating search and horizontally
+  scrolling status chips on top. The list is a bottom sheet with a grab bar: a peek state (state
+  switcher, count, Near me) and an open state (64% of the height); tap or drag the bar. Selecting
+  an office swaps the list for the office sheet. No +/- zoom buttons (pinch instead).
+- **Bottom tab bar** with Explore, Passport and Account (thumb reach). The header is slim (56px);
+  desktop keeps the full header and puts Password and Sign out there.
+- **Account tab** holds sign-in, password, share, welcome tour, privacy, terms, contact and the disclaimer.
+- **Mobile apps open on the map.** The welcome page is a first-launch tour; later launches go
+  straight to Explore (`/?tour=1` replays it from Account).
+- Touch: 44px targets, 16px inputs, no tap flash or double-tap delay, no rubber-banding, safe-area
+  insets for the notch and home bar (see docs/MOBILE.md).

@@ -5,6 +5,9 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import "./landing.css";
 import { ArrowLeftIcon, ArrowRightIcon } from "@/components/ui/icons";
 import { useAuth } from "@/components/providers/AuthProvider";
+import { useRouter } from "next/navigation";
+import { isNativeApp } from "@/lib/native";
+import { readJson, writeJson } from "@/lib/local-storage";
 import { useStateOffices } from "@/components/providers/StateProvider";
 import { stateName } from "@/lib/states";
 import { useVisits } from "@/components/providers/VisitsProvider";
@@ -81,12 +84,15 @@ function Wordmark({ white = false }: { white?: boolean }) {
  * scrolling grows the map card until it fills the screen. Plays once per browser
  * session (never for people who ask for reduced motion) and can be skipped.
  */
+const ONBOARDED_KEY = "kp:onboarded:v1";
+
 export function Landing({ offices }: { offices: PostOffice[] }) {
   const { user, isLoading, openSignIn, signOut } = useAuth();
   const { visits } = useVisits();
 
   const rootRef = useRef<HTMLDivElement>(null);
   const scrollerRef = useRef<HTMLDivElement>(null);
+  const router = useRouter();
   const trackRef = useRef<HTMLDivElement>(null);
   const [cardIndex, setCardIndex] = useState(0);
   const [atStart, setAtStart] = useState(true);
@@ -112,6 +118,15 @@ export function Landing({ offices }: { offices: PostOffice[] }) {
   const isSample = stamped === 0;
   const shownStamped = isSample ? Math.min(12, stateTotal) : stamped;
   const firstName = user ? getFirstName(user) : null;
+
+  // In the mobile apps the welcome page is a first-launch tour; after that the app opens on the map.
+  useEffect(() => {
+    if (!isNativeApp()) return;
+    const tour = new URLSearchParams(window.location.search).has("tour");
+    const seen = readJson<boolean>(ONBOARDED_KEY, false);
+    if (seen && !tour) router.replace("/explore");
+    else writeJson(ONBOARDED_KEY, true);
+  }, [router]);
 
   // The intro: runs once per session, skipped when motion is reduced or it was already seen.
   useEffect(() => {

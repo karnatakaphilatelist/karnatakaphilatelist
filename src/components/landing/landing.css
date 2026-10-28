@@ -1192,3 +1192,17 @@ html[data-intro-playing] {
     width: 30px;
   }
 }
+
+/* ---- phone polish: a quieter top strip so the cards get the room ---- */
+@media (max-width: 640px) {
+  .kpl-sub,
+  .kpl-mail {
+    display: none;
+  }
+  .kpl-row {
+    padding: 2px 0;
+  }
+  .kpl-track {
+    --top0: calc(var(--row-top) + 56px);
+  }
+}

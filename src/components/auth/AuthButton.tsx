@@ -26,7 +26,9 @@ export function AuthButton() {
 
   return (
     <div className="flex items-center gap-2">
-      <span
+      <Link
+        href="/account"
+        aria-label="Your account"
         title={getDisplayName(user) ?? undefined}
         className="grid size-9 place-items-center overflow-hidden rounded-full bg-visited-soft text-sm font-bold text-visited-ink"
       >
@@ -42,7 +44,7 @@ export function AuthButton() {
         ) : (
           getInitial(user)
         )}
-      </span>
+      </Link>
       <Link
         href="/account/password"
         className="hidden min-h-11 items-center rounded-full px-3 text-sm font-semibold text-muted md:flex"
@@ -52,7 +54,7 @@ export function AuthButton() {
       <button
         type="button"
         onClick={() => void signOut()}
-        className="min-h-11 rounded-full px-3 text-sm font-semibold text-muted"
+        className="hidden min-h-11 rounded-full px-3 text-sm font-semibold text-muted md:block"
       >
         Sign out
       </button>

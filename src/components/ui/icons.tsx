@@ -137,3 +137,16 @@ export const ArrowLeftIcon = (props: IconProps) => (
     <path d="M11 6l-6 6 6 6" />
   </Icon>
 );
+
+export const UserIcon = (props: IconProps) => (
+  <Icon {...props}>
+    <circle cx="12" cy="8" r="4" />
+    <path d="M4 21c1-4 4-6 8-6s7 2 8 6" />
+  </Icon>
+);
+
+export const ChevronRightIcon = (props: IconProps) => (
+  <Icon {...props}>
+    <path d="M9 6l6 6-6 6" />
+  </Icon>
+);

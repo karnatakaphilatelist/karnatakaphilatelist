@@ -16,7 +16,11 @@ interface FilterChipsProps {
 
 export function FilterChips({ value, onChange }: FilterChipsProps) {
   return (
-    <div role="group" aria-label="Filter by status" className="-mx-1 flex flex-wrap">
+    <div
+      role="group"
+      aria-label="Filter by status"
+      className="-mx-1 flex flex-nowrap overflow-x-auto md:flex-wrap md:overflow-visible [scrollbar-width:none]"
+    >
       {FILTERS.map((filter) => {
         const active = filter.value === value;
         return (
@@ -26,7 +30,7 @@ export function FilterChips({ value, onChange }: FilterChipsProps) {
             type="button"
             aria-pressed={active}
             onClick={() => onChange(filter.value)}
-            className="min-h-11 px-1"
+            className="min-h-11 shrink-0 px-1"
           >
             <span
               className={`block rounded-full border px-3.5 py-1.5 text-sm font-semibold ${

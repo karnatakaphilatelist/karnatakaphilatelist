@@ -26,7 +26,7 @@ interface AuthDialogProps {
   onPassword: (
     mode: PasswordMode,
     email: string,
-    password: string,
+    password: string
   ) => Promise<PasswordOutcome>;
 }
 
@@ -96,7 +96,7 @@ export function AuthDialog({
       setError(
         caught instanceof Error
           ? caught.message
-          : "Something went wrong. Please try again.",
+          : "Something went wrong. Please try again."
       );
     } finally {
       setIsBusy(false);
@@ -113,11 +113,11 @@ export function AuthDialog({
     setIsBusy(true);
     setError(null);
     try {
-      await (isSignUp ? onEmail : (onReset ?? onEmail))(trimmedEmail);
+      await (isSignUp ? onEmail : onReset ?? onEmail)(trimmedEmail);
       setNotice({ kind: "link-sent", email: trimmedEmail });
     } catch (caught) {
       setError(
-        caught instanceof Error ? caught.message : "Could not send the link.",
+        caught instanceof Error ? caught.message : "Could not send the link."
       );
     } finally {
       setIsBusy(false);
@@ -134,7 +134,7 @@ export function AuthDialog({
     } catch (caught) {
       setIsOpeningGoogle(false);
       setError(
-        caught instanceof Error ? caught.message : "Google sign-in failed.",
+        caught instanceof Error ? caught.message : "Google sign-in failed."
       );
     }
   }
@@ -256,8 +256,8 @@ export function AuthDialog({
               {isBusy
                 ? "Please wait…"
                 : isSignUp
-                  ? "Create account"
-                  : "Sign in"}
+                ? "Create account"
+                : "Sign in"}
             </button>
           </form>
 

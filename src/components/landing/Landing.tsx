@@ -474,19 +474,7 @@ export function Landing({ offices }: { offices: PostOffice[] }) {
           </div>
 
           <div className="kpl-dock">
-            <div className="kpl-ticks" role="group" aria-label="Cards">
-              {Array.from({ length: cardCount }, (_, i) => (
-                <button
-                  key={i}
-                  type="button"
-                  aria-label={`Go to card ${i + 1} of ${cardCount}`}
-                  aria-current={i === cardIndex ? "true" : undefined}
-                  className={i === cardIndex ? "on" : ""}
-                  onClick={() => goToCard(i)}
-                />
-              ))}
-            </div>
-            <div className="kpl-dockrow">
+            <div className="kpl-nav2">
               <button
                 type="button"
                 className="kpl-arrow"
@@ -496,10 +484,18 @@ export function Landing({ offices }: { offices: PostOffice[] }) {
               >
                 <ArrowLeftIcon />
               </button>
-              <Link href="/explore" className="kpl-open-map">
-                Open the map
-                <ArrowRightIcon />
-              </Link>
+              <div className="kpl-ticks" role="group" aria-label="Cards">
+                {Array.from({ length: cardCount }, (_, i) => (
+                  <button
+                    key={i}
+                    type="button"
+                    aria-label={`Go to card ${i + 1} of ${cardCount}`}
+                    aria-current={i === cardIndex ? "true" : undefined}
+                    className={i === cardIndex ? "on" : ""}
+                    onClick={() => goToCard(i)}
+                  />
+                ))}
+              </div>
               <button
                 type="button"
                 className="kpl-arrow"
@@ -510,6 +506,10 @@ export function Landing({ offices }: { offices: PostOffice[] }) {
                 <ArrowRightIcon />
               </button>
             </div>
+            <Link href="/explore" className="kpl-open-map">
+              Open the map
+              <ArrowRightIcon />
+            </Link>
           </div>
         </div>
       </div>

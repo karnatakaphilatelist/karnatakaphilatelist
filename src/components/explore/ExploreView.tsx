@@ -125,7 +125,7 @@ export function ExploreView({
       <aside
         aria-label="Post offices"
         className={`absolute inset-x-0 bottom-0 z-[1050] flex min-h-0 flex-col rounded-t-3xl border-t border-line bg-white shadow-[0_-10px_30px_-12px_rgb(28_43_107/0.35)] transition-[height] duration-300 ease-out md:static md:z-auto md:h-auto md:w-[26rem] md:shrink-0 md:rounded-none md:border-r md:border-t-0 md:shadow-none ${
-          sheetOpen ? "h-[64%]" : "h-[9.5rem]"
+          sheetOpen ? "h-[64%]" : "h-[7.75rem]"
         } ${selectedOffice ? "max-md:hidden" : ""}`}
       >
         <SheetHandle open={sheetOpen} onChange={setSheetOpen} />
@@ -158,28 +158,27 @@ export function ExploreView({
               />
             </div>
           ) : null}
-          <div className="pb-1 md:hidden">
-            <StateSwitcher
-              states={states}
-              value={stateCode}
-              onChange={choose}
-              idSuffix="mobile"
-            />
+          <div className="flex items-center gap-1 pb-1 md:hidden">
+            <div className="min-w-0 flex-1">
+              <StateSwitcher
+                states={states}
+                value={stateCode}
+                onChange={choose}
+                idSuffix="mobile"
+              />
+            </div>
+            <NearMeButton onClick={handleFindNearMe} isLocating={isLocating} />
           </div>
-          <div className="flex items-center justify-between pb-2">
+          <div className="flex items-center justify-between pb-1.5 md:pb-2">
             <p className="text-sm text-muted" aria-live="polite">
               {visibleOffices.length} of {offices.length} post offices
               {userLocation ? " · nearest first" : ""}
             </p>
-            <button
-              type="button"
+            <NearMeButton
               onClick={handleFindNearMe}
-              disabled={isLocating}
-              className="flex min-h-11 items-center gap-1.5 rounded-full px-3 text-sm font-semibold text-postal disabled:opacity-60"
-            >
-              <LocateIcon className="size-4" />
-              {isLocating ? "Locating…" : "Near me"}
-            </button>
+              isLocating={isLocating}
+              className="max-md:hidden"
+            />
           </div>
         </div>
         <div
@@ -264,6 +263,28 @@ function SheetHandle({
       className="grid h-7 w-full shrink-0 touch-none place-items-center md:hidden"
     >
       <span className="h-1.5 w-11 rounded-full bg-line-strong" />
+    </button>
+  );
+}
+
+function NearMeButton({
+  onClick,
+  isLocating,
+  className = "",
+}: {
+  onClick: () => void;
+  isLocating: boolean;
+  className?: string;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={isLocating}
+      className={`flex min-h-11 shrink-0 items-center gap-1.5 rounded-full px-3 text-sm font-semibold text-postal disabled:opacity-60 ${className}`}
+    >
+      <LocateIcon className="size-4" />
+      {isLocating ? "Locating…" : "Near me"}
     </button>
   );
 }

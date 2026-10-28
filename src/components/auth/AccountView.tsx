@@ -1,10 +1,13 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 import type { ReactNode } from "react";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { useToast } from "@/components/providers/ToastProvider";
 import { ChevronRightIcon } from "@/components/ui/icons";
+import { Sheet } from "@/components/ui/Sheet";
 import { CONTACT_EMAIL, DISCLAIMER } from "@/lib/constants";
 import { shareContent } from "@/lib/share";
 import { getAvatarUrl, getDisplayName, getInitial } from "@/lib/user-display";
@@ -23,7 +26,11 @@ function Row({ children }: { children: ReactNode }) {
 
 /** Account home for phones: who you are, sign-in options, and the small print. */
 export function AccountView() {
-  const { user, isLoading, openSignIn, signOut } = useAuth();
+  const { user, isLoading, openSignIn, signOut, deleteAccount } = useAuth();
+  const router = useRouter();
+  const [confirming, setConfirming] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
   const { showToast } = useToast();
   const avatarUrl = user ? getAvatarUrl(user) : null;
 
@@ -37,6 +44,26 @@ export function AccountView() {
       showToast({ message: "Link copied. Paste it anywhere to share." });
     if (result === "failed")
       showToast({ message: "Could not share. Please try again." });
+  }
+
+  async function handleDelete() {
+    if (isDeleting) return;
+    setIsDeleting(true);
+    setDeleteError(null);
+    try {
+      await deleteAccount();
+      setConfirming(false);
+      showToast({ message: "Your account has been deleted." });
+      router.push("/");
+    } catch (caught) {
+      setDeleteError(
+        caught instanceof Error
+          ? caught.message
+          : "Could not delete your account. Please try again."
+      );
+    } finally {
+      setIsDeleting(false);
+    }
   }
 
   if (isLoading) {
@@ -139,7 +166,49 @@ export function AccountView() {
           </button>
         ) : null}
 
+        {user ? (
+          <button
+            type="button"
+            onClick={() => {
+              setDeleteError(null);
+              setConfirming(true);
+            }}
+            className="mt-2 min-h-12 w-full rounded-full text-sm font-semibold text-postal-dark"
+          >
+            Delete my account
+          </button>
+        ) : null}
+
         <p className="mt-6 text-xs leading-5 text-muted">{DISCLAIMER}</p>
+
+        <Sheet
+          open={confirming}
+          onClose={() => setConfirming(false)}
+          title="Delete your account?"
+          description="This permanently removes your account, your stamps, notes and photos. It cannot be undone."
+        >
+          {deleteError ? (
+            <p role="alert" className="mb-3 text-sm text-postal-dark">
+              {deleteError}
+            </p>
+          ) : null}
+          <button
+            type="button"
+            onClick={handleDelete}
+            disabled={isDeleting}
+            className="min-h-12 w-full rounded-full bg-postal text-base font-semibold text-white disabled:opacity-60"
+          >
+            {isDeleting ? "Deleting…" : "Yes, delete everything"}
+          </button>
+          <button
+            type="button"
+            onClick={() => setConfirming(false)}
+            disabled={isDeleting}
+            className="mt-2 min-h-12 w-full rounded-full text-base font-semibold text-ink"
+          >
+            Keep my account
+          </button>
+        </Sheet>
       </div>
     </div>
   );

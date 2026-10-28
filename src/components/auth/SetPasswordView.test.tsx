@@ -1,4 +1,10 @@
-import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import {
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { SetPasswordView } from "@/components/auth/SetPasswordView";
 
@@ -8,7 +14,11 @@ const state = vi.hoisted(() => ({
   updateUser: vi.fn(),
 }));
 vi.mock("@/components/providers/AuthProvider", () => ({
-  useAuth: () => ({ user: state.user, isLoading: false, openSignIn: state.openSignIn }),
+  useAuth: () => ({
+    user: state.user,
+    isLoading: false,
+    openSignIn: state.openSignIn,
+  }),
 }));
 vi.mock("@/lib/supabase/client", () => ({
   getSupabaseBrowserClient: () => ({ auth: { updateUser: state.updateUser } }),
@@ -44,7 +54,9 @@ describe("SetPasswordView", () => {
 
     fireEvent.change(second, { target: { value: "longenough1" } });
     fireEvent.click(screen.getByRole("button", { name: /save password/i }));
-    await waitFor(() => expect(screen.getByText(/password is saved/i)).toBeTruthy());
+    await waitFor(() =>
+      expect(screen.getByText(/password is saved/i)).toBeTruthy()
+    );
     expect(state.updateUser).toHaveBeenCalledWith({ password: "longenough1" });
   });
 });

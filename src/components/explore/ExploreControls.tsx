@@ -1,4 +1,7 @@
-import { FilterChips, type StatusFilter } from "@/components/explore/FilterChips";
+import {
+  FilterChips,
+  type StatusFilter,
+} from "@/components/explore/FilterChips";
 import { SearchIcon } from "@/components/ui/icons";
 
 interface ExploreControlsProps {

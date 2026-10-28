@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { ExploreControls } from "@/components/explore/ExploreControls";
 import type { StatusFilter } from "@/components/explore/FilterChips";
 import { OfficeList } from "@/components/explore/OfficeList";
@@ -48,6 +48,7 @@ export function ExploreView({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const [sheetOpen, setSheetOpen] = useState(false);
   const [filter, setFilter] = useState<StatusFilter>("all");
   const [query, setQuery] = useState("");
   const [selectedId, setSelectedId] = useState<number | null>(
@@ -120,12 +121,15 @@ export function ExploreView({
   }
 
   return (
-    <div className="flex h-full min-h-0 flex-col-reverse md:flex-row">
+    <div className="relative flex h-full min-h-0 flex-col md:flex-row">
       <aside
         aria-label="Post offices"
-        className="flex h-[44%] min-h-0 flex-col border-t border-line bg-white md:h-auto md:w-[26rem] md:shrink-0 md:border-r md:border-t-0"
+        className={`absolute inset-x-0 bottom-0 z-[1050] flex min-h-0 flex-col rounded-t-3xl border-t border-line bg-white shadow-[0_-10px_30px_-12px_rgb(28_43_107/0.35)] transition-[height] duration-300 ease-out md:static md:z-auto md:h-auto md:w-[26rem] md:shrink-0 md:rounded-none md:border-r md:border-t-0 md:shadow-none ${
+          sheetOpen ? "h-[64%]" : "h-[9.5rem]"
+        } ${selectedOffice ? "max-md:hidden" : ""}`}
       >
-        <div className="shrink-0 space-y-1 px-4 pt-3 md:pt-4">
+        <SheetHandle open={sheetOpen} onChange={setSheetOpen} />
+        <div className="shrink-0 space-y-1 px-4 md:pt-4">
           {/* On phones the controls live over the map instead, so the detail sheet never covers them. */}
           <div className="hidden space-y-1 md:block">
             <StateSwitcher
@@ -143,14 +147,16 @@ export function ExploreView({
             />
           </div>
           {isReady ? (
-            <ProgressStrip
-              signedIn={isAuthLoading ? null : user !== null}
-              firstName={user ? getFirstName(user) : null}
-              stamped={offices.filter((office) => visits[office.id]).length}
-              total={offices.length}
-              onFindNext={() => setFilter("unvisited")}
-              onSignIn={() => openSignIn("manual")}
-            />
+            <div className={sheetOpen ? "" : "max-md:hidden"}>
+              <ProgressStrip
+                signedIn={isAuthLoading ? null : user !== null}
+                firstName={user ? getFirstName(user) : null}
+                stamped={offices.filter((office) => visits[office.id]).length}
+                total={offices.length}
+                onFindNext={() => setFilter("unvisited")}
+                onSignIn={() => openSignIn("manual")}
+              />
+            </div>
           ) : null}
           <div className="pb-1 md:hidden">
             <StateSwitcher
@@ -176,7 +182,11 @@ export function ExploreView({
             </button>
           </div>
         </div>
-        <div className="min-h-0 flex-1 overflow-y-auto">
+        <div
+          className={`min-h-0 flex-1 overflow-y-auto overscroll-contain ${
+            sheetOpen ? "" : "max-md:overflow-hidden"
+          }`}
+        >
           <OfficeList
             offices={visibleOffices}
             selectedId={selectedId}
@@ -185,15 +195,20 @@ export function ExploreView({
         </div>
       </aside>
 
-      <section aria-label="Map" className="relative isolate min-h-0 flex-1">
-        <div className="absolute inset-x-0 top-0 z-[1100] space-y-1 bg-white/95 px-4 pb-1 pt-3 shadow-sm md:hidden">
-          <ExploreControls
-            idSuffix="mobile"
-            query={query}
-            onQueryChange={setQuery}
-            filter={filter}
-            onFilterChange={setFilter}
-          />
+      <section
+        aria-label="Map"
+        className="absolute inset-0 isolate md:relative md:inset-auto md:min-h-0 md:flex-1"
+      >
+        <div className="pointer-events-none absolute inset-x-0 top-0 z-[1100] space-y-1 px-3 pt-3 md:hidden">
+          <div className="pointer-events-auto space-y-1 [&_input]:shadow-md">
+            <ExploreControls
+              idSuffix="mobile"
+              query={query}
+              onQueryChange={setQuery}
+              filter={filter}
+              onFilterChange={setFilter}
+            />
+          </div>
         </div>
         <LazyOfficeMap
           key={stateCode}
@@ -215,5 +230,40 @@ export function ExploreView({
 
       <VisitDialog office={editingOffice} onClose={() => setEditingId(null)} />
     </div>
+  );
+}
+
+/** The grab bar of the phone list sheet: tap to toggle, or drag up or down. */
+function SheetHandle({
+  open,
+  onChange,
+}: {
+  open: boolean;
+  onChange: (open: boolean) => void;
+}) {
+  const startY = useRef<number | null>(null);
+  return (
+    <button
+      type="button"
+      aria-label={open ? "Collapse the list" : "Expand the list"}
+      aria-expanded={open}
+      onPointerDown={(event) => {
+        startY.current = event.clientY;
+      }}
+      onPointerUp={(event) => {
+        const dy = startY.current === null ? 0 : event.clientY - startY.current;
+        startY.current = null;
+        if (dy < -24) onChange(true);
+        else if (dy > 24) onChange(false);
+        else onChange(!open);
+      }}
+      onKeyDown={(event) => {
+        if (event.key === "Enter" || event.key === " ") event.preventDefault();
+        if (event.key === "Enter" || event.key === " ") onChange(!open);
+      }}
+      className="grid h-7 w-full shrink-0 touch-none place-items-center md:hidden"
+    >
+      <span className="h-1.5 w-11 rounded-full bg-line-strong" />
+    </button>
   );
 }

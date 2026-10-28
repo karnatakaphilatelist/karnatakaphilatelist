@@ -3,7 +3,10 @@
 import { usePathname, useSearchParams } from "next/navigation";
 import { useEffect } from "react";
 import { useToast } from "@/components/providers/ToastProvider";
-import { AUTH_FAILURE_MESSAGES, isAuthFailureReason } from "@/lib/auth-callback";
+import {
+  AUTH_FAILURE_MESSAGES,
+  isAuthFailureReason,
+} from "@/lib/auth-callback";
 
 /** Explains why sign-in did not finish when the callback redirects back with `?auth=failed`. */
 export function AuthStatusNotice() {
@@ -24,7 +27,11 @@ export function AuthStatusNotice() {
     remaining.delete("auth");
     remaining.delete("reason");
     const query = remaining.toString();
-    window.history.replaceState(null, "", query ? `${pathname}?${query}` : pathname);
+    window.history.replaceState(
+      null,
+      "",
+      query ? `${pathname}?${query}` : pathname
+    );
   }, [failed, reasonParam, pathname, showToast]);
 
   return null;

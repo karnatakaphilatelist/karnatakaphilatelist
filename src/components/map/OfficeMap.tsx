@@ -7,10 +7,15 @@ import {
   Marker,
   TileLayer,
   Tooltip,
+  ZoomControl,
   useMap,
   useMapEvents,
 } from "react-leaflet";
-import { clusterProgress, getClusterIcon, getPinIcon } from "@/components/map/pin-icons";
+import {
+  clusterProgress,
+  getClusterIcon,
+  getPinIcon,
+} from "@/components/map/pin-icons";
 import { clusterPoints } from "@/lib/cluster";
 import { MAP_START_CENTER, MAP_START_ZOOM } from "@/lib/constants";
 import { hasCoordinates } from "@/lib/office-status";
@@ -82,7 +87,7 @@ function OfficeMarkers({
   const located = useMemo(() => offices.filter(hasCoordinates), [offices]);
   const byId = useMemo(
     () => new Map(located.map((office) => [office.id, office])),
-    [located],
+    [located]
   );
   const clusters = useMemo(
     () =>
@@ -90,9 +95,9 @@ function OfficeMarkers({
         located.map(({ id, lat, lng }) => ({ id, lat, lng })),
         zoom,
         64,
-        new Set(selectedId === null ? [] : [selectedId]),
+        new Set(selectedId === null ? [] : [selectedId])
       ),
-    [located, zoom, selectedId],
+    [located, zoom, selectedId]
   );
 
   return (
@@ -106,11 +111,15 @@ function OfficeMarkers({
               icon={getClusterIcon(
                 cluster.ids.length,
                 clusterProgress(
-                  cluster.ids.filter((id) => byId.get(id)?.status === "visited").length,
-                  cluster.ids.length,
-                ),
+                  cluster.ids.filter((id) => byId.get(id)?.status === "visited")
+                    .length,
+                  cluster.ids.length
+                )
               )}
-              title={`${cluster.ids.length} post offices, ${cluster.ids.filter((id) => byId.get(id)?.status === "visited").length} stamped`}
+              title={`${cluster.ids.length} post offices, ${
+                cluster.ids.filter((id) => byId.get(id)?.status === "visited")
+                  .length
+              } stamped`}
               eventHandlers={{
                 click: () => {
                   const bounds = cluster.ids
@@ -163,12 +172,13 @@ export function OfficeMap({
       center={[MAP_START_CENTER.lat, MAP_START_CENTER.lng]}
       zoom={MAP_START_ZOOM}
       className="kp-map size-full"
-      zoomControl
+      zoomControl={false}
     >
       <TileLayer
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
+      <ZoomControl position="topleft" />
       <MapViewport
         offices={offices}
         selectedId={selectedId}

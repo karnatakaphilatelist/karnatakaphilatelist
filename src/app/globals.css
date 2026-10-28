@@ -201,3 +201,27 @@ body {
     height: 20px;
   }
 }
+
+/* Phones: pinch to zoom, so no +/- buttons; keep the credit above the peeking list sheet. */
+@media (max-width: 767px) {
+  .kp-map .leaflet-control-zoom {
+    display: none;
+  }
+  .kp-map .leaflet-bottom {
+    bottom: 9.5rem;
+  }
+}
+
+/* App-like touch behaviour: no grey tap flash, no double-tap zoom delay, no rubber-banding. */
+html {
+  -webkit-tap-highlight-color: transparent;
+  overscroll-behavior: none;
+  -webkit-text-size-adjust: 100%;
+}
+button,
+a,
+select,
+summary,
+label {
+  touch-action: manipulation;
+}

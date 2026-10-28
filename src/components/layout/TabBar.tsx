@@ -11,7 +11,7 @@ export function TabBar() {
   return (
     <nav
       aria-label="Primary"
-      className="flex h-16 shrink-0 border-t border-line bg-white md:hidden"
+      className="flex h-[3.75rem] shrink-0 border-t border-line bg-white md:hidden"
     >
       {NAV_ITEMS.map(({ href, label, Icon }) => {
         const active = isActivePath(pathname, href);

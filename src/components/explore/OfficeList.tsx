@@ -29,7 +29,9 @@ export function OfficeList({ offices, selectedId, onSelect }: OfficeListProps) {
               onClick={() => onSelect(office.id)}
               aria-current={selected ? "true" : undefined}
               className={`mb-1 flex min-h-[72px] w-full items-center gap-3 rounded-2xl border-[1.5px] px-2 py-2.5 text-left ${
-                selected ? "border-postal bg-postal-soft/50" : "border-transparent"
+                selected
+                  ? "border-postal bg-postal-soft/50"
+                  : "border-transparent"
               }`}
             >
               <StampThumb path={office.stampImagePath} status={office.status} />

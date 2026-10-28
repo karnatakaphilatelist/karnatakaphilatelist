@@ -1,13 +1,31 @@
-import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
-import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
+import {
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from "@testing-library/react";
+import {
+  afterEach,
+  beforeAll,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+} from "vitest";
 import { AuthDialog } from "@/components/auth/AuthDialog";
 
 // jsdom does not implement the modal <dialog> methods, so give it minimal ones.
 beforeAll(() => {
-  HTMLDialogElement.prototype.showModal ??= function showModal(this: HTMLDialogElement) {
+  HTMLDialogElement.prototype.showModal ??= function showModal(
+    this: HTMLDialogElement
+  ) {
     this.setAttribute("open", "");
   };
-  HTMLDialogElement.prototype.close ??= function close(this: HTMLDialogElement) {
+  HTMLDialogElement.prototype.close ??= function close(
+    this: HTMLDialogElement
+  ) {
     this.removeAttribute("open");
   };
 });
@@ -20,7 +38,13 @@ const handlers = {
 };
 
 function renderDialog(googleAvailable = true) {
-  return render(<AuthDialog reason="manual" googleAvailable={googleAvailable} {...handlers} />);
+  return render(
+    <AuthDialog
+      reason="manual"
+      googleAvailable={googleAvailable}
+      {...handlers}
+    />
+  );
 }
 
 beforeEach(() => {
@@ -34,7 +58,9 @@ describe("Google sign-in", () => {
     handlers.onGoogle.mockReturnValue(new Promise(() => undefined));
     renderDialog();
 
-    fireEvent.click(screen.getByRole("button", { name: "Continue with Google" }));
+    fireEvent.click(
+      screen.getByRole("button", { name: "Continue with Google" })
+    );
     const busy = await screen.findByRole("button", { name: "Opening Google…" });
     expect((busy as HTMLButtonElement).disabled).toBe(true);
 
@@ -46,17 +72,25 @@ describe("Google sign-in", () => {
     handlers.onGoogle.mockRejectedValue(new Error("Unsupported provider"));
     renderDialog();
 
-    fireEvent.click(screen.getByRole("button", { name: "Continue with Google" }));
+    fireEvent.click(
+      screen.getByRole("button", { name: "Continue with Google" })
+    );
 
-    expect((await screen.findByRole("alert")).textContent).toContain("Unsupported provider");
+    expect((await screen.findByRole("alert")).textContent).toContain(
+      "Unsupported provider"
+    );
     const button = screen.getByRole("button", { name: "Continue with Google" });
     expect((button as HTMLButtonElement).disabled).toBe(false);
   });
 
   it("is hidden, with an explanation, when Google is switched off", () => {
     renderDialog(false);
-    expect(screen.queryByRole("button", { name: /Continue with Google/ })).toBeNull();
-    expect(screen.getByText(/Google sign-in is not available right now/)).toBeDefined();
+    expect(
+      screen.queryByRole("button", { name: /Continue with Google/ })
+    ).toBeNull();
+    expect(
+      screen.getByText(/Google sign-in is not available right now/)
+    ).toBeDefined();
     expect(screen.getByLabelText("Email address")).toBeDefined();
   });
 });
@@ -75,26 +109,39 @@ describe("password sign-in", () => {
     fireEvent.click(screen.getByRole("button", { name: "Sign in" }));
 
     await waitFor(() =>
-      expect(handlers.onPassword).toHaveBeenCalledWith("signin", "asha@example.com", "correct horse"),
+      expect(handlers.onPassword).toHaveBeenCalledWith(
+        "signin",
+        "asha@example.com",
+        "correct horse"
+      )
     );
   });
 
   it("shows the reason when sign-in fails and lets the person try again", async () => {
-    handlers.onPassword.mockRejectedValue(new Error("That email and password do not match."));
+    handlers.onPassword.mockRejectedValue(
+      new Error("That email and password do not match.")
+    );
     renderDialog();
 
     fill("Email address", "asha@example.com");
     fill("Password", "wrong-password");
     fireEvent.click(screen.getByRole("button", { name: "Sign in" }));
 
-    expect((await screen.findByRole("alert")).textContent).toContain("do not match");
-    expect((screen.getByRole("button", { name: "Sign in" }) as HTMLButtonElement).disabled).toBe(false);
+    expect((await screen.findByRole("alert")).textContent).toContain(
+      "do not match"
+    );
+    expect(
+      (screen.getByRole("button", { name: "Sign in" }) as HTMLButtonElement)
+        .disabled
+    ).toBe(false);
   });
 });
 
 describe("creating an account", () => {
   function openSignUp() {
-    fireEvent.click(screen.getByRole("button", { name: "New here? Create an account" }));
+    fireEvent.click(
+      screen.getByRole("button", { name: "New here? Create an account" })
+    );
   }
 
   it("refuses a short password without calling the server", async () => {
@@ -103,9 +150,13 @@ describe("creating an account", () => {
 
     fill("Email address", "asha@example.com");
     fill("Password", "short");
-    fireEvent.submit(screen.getByRole("button", { name: "Create account" }).closest("form")!);
+    fireEvent.submit(
+      screen.getByRole("button", { name: "Create account" }).closest("form")!
+    );
 
-    expect((await screen.findByRole("alert")).textContent).toContain("at least 8");
+    expect((await screen.findByRole("alert")).textContent).toContain(
+      "at least 8"
+    );
     expect(handlers.onPassword).not.toHaveBeenCalled();
   });
 
@@ -122,8 +173,8 @@ describe("creating an account", () => {
       expect(handlers.onPassword).toHaveBeenCalledWith(
         "signup",
         "asha@example.com",
-        "long enough password",
-      ),
+        "long enough password"
+      )
     );
   });
 
@@ -136,7 +187,9 @@ describe("creating an account", () => {
     fill("Password", "long enough password");
     fireEvent.click(screen.getByRole("button", { name: "Create account" }));
 
-    expect((await screen.findByRole("status")).textContent).toContain("confirmation link");
+    expect((await screen.findByRole("status")).textContent).toContain(
+      "confirmation link"
+    );
     fireEvent.click(screen.getByRole("button", { name: "Back" }));
     expect(screen.getByLabelText("Email address")).toBeDefined();
   });
@@ -144,7 +197,9 @@ describe("creating an account", () => {
   it("can switch back to signing in", () => {
     renderDialog();
     openSignUp();
-    fireEvent.click(screen.getByRole("button", { name: "Already have an account? Sign in" }));
+    fireEvent.click(
+      screen.getByRole("button", { name: "Already have an account? Sign in" })
+    );
     expect(screen.getByRole("button", { name: "Sign in" })).toBeDefined();
   });
 });
@@ -157,7 +212,9 @@ describe("sign-in link", () => {
     fill("Email address", "asha@example.com");
     fireEvent.click(screen.getByRole("button", { name: /Forgot password/ }));
 
-    expect((await screen.findByRole("status")).textContent).toContain("sign-in link");
+    expect((await screen.findByRole("status")).textContent).toContain(
+      "sign-in link"
+    );
     expect(handlers.onEmail).toHaveBeenCalledWith("asha@example.com");
     expect(screen.queryByLabelText(/code/i)).toBeNull();
   });
@@ -165,7 +222,9 @@ describe("sign-in link", () => {
   it("asks for an email address before sending a link", async () => {
     renderDialog();
     fireEvent.click(screen.getByRole("button", { name: /Forgot password/ }));
-    expect((await screen.findByRole("alert")).textContent).toContain("Enter your email");
+    expect((await screen.findByRole("alert")).textContent).toContain(
+      "Enter your email"
+    );
     expect(handlers.onEmail).not.toHaveBeenCalled();
   });
 
@@ -174,16 +233,20 @@ describe("sign-in link", () => {
     renderDialog();
     fill("Email address", "asha@example.com");
     fireEvent.click(screen.getByRole("button", { name: /Forgot password/ }));
-    expect((await screen.findByRole("alert")).textContent).toContain("rate limit");
+    expect((await screen.findByRole("alert")).textContent).toContain(
+      "rate limit"
+    );
   });
 });
 
 describe("legal links", () => {
   it("links to the terms and privacy policy", () => {
     renderDialog();
-    expect(screen.getByRole("link", { name: "Terms" }).getAttribute("href")).toBe("/terms");
-    expect(screen.getByRole("link", { name: "Privacy Policy" }).getAttribute("href")).toBe(
-      "/privacy",
-    );
+    expect(
+      screen.getByRole("link", { name: "Terms" }).getAttribute("href")
+    ).toBe("/terms");
+    expect(
+      screen.getByRole("link", { name: "Privacy Policy" }).getAttribute("href")
+    ).toBe("/privacy");
   });
 });

@@ -14,13 +14,17 @@ const state = vi.hoisted(() => ({
 }));
 
 vi.mock("@/components/providers/AuthProvider", () => ({
-  useAuth: () => ({ user: state.user, isLoading: false, openSignIn: state.openSignIn }),
+  useAuth: () => ({
+    user: state.user,
+    isLoading: false,
+    openSignIn: state.openSignIn,
+  }),
 }));
 vi.mock("@/components/providers/VisitsProvider", () => ({
   useVisits: () => ({
     isReady: true,
     visits: Object.fromEntries(
-      Array.from({ length: state.visitCount }, (_, index) => [index, {}]),
+      Array.from({ length: state.visitCount }, (_, index) => [index, {}])
     ),
   }),
 }));

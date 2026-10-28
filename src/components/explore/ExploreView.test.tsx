@@ -4,21 +4,33 @@ import { ExploreView } from "@/components/explore/ExploreView";
 import type { PostOffice, Visit } from "@/types";
 
 vi.mock("@/lib/env", () => ({
-  env: { supabaseUrl: "https://example.supabase.co", supabasePublishableKey: "key" },
+  env: {
+    supabaseUrl: "https://example.supabase.co",
+    supabasePublishableKey: "key",
+  },
 }));
 // Leaflet needs a real browser; the map is not what these tests are about.
-vi.mock("@/components/map/LazyOfficeMap", () => ({ LazyOfficeMap: () => null }));
+vi.mock("@/components/map/LazyOfficeMap", () => ({
+  LazyOfficeMap: () => null,
+}));
 vi.mock("@/components/office/VisitDialog", () => ({ VisitDialog: () => null }));
 vi.mock("@/components/providers/ToastProvider", () => ({
   useToast: () => ({ showToast: vi.fn() }),
 }));
 
 const auth = vi.hoisted(() => ({
-  user: null as { email: string; user_metadata: Record<string, unknown> } | null,
+  user: null as {
+    email: string;
+    user_metadata: Record<string, unknown>;
+  } | null,
   openSignIn: vi.fn(),
 }));
 vi.mock("@/components/providers/AuthProvider", () => ({
-  useAuth: () => ({ user: auth.user, isLoading: false, openSignIn: auth.openSignIn }),
+  useAuth: () => ({
+    user: auth.user,
+    isLoading: false,
+    openSignIn: auth.openSignIn,
+  }),
 }));
 
 const visits = vi.hoisted(() => ({ current: {} as Record<number, Visit> }));
@@ -38,6 +50,7 @@ const office = (id: number, name: string): PostOffice => ({
   name,
   pincode: `5600${id}`,
   district: "Bengaluru Urban",
+  state: "KA",
   lat: 12.9,
   lng: 77.5,
   stampImagePath: null,
@@ -99,14 +112,19 @@ describe("ExploreView selection", () => {
 describe("ExploreView progress strip", () => {
   it("greets a signed-in person and filters to unvisited post offices on Find next", () => {
     visits.current = {};
-    auth.user = { email: "asha@example.com", user_metadata: { full_name: "Asha Rao" } };
+    auth.user = {
+      email: "asha@example.com",
+      user_metadata: { full_name: "Asha Rao" },
+    };
     render(<ExploreView offices={offices} initialSelectedId={null} />);
 
     expect(screen.getByText("Namaskara, Asha")).toBeDefined();
     fireEvent.click(screen.getByRole("button", { name: "Find next" }));
-    expect(screen.getAllByRole("button", { name: "Not visited" }).some(
-      (button) => button.getAttribute("aria-pressed") === "true",
-    )).toBe(true);
+    expect(
+      screen
+        .getAllByRole("button", { name: "Not visited" })
+        .some((button) => button.getAttribute("aria-pressed") === "true")
+    ).toBe(true);
     auth.user = null;
   });
 

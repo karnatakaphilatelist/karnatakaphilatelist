@@ -9,11 +9,11 @@ import { Providers } from "@/components/providers/Providers";
 
 export const metadata: Metadata = {
   title: {
-    default: "Karnataka Philatelic Passport",
-    template: "%s · Karnataka Philatelic Passport",
+    default: "Philatelist: the post office stamp passport for India",
+    template: "%s · Philatelist",
   },
   description:
-    "Find every post office in the Karnataka philatelic passport on the map, plan your day, and track the stamps you have collected.",
+    "Find post offices across India on the map, plan your day, and keep a passport of the stamps you have collected.",
 };
 
 export const viewport: Viewport = {

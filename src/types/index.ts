@@ -1,9 +1,11 @@
-/** A post office listed in the Karnataka philatelic passport. */
+/** A post office listed in the passport. */
 export interface PostOffice {
   id: number;
   name: string;
   pincode: string;
   district: string;
+  /** Two-letter state code, e.g. "KA"; see src/lib/states.ts. */
+  state: string;
   /** Null when the office has no coordinates yet; such offices are listed but not mapped. */
   lat: number | null;
   lng: number | null;

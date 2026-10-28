@@ -135,3 +135,10 @@ reset email that lands on `/account/password`, where a signed-in person sets or 
 password. That page is also linked from the header and the Passport page. The auth callback
 accepts both `code` links (same browser only) and `token_hash` links (any browser; needs a
 custom email template, which needs custom SMTP in Supabase).
+
+## States
+
+The passport is multi-state. `post_offices.state_code` holds the code (KA, TN, ...). Explore and
+Passport show a state switcher (also lists states that are "coming soon"); the choice is kept on the
+device. Progress, totals and the map are per state. The landing page is national: "every post office
+in India", with the selected state shown in the sample progress card and stamp art.

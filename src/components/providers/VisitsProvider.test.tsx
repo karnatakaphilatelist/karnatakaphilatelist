@@ -1,7 +1,10 @@
 import { act, cleanup, render, screen, waitFor } from "@testing-library/react";
 import { useEffect } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { VisitsProvider, useVisits } from "@/components/providers/VisitsProvider";
+import {
+  VisitsProvider,
+  useVisits,
+} from "@/components/providers/VisitsProvider";
 import { GUEST_VISITS_KEY } from "@/lib/constants";
 import type { Visit } from "@/types";
 
@@ -26,11 +29,16 @@ const toast = vi.hoisted(() => ({ showToast: vi.fn() }));
 vi.mock("@/components/providers/ToastProvider", () => ({
   useToast: () => toast,
 }));
-vi.mock("@/lib/supabase/client", () => ({ getSupabaseBrowserClient: () => ({}) }));
+vi.mock("@/lib/supabase/client", () => ({
+  getSupabaseBrowserClient: () => ({}),
+}));
 vi.mock("@/lib/visits/remote-store", () => remote);
 vi.mock("@/lib/image", () => ({ compressImage: async (file: File) => file }));
 
-const storedVisit = (officeId: number, overrides: Partial<Visit> = {}): Visit => ({
+const storedVisit = (
+  officeId: number,
+  overrides: Partial<Visit> = {}
+): Visit => ({
   officeId,
   visitedAt: "2026-10-01",
   note: "",
@@ -40,7 +48,9 @@ const storedVisit = (officeId: number, overrides: Partial<Visit> = {}): Visit =>
 });
 
 // Holds the latest context value so tests can call provider actions directly.
-const latest: { current: ReturnType<typeof useVisits> | null } = { current: null };
+const latest: { current: ReturnType<typeof useVisits> | null } = {
+  current: null,
+};
 
 function api(): ReturnType<typeof useVisits> {
   if (!latest.current) throw new Error("Probe has not rendered yet");
@@ -97,27 +107,38 @@ describe("VisitsProvider as a guest", () => {
     expect(screen.getByTestId("count").textContent).toBe("1");
     expect(api().visits[7].note).toBe("");
     expect(api().visits[7].visitedAt).toMatch(/^\d{4}-\d{2}-\d{2}$/);
-    const stored = JSON.parse(window.localStorage.getItem(GUEST_VISITS_KEY) ?? "[]");
+    const stored = JSON.parse(
+      window.localStorage.getItem(GUEST_VISITS_KEY) ?? "[]"
+    );
     expect(stored).toHaveLength(1);
     expect(remote.insertVisitIfMissing).not.toHaveBeenCalled();
   });
 
   it("restores guest visits after a reload", async () => {
-    window.localStorage.setItem(GUEST_VISITS_KEY, JSON.stringify([storedVisit(3)]));
+    window.localStorage.setItem(
+      GUEST_VISITS_KEY,
+      JSON.stringify([storedVisit(3)])
+    );
     renderProvider();
     await waitFor(() => expect(api().isReady).toBe(true));
     expect(api().visits[3]).toBeDefined();
   });
 
   it("starts empty instead of crashing when the stored data is corrupt", async () => {
-    window.localStorage.setItem(GUEST_VISITS_KEY, JSON.stringify({ not: "a list" }));
+    window.localStorage.setItem(
+      GUEST_VISITS_KEY,
+      JSON.stringify({ not: "a list" })
+    );
     renderProvider();
     await waitFor(() => expect(api().isReady).toBe(true));
     expect(screen.getByTestId("count").textContent).toBe("0");
   });
 
   it("removes a visit", async () => {
-    window.localStorage.setItem(GUEST_VISITS_KEY, JSON.stringify([storedVisit(3)]));
+    window.localStorage.setItem(
+      GUEST_VISITS_KEY,
+      JSON.stringify([storedVisit(3)])
+    );
     renderProvider();
     await waitFor(() => expect(api().isReady).toBe(true));
 
@@ -126,7 +147,9 @@ describe("VisitsProvider as a guest", () => {
     });
 
     expect(api().visits[3]).toBeUndefined();
-    expect(JSON.parse(window.localStorage.getItem(GUEST_VISITS_KEY) ?? "[]")).toEqual([]);
+    expect(
+      JSON.parse(window.localStorage.getItem(GUEST_VISITS_KEY) ?? "[]")
+    ).toEqual([]);
   });
 
   it("toggles planned offices and remembers them", async () => {
@@ -143,7 +166,7 @@ describe("VisitsProvider as a guest", () => {
   it("does not replace an existing note when the same office is marked again", async () => {
     window.localStorage.setItem(
       GUEST_VISITS_KEY,
-      JSON.stringify([storedVisit(3, { note: "keep me" })]),
+      JSON.stringify([storedVisit(3, { note: "keep me" })])
     );
     renderProvider();
     await waitFor(() => expect(api().isReady).toBe(true));
@@ -158,7 +181,10 @@ describe("VisitsProvider as a guest", () => {
   });
 
   it("trims the note and saves privacy on the device", async () => {
-    window.localStorage.setItem(GUEST_VISITS_KEY, JSON.stringify([storedVisit(3)]));
+    window.localStorage.setItem(
+      GUEST_VISITS_KEY,
+      JSON.stringify([storedVisit(3)])
+    );
     renderProvider();
     await waitFor(() => expect(api().isReady).toBe(true));
 
@@ -166,7 +192,10 @@ describe("VisitsProvider as a guest", () => {
       await api().saveDetails(3, details());
     });
 
-    expect(api().visits[3]).toMatchObject({ note: "Lovely staff", isPublic: true });
+    expect(api().visits[3]).toMatchObject({
+      note: "Lovely staff",
+      isPublic: true,
+    });
     expect(remote.updateVisitDetails).not.toHaveBeenCalled();
   });
 });
@@ -177,7 +206,10 @@ describe("VisitsProvider when signed in", () => {
   };
 
   it("merges guest visits into the account, then loads the account's visits", async () => {
-    window.localStorage.setItem(GUEST_VISITS_KEY, JSON.stringify([storedVisit(1)]));
+    window.localStorage.setItem(
+      GUEST_VISITS_KEY,
+      JSON.stringify([storedVisit(1)])
+    );
     signIn();
     remote.mergeGuestVisits.mockResolvedValue(undefined);
     remote.fetchVisits.mockResolvedValue([storedVisit(1), storedVisit(2)]);
@@ -185,13 +217,18 @@ describe("VisitsProvider when signed in", () => {
     renderProvider();
     await waitFor(() => expect(api().isReady).toBe(true));
 
-    expect(remote.mergeGuestVisits).toHaveBeenCalledWith({}, "user-1", [storedVisit(1)]);
+    expect(remote.mergeGuestVisits).toHaveBeenCalledWith({}, "user-1", [
+      storedVisit(1),
+    ]);
     expect(window.localStorage.getItem(GUEST_VISITS_KEY)).toBeNull();
     expect(Object.keys(api().visits).sort()).toEqual(["1", "2"]);
   });
 
   it("still shows the account's passport when the guest merge fails, and keeps the guest stamps", async () => {
-    window.localStorage.setItem(GUEST_VISITS_KEY, JSON.stringify([storedVisit(1)]));
+    window.localStorage.setItem(
+      GUEST_VISITS_KEY,
+      JSON.stringify([storedVisit(1)])
+    );
     signIn();
     remote.mergeGuestVisits.mockRejectedValue(new Error("network down"));
     remote.fetchVisits.mockResolvedValue([storedVisit(2)]);
@@ -253,7 +290,9 @@ describe("VisitsProvider when signed in", () => {
 
   it("uploads a new photo, saves details and removes the replaced photo", async () => {
     signIn();
-    remote.fetchVisits.mockResolvedValue([storedVisit(4, { photoPath: "user-1/old.jpg" })]);
+    remote.fetchVisits.mockResolvedValue([
+      storedVisit(4, { photoPath: "user-1/old.jpg" }),
+    ]);
     remote.uploadStampPhoto.mockResolvedValue("user-1/new.jpg");
     remote.updateVisitDetails.mockResolvedValue(undefined);
     remote.removeStampPhoto.mockResolvedValue(undefined);
@@ -263,7 +302,10 @@ describe("VisitsProvider when signed in", () => {
 
     let saved = false;
     await act(async () => {
-      saved = await api().saveDetails(4, details({ newPhoto: new File(["x"], "p.jpg") }));
+      saved = await api().saveDetails(
+        4,
+        details({ newPhoto: new File(["x"], "p.jpg") })
+      );
     });
 
     expect(saved).toBe(true);
@@ -283,7 +325,10 @@ describe("VisitsProvider when signed in", () => {
 
     let saved = true;
     await act(async () => {
-      saved = await api().saveDetails(4, details({ newPhoto: new File(["x"], "p.jpg") }));
+      saved = await api().saveDetails(
+        4,
+        details({ newPhoto: new File(["x"], "p.jpg") })
+      );
     });
 
     expect(saved).toBe(false);
@@ -297,7 +342,7 @@ describe("VisitsProvider when signed in", () => {
     remote.deleteVisit.mockResolvedValue(undefined);
     let finishUpdate: () => void = () => undefined;
     remote.updateVisitDetails.mockImplementation(
-      () => new Promise<void>((resolve) => (finishUpdate = resolve)),
+      () => new Promise<void>((resolve) => (finishUpdate = resolve))
     );
 
     renderProvider();
@@ -336,7 +381,10 @@ describe("VisitsProvider when signed in", () => {
 
 describe("VisitsProvider when the person changes", () => {
   it("hides the previous person's stamps and refuses actions until the new passport has loaded", async () => {
-    window.localStorage.setItem(GUEST_VISITS_KEY, JSON.stringify([storedVisit(3)]));
+    window.localStorage.setItem(
+      GUEST_VISITS_KEY,
+      JSON.stringify([storedVisit(3)])
+    );
     const view = renderProvider();
     await waitFor(() => expect(api().isReady).toBe(true));
     expect(screen.getByTestId("count").textContent).toBe("1");
@@ -345,7 +393,7 @@ describe("VisitsProvider when the person changes", () => {
     let finishFetch: (visits: Visit[]) => void = () => undefined;
     remote.mergeGuestVisits.mockResolvedValue(undefined);
     remote.fetchVisits.mockImplementation(
-      () => new Promise<Visit[]>((resolve) => (finishFetch = resolve)),
+      () => new Promise<Visit[]>((resolve) => (finishFetch = resolve))
     );
     authState.current = { user: { id: "user-1" }, isLoading: false };
     view.rerenderProvider();

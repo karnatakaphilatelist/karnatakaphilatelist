@@ -64,18 +64,21 @@ describe("getPostOffices", () => {
     expect(cache.cacheLife).toHaveBeenCalledWith("hours");
   });
 
-  it("falls back to the plain columns before the stamp-images migration has run", async () => {
+  it("falls back to fewer columns before the newer migrations have run", async () => {
     db.responses = [
+      { data: null, error: { code: "42703", message: "column does not exist" } },
       { data: null, error: { code: "42703", message: "column does not exist" } },
       { data: [row(1, "Hampi SO")], error: null },
     ];
 
     const offices = await getPostOffices();
 
-    expect(db.queries).toHaveLength(2);
-    expect(db.queries[0]).toContain("stamp_image_path");
-    expect(db.queries[1]).not.toContain("stamp_image_path");
+    expect(db.queries).toHaveLength(3);
+    expect(db.queries[0]).toContain("state_code");
+    expect(db.queries[1]).not.toContain("state_code");
+    expect(db.queries[2]).not.toContain("stamp_image_path");
     expect(offices[0].stampImagePath).toBeNull();
+    expect(offices[0].state).toBe("KA");
     expect(cache.cacheLife).toHaveBeenCalledWith("hours");
   });
 

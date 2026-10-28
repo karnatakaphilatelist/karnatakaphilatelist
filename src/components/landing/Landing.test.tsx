@@ -31,6 +31,7 @@ const offices: PostOffice[] = [
     name: "Mysuru GPO",
     pincode: "570001",
     district: "Mysuru",
+    state: "KA",
     lat: 12.3,
     lng: 76.6,
     stampImagePath: null,
@@ -40,6 +41,7 @@ const offices: PostOffice[] = [
     name: "Hampi",
     pincode: "583239",
     district: "Vijayanagara",
+    state: "KA",
     lat: 15.3,
     lng: 76.4,
     stampImagePath: null,
@@ -69,26 +71,26 @@ describe("Landing", () => {
   it("states the promise and links to the map", () => {
     render(<Landing offices={offices} />);
     expect(screen.getByRole("heading", { level: 1 }).textContent).toContain(
-      "every post office in Karnataka",
+      "every post office in India"
     );
     const links = screen.getAllByRole("link", {
       name: /open the map|explore/i,
     });
     expect(links.every((l) => l.getAttribute("href") === "/explore")).toBe(
-      true,
+      true
     );
   });
 
   it("shows the disclaimer and legal links", () => {
     render(<Landing offices={offices} />);
     expect(
-      screen.getByText(/not run, endorsed or sponsored by India Post/),
+      screen.getByText(/not run, endorsed or sponsored by India Post/)
     ).toBeDefined();
     expect(
-      screen.getByRole("link", { name: "Privacy" }).getAttribute("href"),
+      screen.getByRole("link", { name: "Privacy" }).getAttribute("href")
     ).toBe("/privacy");
     expect(
-      screen.getByRole("link", { name: "Terms" }).getAttribute("href"),
+      screen.getByRole("link", { name: "Terms" }).getAttribute("href")
     ).toBe("/terms");
   });
 
@@ -97,14 +99,14 @@ describe("Landing", () => {
     const intro = container.querySelector(".kpl-intro");
     expect(intro?.getAttribute("data-state")).toBe("playing");
     expect(document.documentElement.hasAttribute("data-intro-playing")).toBe(
-      true,
+      true
     );
     act(() => {
       fireEvent.click(screen.getByRole("button", { name: "Skip" }));
     });
     expect(intro?.getAttribute("data-state")).toBe("done");
     expect(document.documentElement.hasAttribute("data-intro-playing")).toBe(
-      false,
+      false
     );
     expect(window.sessionStorage.getItem(INTRO_SEEN_KEY)).toBe("1");
   });
@@ -113,7 +115,7 @@ describe("Landing", () => {
     window.sessionStorage.setItem(INTRO_SEEN_KEY, "1");
     const { container } = render(<Landing offices={offices} />);
     expect(
-      container.querySelector(".kpl-intro")?.getAttribute("data-state"),
+      container.querySelector(".kpl-intro")?.getAttribute("data-state")
     ).toBe("done");
   });
 
@@ -121,7 +123,7 @@ describe("Landing", () => {
     mockMotion(true);
     const { container } = render(<Landing offices={offices} />);
     expect(
-      container.querySelector(".kpl-intro")?.getAttribute("data-state"),
+      container.querySelector(".kpl-intro")?.getAttribute("data-state")
     ).toBe("done");
   });
 
@@ -149,7 +151,7 @@ describe("Landing", () => {
   it("has a progress tick for every card", () => {
     render(<Landing offices={offices} />);
     expect(
-      screen.getAllByRole("button", { name: /Go to card \d+ of \d+/ }).length,
+      screen.getAllByRole("button", { name: /Go to card \d+ of \d+/ }).length
     ).toBeGreaterThan(0);
   });
 
@@ -171,7 +173,9 @@ describe("Landing", () => {
     mockMotion(true);
     window.scrollTo = vi.fn() as unknown as typeof window.scrollTo;
     render(<Landing offices={offices} />);
-    expect(screen.getAllByRole("link", { name: /open the map/i })).toHaveLength(1);
+    expect(screen.getAllByRole("link", { name: /open the map/i })).toHaveLength(
+      1
+    );
     fireEvent.click(screen.getByRole("button", { name: /see how it works/i }));
     expect(window.scrollTo).toHaveBeenCalled();
   });

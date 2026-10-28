@@ -52,7 +52,7 @@ export interface PlacedPin {
 
 /**
  * Places each post office inside a rectangle by its real latitude and longitude, so the
- * landing card shows Karnataka's true shape of pins without loading a map. Offices
+ * landing card shows the true shape of the pins without loading a map. Offices
  * without coordinates are left out.
  */
 export function projectPins(offices: Located[], padding = 8): PlacedPin[] {

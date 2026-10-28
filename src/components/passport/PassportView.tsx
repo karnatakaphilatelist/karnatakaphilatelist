@@ -7,13 +7,26 @@ import { DistrictProgress } from "@/components/passport/DistrictProgress";
 import { ProgressRing } from "@/components/passport/ProgressRing";
 import { VisitedCard } from "@/components/passport/VisitedCard";
 import { useAuth } from "@/components/providers/AuthProvider";
+import { useStateOffices } from "@/components/providers/StateProvider";
 import { useVisits } from "@/components/providers/VisitsProvider";
+import { StateSwitcher } from "@/components/ui/StateSwitcher";
+import { stateName } from "@/lib/states";
 import { DISCLAIMER } from "@/lib/constants";
 import type { PostOffice } from "@/types";
 
 const UP_NEXT_COUNT = 3;
 
-export function PassportView({ offices }: { offices: PostOffice[] }) {
+export function PassportView({
+  offices: indiaOffices,
+}: {
+  offices: PostOffice[];
+}) {
+  const {
+    states,
+    stateCode,
+    stateOffices: offices,
+    choose,
+  } = useStateOffices(indiaOffices);
   const { user, isLoading: isAuthLoading, openSignIn } = useAuth();
   const { visits, isReady } = useVisits();
   const [editingId, setEditingId] = useState<number | null>(null);
@@ -43,6 +56,14 @@ export function PassportView({ offices }: { offices: PostOffice[] }) {
         <p className="mt-1 text-sm text-muted">
           Every stamp you collect, in one place.
         </p>
+        <div className="mt-3 max-w-xs">
+          <StateSwitcher
+            states={states}
+            value={stateCode}
+            onChange={choose}
+            idSuffix="passport"
+          />
+        </div>
 
         {!user && !isAuthLoading ? (
           <div className="mt-4 flex items-center gap-3 rounded-2xl bg-planned-soft p-3.5">
@@ -74,7 +95,9 @@ export function PassportView({ offices }: { offices: PostOffice[] }) {
                 of {total}
               </span>
             </p>
-            <p className="mt-1 text-sm text-muted">post offices stamped</p>
+            <p className="mt-1 text-sm text-muted">
+              post offices stamped in {stateName(stateCode)}
+            </p>
             <p className="mt-2 text-sm font-semibold text-visited-ink">
               {total - visitedOffices.length} to go
             </p>

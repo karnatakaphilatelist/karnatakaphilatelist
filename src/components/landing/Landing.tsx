@@ -141,7 +141,18 @@ export function Landing({ offices }: { offices: PostOffice[] }) {
     introRef.current?.setAttribute("data-go", "");
     const start = performance.now();
     let opened = false;
+    let last = start;
+    let slowFrames = 0;
+    // Safety nets for slow or throttled browsers: never leave someone staring at the red screen.
+    timers.push(setTimeout(finish, 7000));
     const tick = (now: number) => {
+      // Three janky frames in a row (over 200ms each) means this device cannot play the intro smoothly.
+      slowFrames = now - last > 200 ? slowFrames + 1 : 0;
+      last = now;
+      if (slowFrames >= 3) {
+        finish();
+        return;
+      }
       const seconds = (now - start) / 1000;
       const progress = cardProgress(seconds);
       const travel = Math.max(0, window.innerWidth - 110);

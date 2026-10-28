@@ -87,6 +87,8 @@ export function Landing({ offices }: { offices: PostOffice[] }) {
   const scrollerRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
   const [cardIndex, setCardIndex] = useState(0);
+  const [atStart, setAtStart] = useState(true);
+  const [atEnd, setAtEnd] = useState(false);
   const [cardCount, setCardCount] = useState(0);
   const cardRef = useRef<HTMLDivElement>(null);
   const solidRef = useRef<HTMLDivElement>(null);
@@ -200,18 +202,21 @@ export function Landing({ offices }: { offices: PostOffice[] }) {
       const root = rootRef.current;
       if (!scroller || !root) return;
       const max = scroller.offsetHeight - window.innerHeight;
-      const p = scrollProgress(window.scrollY, max, 0.92);
+      const p = scrollProgress(window.scrollY, max, 1);
       root.style.setProperty("--p", p.toFixed(4));
+      setAtStart(p < 0.01);
+      setAtEnd(p > 0.99);
 
       // Which card is currently at the left edge, for the arrows and the progress ticks.
       const track = trackRef.current;
       if (track) {
         const cards = Array.from(track.children) as HTMLElement[];
         const pad = parseFloat(getComputedStyle(track).paddingLeft) || 0;
-        const shift = p * Math.max(0, track.offsetWidth - window.innerWidth);
+        const span = Math.max(1, track.offsetWidth - window.innerWidth);
         let current = 0;
         cards.forEach((card, i) => {
-          if (card.offsetLeft - pad <= shift + 40) current = i;
+          const stop = Math.min(1, (card.offsetLeft - pad) / span);
+          if (stop <= p + 0.01) current = i;
         });
         setCardCount(cards.length);
         // Without a layout (for example before styles load) keep the first card selected.
@@ -231,25 +236,43 @@ export function Landing({ offices }: { offices: PostOffice[] }) {
     };
   }, []);
 
-  /** Scrolls the page so that card `index` sits at the left edge (works backwards too). */
-  const goToCard = (index: number) => {
-    const scroller = scrollerRef.current;
+  /** Where (0-1) card `index` sits along the track; cards past the end share the final stop. */
+  const stopOf = (index: number) => {
     const track = trackRef.current;
-    if (!scroller || !track) return;
+    if (!track) return 0;
     const cards = Array.from(track.children) as HTMLElement[];
     const target = cards[Math.max(0, Math.min(cards.length - 1, index))];
-    if (!target) return;
+    if (!target) return 0;
     const pad = parseFloat(getComputedStyle(track).paddingLeft) || 0;
     const span = Math.max(1, track.offsetWidth - window.innerWidth);
-    const p = Math.max(0, Math.min(1, (target.offsetLeft - pad) / span));
+    return Math.max(0, Math.min(1, (target.offsetLeft - pad) / span));
+  };
+
+  /** Scrolls the page so that card `index` sits at the left edge (works backwards too). */
+  const goToCard = (index: number) => scrollToStop(stopOf(index));
+
+  const scrollToStop = (p: number) => {
+    const scroller = scrollerRef.current;
+    if (!scroller) return;
     const max = scroller.offsetHeight - window.innerHeight;
     const reduced = window.matchMedia(
       "(prefers-reduced-motion: reduce)",
     ).matches;
-    window.scrollTo({
-      top: p * max * 0.92,
-      behavior: reduced ? "auto" : "smooth",
-    });
+    window.scrollTo({ top: p * max, behavior: reduced ? "auto" : "smooth" });
+  };
+
+  /** Steps to the neighbouring stop, skipping cards that share the end of the track. */
+  const step = (dir: 1 | -1) => {
+    const scroller = scrollerRef.current;
+    if (!scroller) return;
+    const max = Math.max(1, scroller.offsetHeight - window.innerHeight);
+    const now = window.scrollY / max;
+    const stops = Array.from({ length: cardCount }, (_, i) => stopOf(i));
+    const next =
+      dir === 1
+        ? stops.find((v) => v > now + 0.015)
+        : [...stops].reverse().find((v) => v < now - 0.015);
+    scrollToStop(next ?? (dir === 1 ? 1 : 0));
   };
 
   return (
@@ -473,43 +496,48 @@ export function Landing({ offices }: { offices: PostOffice[] }) {
             </article>
           </div>
 
+          <div className="kpl-edge kpl-edge-l">
+            <button
+              type="button"
+              className="kpl-arrow"
+              aria-label="Previous card"
+              disabled={atStart}
+              onClick={() => step(-1)}
+            >
+              <ArrowLeftIcon />
+            </button>
+          </div>
+          <div className="kpl-edge kpl-edge-r">
+            <button
+              type="button"
+              className="kpl-arrow"
+              aria-label="Next card"
+              disabled={atEnd}
+              onClick={() => step(1)}
+            >
+              <ArrowRightIcon />
+            </button>
+          </div>
+
           <div className="kpl-dock">
-            <div className="kpl-ticks" role="group" aria-label="Cards">
-              {Array.from({ length: cardCount }, (_, i) => (
-                <button
-                  key={i}
-                  type="button"
-                  aria-label={`Go to card ${i + 1} of ${cardCount}`}
-                  aria-current={i === cardIndex ? "true" : undefined}
-                  className={i === cardIndex ? "on" : ""}
-                  onClick={() => goToCard(i)}
-                />
-              ))}
+            <div className="kpl-nav2">
+              <div className="kpl-ticks" role="group" aria-label="Cards">
+                {Array.from({ length: cardCount }, (_, i) => (
+                  <button
+                    key={i}
+                    type="button"
+                    aria-label={`Go to card ${i + 1} of ${cardCount}`}
+                    aria-current={i === cardIndex ? "true" : undefined}
+                    className={i === cardIndex ? "on" : ""}
+                    onClick={() => goToCard(i)}
+                  />
+                ))}
+              </div>
             </div>
-            <div className="kpl-dockrow">
-              <button
-                type="button"
-                className="kpl-arrow"
-                aria-label="Previous card"
-                disabled={cardIndex <= 0}
-                onClick={() => goToCard(cardIndex - 1)}
-              >
-                <ArrowLeftIcon />
-              </button>
-              <Link href="/explore" className="kpl-open-map">
-                Open the map
-                <ArrowRightIcon />
-              </Link>
-              <button
-                type="button"
-                className="kpl-arrow"
-                aria-label="Next card"
-                disabled={cardCount > 0 && cardIndex >= cardCount - 1}
-                onClick={() => goToCard(cardIndex + 1)}
-              >
-                <ArrowRightIcon />
-              </button>
-            </div>
+            <Link href="/explore" className="kpl-open-map">
+              Open the map
+              <ArrowRightIcon />
+            </Link>
           </div>
         </div>
       </div>

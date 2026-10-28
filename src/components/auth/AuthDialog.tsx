@@ -142,7 +142,7 @@ export function AuthDialog({
     >
       {notice ? (
         <div>
-          <p role="status" className="rounded-2xl bg-visited-soft p-4 text-sm text-visited-ink">
+          <p role="status" className="rounded-sm bg-visited-soft p-4 text-sm text-visited-ink">
             {notice.kind === "link-sent" ? (
               <>
                 Check your inbox. We sent a sign-in link to <strong>{notice.email}</strong>. Open it
@@ -171,7 +171,7 @@ export function AuthDialog({
                 type="button"
                 onClick={handleGoogle}
                 disabled={isOpeningGoogle}
-                className="flex min-h-13 w-full items-center justify-center gap-3 rounded-full border-[1.5px] border-line-strong bg-white text-base font-semibold disabled:opacity-60"
+                className="flex min-h-13 w-full items-center justify-center gap-3 rounded-sm border-[1.5px] border-line-strong bg-white text-base font-semibold disabled:opacity-60"
               >
                 <GoogleIcon className="size-5" />
                 {isOpeningGoogle ? "Opening Google…" : "Continue with Google"}
@@ -184,7 +184,7 @@ export function AuthDialog({
               </div>
             </>
           ) : (
-            <p className="mb-4 rounded-2xl bg-planned-soft p-3.5 text-sm text-planned-ink">
+            <p className="mb-4 rounded-sm bg-planned-soft p-3.5 text-sm text-planned-ink">
               Google sign-in is not available right now. You can still sign in with your email below.
             </p>
           )}
@@ -201,7 +201,7 @@ export function AuthDialog({
               value={email}
               onChange={(event) => setEmail(event.target.value)}
               placeholder="you@example.com"
-              className="h-12 w-full rounded-xl border border-line-strong px-4 text-base"
+              className="h-12 w-full rounded-sm border border-line-strong px-4 text-base"
             />
 
             <label htmlFor="auth-password" className="block text-sm font-semibold">
@@ -216,13 +216,13 @@ export function AuthDialog({
               value={password}
               onChange={(event) => setPassword(event.target.value)}
               placeholder={isSignUp ? `At least ${MIN_PASSWORD_LENGTH} characters` : "Your password"}
-              className="h-12 w-full rounded-xl border border-line-strong px-4 text-base"
+              className="h-12 w-full rounded-sm border border-line-strong px-4 text-base"
             />
 
             <button
               type="submit"
               disabled={isBusy}
-              className="min-h-13 w-full rounded-full bg-ink text-base font-semibold text-white disabled:opacity-60"
+              className="min-h-13 w-full rounded-sm bg-ink text-base font-semibold text-white disabled:opacity-60"
             >
               {isBusy ? "Please wait…" : isSignUp ? "Create account" : "Sign in"}
             </button>

@@ -32,7 +32,7 @@ export function ExploreControls({
           value={query}
           onChange={(event) => onQueryChange(event.target.value)}
           placeholder="Search post office, district or pincode"
-          className="h-12 w-full rounded-xl border border-line-strong bg-paper pl-11 pr-3 text-base"
+          className="h-12 w-full rounded-sm border border-line-strong bg-paper pl-11 pr-3 text-base"
         />
       </div>
       <FilterChips value={filter} onChange={onFilterChange} />

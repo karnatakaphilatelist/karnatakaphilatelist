@@ -127,7 +127,7 @@ export function ExploreView({ offices, initialSelectedId }: ExploreViewProps) {
               type="button"
               onClick={handleFindNearMe}
               disabled={isLocating}
-              className="flex min-h-11 items-center gap-1.5 rounded-full px-3 text-sm font-semibold text-focus disabled:opacity-60"
+              className="flex min-h-11 items-center gap-1.5 rounded-sm px-3 text-sm font-semibold text-focus disabled:opacity-60"
             >
               <LocateIcon className="size-4" />
               {isLocating ? "Locating…" : "Near me"}
@@ -144,7 +144,7 @@ export function ExploreView({ offices, initialSelectedId }: ExploreViewProps) {
       </aside>
 
       <section aria-label="Map" className="relative isolate min-h-0 flex-1">
-        <div className="absolute inset-x-0 top-0 z-[1100] space-y-1 bg-white/95 px-4 pb-1 pt-3 shadow-sm md:hidden">
+        <div className="absolute inset-x-0 top-0 z-[1100] space-y-1 bg-white/95 px-4 pb-1 pt-3 border-b border-ink md:hidden">
           <ExploreControls
             idSuffix="mobile"
             query={query}

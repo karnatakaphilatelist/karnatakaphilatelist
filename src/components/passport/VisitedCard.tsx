@@ -16,7 +16,7 @@ export function VisitedCard({ office, visit, onEdit }: VisitedCardProps) {
   const photoUrl = usePhotoUrl(visit.photoPath);
 
   return (
-    <li className="rounded-2xl bg-white p-4 shadow-sm">
+    <li className="rounded-sm bg-white p-4 border border-ink">
       <div className="flex items-start gap-3">
         <StampThumb path={office.stampImagePath} status="visited" className="size-12" />
         <div className="min-w-0 flex-1">
@@ -25,7 +25,7 @@ export function VisitedCard({ office, visit, onEdit }: VisitedCardProps) {
             {office.district} · <span className="whitespace-nowrap">{visit.visitedAt}</span>
           </p>
         </div>
-        <span className="flex shrink-0 items-center gap-1 rounded-[10px] bg-sand px-2 py-1 text-xs font-semibold text-muted">
+        <span className="flex shrink-0 items-center gap-1 rounded-sm bg-sand px-2 py-1 text-xs font-semibold text-muted">
           {visit.isPublic ? (
             <GlobeIcon className="size-3" />
           ) : (
@@ -47,10 +47,10 @@ export function VisitedCard({ office, visit, onEdit }: VisitedCardProps) {
             <img
               src={photoUrl}
               alt={`Your stamp at ${office.name}`}
-              className="h-40 w-full rounded-xl object-cover"
+              className="h-40 w-full rounded-sm object-cover"
             />
           ) : (
-            <div className="grid h-40 w-full place-items-center rounded-xl bg-sand text-muted">
+            <div className="grid h-40 w-full place-items-center rounded-sm bg-sand text-muted">
               <CameraIcon className="size-6" />
             </div>
           )}

@@ -94,7 +94,7 @@ function VisitForm({ visit, onDone }: { visit: Visit; onDone: () => void }) {
         maxLength={MAX_NOTE_LENGTH}
         onChange={(event) => setNote(event.target.value)}
         placeholder="Special cancellation? Counter timing? Anything to remember."
-        className="mt-1.5 h-24 w-full resize-none rounded-2xl border border-line-strong p-3 text-base"
+        className="mt-1.5 h-24 w-full resize-none rounded-sm border border-line-strong p-3 text-base"
       />
 
       <p className="mt-4 text-sm font-bold">Photo of your stamp</p>
@@ -102,23 +102,23 @@ function VisitForm({ visit, onDone }: { visit: Visit; onDone: () => void }) {
         <button
           type="button"
           onClick={() => openSignIn("manual")}
-          className="mt-1.5 flex min-h-16 w-full items-center justify-center gap-2 rounded-2xl border-[1.5px] border-dashed border-line-strong bg-paper px-4 text-base font-semibold"
+          className="mt-1.5 flex min-h-16 w-full items-center justify-center gap-2 rounded-sm border-[1.5px] border-dashed border-line-strong bg-paper px-4 text-base font-semibold"
         >
           <CameraIcon className="size-5" />
           Sign in to add photos
         </button>
       ) : hasPhoto ? (
-        <div className="mt-1.5 flex items-center gap-3 rounded-2xl border border-line-strong p-2">
+        <div className="mt-1.5 flex items-center gap-3 rounded-sm border border-line-strong p-2">
           {shownPhotoUrl ? (
             // A signed or blob URL: next/image cannot optimise either, so a plain img is correct here.
             // eslint-disable-next-line @next/next/no-img-element
             <img
               src={shownPhotoUrl}
               alt="Your stamp"
-              className="size-14 rounded-xl object-cover"
+              className="size-14 rounded-sm object-cover"
             />
           ) : (
-            <span className="grid size-14 place-items-center rounded-xl bg-sand text-muted">
+            <span className="grid size-14 place-items-center rounded-sm bg-sand text-muted">
               <CameraIcon className="size-5" />
             </span>
           )}
@@ -132,7 +132,7 @@ function VisitForm({ visit, onDone }: { visit: Visit; onDone: () => void }) {
           </button>
         </div>
       ) : (
-        <label className="mt-1.5 flex min-h-16 w-full cursor-pointer items-center justify-center gap-2 rounded-2xl border-[1.5px] border-dashed border-line-strong bg-paper px-4 text-base font-semibold">
+        <label className="mt-1.5 flex min-h-16 w-full cursor-pointer items-center justify-center gap-2 rounded-sm border-[1.5px] border-dashed border-line-strong bg-paper px-4 text-base font-semibold">
           <CameraIcon className="size-5" />
           Take or upload a photo
           <input
@@ -147,7 +147,7 @@ function VisitForm({ visit, onDone }: { visit: Visit; onDone: () => void }) {
 
       <fieldset className="mt-4">
         <legend className="text-sm font-bold">Who can see this</legend>
-        <div className="mt-1.5 flex gap-1 rounded-2xl bg-sand p-1">
+        <div className="mt-1.5 flex gap-1 rounded-sm bg-sand p-1">
           <VisibilityOption
             checked={!isPublic}
             onSelect={() => setIsPublic(false)}
@@ -172,7 +172,7 @@ function VisitForm({ visit, onDone }: { visit: Visit; onDone: () => void }) {
         type="button"
         onClick={handleSave}
         disabled={isSaving}
-        className="mt-5 min-h-13 w-full rounded-full bg-postal text-base font-bold text-white disabled:opacity-60"
+        className="mt-5 min-h-13 w-full rounded-sm bg-postal kp-label text-white disabled:opacity-60"
       >
         {isSaving ? "Saving…" : "Save to my passport"}
       </button>
@@ -190,8 +190,8 @@ interface VisibilityOptionProps {
 function VisibilityOption({ checked, onSelect, label, icon }: VisibilityOptionProps) {
   return (
     <label
-      className={`flex min-h-11 flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-xl text-sm font-bold has-[:focus-visible]:outline-3 has-[:focus-visible]:outline-focus ${
-        checked ? "bg-white shadow-sm" : ""
+      className={`flex min-h-11 flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-sm text-sm font-bold has-[:focus-visible]:outline-3 has-[:focus-visible]:outline-focus ${
+        checked ? "bg-white border border-ink" : ""
       }`}
     >
       <input

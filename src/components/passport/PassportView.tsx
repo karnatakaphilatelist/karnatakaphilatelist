@@ -20,8 +20,11 @@ export function PassportView({ offices }: { offices: PostOffice[] }) {
 
   const total = offices.length;
   const visitedOffices = offices.filter((office) => visits[office.id]);
-  const upNext = offices.filter((office) => !visits[office.id]).slice(0, UP_NEXT_COUNT);
-  const editingOffice = offices.find((office) => office.id === editingId) ?? null;
+  const upNext = offices
+    .filter((office) => !visits[office.id])
+    .slice(0, UP_NEXT_COUNT);
+  const editingOffice =
+    offices.find((office) => office.id === editingId) ?? null;
 
   if (!isReady) {
     return (
@@ -34,13 +37,18 @@ export function PassportView({ offices }: { offices: PostOffice[] }) {
   return (
     <div className="h-full overflow-y-auto">
       <div className="mx-auto max-w-2xl px-5 pb-10 pt-6">
-        <h1 className="font-display text-3xl font-bold tracking-tight">My Passport</h1>
-        <p className="mt-1 text-sm text-muted">Every stamp you collect, in one place.</p>
+        <h1 className="font-display text-3xl font-bold tracking-tight">
+          My Passport
+        </h1>
+        <p className="mt-1 text-sm text-muted">
+          Every stamp you collect, in one place.
+        </p>
 
         {!user && !isAuthLoading ? (
           <div className="mt-4 flex items-center gap-3 rounded-2xl bg-planned-soft p-3.5">
             <p className="flex-1 text-sm leading-[18px] text-planned-ink">
-              You&apos;re browsing as a guest. Sign in to keep your passport on every device.
+              You&apos;re browsing as a guest. Sign in to keep your passport on
+              every device.
             </p>
             <button
               type="button"
@@ -59,8 +67,12 @@ export function PassportView({ offices }: { offices: PostOffice[] }) {
           <ProgressRing visited={visitedOffices.length} total={total} />
           <div>
             <p className="flex items-baseline gap-1.5 whitespace-nowrap font-display font-bold leading-none">
-              <span className="text-5xl font-semibold italic text-postal">{visitedOffices.length}</span>
-              <span className="text-lg font-semibold text-muted">of {total}</span>
+              <span className="text-5xl font-semibold italic text-postal">
+                {visitedOffices.length}
+              </span>
+              <span className="text-lg font-semibold text-muted">
+                of {total}
+              </span>
             </p>
             <p className="mt-1 text-sm text-muted">post offices stamped</p>
             <p className="mt-2 text-sm font-semibold text-visited-ink">
@@ -68,6 +80,18 @@ export function PassportView({ offices }: { offices: PostOffice[] }) {
             </p>
           </div>
         </section>
+
+        {user ? (
+          <p className="mt-4 text-sm text-muted">
+            Signed in as {user.email ?? "you"}.{" "}
+            <Link
+              href="/account/password"
+              className="font-semibold text-postal underline"
+            >
+              Set or change your password
+            </Link>
+          </p>
+        ) : null}
 
         {upNext.length > 0 ? (
           <section aria-labelledby="up-next-heading" className="mt-7">
@@ -127,14 +151,22 @@ export function PassportView({ offices }: { offices: PostOffice[] }) {
 
         <footer className="mt-8 text-center text-sm text-muted">
           <div className="flex justify-center gap-5">
-            <Link href="/privacy" className="flex min-h-11 items-center underline">
+            <Link
+              href="/privacy"
+              className="flex min-h-11 items-center underline"
+            >
               Privacy
             </Link>
-            <Link href="/terms" className="flex min-h-11 items-center underline">
+            <Link
+              href="/terms"
+              className="flex min-h-11 items-center underline"
+            >
               Terms
             </Link>
           </div>
-          <p className="mx-auto mt-3 max-w-md text-xs leading-5">{DISCLAIMER}</p>
+          <p className="mx-auto mt-3 max-w-md text-xs leading-5">
+            {DISCLAIMER}
+          </p>
         </footer>
       </div>
 

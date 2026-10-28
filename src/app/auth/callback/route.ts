@@ -10,7 +10,21 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get("code");
+  const tokenHash = searchParams.get("token_hash");
+  const type = searchParams.get("type");
   const next = searchParams.get("next");
+
+  // Email links built with a token hash work in any browser, unlike the code flow, which only
+  // works where the link was requested. Used by the reset-password email template.
+  if (tokenHash && (type === "recovery" || type === "magiclink" || type === "email")) {
+    const supabase = await createSupabaseServerClient();
+    const { error } = await supabase.auth.verifyOtp({ type, token_hash: tokenHash });
+    if (error) {
+      const reason = classifyAuthFailure({ exchangeMessage: error.message });
+      return NextResponse.redirect(failureRedirectUrl(origin, next, reason));
+    }
+    return NextResponse.redirect(`${origin}${safeRedirectPath(next)}`);
+  }
 
   if (!code) {
     // The provider sent the person back without a code: they cancelled, were

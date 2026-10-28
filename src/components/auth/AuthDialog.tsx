@@ -21,7 +21,13 @@ interface AuthDialogProps {
   onGoogle: () => Promise<void>;
   /** Sends a one-time sign-in link; also how someone who forgot their password gets back in. */
   onEmail: (email: string) => Promise<void>;
-  onPassword: (mode: PasswordMode, email: string, password: string) => Promise<PasswordOutcome>;
+  /** Emails a password-reset link that lands on the set-a-password page. Falls back to `onEmail`. */
+  onReset?: (email: string) => Promise<void>;
+  onPassword: (
+    mode: PasswordMode,
+    email: string,
+    password: string,
+  ) => Promise<PasswordOutcome>;
 }
 
 const COPY: Record<SignInReason, { title: string; description: string }> = {
@@ -44,6 +50,7 @@ export function AuthDialog({
   googleAvailable,
   onGoogle,
   onEmail,
+  onReset,
   onPassword,
 }: AuthDialogProps) {
   const [mode, setMode] = useState<PasswordMode>("signin");
@@ -82,10 +89,15 @@ export function AuthDialog({
     setError(null);
     try {
       const outcome = await onPassword(mode, trimmedEmail, password);
-      if (outcome === "confirm-email") setNotice({ kind: "confirm-email", email: trimmedEmail });
+      if (outcome === "confirm-email")
+        setNotice({ kind: "confirm-email", email: trimmedEmail });
       // When signed in, the provider closes this dialog; nothing more to do here.
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : "Something went wrong. Please try again.");
+      setError(
+        caught instanceof Error
+          ? caught.message
+          : "Something went wrong. Please try again.",
+      );
     } finally {
       setIsBusy(false);
     }
@@ -101,10 +113,12 @@ export function AuthDialog({
     setIsBusy(true);
     setError(null);
     try {
-      await onEmail(trimmedEmail);
+      await (isSignUp ? onEmail : (onReset ?? onEmail))(trimmedEmail);
       setNotice({ kind: "link-sent", email: trimmedEmail });
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : "Could not send the link.");
+      setError(
+        caught instanceof Error ? caught.message : "Could not send the link.",
+      );
     } finally {
       setIsBusy(false);
     }
@@ -119,7 +133,9 @@ export function AuthDialog({
       // The browser is now heading to Google, so the button stays disabled.
     } catch (caught) {
       setIsOpeningGoogle(false);
-      setError(caught instanceof Error ? caught.message : "Google sign-in failed.");
+      setError(
+        caught instanceof Error ? caught.message : "Google sign-in failed.",
+      );
     }
   }
 
@@ -142,16 +158,21 @@ export function AuthDialog({
     >
       {notice ? (
         <div>
-          <p role="status" className="rounded-2xl bg-visited-soft p-4 text-sm text-visited-ink">
+          <p
+            role="status"
+            className="rounded-2xl bg-visited-soft p-4 text-sm text-visited-ink"
+          >
             {notice.kind === "link-sent" ? (
               <>
-                Check your inbox. We sent a sign-in link to <strong>{notice.email}</strong>. Open it
-                on this device to finish signing in.
+                Check your inbox. We sent a sign-in link to{" "}
+                <strong>{notice.email}</strong>. Open it on this device to
+                finish signing in.
               </>
             ) : (
               <>
-                Almost there. We sent a confirmation link to <strong>{notice.email}</strong>. Open it
-                to activate your account, then sign in.
+                Almost there. We sent a confirmation link to{" "}
+                <strong>{notice.email}</strong>. Open it to activate your
+                account, then sign in.
               </>
             )}
           </p>
@@ -185,7 +206,8 @@ export function AuthDialog({
             </>
           ) : (
             <p className="mb-4 rounded-2xl bg-planned-soft p-3.5 text-sm text-planned-ink">
-              Google sign-in is not available right now. You can still sign in with your email below.
+              Google sign-in is not available right now. You can still sign in
+              with your email below.
             </p>
           )}
 
@@ -204,7 +226,10 @@ export function AuthDialog({
               className="h-12 w-full rounded-xl border border-line-strong px-4 text-base"
             />
 
-            <label htmlFor="auth-password" className="block text-sm font-semibold">
+            <label
+              htmlFor="auth-password"
+              className="block text-sm font-semibold"
+            >
               Password
             </label>
             <input
@@ -215,7 +240,11 @@ export function AuthDialog({
               minLength={isSignUp ? MIN_PASSWORD_LENGTH : undefined}
               value={password}
               onChange={(event) => setPassword(event.target.value)}
-              placeholder={isSignUp ? `At least ${MIN_PASSWORD_LENGTH} characters` : "Your password"}
+              placeholder={
+                isSignUp
+                  ? `At least ${MIN_PASSWORD_LENGTH} characters`
+                  : "Your password"
+              }
               className="h-12 w-full rounded-xl border border-line-strong px-4 text-base"
             />
 
@@ -224,7 +253,11 @@ export function AuthDialog({
               disabled={isBusy}
               className="min-h-13 w-full rounded-full bg-ink text-base font-semibold text-white disabled:opacity-60"
             >
-              {isBusy ? "Please wait…" : isSignUp ? "Create account" : "Sign in"}
+              {isBusy
+                ? "Please wait…"
+                : isSignUp
+                  ? "Create account"
+                  : "Sign in"}
             </button>
           </form>
 
@@ -234,7 +267,9 @@ export function AuthDialog({
               onClick={() => switchMode(isSignUp ? "signin" : "signup")}
               className="min-h-11 font-semibold text-focus"
             >
-              {isSignUp ? "Already have an account? Sign in" : "New here? Create an account"}
+              {isSignUp
+                ? "Already have an account? Sign in"
+                : "New here? Create an account"}
             </button>
             <button
               type="button"
@@ -242,7 +277,9 @@ export function AuthDialog({
               disabled={isBusy}
               className="min-h-11 text-muted underline disabled:opacity-60"
             >
-              {isSignUp ? "Skip the password: email me a sign-in link" : "Forgot password? Email me a sign-in link"}
+              {isSignUp
+                ? "Skip the password: email me a sign-in link"
+                : "Forgot password? Email me a reset link"}
             </button>
           </div>
         </>
@@ -256,11 +293,21 @@ export function AuthDialog({
 
       <p className="mt-4 text-center text-xs text-muted">
         By continuing you agree to the{" "}
-        <Link href="/terms" target="_blank" rel="noopener noreferrer" className="underline">
+        <Link
+          href="/terms"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="underline"
+        >
           Terms
         </Link>{" "}
         and{" "}
-        <Link href="/privacy" target="_blank" rel="noopener noreferrer" className="underline">
+        <Link
+          href="/privacy"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="underline"
+        >
           Privacy Policy
         </Link>
         .

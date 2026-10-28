@@ -49,3 +49,10 @@ describe("friendlyPasswordError", () => {
     expect(friendlyPasswordError({ message: "boom" }, "signup")).toContain("create your account");
   });
 });
+
+describe("friendlyPasswordError for password updates", () => {
+  it("explains a reused password and falls back to a save message", () => {
+    expect(friendlyPasswordError({ code: "same_password" }, "signup", "update")).toMatch(/not used/);
+    expect(friendlyPasswordError({ code: "x" }, "signup", "update")).toMatch(/save your password/);
+  });
+});

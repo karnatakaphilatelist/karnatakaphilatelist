@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import "./landing.css";
+import { ArrowLeftIcon, ArrowRightIcon } from "@/components/ui/icons";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { useVisits } from "@/components/providers/VisitsProvider";
 import { CONTACT_EMAIL, DISCLAIMER } from "@/lib/constants";
@@ -84,6 +85,9 @@ export function Landing({ offices }: { offices: PostOffice[] }) {
 
   const rootRef = useRef<HTMLDivElement>(null);
   const scrollerRef = useRef<HTMLDivElement>(null);
+  const trackRef = useRef<HTMLDivElement>(null);
+  const [cardIndex, setCardIndex] = useState(0);
+  const [cardCount, setCardCount] = useState(0);
   const cardRef = useRef<HTMLDivElement>(null);
   const solidRef = useRef<HTMLDivElement>(null);
   const countRef = useRef<HTMLDivElement>(null);
@@ -198,6 +202,21 @@ export function Landing({ offices }: { offices: PostOffice[] }) {
       const max = scroller.offsetHeight - window.innerHeight;
       const p = scrollProgress(window.scrollY, max, 0.92);
       root.style.setProperty("--p", p.toFixed(4));
+
+      // Which card is currently at the left edge, for the arrows and the progress ticks.
+      const track = trackRef.current;
+      if (track) {
+        const cards = Array.from(track.children) as HTMLElement[];
+        const pad = parseFloat(getComputedStyle(track).paddingLeft) || 0;
+        const shift = p * Math.max(0, track.offsetWidth - window.innerWidth);
+        let current = 0;
+        cards.forEach((card, i) => {
+          if (card.offsetLeft - pad <= shift + 40) current = i;
+        });
+        setCardCount(cards.length);
+        // Without a layout (for example before styles load) keep the first card selected.
+        setCardIndex(track.offsetWidth > 0 ? current : 0);
+      }
     };
     const onScroll = () => {
       if (!frame) frame = requestAnimationFrame(update);
@@ -211,6 +230,27 @@ export function Landing({ offices }: { offices: PostOffice[] }) {
       if (frame) cancelAnimationFrame(frame);
     };
   }, []);
+
+  /** Scrolls the page so that card `index` sits at the left edge (works backwards too). */
+  const goToCard = (index: number) => {
+    const scroller = scrollerRef.current;
+    const track = trackRef.current;
+    if (!scroller || !track) return;
+    const cards = Array.from(track.children) as HTMLElement[];
+    const target = cards[Math.max(0, Math.min(cards.length - 1, index))];
+    if (!target) return;
+    const pad = parseFloat(getComputedStyle(track).paddingLeft) || 0;
+    const span = Math.max(1, track.offsetWidth - window.innerWidth);
+    const p = Math.max(0, Math.min(1, (target.offsetLeft - pad) / span));
+    const max = scroller.offsetHeight - window.innerHeight;
+    const reduced = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
+    window.scrollTo({
+      top: p * max * 0.92,
+      behavior: reduced ? "auto" : "smooth",
+    });
+  };
 
   return (
     <div ref={rootRef} className={`kpl${revealed ? " in" : ""}`}>
@@ -246,7 +286,7 @@ export function Landing({ offices }: { offices: PostOffice[] }) {
             {total} post offices
           </p>
 
-          <div className="kpl-track">
+          <div ref={trackRef} className="kpl-track">
             <article className="kpl-card kpl-card--hero">
               <header className="kpl-cardhead">
                 <span>01</span>
@@ -393,6 +433,9 @@ export function Landing({ offices }: { offices: PostOffice[] }) {
                   <span>{String(step.n + 2).padStart(2, "0")}</span>
                   <span>Step {step.n} of 3</span>
                 </header>
+                <span className="kpl-bignum" aria-hidden="true">
+                  {step.n}
+                </span>
                 <h2>{step.title}</h2>
                 <p>{step.text}</p>
               </article>
@@ -430,9 +473,44 @@ export function Landing({ offices }: { offices: PostOffice[] }) {
             </article>
           </div>
 
-          <Link href="/explore" className="kpl-open-map">
-            Open the map
-          </Link>
+          <div className="kpl-dock">
+            <div className="kpl-ticks" role="group" aria-label="Cards">
+              {Array.from({ length: cardCount }, (_, i) => (
+                <button
+                  key={i}
+                  type="button"
+                  aria-label={`Go to card ${i + 1} of ${cardCount}`}
+                  aria-current={i === cardIndex ? "true" : undefined}
+                  className={i === cardIndex ? "on" : ""}
+                  onClick={() => goToCard(i)}
+                />
+              ))}
+            </div>
+            <div className="kpl-dockrow">
+              <button
+                type="button"
+                className="kpl-arrow"
+                aria-label="Previous card"
+                disabled={cardIndex <= 0}
+                onClick={() => goToCard(cardIndex - 1)}
+              >
+                <ArrowLeftIcon />
+              </button>
+              <Link href="/explore" className="kpl-open-map">
+                Open the map
+                <ArrowRightIcon />
+              </Link>
+              <button
+                type="button"
+                className="kpl-arrow"
+                aria-label="Next card"
+                disabled={cardCount > 0 && cardIndex >= cardCount - 1}
+                onClick={() => goToCard(cardIndex + 1)}
+              >
+                <ArrowRightIcon />
+              </button>
+            </div>
+          </div>
         </div>
       </div>
 

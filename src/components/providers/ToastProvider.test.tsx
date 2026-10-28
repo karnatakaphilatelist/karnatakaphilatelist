@@ -8,7 +8,11 @@ function Trigger({ onAction }: { onAction?: () => void }) {
     <button
       type="button"
       onClick={() =>
-        showToast({ message: "Marked as visited", actionLabel: "Add photo or note", onAction })
+        showToast({
+          message: "Marked as visited",
+          actionLabel: "Add photo or note",
+          onAction,
+        })
       }
     >
       show
@@ -32,7 +36,7 @@ describe("ToastProvider", () => {
     render(
       <ToastProvider>
         <Trigger />
-      </ToastProvider>,
+      </ToastProvider>
     );
     act(() => screen.getByText("show").click());
     expect(screen.getByText("Marked as visited")).toBeDefined();
@@ -48,7 +52,7 @@ describe("ToastProvider", () => {
     render(
       <ToastProvider>
         <Trigger onAction={onAction} />
-      </ToastProvider>,
+      </ToastProvider>
     );
     act(() => screen.getByText("show").click());
     act(() => screen.getByText("Add photo or note").click());
@@ -64,7 +68,7 @@ describe("ToastProvider", () => {
     render(
       <ToastProvider>
         <Trigger />
-      </ToastProvider>,
+      </ToastProvider>
     );
     act(() => screen.getByText("show").click());
 
@@ -83,7 +87,7 @@ describe("ToastProvider", () => {
       <ToastProvider>
         <Trigger />
         <dialog data-testid="dialog">dialog</dialog>
-      </ToastProvider>,
+      </ToastProvider>
     );
     act(() => screen.getByText("show").click());
     const before = showPopover.mock.calls.length;

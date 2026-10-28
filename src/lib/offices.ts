@@ -1,6 +1,7 @@
 import { cacheLife, cacheTag } from "next/cache";
 import snapshot from "@/data/post-offices.snapshot.json";
 import { formatPlaceName } from "@/lib/format";
+import { DEFAULT_STATE } from "@/lib/states";
 import { createSupabasePublicClient } from "@/lib/supabase/public";
 import type { PostOffice } from "@/types";
 
@@ -10,6 +11,8 @@ interface PostOfficeRow {
   name: string;
   pincode: string | number | null;
   district: string | null;
+  /** Absent until the states migration has been run; those rows are all Karnataka. */
+  state_code?: string | null;
   lat: number | null;
   lng: number | null;
   /** Absent until the stamp-images migration has been run. */
@@ -34,6 +37,7 @@ export function toPostOffice(row: PostOfficeRow): PostOffice {
     name: formatPlaceName(row.name),
     pincode: row.pincode == null ? "" : String(row.pincode),
     district: row.district ? formatPlaceName(row.district) : "Unknown district",
+    state: row.state_code ?? DEFAULT_STATE,
     lat: row.lat,
     lng: row.lng,
     stampImagePath: row.stamp_image_path ?? null,
@@ -49,8 +53,11 @@ async function selectPostOffices(columns: string) {
 }
 
 async function loadFromDatabase(): Promise<PostOfficeRow[]> {
-  let result = await selectPostOffices(`${BASE_COLUMNS}, stamp_image_path`);
-  // Keep the app working before the stamp-images migration has been run.
+  let result = await selectPostOffices(`${BASE_COLUMNS}, state_code, stamp_image_path`);
+  // Keep the app working before the newer migrations have been run.
+  if (result.error?.code === UNDEFINED_COLUMN) {
+    result = await selectPostOffices(`${BASE_COLUMNS}, stamp_image_path`);
+  }
   if (result.error?.code === UNDEFINED_COLUMN) {
     result = await selectPostOffices(BASE_COLUMNS);
   }

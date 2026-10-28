@@ -4,6 +4,7 @@ import { Suspense, type ReactNode } from "react";
 import { AuthStatusNotice } from "@/components/auth/AuthStatusNotice";
 import { GuestSignInPrompt } from "@/components/auth/GuestSignInPrompt";
 import { AuthProvider } from "@/components/providers/AuthProvider";
+import { StateProvider } from "@/components/providers/StateProvider";
 import { ToastProvider } from "@/components/providers/ToastProvider";
 import { VisitsProvider } from "@/components/providers/VisitsProvider";
 
@@ -13,7 +14,7 @@ export function Providers({ children }: { children: ReactNode }) {
     <ToastProvider>
       <AuthProvider>
         <VisitsProvider>
-          {children}
+          <StateProvider>{children}</StateProvider>
           <GuestSignInPrompt />
           <Suspense>
             <AuthStatusNotice />

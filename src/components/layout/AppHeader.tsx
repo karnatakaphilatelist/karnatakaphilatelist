@@ -14,7 +14,7 @@ export function AppHeader() {
         <span
           className="kp-wordmark"
           role="img"
-          aria-label="Karnataka Philatelic Passport"
+          aria-label="Philatelist"
         />
       </Link>
 

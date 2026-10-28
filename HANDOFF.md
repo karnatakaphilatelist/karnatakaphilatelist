@@ -1,9 +1,9 @@
-# Handoff: Karnataka Philatelic Passport
+# Handoff: Philatelist (post office stamp passport for India)
 
 Context for a new Claude Code session picking this project up. Read `AGENTS.md` (Next.js version differs from older docs; check `node_modules/next/dist/docs/`) and `docs/SETUP.md` first.
 
 ## Product
-Visitors browse every post office in the Karnataka philatelic passport book on a map, plan a day, and mark post offices as visited. Guests can mark visits without an account; after the 3rd stamp they are invited to sign in so progress is kept. Signed-in users can add a note and a stamp photo (private or public) per visit and track progress on `/passport`.
+Visitors browse every post office in the philatelic passport books (Karnataka first, more states on the way) on a map, plan a day, and mark post offices as visited. Guests can mark visits without an account; after the 3rd stamp they are invited to sign in so progress is kept. Signed-in users can add a note and a stamp photo (private or public) per visit and track progress on `/passport`.
 
 Always say "post offices", never just "offices" (user feedback: "offices" is confusing). Note: much of the code and many identifiers still say `office`; user-facing strings should be switched to "post offices".
 

@@ -1,4 +1,4 @@
-# Karnataka Philatelic Passport: developer setup
+# Philatelist: developer setup
 
 A Next.js (App Router) + TypeScript app backed by Supabase. Visitors browse every
 passport post office on a map without signing in, mark the ones they have visited,
@@ -125,3 +125,12 @@ supabase/migrations/      Database schema, versioned as SQL
   before traffic grows.
 - Public visits are stored and readable by policy, but no public profile or community
   gallery page exists yet.
+
+
+## Adding a state
+
+1. Make sure the state code exists in `src/lib/states.ts` (all states and union territories are listed).
+2. Prepare a CSV with the exact header `name,pincode,district,lat,lng`.
+3. `node scripts/states-csv-to-sql.mjs TN tamil-nadu.csv > tn.sql`, then run `tn.sql` in the Supabase SQL editor.
+4. Revalidate the `post-offices` cache (or wait up to an hour). The state appears in the switcher by itself,
+   and its "coming soon" entry (`COMING_SOON_STATES`) disappears once it has post offices.

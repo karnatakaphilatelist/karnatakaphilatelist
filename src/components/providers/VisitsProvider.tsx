@@ -94,7 +94,7 @@ export function VisitsProvider({ children }: { children: ReactNode }) {
       setVisits(next);
       if (!userId) writeJson(GUEST_VISITS_KEY, Object.values(next));
     },
-    [userId],
+    [userId]
   );
 
   const reportError = useCallback(
@@ -102,13 +102,15 @@ export function VisitsProvider({ children }: { children: ReactNode }) {
       const detail = error instanceof Error ? error.message : "Unknown error";
       showToast({ message: `Could not ${action}. ${detail}` });
     },
-    [showToast],
+    [showToast]
   );
 
   /** True when the loaded visits belong to the person using the app right now. */
   const isLoadedForCurrentPerson = useCallback(() => {
     if (ownerRef.current === identityKey) return true;
-    showToast({ message: "Your passport is still loading. Try again in a moment." });
+    showToast({
+      message: "Your passport is still loading. Try again in a moment.",
+    });
     return false;
   }, [identityKey, showToast]);
 
@@ -127,7 +129,9 @@ export function VisitsProvider({ children }: { children: ReactNode }) {
     let cancelled = false;
 
     async function load() {
-      const guestVisits = parseGuestVisits(readJson<unknown>(GUEST_VISITS_KEY, []));
+      const guestVisits = parseGuestVisits(
+        readJson<unknown>(GUEST_VISITS_KEY, [])
+      );
       let loaded = guestVisits;
       let mergeError: unknown = null;
       let loadError: unknown = null;
@@ -158,7 +162,8 @@ export function VisitsProvider({ children }: { children: ReactNode }) {
       setOwnerKey(identityKey);
 
       if (loadError) reportError("load your passport", loadError);
-      else if (mergeError) reportError("move your guest stamps to your account", mergeError);
+      else if (mergeError)
+        reportError("move your guest stamps to your account", mergeError);
     }
 
     load();
@@ -192,7 +197,7 @@ export function VisitsProvider({ children }: { children: ReactNode }) {
         return false;
       }
     },
-    [commit, userId, supabase, reportError, isLoadedForCurrentPerson],
+    [commit, userId, supabase, reportError, isLoadedForCurrentPerson]
   );
 
   const saveDetails = useCallback(
@@ -203,14 +208,20 @@ export function VisitsProvider({ children }: { children: ReactNode }) {
 
       let uploadedPath: string | null = null;
       const discardUpload = () => {
-        if (uploadedPath) removeStampPhoto(supabase, uploadedPath).catch(() => undefined);
+        if (uploadedPath)
+          removeStampPhoto(supabase, uploadedPath).catch(() => undefined);
       };
 
       try {
         let photoPath = details.removePhoto ? null : current.photoPath;
         if (userId && details.newPhoto) {
           const compressed = await compressImage(details.newPhoto);
-          uploadedPath = await uploadStampPhoto(supabase, userId, officeId, compressed);
+          uploadedPath = await uploadStampPhoto(
+            supabase,
+            userId,
+            officeId,
+            compressed
+          );
           photoPath = uploadedPath;
         }
 
@@ -241,7 +252,7 @@ export function VisitsProvider({ children }: { children: ReactNode }) {
         return false;
       }
     },
-    [commit, userId, supabase, reportError, isLoadedForCurrentPerson],
+    [commit, userId, supabase, reportError, isLoadedForCurrentPerson]
   );
 
   const removeVisit = useCallback(
@@ -264,7 +275,7 @@ export function VisitsProvider({ children }: { children: ReactNode }) {
         return false;
       }
     },
-    [commit, userId, supabase, reportError, isLoadedForCurrentPerson],
+    [commit, userId, supabase, reportError, isLoadedForCurrentPerson]
   );
 
   const togglePlanned = useCallback((officeId: number) => {
@@ -286,14 +297,25 @@ export function VisitsProvider({ children }: { children: ReactNode }) {
       removeVisit,
       togglePlanned,
     }),
-    [visits, plannedIds, isReady, markVisited, saveDetails, removeVisit, togglePlanned],
+    [
+      visits,
+      plannedIds,
+      isReady,
+      markVisited,
+      saveDetails,
+      removeVisit,
+      togglePlanned,
+    ]
   );
 
-  return <VisitsContext.Provider value={value}>{children}</VisitsContext.Provider>;
+  return (
+    <VisitsContext.Provider value={value}>{children}</VisitsContext.Provider>
+  );
 }
 
 export function useVisits(): VisitsContextValue {
   const context = useContext(VisitsContext);
-  if (!context) throw new Error("useVisits must be used inside <VisitsProvider>");
+  if (!context)
+    throw new Error("useVisits must be used inside <VisitsProvider>");
   return context;
 }

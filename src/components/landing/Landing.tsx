@@ -5,6 +5,8 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import "./landing.css";
 import { ArrowLeftIcon, ArrowRightIcon } from "@/components/ui/icons";
 import { useAuth } from "@/components/providers/AuthProvider";
+import { useStateOffices } from "@/components/providers/StateProvider";
+import { stateName } from "@/lib/states";
 import { useVisits } from "@/components/providers/VisitsProvider";
 import { CONTACT_EMAIL, DISCLAIMER } from "@/lib/constants";
 import {
@@ -101,16 +103,20 @@ export function Landing({ offices }: { offices: PostOffice[] }) {
 
   const pins = useMemo(() => projectPins(offices), [offices]);
   const total = offices.length;
-  const stamped = Object.keys(visits).length;
+  const { stateCode, stateOffices } = useStateOffices(offices);
+  const stateTotal = stateOffices.length;
+  const stateName_ = stateName(stateCode);
+  const liveCount = new Set(offices.map((office) => office.state)).size;
+  const stamped = stateOffices.filter((office) => visits[office.id]).length;
   // Until someone has a stamp of their own, show an example so the card still makes sense.
   const isSample = stamped === 0;
-  const shownStamped = isSample ? 12 : stamped;
+  const shownStamped = isSample ? Math.min(12, stateTotal) : stamped;
   const firstName = user ? getFirstName(user) : null;
 
   // The intro: runs once per session, skipped when motion is reduced or it was already seen.
   useEffect(() => {
     const reduced = window.matchMedia(
-      "(prefers-reduced-motion: reduce)",
+      "(prefers-reduced-motion: reduce)"
     ).matches;
     if (reduced || hasSeenIntro()) {
       // Mounting is the only moment we can learn this (it needs browser APIs).
@@ -159,7 +165,9 @@ export function Landing({ offices }: { offices: PostOffice[] }) {
       const card = cardRef.current;
       if (card) {
         card.style.opacity = seconds > 0.4 && progress < 1 ? "1" : "0";
-        card.style.transform = `translateX(${progress * travel}px) rotate(${-6 + progress * 6}deg)`;
+        card.style.transform = `translateX(${progress * travel}px) rotate(${
+          -6 + progress * 6
+        }deg)`;
       }
       if (solidRef.current) {
         solidRef.current.style.width =
@@ -172,7 +180,7 @@ export function Landing({ offices }: { offices: PostOffice[] }) {
         opened = true;
         setIntroState("open");
         timers.push(
-          setTimeout(() => setRevealed(true), SPLIT_DURATION_MS * 0.55),
+          setTimeout(() => setRevealed(true), SPLIT_DURATION_MS * 0.55)
         );
         timers.push(setTimeout(finish, SPLIT_DURATION_MS));
         return;
@@ -274,7 +282,7 @@ export function Landing({ offices }: { offices: PostOffice[] }) {
     if (!scroller) return;
     const max = scroller.offsetHeight - window.innerHeight;
     const reduced = window.matchMedia(
-      "(prefers-reduced-motion: reduce)",
+      "(prefers-reduced-motion: reduce)"
     ).matches;
     window.scrollTo({ top: p * max, behavior: reduced ? "auto" : "smooth" });
   };
@@ -314,7 +322,8 @@ export function Landing({ offices }: { offices: PostOffice[] }) {
     const onEnd = (event: TouchEvent) => {
       const dx = event.changedTouches[0].clientX - startX;
       const dy = event.changedTouches[0].clientY - startY;
-      if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.5) step(dx < 0 ? 1 : -1);
+      if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.5)
+        step(dx < 0 ? 1 : -1);
     };
     window.addEventListener("keydown", onKey);
     window.addEventListener("touchstart", onStart, { passive: true });
@@ -336,7 +345,7 @@ export function Landing({ offices }: { offices: PostOffice[] }) {
         <div className="kpl-stage">
           <Wordmark />
           <div className="kpl-row">
-            <p className="kpl-meta kpl-sub">Karnataka philatelic passport</p>
+            <p className="kpl-meta kpl-sub">The philately passport for India</p>
             <nav className="kpl-meta kpl-nav" aria-label="Main">
               <Link href="/explore">Explore</Link>
               <Link href="/passport">Passport</Link>
@@ -369,12 +378,15 @@ export function Landing({ offices }: { offices: PostOffice[] }) {
               <div className="kpl-herobody">
                 <div className="kpl-hero-copy">
                   <h1>
-                    Collect a stamp from every post office in Karnataka,{" "}
+                    Collect a stamp from every post office in India,{" "}
                     <span>one stamp</span> at a time.
                   </h1>
                   <p>
-                    Find the {total} post offices of the Karnataka philatelic
-                    passport, visit them and keep every stamp in one place.
+                    Find post offices on the map, visit them and keep every
+                    stamp in one place.{" "}
+                    {liveCount > 1
+                      ? `${liveCount} states are live.`
+                      : `${stateName_} is live; more states are on the way.`}
                   </p>
                   <div className="kpl-btns">
                     <button
@@ -414,7 +426,7 @@ export function Landing({ offices }: { offices: PostOffice[] }) {
                         fontWeight="700"
                         fill="#1c2b6b"
                       >
-                        KARNATAKA
+                        {stateName_.toUpperCase()}
                       </text>
                       <text
                         x="60"
@@ -479,10 +491,11 @@ export function Landing({ offices }: { offices: PostOffice[] }) {
                 <span>Progress</span>
               </header>
               <p className="kpl-kicker">
-                {firstName ? `Namaskara, ${firstName}` : "Your passport"}
+                {firstName ? `Namaskara, ${firstName}` : "Your passport"} ·{" "}
+                {stateName_}
               </p>
               <p className="kpl-big">
-                <b>{shownStamped}</b> of {total} stamped
+                <b>{shownStamped}</b> of {stateTotal} stamped
               </p>
               <div
                 className="kpl-bar"
@@ -490,18 +503,20 @@ export function Landing({ offices }: { offices: PostOffice[] }) {
                 aria-label="Stamps collected"
                 aria-valuenow={shownStamped}
                 aria-valuemin={0}
-                aria-valuemax={total}
+                aria-valuemax={stateTotal}
               >
                 <i
                   style={{
-                    width: `${Math.round((shownStamped / Math.max(total, 1)) * 100)}%`,
+                    width: `${Math.round(
+                      (shownStamped / Math.max(stateTotal, 1)) * 100
+                    )}%`,
                   }}
                 />
               </div>
               <p className="kpl-note">
                 {isSample
                   ? "An example. Your own count appears here once you start collecting."
-                  : `${total - shownStamped} to go. Keep going.`}
+                  : `${stateTotal - shownStamped} to go. Keep going.`}
               </p>
             </article>
 
@@ -532,9 +547,7 @@ export function Landing({ offices }: { offices: PostOffice[] }) {
                   />
                 ))}
               </div>
-              <p className="kpl-note">
-                Every post office, pinned across Karnataka.
-              </p>
+              <p className="kpl-note">Every post office, pinned on the map.</p>
             </article>
 
             <article className="kpl-card kpl-card--foot">

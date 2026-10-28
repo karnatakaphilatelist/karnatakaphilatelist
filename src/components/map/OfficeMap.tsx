@@ -12,7 +12,7 @@ import {
 } from "react-leaflet";
 import { clusterProgress, getClusterIcon, getPinIcon } from "@/components/map/pin-icons";
 import { clusterPoints } from "@/lib/cluster";
-import { KARNATAKA_CENTER, KARNATAKA_DEFAULT_ZOOM } from "@/lib/constants";
+import { MAP_START_CENTER, MAP_START_ZOOM } from "@/lib/constants";
 import { hasCoordinates } from "@/lib/office-status";
 import type { Coordinates, OfficeWithStatus } from "@/types";
 
@@ -160,8 +160,8 @@ export function OfficeMap({
 }: OfficeMapProps) {
   return (
     <MapContainer
-      center={[KARNATAKA_CENTER.lat, KARNATAKA_CENTER.lng]}
-      zoom={KARNATAKA_DEFAULT_ZOOM}
+      center={[MAP_START_CENTER.lat, MAP_START_CENTER.lng]}
+      zoom={MAP_START_ZOOM}
       className="kp-map size-full"
       zoomControl
     >

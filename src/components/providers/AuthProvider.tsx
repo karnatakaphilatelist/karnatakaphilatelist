@@ -19,6 +19,7 @@ import {
   type PasswordMode,
   type PasswordOutcome,
 } from "@/lib/password-auth";
+import { isNativeApp, NATIVE_AUTH_REDIRECT, parseNativeAuthCode } from "@/lib/native";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 
 interface AuthContextValue {
@@ -63,6 +64,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => data.subscription.unsubscribe();
   }, [supabase]);
 
+  // Inside the mobile apps Google sign-in runs in the system browser (Google refuses embedded
+  // web views) and comes back through the app's own link, carrying the one-time code.
+  useEffect(() => {
+    if (!isNativeApp()) return;
+    let remove: (() => void) | undefined;
+    let cancelled = false;
+    (async () => {
+      const [{ App }, { Browser }] = await Promise.all([
+        import("@capacitor/app"),
+        import("@capacitor/browser"),
+      ]);
+      const handle = await App.addListener("appUrlOpen", async ({ url }) => {
+        const code = parseNativeAuthCode(url);
+        if (!code) return;
+        await supabase.auth.exchangeCodeForSession(code);
+        await Browser.close().catch(() => undefined);
+      });
+      if (cancelled) void handle.remove();
+      else remove = () => void handle.remove();
+    })();
+    return () => {
+      cancelled = true;
+      remove?.();
+    };
+  }, [supabase]);
+
   const openSignIn = useCallback(
     (reason: SignInReason = "manual") => setDialogReason(reason),
     [],
@@ -70,6 +97,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const closeSignIn = useCallback(() => setDialogReason(null), []);
 
   const signInWithGoogle = useCallback(async () => {
+    if (isNativeApp()) {
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: NATIVE_AUTH_REDIRECT,
+          skipBrowserRedirect: true,
+          queryParams: { prompt: "select_account" },
+        },
+      });
+      if (error) throw error;
+      const { Browser } = await import("@capacitor/browser");
+      await Browser.open({ url: data.url });
+      return;
+    }
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {

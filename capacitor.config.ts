@@ -14,9 +14,15 @@ const config: CapacitorConfig = {
     // Sign-in with Google happens in the system browser and returns through this scheme.
     allowNavigation: ["karnatakaphilatelist.vercel.app", "*.supabase.co"],
   },
-  ios: { contentInset: "never", scheme: "Philatelist" },
+  // Keep the page clear of the notch and home bar; Android pads the web view itself.
+  ios: {
+    contentInset: "always",
+    scheme: "Philatelist",
+    backgroundColor: "#fbf5e9",
+  },
   android: { allowMixedContent: false },
   plugins: {
+    SystemBars: { insetsHandling: "native" },
     SplashScreen: { launchShowDuration: 800, backgroundColor: "#cf1830" },
   },
 };

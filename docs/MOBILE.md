@@ -9,6 +9,10 @@ every website release reaches both apps at once. `native-www/` is only the offli
 - Google sign-in opens the system browser (Google refuses embedded web views) and returns through
   `com.karnatakaphilatelist.passport://auth/callback`. Handled in `AuthProvider` + `src/lib/native.ts`.
 - Location, camera and photo permissions are declared for "Near me" and stamp photos.
+- Stamp photos use the phone's own camera/library sheet (`src/lib/native-photo.ts`); "Share my progress" on
+  Passport opens the phone's share sheet (`src/lib/share.ts`).
+- iOS content is inset from the notch (`contentInset: always`); Android pads the web view itself
+  (`SystemBars.insetsHandling: native`).
 
 ## One-time setup in Supabase
 Authentication -> URL Configuration -> Redirect URLs: add `com.karnatakaphilatelist.passport://auth/callback`.

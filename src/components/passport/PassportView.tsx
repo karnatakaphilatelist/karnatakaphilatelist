@@ -11,6 +11,8 @@ import { useStateOffices } from "@/components/providers/StateProvider";
 import { useVisits } from "@/components/providers/VisitsProvider";
 import { StateSwitcher } from "@/components/ui/StateSwitcher";
 import { stateName } from "@/lib/states";
+import { progressShareText, shareContent } from "@/lib/share";
+import { useToast } from "@/components/providers/ToastProvider";
 import { DISCLAIMER } from "@/lib/constants";
 import type { PostOffice } from "@/types";
 
@@ -29,6 +31,7 @@ export function PassportView({
   } = useStateOffices(indiaOffices);
   const { user, isLoading: isAuthLoading, openSignIn } = useAuth();
   const { visits, isReady } = useVisits();
+  const { showToast } = useToast();
   const [editingId, setEditingId] = useState<number | null>(null);
 
   const total = offices.length;
@@ -103,6 +106,28 @@ export function PassportView({
             </p>
           </div>
         </section>
+
+        <button
+          type="button"
+          onClick={async () => {
+            const result = await shareContent({
+              title: "Philatelist",
+              text: progressShareText(
+                visitedOffices.length,
+                total,
+                stateName(stateCode)
+              ),
+              url: window.location.origin,
+            });
+            if (result === "copied")
+              showToast({ message: "Copied. Paste it anywhere to share." });
+            if (result === "failed")
+              showToast({ message: "Could not share. Please try again." });
+          }}
+          className="mt-4 min-h-11 rounded-full border-[1.5px] border-postal bg-white px-5 text-sm font-semibold text-postal-dark"
+        >
+          Share my progress
+        </button>
 
         {user ? (
           <p className="mt-4 text-sm text-muted">

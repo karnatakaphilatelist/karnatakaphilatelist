@@ -152,6 +152,14 @@ export function ExploreView({
               onSignIn={() => openSignIn("manual")}
             />
           ) : null}
+          <div className="pb-1 md:hidden">
+            <StateSwitcher
+              states={states}
+              value={stateCode}
+              onChange={choose}
+              idSuffix="mobile"
+            />
+          </div>
           <div className="flex items-center justify-between pb-2">
             <p className="text-sm text-muted" aria-live="polite">
               {visibleOffices.length} of {offices.length} post offices
@@ -179,12 +187,6 @@ export function ExploreView({
 
       <section aria-label="Map" className="relative isolate min-h-0 flex-1">
         <div className="absolute inset-x-0 top-0 z-[1100] space-y-1 bg-white/95 px-4 pb-1 pt-3 shadow-sm md:hidden">
-          <StateSwitcher
-            states={states}
-            value={stateCode}
-            onChange={choose}
-            idSuffix="mobile"
-          />
           <ExploreControls
             idSuffix="mobile"
             query={query}

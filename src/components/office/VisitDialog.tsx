@@ -6,6 +6,8 @@ import { useVisits } from "@/components/providers/VisitsProvider";
 import { CameraIcon, GlobeIcon, LockIcon } from "@/components/ui/icons";
 import { Sheet } from "@/components/ui/Sheet";
 import { usePhotoUrl } from "@/hooks/usePhotoUrl";
+import { isNativeApp } from "@/lib/native";
+import { pickNativePhoto } from "@/lib/native-photo";
 import { MAX_NOTE_LENGTH } from "@/lib/visits/guest-visits";
 import type { PostOffice, Visit } from "@/types";
 
@@ -25,7 +27,9 @@ export function VisitDialog({ office, onClose }: VisitDialogProps) {
       open={Boolean(office && visit)}
       onClose={onClose}
       title="Your visit"
-      description={office && visit ? `${office.name} · ${visit.visitedAt}` : undefined}
+      description={
+        office && visit ? `${office.name} · ${visit.visitedAt}` : undefined
+      }
     >
       {/* Keyed so the form state resets for every office it is opened on. */}
       {office && visit ? (
@@ -48,7 +52,8 @@ function VisitForm({ visit, onDone }: { visit: Visit; onDone: () => void }) {
 
   const savedPhotoUrl = usePhotoUrl(visit.photoPath);
   const shownPhotoUrl = previewUrl ?? (removePhoto ? null : savedPhotoUrl);
-  const hasPhoto = Boolean(newPhoto) || (Boolean(visit.photoPath) && !removePhoto);
+  const hasPhoto =
+    Boolean(newPhoto) || (Boolean(visit.photoPath) && !removePhoto);
 
   // Free the temporary preview URL when it is replaced or the form closes.
   useEffect(() => {
@@ -60,6 +65,15 @@ function VisitForm({ visit, onDone }: { visit: Visit; onDone: () => void }) {
   function handlePhotoChange(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
     if (!file) return;
+    acceptPhoto(file);
+  }
+
+  async function handleNativePhoto() {
+    const file = await pickNativePhoto();
+    if (file) acceptPhoto(file);
+  }
+
+  function acceptPhoto(file: File) {
     setNewPhoto(file);
     setPreviewUrl(URL.createObjectURL(file));
     setRemovePhoto(false);
@@ -122,7 +136,9 @@ function VisitForm({ visit, onDone }: { visit: Visit; onDone: () => void }) {
               <CameraIcon className="size-5" />
             </span>
           )}
-          <span className="flex-1 text-sm font-semibold">Stamp photo added</span>
+          <span className="flex-1 text-sm font-semibold">
+            Stamp photo added
+          </span>
           <button
             type="button"
             onClick={handleRemovePhoto}
@@ -132,7 +148,16 @@ function VisitForm({ visit, onDone }: { visit: Visit; onDone: () => void }) {
           </button>
         </div>
       ) : (
-        <label className="mt-1.5 flex min-h-16 w-full cursor-pointer items-center justify-center gap-2 rounded-2xl border-[1.5px] border-dashed border-line-strong bg-paper px-4 text-base font-semibold">
+        <label
+          onClick={(event) => {
+            // In the mobile apps the phone's own camera sheet is nicer than the file chooser.
+            if (isNativeApp()) {
+              event.preventDefault();
+              void handleNativePhoto();
+            }
+          }}
+          className="mt-1.5 flex min-h-16 w-full cursor-pointer items-center justify-center gap-2 rounded-2xl border-[1.5px] border-dashed border-line-strong bg-paper px-4 text-base font-semibold"
+        >
           <CameraIcon className="size-5" />
           Take or upload a photo
           <input
@@ -187,7 +212,12 @@ interface VisibilityOptionProps {
   icon: ReactNode;
 }
 
-function VisibilityOption({ checked, onSelect, label, icon }: VisibilityOptionProps) {
+function VisibilityOption({
+  checked,
+  onSelect,
+  label,
+  icon,
+}: VisibilityOptionProps) {
   return (
     <label
       className={`flex min-h-11 flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-xl text-sm font-bold has-[:focus-visible]:outline-3 has-[:focus-visible]:outline-focus ${

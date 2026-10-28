@@ -102,12 +102,36 @@ owners."
 
 "Namma Karnataka, one stamp at a time."
 
-## Landing page (`/`) and explorer (`/explore`)
+## Landing page (`/`) and the app
 
 `/` is a full-screen front door with no app header. First visit in a session: red screen, a
 postcard glides along a dashed line (counter 000 to the number of post offices), drops into a
-post box, the screen splits open, the page appears in red-on-white and the five dots roll in.
-It plays once per browser session, is skipped for `prefers-reduced-motion`, and has a Skip
-button. Below it, scrolling grows the map card (scroll-driven `--p`) until it fills the screen
-with the Namaskara panel, the Open the map button and the India Post disclaimer. The explorer
-lives at `/explore`.
+post box, the screen splits open and the page appears. It plays once per session, is skipped
+for `prefers-reduced-motion`, has a Skip button, and ends itself after 7 seconds or three
+janky frames in a row so a slow browser is never stuck on the red screen.
+
+After the intro: the crimson PHILATELIST wordmark (vector, used as a CSS mask), then seven
+cream cards that slide sideways as the page scrolls (scroll-driven `--p`, 0 to 1 across the
+whole scroll, no dead zone): welcome, progress sample, Find, Visit, Stamp, a mini map, and the
+disclaimer. Moving between cards:
+
+- Hover the left or right screen edge (desktop only) to reveal a round arrow, centred on the
+  cards; click to step. Arrows step by scroll position, so they work at the end of the track.
+- Ticks under the cards are 44px touch targets and jump to a card.
+- Arrow keys step too (ignored while typing); swipe left or right on touch screens.
+- Cards scrolled out of sight are `inert`, so Tab never lands on something hidden.
+- One standalone "Open the map" pill sits under the ticks. It is the only such button on
+  the page; the hero button says "See how it works" and scrolls to the steps.
+
+The rest of the app matches: the header uses the same crimson wordmark, Passport shows the
+stamp count in italic crimson Fraunces inside outlined 18px cards, links and accents are
+crimson, buttons are pills, map pins are small round dots and nearby offices merge into
+numbered bubbles (all stamped: green, some stamped: half green, none: indigo).
+
+## Passwords
+
+Sign-in is Google, email and password, or an emailed one-time link. "Forgot password" sends a
+reset email that lands on `/account/password`, where a signed-in person sets or changes a
+password. That page is also linked from the header and the Passport page. The auth callback
+accepts both `code` links (same browser only) and `token_hash` links (any browser; needs a
+custom email template, which needs custom SMTP in Supabase).

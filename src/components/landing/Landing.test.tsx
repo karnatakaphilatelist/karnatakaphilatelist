@@ -152,4 +152,27 @@ describe("Landing", () => {
       screen.getAllByRole("button", { name: /Go to card \d+ of \d+/ }).length,
     ).toBeGreaterThan(0);
   });
+
+  it("moves through the cards with the arrow keys and ignores typing in fields", () => {
+    mockMotion(true);
+    window.scrollTo = vi.fn() as unknown as typeof window.scrollTo;
+    render(<Landing offices={offices} />);
+    fireEvent.keyDown(window, { key: "ArrowRight" });
+    expect(window.scrollTo).toHaveBeenCalledTimes(1);
+
+    const input = document.createElement("input");
+    document.body.appendChild(input);
+    fireEvent.keyDown(input, { key: "ArrowRight" });
+    expect(window.scrollTo).toHaveBeenCalledTimes(1);
+    input.remove();
+  });
+
+  it("offers one Open the map button, and the hero button scrolls to how it works", () => {
+    mockMotion(true);
+    window.scrollTo = vi.fn() as unknown as typeof window.scrollTo;
+    render(<Landing offices={offices} />);
+    expect(screen.getAllByRole("link", { name: /open the map/i })).toHaveLength(1);
+    fireEvent.click(screen.getByRole("button", { name: /see how it works/i }));
+    expect(window.scrollTo).toHaveBeenCalled();
+  });
 });

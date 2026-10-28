@@ -10,7 +10,7 @@ import {
   useMap,
   useMapEvents,
 } from "react-leaflet";
-import { getClusterIcon, getPinIcon } from "@/components/map/pin-icons";
+import { clusterProgress, getClusterIcon, getPinIcon } from "@/components/map/pin-icons";
 import { clusterPoints } from "@/lib/cluster";
 import { KARNATAKA_CENTER, KARNATAKA_DEFAULT_ZOOM } from "@/lib/constants";
 import { hasCoordinates } from "@/lib/office-status";
@@ -103,8 +103,14 @@ function OfficeMarkers({
             <Marker
               key={`c${cluster.key}-${cluster.ids.length}`}
               position={[cluster.lat, cluster.lng]}
-              icon={getClusterIcon(cluster.ids.length)}
-              title={`${cluster.ids.length} post offices`}
+              icon={getClusterIcon(
+                cluster.ids.length,
+                clusterProgress(
+                  cluster.ids.filter((id) => byId.get(id)?.status === "visited").length,
+                  cluster.ids.length,
+                ),
+              )}
+              title={`${cluster.ids.length} post offices, ${cluster.ids.filter((id) => byId.get(id)?.status === "visited").length} stamped`}
               eventHandlers={{
                 click: () => {
                   const bounds = cluster.ids

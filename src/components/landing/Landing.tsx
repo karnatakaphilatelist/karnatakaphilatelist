@@ -229,6 +229,13 @@ export function Landing({ offices }: { offices: PostOffice[] }) {
           const stop = Math.min(1, (card.offsetLeft - pad) / span);
           if (stop <= p + 0.01) current = i;
         });
+        // Cards scrolled out of sight must not be reachable with the Tab key.
+        cards.forEach((card) => {
+          const rect = card.getBoundingClientRect();
+          const visible = rect.right > 0 && rect.left < window.innerWidth;
+          if (visible) card.removeAttribute("inert");
+          else card.setAttribute("inert", "");
+        });
         setCardCount(cards.length);
         // Without a layout (for example before styles load) keep the first card selected.
         setCardIndex(track.offsetWidth > 0 ? current : 0);
@@ -286,6 +293,39 @@ export function Landing({ offices }: { offices: PostOffice[] }) {
     scrollToStop(next ?? (dir === 1 ? 1 : 0));
   };
 
+  // Arrow keys and horizontal swipes move through the cards too.
+  useEffect(() => {
+    const onKey = (event: KeyboardEvent) => {
+      const target = event.target;
+      if (
+        target instanceof HTMLElement &&
+        target.closest("input, textarea, select, [contenteditable], dialog")
+      )
+        return;
+      if (event.key === "ArrowRight") step(1);
+      else if (event.key === "ArrowLeft") step(-1);
+    };
+    let startX = 0;
+    let startY = 0;
+    const onStart = (event: TouchEvent) => {
+      startX = event.touches[0].clientX;
+      startY = event.touches[0].clientY;
+    };
+    const onEnd = (event: TouchEvent) => {
+      const dx = event.changedTouches[0].clientX - startX;
+      const dy = event.changedTouches[0].clientY - startY;
+      if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.5) step(dx < 0 ? 1 : -1);
+    };
+    window.addEventListener("keydown", onKey);
+    window.addEventListener("touchstart", onStart, { passive: true });
+    window.addEventListener("touchend", onEnd, { passive: true });
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      window.removeEventListener("touchstart", onStart);
+      window.removeEventListener("touchend", onEnd);
+    };
+  });
+
   return (
     <div ref={rootRef} className={`kpl${revealed ? " in" : ""}`}>
       <noscript>
@@ -337,9 +377,13 @@ export function Landing({ offices }: { offices: PostOffice[] }) {
                     passport, visit them and keep every stamp in one place.
                   </p>
                   <div className="kpl-btns">
-                    <Link href="/explore" className="kpl-btn kpl-btn--red">
-                      Open the map
-                    </Link>
+                    <button
+                      type="button"
+                      className="kpl-btn kpl-btn--red"
+                      onClick={() => goToCard(2)}
+                    >
+                      See how it works
+                    </button>
                     <Link href="/passport" className="kpl-btn kpl-btn--line">
                       My passport
                     </Link>

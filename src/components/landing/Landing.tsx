@@ -248,108 +248,118 @@ export function Landing({ offices }: { offices: PostOffice[] }) {
 
           <div className="kpl-track">
             <article className="kpl-card kpl-card--hero">
-              <div className="kpl-hero-copy">
-                <h1>
-                  Collect a stamp from every post office in Karnataka,{" "}
-                  <span>one stamp</span> at a time.
-                </h1>
-                <p>
-                  Find the {total} post offices of the Karnataka philatelic
-                  passport, visit them and keep every stamp in one place.
-                </p>
-                <div className="kpl-btns">
-                  <Link href="/explore" className="kpl-btn kpl-btn--red">
-                    Open the map
-                  </Link>
-                  <Link href="/passport" className="kpl-btn kpl-btn--line">
-                    My passport
-                  </Link>
+              <header className="kpl-cardhead">
+                <span>01</span>
+                <span>Welcome</span>
+              </header>
+              <div className="kpl-herobody">
+                <div className="kpl-hero-copy">
+                  <h1>
+                    Collect a stamp from every post office in Karnataka,{" "}
+                    <span>one stamp</span> at a time.
+                  </h1>
+                  <p>
+                    Find the {total} post offices of the Karnataka philatelic
+                    passport, visit them and keep every stamp in one place.
+                  </p>
+                  <div className="kpl-btns">
+                    <Link href="/explore" className="kpl-btn kpl-btn--red">
+                      Open the map
+                    </Link>
+                    <Link href="/passport" className="kpl-btn kpl-btn--line">
+                      My passport
+                    </Link>
+                  </div>
                 </div>
-              </div>
-              <div className="kpl-coral" aria-hidden="true">
-                <div className="kp-perforated kpl-stampart">
-                  <svg viewBox="0 0 120 150" width="100%" height="100%">
-                    <rect
-                      x="10"
-                      y="10"
-                      width="100"
-                      height="100"
-                      fill="#f1e8d3"
+                <div className="kpl-coral" aria-hidden="true">
+                  <div className="kp-perforated kpl-stampart">
+                    <svg viewBox="0 0 120 150" width="100%" height="100%">
+                      <rect
+                        x="10"
+                        y="10"
+                        width="100"
+                        height="100"
+                        fill="#f1e8d3"
+                        stroke="#1c2b6b"
+                        strokeWidth="2"
+                      />
+                      <path
+                        d="M25 90 L45 55 L62 78 L75 62 L95 90 Z"
+                        fill="#1c2b6b"
+                      />
+                      <circle cx="80" cy="34" r="9" fill="#cf1830" />
+                      <text
+                        x="60"
+                        y="132"
+                        textAnchor="middle"
+                        fontSize="13"
+                        fontWeight="700"
+                        fill="#1c2b6b"
+                      >
+                        KARNATAKA
+                      </text>
+                      <text
+                        x="60"
+                        y="145"
+                        textAnchor="middle"
+                        fontSize="9"
+                        fill="#1c2b6b"
+                      >
+                        INDIA · POST
+                      </text>
+                    </svg>
+                  </div>
+                  <svg
+                    className="kpl-postmark"
+                    viewBox="0 0 100 100"
+                    width="96"
+                    height="96"
+                  >
+                    <circle
+                      cx="50"
+                      cy="50"
+                      r="46"
+                      fill="none"
                       stroke="#1c2b6b"
-                      strokeWidth="2"
+                      strokeWidth="2.5"
                     />
-                    <path
-                      d="M25 90 L45 55 L62 78 L75 62 L95 90 Z"
-                      fill="#1c2b6b"
+                    <circle
+                      cx="50"
+                      cy="50"
+                      r="38"
+                      fill="none"
+                      stroke="#1c2b6b"
+                      strokeWidth="1.5"
                     />
-                    <circle cx="80" cy="34" r="9" fill="#cf1830" />
                     <text
-                      x="60"
-                      y="132"
+                      x="50"
+                      y="46"
                       textAnchor="middle"
-                      fontSize="13"
+                      fontSize="11"
                       fontWeight="700"
                       fill="#1c2b6b"
                     >
-                      KARNATAKA
+                      BENGALURU
                     </text>
                     <text
-                      x="60"
-                      y="145"
+                      x="50"
+                      y="60"
                       textAnchor="middle"
                       fontSize="9"
                       fill="#1c2b6b"
                     >
-                      INDIA · POST
+                      STAMPED
                     </text>
                   </svg>
                 </div>
-                <svg
-                  className="kpl-postmark"
-                  viewBox="0 0 100 100"
-                  width="96"
-                  height="96"
-                >
-                  <circle
-                    cx="50"
-                    cy="50"
-                    r="46"
-                    fill="none"
-                    stroke="#1c2b6b"
-                    strokeWidth="2.5"
-                  />
-                  <circle
-                    cx="50"
-                    cy="50"
-                    r="38"
-                    fill="none"
-                    stroke="#1c2b6b"
-                    strokeWidth="1.5"
-                  />
-                  <text
-                    x="50"
-                    y="46"
-                    textAnchor="middle"
-                    fontSize="11"
-                    fontWeight="700"
-                    fill="#1c2b6b"
-                  >
-                    BENGALURU
-                  </text>
-                  <text
-                    x="50"
-                    y="60"
-                    textAnchor="middle"
-                    fontSize="9"
-                    fill="#1c2b6b"
-                  >
-                    STAMPED
-                  </text>
-                </svg>
               </div>
             </article>
 
             <article className="kpl-card kpl-card--progress">
+              <header className="kpl-cardhead">
+                <span>02</span>
+                <span>Progress</span>
+              </header>
               <p className="kpl-kicker">
                 {firstName ? `Namaskara, ${firstName}` : "Your passport"}
               </p>
@@ -379,7 +389,10 @@ export function Landing({ offices }: { offices: PostOffice[] }) {
 
             {STEPS.map((step) => (
               <article key={step.title} className="kpl-card kpl-card--step">
-                <p className="kpl-kicker">Step {step.n}</p>
+                <header className="kpl-cardhead">
+                  <span>{String(step.n + 2).padStart(2, "0")}</span>
+                  <span>Step {step.n} of 3</span>
+                </header>
                 <h2>{step.title}</h2>
                 <p>{step.text}</p>
               </article>
@@ -398,14 +411,16 @@ export function Landing({ offices }: { offices: PostOffice[] }) {
                   />
                 ))}
               </div>
-              <p className="kpl-kicker">The map</p>
               <p className="kpl-note">
                 Every post office, pinned across Karnataka.
               </p>
             </article>
 
             <article className="kpl-card kpl-card--foot">
-              <p className="kpl-kicker">Good to know</p>
+              <header className="kpl-cardhead">
+                <span>07</span>
+                <span>Good to know</span>
+              </header>
               <p className="kpl-fine">{DISCLAIMER}</p>
               <p className="kpl-links">
                 <Link href="/privacy">Privacy</Link>

@@ -491,8 +491,10 @@ export function Landing({ offices }: { offices: PostOffice[] }) {
                 <span>Progress</span>
               </header>
               <p className="kpl-kicker">
-                {firstName ? `Namaskara, ${firstName}` : "Your passport"} ·{" "}
-                {stateName_}
+                <span>
+                  {firstName ? `Namaskara, ${firstName}` : "Your passport"}
+                </span>{" "}
+                · {stateName_}
               </p>
               <p className="kpl-big">
                 <b>{shownStamped}</b> of {stateTotal} stamped

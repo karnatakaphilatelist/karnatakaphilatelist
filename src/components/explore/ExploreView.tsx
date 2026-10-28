@@ -127,7 +127,7 @@ export function ExploreView({ offices, initialSelectedId }: ExploreViewProps) {
               type="button"
               onClick={handleFindNearMe}
               disabled={isLocating}
-              className="flex min-h-11 items-center gap-1.5 rounded-full px-3 text-sm font-semibold text-focus disabled:opacity-60"
+              className="flex min-h-11 items-center gap-1.5 rounded-full px-3 text-sm font-semibold text-postal disabled:opacity-60"
             >
               <LocateIcon className="size-4" />
               {isLocating ? "Locating…" : "Near me"}

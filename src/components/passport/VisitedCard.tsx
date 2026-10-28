@@ -16,7 +16,7 @@ export function VisitedCard({ office, visit, onEdit }: VisitedCardProps) {
   const photoUrl = usePhotoUrl(visit.photoPath);
 
   return (
-    <li className="rounded-2xl bg-white p-4 shadow-sm">
+    <li className="rounded-[18px] border border-line bg-white p-4">
       <div className="flex items-start gap-3">
         <StampThumb path={office.stampImagePath} status="visited" className="size-12" />
         <div className="min-w-0 flex-1">

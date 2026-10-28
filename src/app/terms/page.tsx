@@ -50,7 +50,7 @@ export default function TermsPage() {
 
       <LegalSection heading="Ending your use">
         <p>
-          You can stop using the service at any time and ask us to delete your account. See the
+          You can stop using the service at any time and delete your account yourself from the Account page, or ask us to. See the
           Privacy Policy for how your data is handled.
         </p>
       </LegalSection>

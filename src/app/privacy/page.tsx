@@ -77,7 +77,8 @@ export default function PrivacyPage() {
         <p>
           Your information stays until you remove it. You can delete any visit, with its note and
           photo, at any time from your passport. To delete your whole account and everything in it,
-          email us and we will do it.
+          open the Account page and choose Delete my account. It removes your stamps, notes and
+          photos straight away. You can also email us and we will do it for you.
         </p>
       </LegalSection>
 

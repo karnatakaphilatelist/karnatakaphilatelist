@@ -12,6 +12,7 @@ import {
   type ReactNode,
 } from "react";
 import { AuthDialog, type SignInReason } from "@/components/auth/AuthDialog";
+import { deleteMyAccount } from "@/lib/delete-account";
 import { fetchGoogleEnabled } from "@/lib/auth-settings";
 import {
   friendlyPasswordError,
@@ -32,6 +33,8 @@ interface AuthContextValue {
   isLoading: boolean;
   openSignIn: (reason?: SignInReason) => void;
   signOut: () => Promise<void>;
+  /** Permanently deletes the signed-in account and its data, then signs out. */
+  deleteAccount: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -187,9 +190,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await supabase.auth.signOut();
   }, [supabase]);
 
+  const deleteAccount = useCallback(async () => {
+    if (!user) return;
+    await deleteMyAccount(supabase, user.id);
+    await supabase.auth.signOut();
+  }, [supabase, user]);
+
   const value = useMemo(
-    () => ({ user, isLoading, openSignIn, signOut }),
-    [user, isLoading, openSignIn, signOut]
+    () => ({ user, isLoading, openSignIn, signOut, deleteAccount }),
+    [user, isLoading, openSignIn, signOut, deleteAccount]
   );
 
   return (

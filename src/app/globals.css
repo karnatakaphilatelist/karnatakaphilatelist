@@ -180,3 +180,18 @@ body {
     margin-top: 7.5rem;
   }
 }
+
+/* The same vector wordmark as the landing page, sized for the app header. */
+.kp-wordmark {
+  display: block;
+  height: 17px;
+  aspect-ratio: 1181 / 161;
+  background: var(--color-postal);
+  -webkit-mask: url("/brand/wordmark.svg") center / 100% 100% no-repeat;
+  mask: url("/brand/wordmark.svg") center / 100% 100% no-repeat;
+}
+@media (min-width: 768px) {
+  .kp-wordmark {
+    height: 20px;
+  }
+}

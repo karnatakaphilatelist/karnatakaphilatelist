@@ -54,12 +54,12 @@ export function PassportView({ offices }: { offices: PostOffice[] }) {
 
         <section
           aria-label="Overall progress"
-          className="mt-4 flex items-center gap-5 rounded-3xl bg-white p-5 shadow-sm"
+          className="mt-4 flex items-center gap-5 rounded-[18px] border border-line bg-white p-5"
         >
           <ProgressRing visited={visitedOffices.length} total={total} />
           <div>
             <p className="flex items-baseline gap-1.5 whitespace-nowrap font-display font-bold leading-none">
-              <span className="text-4xl">{visitedOffices.length}</span>
+              <span className="text-5xl font-semibold italic text-postal">{visitedOffices.length}</span>
               <span className="text-lg font-semibold text-muted">of {total}</span>
             </p>
             <p className="mt-1 text-sm text-muted">post offices stamped</p>
@@ -93,7 +93,7 @@ export function PassportView({ offices }: { offices: PostOffice[] }) {
             Visited
           </h2>
           {visitedOffices.length === 0 ? (
-            <div className="mt-2.5 rounded-2xl bg-white p-6 text-center text-muted">
+            <div className="mt-2.5 rounded-[18px] border border-line bg-white p-6 text-center text-muted">
               <p>No stamps yet. Find a post office and tap Mark as visited.</p>
               <Link
                 href="/explore"
@@ -120,7 +120,7 @@ export function PassportView({ offices }: { offices: PostOffice[] }) {
           <h2 id="districts-heading" className="font-display text-xl font-bold">
             By district
           </h2>
-          <div className="mt-3 rounded-2xl bg-white p-4 shadow-sm">
+          <div className="mt-3 rounded-[18px] border border-line bg-white p-4">
             <DistrictProgress offices={offices} visits={visits} />
           </div>
         </section>

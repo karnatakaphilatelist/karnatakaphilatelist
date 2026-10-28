@@ -4,20 +4,18 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { AuthButton } from "@/components/auth/AuthButton";
 import { isActivePath, NAV_ITEMS } from "@/components/layout/nav-items";
-import { MailIcon } from "@/components/ui/icons";
 
 export function AppHeader() {
   const pathname = usePathname();
 
   return (
     <header className="flex min-h-16 shrink-0 items-center justify-between gap-4 border-b border-line bg-card px-4 md:px-6">
-      <Link href="/" className="flex items-center gap-3">
-        <span className="kp-perforated grid size-9 place-items-center bg-postal text-white">
-          <MailIcon className="size-5" />
-        </span>
-        <span className="font-display text-base font-bold tracking-tight md:text-lg">
-          Karnataka Philatelic Passport
-        </span>
+      <Link href="/" className="flex min-h-11 items-center">
+        <span
+          className="kp-wordmark"
+          role="img"
+          aria-label="Karnataka Philatelic Passport"
+        />
       </Link>
 
       <div className="flex items-center gap-2">

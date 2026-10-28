@@ -162,3 +162,12 @@ body {
     margin-top: 7.5rem;
   }
 }
+
+/* Small uppercase monospace label used on controls, like a printed form. */
+.kp-label {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}

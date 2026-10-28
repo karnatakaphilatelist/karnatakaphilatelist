@@ -11,7 +11,7 @@ const STYLES: Record<OfficeStatus, string> = {
 export function StatusBadge({ status }: { status: OfficeStatus }) {
   return (
     <span
-      className={`shrink-0 rounded-xl px-2.5 py-1 text-xs font-semibold ${STYLES[status]}`}
+      className={`shrink-0 rounded-sm px-2 py-1 kp-label ${STYLES[status]}`}
     >
       {STATUS_LABEL[status]}
     </span>

@@ -87,6 +87,7 @@ export function Landing({ offices }: { offices: PostOffice[] }) {
   const cardRef = useRef<HTMLDivElement>(null);
   const solidRef = useRef<HTMLDivElement>(null);
   const countRef = useRef<HTMLDivElement>(null);
+  const introRef = useRef<HTMLDivElement>(null);
   const skipRef = useRef<() => void>(() => undefined);
   const [introState, setIntroState] = useState<IntroState>("playing");
   const [revealed, setRevealed] = useState(false);
@@ -131,6 +132,7 @@ export function Landing({ offices }: { offices: PostOffice[] }) {
     };
     skipRef.current = finish;
 
+    introRef.current?.setAttribute("data-go", "");
     const start = performance.now();
     let opened = false;
     const tick = (now: number) => {
@@ -420,6 +422,7 @@ export function Landing({ offices }: { offices: PostOffice[] }) {
       </div>
 
       <div
+        ref={introRef}
         className="kpl-intro"
         data-state={introState}
         aria-hidden={introState === "done"}

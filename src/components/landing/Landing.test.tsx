@@ -1,11 +1,20 @@
-import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
+import {
+  act,
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+} from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { Landing } from "@/components/landing/Landing";
 import { INTRO_SEEN_KEY } from "@/lib/landing";
 import type { PostOffice } from "@/types";
 
 const auth = vi.hoisted(() => ({
-  user: null as { email: string; user_metadata: Record<string, unknown> } | null,
+  user: null as {
+    email: string;
+    user_metadata: Record<string, unknown>;
+  } | null,
   openSignIn: vi.fn(),
   signOut: vi.fn(),
 }));
@@ -17,8 +26,24 @@ vi.mock("@/components/providers/VisitsProvider", () => ({
 }));
 
 const offices: PostOffice[] = [
-  { id: 1, name: "Mysuru GPO", pincode: "570001", district: "Mysuru", lat: 12.3, lng: 76.6, stampImagePath: null },
-  { id: 2, name: "Hampi", pincode: "583239", district: "Vijayanagara", lat: 15.3, lng: 76.4, stampImagePath: null },
+  {
+    id: 1,
+    name: "Mysuru GPO",
+    pincode: "570001",
+    district: "Mysuru",
+    lat: 12.3,
+    lng: 76.6,
+    stampImagePath: null,
+  },
+  {
+    id: 2,
+    name: "Hampi",
+    pincode: "583239",
+    district: "Vijayanagara",
+    lat: 15.3,
+    lng: 76.4,
+    stampImagePath: null,
+  },
 ];
 
 function mockMotion(reduce: boolean) {
@@ -46,40 +71,58 @@ describe("Landing", () => {
     expect(screen.getByRole("heading", { level: 1 }).textContent).toContain(
       "every post office in Karnataka",
     );
-    const links = screen.getAllByRole("link", { name: /open the map|explore/i });
-    expect(links.every((l) => l.getAttribute("href") === "/explore")).toBe(true);
+    const links = screen.getAllByRole("link", {
+      name: /open the map|explore/i,
+    });
+    expect(links.every((l) => l.getAttribute("href") === "/explore")).toBe(
+      true,
+    );
   });
 
   it("shows the disclaimer and legal links", () => {
     render(<Landing offices={offices} />);
-    expect(screen.getByText(/not run, endorsed or sponsored by India Post/)).toBeDefined();
-    expect(screen.getByRole("link", { name: "Privacy" }).getAttribute("href")).toBe("/privacy");
-    expect(screen.getByRole("link", { name: "Terms" }).getAttribute("href")).toBe("/terms");
+    expect(
+      screen.getByText(/not run, endorsed or sponsored by India Post/),
+    ).toBeDefined();
+    expect(
+      screen.getByRole("link", { name: "Privacy" }).getAttribute("href"),
+    ).toBe("/privacy");
+    expect(
+      screen.getByRole("link", { name: "Terms" }).getAttribute("href"),
+    ).toBe("/terms");
   });
 
   it("plays the intro for a first visit and ends it on Skip", () => {
     const { container } = render(<Landing offices={offices} />);
     const intro = container.querySelector(".kpl-intro");
     expect(intro?.getAttribute("data-state")).toBe("playing");
-    expect(document.documentElement.hasAttribute("data-intro-playing")).toBe(true);
+    expect(document.documentElement.hasAttribute("data-intro-playing")).toBe(
+      true,
+    );
     act(() => {
       fireEvent.click(screen.getByRole("button", { name: "Skip" }));
     });
     expect(intro?.getAttribute("data-state")).toBe("done");
-    expect(document.documentElement.hasAttribute("data-intro-playing")).toBe(false);
+    expect(document.documentElement.hasAttribute("data-intro-playing")).toBe(
+      false,
+    );
     expect(window.sessionStorage.getItem(INTRO_SEEN_KEY)).toBe("1");
   });
 
   it("skips the intro when it was already seen this session", () => {
     window.sessionStorage.setItem(INTRO_SEEN_KEY, "1");
     const { container } = render(<Landing offices={offices} />);
-    expect(container.querySelector(".kpl-intro")?.getAttribute("data-state")).toBe("done");
+    expect(
+      container.querySelector(".kpl-intro")?.getAttribute("data-state"),
+    ).toBe("done");
   });
 
   it("skips the intro when the person prefers reduced motion", () => {
     mockMotion(true);
     const { container } = render(<Landing offices={offices} />);
-    expect(container.querySelector(".kpl-intro")?.getAttribute("data-state")).toBe("done");
+    expect(
+      container.querySelector(".kpl-intro")?.getAttribute("data-state"),
+    ).toBe("done");
   });
 
   it("opens sign-in for a guest", () => {

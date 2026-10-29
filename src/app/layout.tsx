@@ -30,7 +30,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <script
           dangerouslySetInnerHTML={{
             __html:
-              'try{if(sessionStorage.getItem("kp:intro-seen:v1"))document.documentElement.setAttribute("data-intro-seen","")}catch(e){}',
+              'try{if(localStorage.getItem("kp:intro-seen:v1")||sessionStorage.getItem("kp:intro-seen:v1"))document.documentElement.setAttribute("data-intro-seen","")}catch(e){}',
           }}
         />
       </head>

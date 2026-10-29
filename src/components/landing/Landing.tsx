@@ -15,7 +15,8 @@ import { CONTACT_EMAIL, DISCLAIMER } from "@/lib/constants";
 import {
   cardProgress,
   formatCounter,
-  INTRO_SEEN_KEY,
+  INTRO_PLAYED_FLAG,
+  SKIP_INTRO_COOKIE,
   projectPins,
   scrollProgress,
   SPLIT_AT,
@@ -42,30 +43,20 @@ const STEPS = [
   },
 ];
 
+const SKIP_COOKIE = new RegExp(`(?:^|; )${SKIP_INTRO_COOKIE}=1`);
+
 type IntroState = "playing" | "open" | "done";
 
-/** The intro plays once per device (and once per tab where storage is limited). */
+/** The intro plays on every fresh load, but not twice in one load or straight after signing in. */
 function hasSeenIntro(): boolean {
-  try {
-    if (window.localStorage.getItem(INTRO_SEEN_KEY) === "1") return true;
-  } catch {
-    // Fall through to the tab-level flag.
-  }
-  try {
-    return window.sessionStorage.getItem(INTRO_SEEN_KEY) === "1";
-  } catch {
-    return false;
-  }
+  const flagged = (window as unknown as Record<string, unknown>)[
+    INTRO_PLAYED_FLAG
+  ];
+  return flagged === true || SKIP_COOKIE.test(document.cookie);
 }
 
 function rememberIntro(): void {
-  for (const store of ["localStorage", "sessionStorage"] as const) {
-    try {
-      window[store].setItem(INTRO_SEEN_KEY, "1");
-    } catch {
-      // Without storage the intro simply plays again next time.
-    }
-  }
+  (window as unknown as Record<string, unknown>)[INTRO_PLAYED_FLAG] = true;
 }
 
 /** The wordmark in white (on the red intro) or red (on the page), as one line or stacked on phones. */

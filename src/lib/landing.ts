@@ -1,6 +1,10 @@
 /** Small pure helpers for the landing page, kept apart from React so they are easy to test. */
 
-export const INTRO_SEEN_KEY = "kp:intro-seen:v1";
+/** Set (for two minutes) when someone has just signed in, so the intro does not replay on the way back. */
+export const SKIP_INTRO_COOKIE = "kp_skip_intro";
+export const SKIP_INTRO_SECONDS = 120;
+/** Marks on window that the intro already played in this page load (a reload clears it). */
+export const INTRO_PLAYED_FLAG = "__kpIntroPlayed";
 
 /** Seconds into the intro at which the postcard starts and finishes its trip along the line. */
 export const CARD_TRAVEL = { start: 0.5, end: 3.0 } as const;
@@ -23,7 +27,9 @@ export function cardProgress(seconds: number): number {
 
 /** The counter text, always three digits: 000 up to the number of post offices. */
 export function formatCounter(progress: number, total: number): string {
-  const value = Math.round(Math.min(1, Math.max(0, progress)) * Math.max(0, total));
+  const value = Math.round(
+    Math.min(1, Math.max(0, progress)) * Math.max(0, total)
+  );
   return String(value).padStart(3, "0");
 }
 
@@ -32,7 +38,11 @@ export function formatCounter(progress: number, total: number): string {
  * It reaches 1 after `finishAt` (default 70%) of the available scroll, so the
  * last stretch of scrolling simply rests on the open map.
  */
-export function scrollProgress(scrollY: number, maxScroll: number, finishAt = 0.7): number {
+export function scrollProgress(
+  scrollY: number,
+  maxScroll: number,
+  finishAt = 0.7
+): number {
   if (maxScroll <= 0) return 0;
   return Math.min(1, Math.max(0, scrollY / (maxScroll * finishAt)));
 }
@@ -58,7 +68,7 @@ export interface PlacedPin {
 export function projectPins(offices: Located[], padding = 8): PlacedPin[] {
   const located = offices.filter(
     (office): office is Located & { lat: number; lng: number } =>
-      office.lat !== null && office.lng !== null,
+      office.lat !== null && office.lng !== null
   );
   if (located.length === 0) return [];
 

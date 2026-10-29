@@ -4,7 +4,19 @@ import {
   failureRedirectUrl,
   safeRedirectPath,
 } from "@/lib/auth-callback";
+import { SKIP_INTRO_COOKIE, SKIP_INTRO_SECONDS } from "@/lib/landing";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+
+/** Sends the person on after signing in, asking the welcome page not to replay its intro. */
+function signedInRedirect(origin: string, next: string | null) {
+  const response = NextResponse.redirect(`${origin}${safeRedirectPath(next)}`);
+  response.cookies.set(SKIP_INTRO_COOKIE, "1", {
+    maxAge: SKIP_INTRO_SECONDS,
+    path: "/",
+    sameSite: "lax",
+  });
+  return response;
+}
 
 /** Finishes Google and email-link sign-in by exchanging the code for a session. */
 export async function GET(request: Request) {
@@ -16,14 +28,20 @@ export async function GET(request: Request) {
 
   // Email links built with a token hash work in any browser, unlike the code flow, which only
   // works where the link was requested. Used by the reset-password email template.
-  if (tokenHash && (type === "recovery" || type === "magiclink" || type === "email")) {
+  if (
+    tokenHash &&
+    (type === "recovery" || type === "magiclink" || type === "email")
+  ) {
     const supabase = await createSupabaseServerClient();
-    const { error } = await supabase.auth.verifyOtp({ type, token_hash: tokenHash });
+    const { error } = await supabase.auth.verifyOtp({
+      type,
+      token_hash: tokenHash,
+    });
     if (error) {
       const reason = classifyAuthFailure({ exchangeMessage: error.message });
       return NextResponse.redirect(failureRedirectUrl(origin, next, reason));
     }
-    return NextResponse.redirect(`${origin}${safeRedirectPath(next)}`);
+    return signedInRedirect(origin, next);
   }
 
   if (!code) {
@@ -52,5 +70,5 @@ export async function GET(request: Request) {
     return NextResponse.redirect(failureRedirectUrl(origin, next, reason));
   }
 
-  return NextResponse.redirect(`${origin}${safeRedirectPath(next)}`);
+  return signedInRedirect(origin, next);
 }

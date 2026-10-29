@@ -7,7 +7,7 @@ import {
 } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { Landing } from "@/components/landing/Landing";
-import { INTRO_SEEN_KEY } from "@/lib/landing";
+import { INTRO_PLAYED_FLAG, SKIP_INTRO_COOKIE } from "@/lib/landing";
 import type { PostOffice } from "@/types";
 
 const auth = vi.hoisted(() => ({
@@ -60,6 +60,8 @@ function mockMotion(reduce: boolean) {
 
 beforeEach(() => {
   window.sessionStorage.clear();
+  delete (window as unknown as Record<string, unknown>)[INTRO_PLAYED_FLAG];
+  document.cookie = `${SKIP_INTRO_COOKIE}=; Max-Age=0; path=/`;
   auth.user = null;
   mockMotion(false);
 });
@@ -109,19 +111,21 @@ describe("Landing", () => {
     expect(document.documentElement.hasAttribute("data-intro-playing")).toBe(
       false
     );
-    expect(window.sessionStorage.getItem(INTRO_SEEN_KEY)).toBe("1");
+    expect(
+      (window as unknown as Record<string, unknown>)[INTRO_PLAYED_FLAG]
+    ).toBe(true);
   });
 
-  it("skips the intro when it was already seen on this device", () => {
-    window.sessionStorage.setItem(INTRO_SEEN_KEY, "1");
+  it("does not replay the intro twice in one page load", () => {
+    (window as unknown as Record<string, unknown>)[INTRO_PLAYED_FLAG] = true;
     const { container } = render(<Landing offices={offices} />);
     expect(
       container.querySelector(".kpl-intro")?.getAttribute("data-state")
     ).toBe("done");
   });
 
-  it("skips the intro for returning visitors even in a fresh tab", () => {
-    window.localStorage.setItem(INTRO_SEEN_KEY, "1");
+  it("skips the intro right after signing in", () => {
+    document.cookie = `${SKIP_INTRO_COOKIE}=1; path=/`;
     const { container } = render(<Landing offices={offices} />);
     expect(
       container.querySelector(".kpl-intro")?.getAttribute("data-state")

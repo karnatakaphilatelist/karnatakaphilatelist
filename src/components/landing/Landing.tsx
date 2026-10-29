@@ -44,7 +44,13 @@ const STEPS = [
 
 type IntroState = "playing" | "open" | "done";
 
+/** The intro plays once per device (and once per tab where storage is limited). */
 function hasSeenIntro(): boolean {
+  try {
+    if (window.localStorage.getItem(INTRO_SEEN_KEY) === "1") return true;
+  } catch {
+    // Fall through to the tab-level flag.
+  }
   try {
     return window.sessionStorage.getItem(INTRO_SEEN_KEY) === "1";
   } catch {
@@ -53,10 +59,12 @@ function hasSeenIntro(): boolean {
 }
 
 function rememberIntro(): void {
-  try {
-    window.sessionStorage.setItem(INTRO_SEEN_KEY, "1");
-  } catch {
-    // Without storage the intro simply plays again next time.
+  for (const store of ["localStorage", "sessionStorage"] as const) {
+    try {
+      window[store].setItem(INTRO_SEEN_KEY, "1");
+    } catch {
+      // Without storage the intro simply plays again next time.
+    }
   }
 }
 
@@ -165,7 +173,7 @@ export function Landing({ offices }: { offices: PostOffice[] }) {
     let last = start;
     let slowFrames = 0;
     // Safety nets for slow or throttled browsers: never leave someone staring at the red screen.
-    timers.push(setTimeout(finish, 7000));
+    timers.push(setTimeout(finish, 5000));
     const tick = (now: number) => {
       // Three janky frames in a row (over 200ms each) means this device cannot play the intro smoothly.
       slowFrames = now - last > 200 ? slowFrames + 1 : 0;

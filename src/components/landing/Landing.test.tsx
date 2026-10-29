@@ -112,8 +112,16 @@ describe("Landing", () => {
     expect(window.sessionStorage.getItem(INTRO_SEEN_KEY)).toBe("1");
   });
 
-  it("skips the intro when it was already seen this session", () => {
+  it("skips the intro when it was already seen on this device", () => {
     window.sessionStorage.setItem(INTRO_SEEN_KEY, "1");
+    const { container } = render(<Landing offices={offices} />);
+    expect(
+      container.querySelector(".kpl-intro")?.getAttribute("data-state")
+    ).toBe("done");
+  });
+
+  it("skips the intro for returning visitors even in a fresh tab", () => {
+    window.localStorage.setItem(INTRO_SEEN_KEY, "1");
     const { container } = render(<Landing offices={offices} />);
     expect(
       container.querySelector(".kpl-intro")?.getAttribute("data-state")

@@ -23,12 +23,7 @@
 }
 
 .kpl-mono {
-  font:
-    500 12px/1.4 ui-monospace,
-    SFMono-Regular,
-    Menlo,
-    Consolas,
-    monospace;
+  font: 500 12px/1.4 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   letter-spacing: 0.06em;
   text-transform: uppercase;
 }
@@ -99,9 +94,7 @@
   position: absolute;
   opacity: 0;
   filter: blur(8px);
-  transition:
-    opacity 0.8s ease,
-    filter 0.8s ease;
+  transition: opacity 0.8s ease, filter 0.8s ease;
 }
 .kpl.in .kpl-meta {
   opacity: calc(1 - var(--p) * 4);
@@ -247,11 +240,7 @@
   color: var(--color-muted);
 }
 .kpl-kicker {
-  font:
-    500 12px/1.4 ui-monospace,
-    SFMono-Regular,
-    Menlo,
-    monospace !important;
+  font: 500 12px/1.4 ui-monospace, SFMono-Regular, Menlo, monospace !important;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--color-postal) !important;
@@ -370,8 +359,11 @@
   min-height: 0;
   border-radius: 8px;
   background: var(--color-sand);
-  background-image:
-    repeating-linear-gradient(0deg, #0000 0 31px, var(--color-line) 31px 32px),
+  background-image: repeating-linear-gradient(
+      0deg,
+      #0000 0 31px,
+      var(--color-line) 31px 32px
+    ),
     repeating-linear-gradient(90deg, #0000 0 31px, var(--color-line) 31px 32px);
 }
 .kpl-card--map .kpl-kicker,
@@ -453,12 +445,7 @@
   justify-content: space-between;
   padding: 11px 18px;
   border-bottom: 1px dashed var(--color-ink);
-  font:
-    500 11px/1 ui-monospace,
-    SFMono-Regular,
-    Menlo,
-    Consolas,
-    monospace;
+  font: 500 11px/1 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--color-ink);
@@ -537,20 +524,12 @@
   border-bottom: 1px solid var(--color-postal);
 }
 .kpl-sub {
-  font:
-    500 11px/1.3 ui-monospace,
-    SFMono-Regular,
-    Menlo,
-    monospace;
+  font: 500 11px/1.3 ui-monospace, SFMono-Regular, Menlo, monospace;
   letter-spacing: 0.1em;
   text-transform: uppercase;
 }
 .kpl-nav {
-  font:
-    500 11px/1.3 ui-monospace,
-    SFMono-Regular,
-    Menlo,
-    monospace;
+  font: 500 11px/1.3 ui-monospace, SFMono-Regular, Menlo, monospace;
   letter-spacing: 0.1em;
   text-transform: uppercase;
 }
@@ -674,9 +653,7 @@
   height: 4px;
   border-radius: 9999px;
   background: var(--color-line-strong);
-  transition:
-    background 0.2s,
-    transform 0.2s;
+  transition: background 0.2s, transform 0.2s;
 }
 .kpl-ticks button.on::after {
   background: var(--color-postal);
@@ -702,9 +679,7 @@
   background: #fff;
   color: var(--color-ink);
   cursor: pointer;
-  transition:
-    background 0.15s,
-    transform 0.15s;
+  transition: background 0.15s, transform 0.15s;
 }
 .kpl-arrow svg {
   width: 20px;
@@ -736,13 +711,10 @@
   font-weight: 700;
   letter-spacing: 0;
   text-transform: none;
-  box-shadow:
-    0 8px 20px -6px rgb(207 24 48 / 0.65),
+  box-shadow: 0 8px 20px -6px rgb(207 24 48 / 0.65),
     inset 0 1px 0 rgb(255 255 255 / 0.25);
   opacity: 1;
-  transition:
-    transform 0.15s,
-    background 0.15s;
+  transition: transform 0.15s, background 0.15s;
 }
 .kpl-open-map svg {
   width: 20px;
@@ -812,6 +784,16 @@
 }
 .kpl-intro[data-state="done"] {
   display: none;
+}
+/* Last resort that needs no script: if the page is still busy after 6s, the red screen lifts anyway. */
+.kpl-intro {
+  animation: kpl-failsafe 0.2s linear 6s forwards;
+}
+@keyframes kpl-failsafe {
+  to {
+    opacity: 0;
+    visibility: hidden;
+  }
 }
 /* People who have already seen it this session, or who ask for less motion, skip it. */
 html[data-intro-seen] .kpl-intro {
@@ -924,9 +906,7 @@ html[data-intro-seen] .kpl-intro {
   width: 24px;
   height: 2px;
   background: var(--color-ink);
-  box-shadow:
-    0 7px 0 var(--color-ink),
-    0 14px 0 var(--color-ink);
+  box-shadow: 0 7px 0 var(--color-ink), 0 14px 0 var(--color-ink);
 }
 .kpl-postbox {
   position: absolute;
@@ -1026,6 +1006,12 @@ html[data-intro-seen] .kpl-intro {
 /* While the intro plays the page does not scroll. */
 html[data-intro-playing] {
   overflow: hidden;
+  animation: kpl-unlock 0s linear 6.2s forwards;
+}
+@keyframes kpl-unlock {
+  to {
+    overflow: auto;
+  }
 }
 
 /* ---- last touches ---- */
@@ -1112,8 +1098,7 @@ html[data-intro-playing] {
   min-height: 58px;
   padding: 0 34px 0 36px;
   font-size: 18px;
-  box-shadow:
-    0 12px 26px -8px rgb(207 24 48 / 0.6),
+  box-shadow: 0 12px 26px -8px rgb(207 24 48 / 0.6),
     inset 0 1px 0 rgb(255 255 255 / 0.25);
 }
 @media (max-width: 640px) {
@@ -1153,9 +1138,7 @@ html[data-intro-playing] {
   height: 56px;
   opacity: 0;
   transform: scale(0.85);
-  transition:
-    opacity 0.22s ease,
-    transform 0.22s ease,
+  transition: opacity 0.22s ease, transform 0.22s ease,
     background-color 0.2s ease;
   box-shadow: 0 10px 28px -10px rgb(28 43 107 / 0.45);
 }

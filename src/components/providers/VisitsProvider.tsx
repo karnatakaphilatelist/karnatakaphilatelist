@@ -1,5 +1,6 @@
 "use client";
 
+import type { SupabaseClient } from "@supabase/supabase-js";
 import {
   createContext,
   useCallback,
@@ -16,7 +17,7 @@ import { GUEST_VISITS_KEY, PLANNED_KEY } from "@/lib/constants";
 import { todayIso } from "@/lib/date";
 import { compressImage } from "@/lib/image";
 import { readJson, removeKey, writeJson } from "@/lib/local-storage";
-import { getSupabaseBrowserClient } from "@/lib/supabase/client";
+import { loadSupabase } from "@/lib/supabase/lazy";
 import { parseGuestVisits, parsePlannedIds } from "@/lib/visits/guest-visits";
 import {
   deleteVisit,
@@ -73,7 +74,6 @@ function withoutOffice(visits: VisitMap, officeId: number): VisitMap {
 export function VisitsProvider({ children }: { children: ReactNode }) {
   const { user, isLoading: isAuthLoading } = useAuth();
   const { showToast } = useToast();
-  const supabase = useMemo(() => getSupabaseBrowserClient(), []);
 
   const [visits, setVisits] = useState<VisitMap>({});
   /** Whose visits `visits` currently holds: a user id, GUEST_OWNER, or null before the first load. */
@@ -137,6 +137,7 @@ export function VisitsProvider({ children }: { children: ReactNode }) {
       let loadError: unknown = null;
 
       if (userId) {
+        const supabase = await loadSupabase();
         if (guestVisits.length > 0) {
           try {
             await mergeGuestVisits(supabase, userId, guestVisits);
@@ -170,7 +171,7 @@ export function VisitsProvider({ children }: { children: ReactNode }) {
     return () => {
       cancelled = true;
     };
-  }, [isAuthLoading, userId, identityKey, supabase, reportError]);
+  }, [isAuthLoading, userId, identityKey, reportError]);
 
   const markVisited = useCallback(
     async (officeId: number) => {
@@ -189,7 +190,7 @@ export function VisitsProvider({ children }: { children: ReactNode }) {
       commit({ ...previous, [officeId]: visit });
       if (!userId) return true;
       try {
-        await insertVisitIfMissing(supabase, userId, visit);
+        await insertVisitIfMissing(await loadSupabase(), userId, visit);
         return true;
       } catch (error) {
         commit(withoutOffice(visitsRef.current, officeId));
@@ -197,7 +198,7 @@ export function VisitsProvider({ children }: { children: ReactNode }) {
         return false;
       }
     },
-    [commit, userId, supabase, reportError, isLoadedForCurrentPerson]
+    [commit, userId, reportError, isLoadedForCurrentPerson]
   );
 
   const saveDetails = useCallback(
@@ -207,14 +208,16 @@ export function VisitsProvider({ children }: { children: ReactNode }) {
       if (!current) return false;
 
       let uploadedPath: string | null = null;
+      let supabase: SupabaseClient | null = null;
       const discardUpload = () => {
-        if (uploadedPath)
+        if (uploadedPath && supabase)
           removeStampPhoto(supabase, uploadedPath).catch(() => undefined);
       };
 
       try {
+        if (userId) supabase = await loadSupabase();
         let photoPath = details.removePhoto ? null : current.photoPath;
-        if (userId && details.newPhoto) {
+        if (userId && supabase && details.newPhoto) {
           const compressed = await compressImage(details.newPhoto);
           uploadedPath = await uploadStampPhoto(
             supabase,
@@ -231,7 +234,8 @@ export function VisitsProvider({ children }: { children: ReactNode }) {
           isPublic: details.isPublic,
           photoPath,
         };
-        if (userId) await updateVisitDetails(supabase, userId, updated);
+        if (userId && supabase)
+          await updateVisitDetails(supabase, userId, updated);
 
         // The visit was removed while this was saving: do not bring it back.
         if (!visitsRef.current[officeId]) {
@@ -241,7 +245,12 @@ export function VisitsProvider({ children }: { children: ReactNode }) {
         commit({ ...visitsRef.current, [officeId]: updated });
 
         // Clean up the replaced photo only after the new state is safely saved.
-        if (userId && current.photoPath && current.photoPath !== photoPath) {
+        if (
+          userId &&
+          supabase &&
+          current.photoPath &&
+          current.photoPath !== photoPath
+        ) {
           removeStampPhoto(supabase, current.photoPath).catch(() => undefined);
         }
         return true;
@@ -252,7 +261,7 @@ export function VisitsProvider({ children }: { children: ReactNode }) {
         return false;
       }
     },
-    [commit, userId, supabase, reportError, isLoadedForCurrentPerson]
+    [commit, userId, reportError, isLoadedForCurrentPerson]
   );
 
   const removeVisit = useCallback(
@@ -264,6 +273,7 @@ export function VisitsProvider({ children }: { children: ReactNode }) {
       commit(withoutOffice(visitsRef.current, officeId));
       if (!userId) return true;
       try {
+        const supabase = await loadSupabase();
         await deleteVisit(supabase, userId, officeId);
         if (existing.photoPath) {
           removeStampPhoto(supabase, existing.photoPath).catch(() => undefined);
@@ -275,7 +285,7 @@ export function VisitsProvider({ children }: { children: ReactNode }) {
         return false;
       }
     },
-    [commit, userId, supabase, reportError, isLoadedForCurrentPerson]
+    [commit, userId, reportError, isLoadedForCurrentPerson]
   );
 
   const togglePlanned = useCallback((officeId: number) => {

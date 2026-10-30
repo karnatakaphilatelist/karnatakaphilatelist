@@ -1,6 +1,6 @@
 "use client";
 
-import type { User } from "@supabase/supabase-js";
+import type { SupabaseClient, User } from "@supabase/supabase-js";
 import {
   createContext,
   useCallback,
@@ -25,7 +25,7 @@ import {
   NATIVE_AUTH_REDIRECT,
   parseNativeAuthCode,
 } from "@/lib/native";
-import { getSupabaseBrowserClient } from "@/lib/supabase/client";
+import { hasStoredSession, loadSupabase } from "@/lib/supabase/lazy";
 
 interface AuthContextValue {
   user: User | null;
@@ -48,7 +48,6 @@ function buildRedirectUrl(): string {
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const supabase = useMemo(() => getSupabaseBrowserClient(), []);
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [dialogReason, setDialogReason] = useState<SignInReason | null>(null);
@@ -64,14 +63,55 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     fetchGoogleEnabled().then(setGoogleEnabled);
   }, [dialogReason]);
 
+  const clientPromise = useRef<Promise<SupabaseClient> | null>(null);
+  const subscription = useRef<{ unsubscribe: () => void } | null>(null);
+
+  /** Loads the Supabase client the first time it is needed and starts listening for sign-in changes. */
+  const getClient = useCallback(() => {
+    clientPromise.current ??= loadSupabase()
+      .then((client) => {
+        // The listener fires INITIAL_SESSION on subscribe, so no separate getSession() call is needed.
+        const { data } = client.auth.onAuthStateChange((_event, session) => {
+          setUser(session?.user ?? null);
+          setIsLoading(false);
+        });
+        subscription.current = data.subscription;
+        return client;
+      })
+      .catch((error) => {
+        clientPromise.current = null;
+        setIsLoading(false);
+        throw error;
+      });
+    return clientPromise.current;
+  }, []);
+
   useEffect(() => {
-    // The listener fires INITIAL_SESSION on subscribe, so no separate getSession() call is needed.
-    const { data } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
+    const ignore = () => undefined;
+    if (hasStoredSession()) {
+      getClient().catch(ignore);
+    } else {
+      // No saved session means a guest: no need to download the auth library to find that out.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setIsLoading(false);
-    });
-    return () => data.subscription.unsubscribe();
-  }, [supabase]);
+    }
+    // Warm the library once the page has settled, so signing in later feels instant.
+    let idle: number | undefined;
+    const timer = window.setTimeout(() => {
+      const warm = () => void getClient().catch(ignore);
+      if ("requestIdleCallback" in window) {
+        idle = window.requestIdleCallback(warm, { timeout: 4000 });
+      } else warm();
+    }, 6000);
+    return () => {
+      window.clearTimeout(timer);
+      if (idle !== undefined && "cancelIdleCallback" in window)
+        window.cancelIdleCallback(idle);
+      subscription.current?.unsubscribe();
+      subscription.current = null;
+      clientPromise.current = null;
+    };
+  }, [getClient]);
 
   // Inside the mobile apps Google sign-in runs in the system browser (Google refuses embedded
   // web views) and comes back through the app's own link, carrying the one-time code.
@@ -87,7 +127,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const handle = await App.addListener("appUrlOpen", async ({ url }) => {
         const code = parseNativeAuthCode(url);
         if (!code) return;
-        await supabase.auth.exchangeCodeForSession(code);
+        await (await getClient()).auth.exchangeCodeForSession(code);
         await Browser.close().catch(() => undefined);
       });
       if (cancelled) void handle.remove();
@@ -97,15 +137,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       cancelled = true;
       remove?.();
     };
-  }, [supabase]);
+  }, [getClient]);
 
   const openSignIn = useCallback(
-    (reason: SignInReason = "manual") => setDialogReason(reason),
-    []
+    (reason: SignInReason = "manual") => {
+      // Start loading the auth library as the dialog opens.
+      getClient().catch(() => undefined);
+      setDialogReason(reason);
+    },
+    [getClient]
   );
   const closeSignIn = useCallback(() => setDialogReason(null), []);
 
   const signInWithGoogle = useCallback(async () => {
+    const supabase = await getClient();
     if (isNativeApp()) {
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: "google",
@@ -130,7 +175,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       },
     });
     if (error) throw error;
-  }, [supabase]);
+  }, [getClient]);
 
   const signInWithPassword = useCallback(
     async (
@@ -138,6 +183,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       email: string,
       password: string
     ): Promise<PasswordOutcome> => {
+      const supabase = await getClient();
       if (mode === "signin") {
         const { error } = await supabase.auth.signInWithPassword({
           email,
@@ -160,22 +206,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
       return outcome;
     },
-    [supabase]
+    [getClient]
   );
 
   const signInWithEmail = useCallback(
     async (email: string) => {
+      const supabase = await getClient();
       const { error } = await supabase.auth.signInWithOtp({
         email,
         options: { emailRedirectTo: buildRedirectUrl() },
       });
       if (error) throw error;
     },
-    [supabase]
+    [getClient]
   );
 
   const resetPassword = useCallback(
     async (email: string) => {
+      const supabase = await getClient();
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: `${
           window.location.origin
@@ -183,18 +231,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
       if (error) throw error;
     },
-    [supabase]
+    [getClient]
   );
 
   const signOut = useCallback(async () => {
-    await supabase.auth.signOut();
-  }, [supabase]);
+    await (await getClient()).auth.signOut();
+  }, [getClient]);
 
   const deleteAccount = useCallback(async () => {
     if (!user) return;
+    const supabase = await getClient();
     await deleteMyAccount(supabase, user.id);
     await supabase.auth.signOut();
-  }, [supabase, user]);
+  }, [getClient, user]);
 
   const value = useMemo(
     () => ({ user, isLoading, openSignIn, signOut, deleteAccount }),

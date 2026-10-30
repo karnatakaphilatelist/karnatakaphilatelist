@@ -26,11 +26,11 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="en" className="antialiased" suppressHydrationWarning>
       <head>
-        {/* Skip the intro right after sign-in (the callback sets this cookie) so it never flashes. */}
+        {/* Skip the intro right after sign-in (the callback sets this cookie), otherwise start its clock now, before the page's scripts have loaded. */}
         <script
           dangerouslySetInnerHTML={{
             __html:
-              'if(/(?:^|; )kp_skip_intro=1/.test(document.cookie))document.documentElement.setAttribute("data-intro-seen","")',
+              'var h=document.documentElement;if(/(?:^|; )kp_skip_intro=1/.test(document.cookie))h.setAttribute("data-intro-seen","");else if(location.pathname==="/"){window.__kpIntroT0=performance.now();h.setAttribute("data-intro-go","")}',
           }}
         />
       </head>

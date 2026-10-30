@@ -158,10 +158,17 @@ export function Landing({ offices }: { offices: PostOffice[] }) {
     };
     skipRef.current = finish;
 
-    introRef.current?.setAttribute("data-go", "");
-    const start = performance.now();
+    // The inline script in <head> normally started the clock already, so a slow load does not delay the intro.
+    const earlyStart = (window as unknown as { __kpIntroT0?: number })
+      .__kpIntroT0;
+    const begun = performance.now();
+    const start =
+      earlyStart !== undefined && begun - earlyStart < 6000
+        ? earlyStart
+        : begun;
+    html.setAttribute("data-intro-go", "");
     let opened = false;
-    let last = start;
+    let last = begun;
     let slowFrames = 0;
     // Safety nets for slow or throttled browsers: never leave someone staring at the red screen.
     timers.push(setTimeout(finish, 5000));

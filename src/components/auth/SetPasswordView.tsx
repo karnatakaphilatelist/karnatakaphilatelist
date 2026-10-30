@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useState, type FormEvent } from "react";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { friendlyPasswordError, validatePassword } from "@/lib/password-auth";
-import { getSupabaseBrowserClient } from "@/lib/supabase/client";
+import { loadSupabase } from "@/lib/supabase/lazy";
 
 /** Lets a signed-in person set or change their password; also the landing page of the reset email. */
 export function SetPasswordView() {
@@ -24,8 +24,9 @@ export function SetPasswordView() {
       return setError("The two passwords do not match.");
     setIsBusy(true);
     setError(null);
-    const { error: updateError } =
-      await getSupabaseBrowserClient().auth.updateUser({ password });
+    const { error: updateError } = await (
+      await loadSupabase()
+    ).auth.updateUser({ password });
     setIsBusy(false);
     if (updateError)
       return setError(friendlyPasswordError(updateError, "signup", "update"));

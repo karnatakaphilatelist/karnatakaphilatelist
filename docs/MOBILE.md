@@ -39,3 +39,16 @@ workflows take a `server_url` input that does this. Leave it blank for productio
 - iOS: *iOS simulator build* only proves the shell compiles (unsigned). To run on an iPhone or ship
   to TestFlight you need an Apple Developer account: open `ios/App` in Xcode, set the signing team,
   Product > Archive, upload.
+
+## Sign-in code (one-time code in the email)
+
+The sign-in dialog can also take the 6-digit code from the "email me a sign-in link" message,
+which is easier than links inside the phone app. It needs one dashboard change: in Supabase,
+Authentication > Email Templates > **Magic Link**, add the code to the body, for example:
+
+    <h2>Your Philatelist sign-in</h2>
+    <p>Enter this code in the app: <strong>{{ .Token }}</strong></p>
+    <p>Or <a href="{{ .ConfirmationURL }}">tap here to sign in</a>.</p>
+
+Until the template includes `{{ .Token }}`, the link still works and the code box simply gets
+no code to enter.

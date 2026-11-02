@@ -221,6 +221,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     [getClient]
   );
 
+  const verifyEmailCode = useCallback(
+    async (email: string, code: string) => {
+      const supabase = await getClient();
+      const { error } = await supabase.auth.verifyOtp({
+        email,
+        token: code,
+        type: "email",
+      });
+      if (error) throw new Error("That code did not work. Check it or ask for a new one.");
+    },
+    [getClient]
+  );
+
   const resetPassword = useCallback(
     async (email: string) => {
       const supabase = await getClient();
@@ -259,6 +272,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         googleAvailable={googleEnabled !== false}
         onGoogle={signInWithGoogle}
         onEmail={signInWithEmail}
+        onVerifyCode={verifyEmailCode}
         onReset={resetPassword}
         onPassword={signInWithPassword}
       />

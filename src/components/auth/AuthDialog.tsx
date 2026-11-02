@@ -21,6 +21,8 @@ interface AuthDialogProps {
   onGoogle: () => Promise<void>;
   /** Sends a one-time sign-in link; also how someone who forgot their password gets back in. */
   onEmail: (email: string) => Promise<void>;
+  /** Signs in with the 6-digit code from the email (works in the phone app, where links open in a browser). */
+  onVerifyCode?: (email: string, code: string) => Promise<void>;
   /** Emails a password-reset link that lands on the set-a-password page. Falls back to `onEmail`. */
   onReset?: (email: string) => Promise<void>;
   onPassword: (
@@ -42,7 +44,7 @@ const COPY: Record<SignInReason, { title: string; description: string }> = {
   },
 };
 
-type Notice = { kind: "link-sent" | "confirm-email"; email: string };
+type Notice = { kind: "link-sent" | "confirm-email"; email: string; withCode?: boolean };
 
 export function AuthDialog({
   reason,
@@ -50,6 +52,7 @@ export function AuthDialog({
   googleAvailable,
   onGoogle,
   onEmail,
+  onVerifyCode,
   onReset,
   onPassword,
 }: AuthDialogProps) {
@@ -60,6 +63,7 @@ export function AuthDialog({
   const [isOpeningGoogle, setIsOpeningGoogle] = useState(false);
   const [notice, setNotice] = useState<Notice | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [code, setCode] = useState("");
 
   const copy = COPY[reason ?? "manual"];
   const isSignUp = mode === "signup";
@@ -114,11 +118,31 @@ export function AuthDialog({
     setError(null);
     try {
       await (isSignUp ? onEmail : onReset ?? onEmail)(trimmedEmail);
-      setNotice({ kind: "link-sent", email: trimmedEmail });
+      setNotice({ kind: "link-sent", email: trimmedEmail, withCode: isSignUp && !!onVerifyCode });
     } catch (caught) {
       setError(
         caught instanceof Error ? caught.message : "Could not send the link."
       );
+    } finally {
+      setIsBusy(false);
+    }
+  }
+
+  async function handleVerifyCode(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (isBusy || !notice || !onVerifyCode) return;
+    const token = code.replace(/\s/g, "");
+    if (!/^\d{6,8}$/.test(token)) {
+      setError("Enter the code from the email (6 to 8 digits).");
+      return;
+    }
+    setIsBusy(true);
+    setError(null);
+    try {
+      await onVerifyCode(notice.email, token);
+      // The provider closes this dialog once the person is signed in.
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : "That code did not work.");
     } finally {
       setIsBusy(false);
     }
@@ -146,6 +170,7 @@ export function AuthDialog({
 
   function backToForm() {
     setNotice(null);
+    setCode("");
     setError(null);
   }
 
@@ -176,6 +201,29 @@ export function AuthDialog({
               </>
             )}
           </p>
+          {notice.withCode ? (
+            <form onSubmit={handleVerifyCode} className="mt-4">
+              <label htmlFor="auth-code" className="text-sm font-semibold">
+                Or enter the code from the email
+              </label>
+              <input
+                id="auth-code"
+                inputMode="numeric"
+                autoComplete="one-time-code"
+                maxLength={8}
+                value={code}
+                onChange={(event) => setCode(event.target.value)}
+                className="mt-1 min-h-12 w-full rounded-xl border border-line-strong bg-white px-4 text-center font-mono text-xl tracking-[0.3em]"
+              />
+              <button
+                type="submit"
+                disabled={isBusy}
+                className="mt-3 min-h-13 w-full rounded-full bg-ink text-base font-semibold text-white disabled:opacity-60"
+              >
+                {isBusy ? "Checking…" : "Verify code"}
+              </button>
+            </form>
+          ) : null}
           <button
             type="button"
             onClick={backToForm}
@@ -286,7 +334,7 @@ export function AuthDialog({
       )}
 
       {error ? (
-        <p role="alert" className="mt-3 text-sm text-postal-dark">
+        <p role="alert" className="mt-3 text-sm font-semibold text-warn">
           {error}
         </p>
       ) : null}

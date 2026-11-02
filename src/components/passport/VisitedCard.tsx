@@ -10,15 +10,23 @@ interface VisitedCardProps {
   office: PostOffice;
   visit: Visit;
   onEdit: (officeId: number) => void;
+  onOpenStamp?: (officeId: number) => void;
 }
 
-export function VisitedCard({ office, visit, onEdit }: VisitedCardProps) {
+export function VisitedCard({ office, visit, onEdit, onOpenStamp }: VisitedCardProps) {
   const photoUrl = usePhotoUrl(visit.photoPath);
 
   return (
     <li className="rounded-[18px] border border-line bg-white p-4">
       <div className="flex items-start gap-3">
-        <StampThumb path={office.stampImagePath} status="visited" className="size-12" />
+        <button
+          type="button"
+          onClick={() => onOpenStamp?.(office.id)}
+          aria-label={`View ${office.name} stamp`}
+          className="shrink-0"
+        >
+          <StampThumb path={office.stampImagePath} status="visited" className="size-12" />
+        </button>
         <div className="min-w-0 flex-1">
           <h3 className="text-base font-semibold">{office.name}</h3>
           <p className="text-sm text-muted">

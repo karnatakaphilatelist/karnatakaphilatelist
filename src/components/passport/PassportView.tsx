@@ -4,6 +4,8 @@ import Link from "next/link";
 import { useState } from "react";
 import { VisitDialog } from "@/components/office/VisitDialog";
 import { DistrictProgress } from "@/components/passport/DistrictProgress";
+import { ShareProgressSheet } from "@/components/passport/ShareProgressSheet";
+import { StampDetailSheet } from "@/components/passport/StampDetailSheet";
 import { ProgressRing } from "@/components/passport/ProgressRing";
 import { VisitedCard } from "@/components/passport/VisitedCard";
 import { useAuth } from "@/components/providers/AuthProvider";
@@ -33,6 +35,8 @@ export function PassportView({
   const { visits, isReady } = useVisits();
   const { showToast } = useToast();
   const [editingId, setEditingId] = useState<number | null>(null);
+  const [stampId, setStampId] = useState<number | null>(null);
+  const [sharing, setSharing] = useState(false);
 
   const total = offices.length;
   const visitedOffices = offices.filter((office) => visits[office.id]);
@@ -65,21 +69,7 @@ export function PassportView({
             </div>
             <button
               type="button"
-              onClick={async () => {
-                const result = await shareContent({
-                  title: "Philatelist",
-                  text: progressShareText(
-                    visitedOffices.length,
-                    total,
-                    stateName(stateCode)
-                  ),
-                  url: window.location.origin,
-                });
-                if (result === "copied")
-                  showToast({ message: "Copied. Paste it anywhere to share." });
-                if (result === "failed")
-                  showToast({ message: "Could not share. Please try again." });
-              }}
+              onClick={() => setSharing(true)}
               className="min-h-11 shrink-0 rounded-full bg-white/20 px-5 text-sm font-semibold text-white"
             >
               Share my progress
@@ -211,6 +201,7 @@ export function PassportView({
                   office={office}
                   visit={visits[office.id]}
                   onEdit={setEditingId}
+                  onOpenStamp={setStampId}
                 />
               ))}
             </ul>
@@ -247,6 +238,30 @@ export function PassportView({
         </footer>
       </div>
 
+      <ShareProgressSheet
+        open={sharing}
+        stamped={visitedOffices.length}
+        total={total}
+        stateName={stateName(stateCode)}
+        onClose={() => setSharing(false)}
+        onShare={async () => {
+          const result = await shareContent({
+            title: "Philatelist",
+            text: progressShareText(visitedOffices.length, total, stateName(stateCode)),
+            url: window.location.origin,
+          });
+          setSharing(false);
+          if (result === "copied")
+            showToast({ message: "Copied. Paste it anywhere to share." });
+          if (result === "failed")
+            showToast({ message: "Could not share. Please try again." });
+        }}
+      />
+      <StampDetailSheet
+        office={offices.find((office) => office.id === stampId) ?? null}
+        visit={stampId === null ? undefined : visits[stampId]}
+        onClose={() => setStampId(null)}
+      />
       <VisitDialog office={editingOffice} onClose={() => setEditingId(null)} />
     </div>
   );

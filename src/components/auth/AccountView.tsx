@@ -128,6 +128,13 @@ export function AccountView() {
         <ul className="mt-4 divide-y divide-line overflow-hidden rounded-[18px] border border-line bg-white">
           {user ? (
             <li>
+              <Link href="/account/profile" className={ROW}>
+                <Row>Edit profile</Row>
+              </Link>
+            </li>
+          ) : null}
+          {user ? (
+            <li>
               <Link href="/account/password" className={ROW}>
                 <Row>Set or change password</Row>
               </Link>

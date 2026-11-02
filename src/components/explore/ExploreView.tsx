@@ -3,10 +3,12 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ExploreControls } from "@/components/explore/ExploreControls";
 import type { StatusFilter } from "@/components/explore/FilterChips";
+import { LocationSheet } from "@/components/explore/LocationSheet";
 import { OfficeList } from "@/components/explore/OfficeList";
 import { ProgressStrip } from "@/components/explore/ProgressStrip";
 import { LazyOfficeMap } from "@/components/map/LazyOfficeMap";
 import { OfficeDetail } from "@/components/office/OfficeDetail";
+import { StampedSheet } from "@/components/office/StampedSheet";
 import { VisitDialog } from "@/components/office/VisitDialog";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { useToast } from "@/components/providers/ToastProvider";
@@ -14,6 +16,9 @@ import { useStateOffices } from "@/components/providers/StateProvider";
 import { useVisits } from "@/components/providers/VisitsProvider";
 import { StateSwitcher } from "@/components/ui/StateSwitcher";
 import { LocateIcon } from "@/components/ui/icons";
+import { LOCATION_PRIMED_KEY } from "@/lib/constants";
+import { isNativeApp } from "@/lib/native";
+import { readJson, writeJson } from "@/lib/local-storage";
 import { sortByDistance, withStatus } from "@/lib/office-status";
 import { getFirstName } from "@/lib/user-display";
 import type { Coordinates, PostOffice } from "@/types";
@@ -57,6 +62,8 @@ export function ExploreView({
   const [editingId, setEditingId] = useState<number | null>(null);
   const [userLocation, setUserLocation] = useState<Coordinates | null>(null);
   const [isLocating, setIsLocating] = useState(false);
+  const [stampedId, setStampedId] = useState<number | null>(null);
+  const [locationSheet, setLocationSheet] = useState<"prime" | "denied" | null>(null);
 
   const allOffices = useMemo(
     () => withStatus(offices, visits, plannedIds, userLocation),
@@ -91,14 +98,19 @@ export function ExploreView({
   async function handleMarkVisited(officeId: number) {
     const saved = await markVisited(officeId);
     if (!saved) return;
-    showToast({
-      message: "Marked as visited",
-      actionLabel: "Add photo or note",
-      onAction: () => setEditingId(officeId),
-    });
+    setStampedId(officeId);
   }
 
   function handleFindNearMe() {
+    // Explain first, once, so the system prompt is never a surprise.
+    if (!readJson<boolean>(LOCATION_PRIMED_KEY, false)) {
+      setLocationSheet("prime");
+      return;
+    }
+    requestLocation();
+  }
+
+  function requestLocation() {
     if (!navigator.geolocation) {
       showToast({ message: "Your browser does not support location." });
       return;
@@ -111,10 +123,7 @@ export function ExploreView({
       },
       () => {
         setIsLocating(false);
-        showToast({
-          message:
-            "Could not get your location. Check your browser permissions.",
-        });
+        setLocationSheet("denied");
       },
       { enableHighAccuracy: false, timeout: 10_000 }
     );
@@ -124,7 +133,7 @@ export function ExploreView({
     <div className="relative flex h-full min-h-0 flex-col md:flex-row">
       <aside
         aria-label="Post offices"
-        className={`absolute inset-x-0 bottom-0 z-[1050] flex min-h-0 flex-col rounded-t-3xl border-t border-line bg-white shadow-[0_-10px_30px_-12px_rgb(28_43_107/0.35)] transition-[height] duration-300 ease-out md:static md:z-auto md:h-auto md:w-[26rem] md:shrink-0 md:rounded-none md:border-r md:border-t-0 md:shadow-none ${
+        className={`absolute inset-x-0 bottom-0 z-[1050] flex min-h-0 flex-col rounded-t-3xl border-t border-line bg-white shadow-[0_-10px_30px_-12px_rgb(22_32_79/0.35)] transition-[height] duration-300 ease-out md:static md:z-auto md:h-auto md:w-[26rem] md:shrink-0 md:rounded-none md:border-r md:border-t-0 md:shadow-none ${
           sheetOpen ? "h-[64%]" : "h-[7.75rem]"
         } ${selectedOffice ? "max-md:hidden" : ""}`}
       >
@@ -227,6 +236,23 @@ export function ExploreView({
         ) : null}
       </section>
 
+      <StampedSheet
+        office={allOffices.find((office) => office.id === stampedId) ?? null}
+        collected={allOffices.filter((office) => office.status === "visited").length}
+        total={allOffices.length}
+        onClose={() => setStampedId(null)}
+        onAddNote={setEditingId}
+      />
+      <LocationSheet
+        mode={locationSheet}
+        native={isNativeApp()}
+        onClose={() => setLocationSheet(null)}
+        onContinue={() => {
+          writeJson(LOCATION_PRIMED_KEY, true);
+          setLocationSheet(null);
+          requestLocation();
+        }}
+      />
       <VisitDialog office={editingOffice} onClose={() => setEditingId(null)} />
     </div>
   );

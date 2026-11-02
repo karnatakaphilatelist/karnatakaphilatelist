@@ -28,3 +28,14 @@ Authentication -> URL Configuration -> Redirect URLs: add `com.karnatakaphilatel
 Apple can reject apps that are only a website in a wrapper. Native touches that help: location,
 camera for stamp photos, share sheet, and push reminders. Add at least one real native feature
 before submitting.
+
+## Building from a branch (previews)
+
+The shells load the live site, so a branch build must point at that branch's Vercel preview.
+Set `CAP_SERVER_URL` before `npx cap sync`; the **Android debug APK** and **iOS simulator build**
+workflows take a `server_url` input that does this. Leave it blank for production.
+
+- Android: run *Android debug APK* with the preview URL, download `philatelist-debug-apk`, install it.
+- iOS: *iOS simulator build* only proves the shell compiles (unsigned). To run on an iPhone or ship
+  to TestFlight you need an Apple Developer account: open `ios/App` in Xcode, set the signing team,
+  Product > Archive, upload.

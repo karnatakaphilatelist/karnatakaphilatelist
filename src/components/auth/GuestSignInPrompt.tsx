@@ -7,10 +7,9 @@ import { GUEST_SIGN_IN_THRESHOLD, SIGN_IN_PROMPTED_KEY } from "@/lib/constants";
 import { readJson, writeJson } from "@/lib/local-storage";
 
 /**
- * Wait this long after the threshold is reached, so the "Marked as visited"
- * message (and its "Add photo or note" button, which stays on screen for 6
- * seconds) is not buried under the sign-in dialog at the very moment the person
- * wants to add a note.
+ * Wait this long after the threshold is reached, so the "Stamped" sheet
+ * (and its "Add note and photo" button) is not buried under the sign-in dialog
+ * at the very moment the person wants to add a note.
  */
 export const PROMPT_DELAY_MS = 7000;
 /** If another dialog is open when the time comes, look again after this long. */

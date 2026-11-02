@@ -153,7 +153,15 @@ Phones get their own patterns rather than a squeezed desktop layout:
 - **Bottom tab bar** with Explore, Passport and Account (thumb reach). The header is slim (56px);
   desktop keeps the full header and puts Password and Sign out there.
 - **Account tab** holds sign-in, password, share, welcome tour, privacy, terms, contact and the disclaimer.
-- **Mobile apps open on the map.** The welcome page is a first-launch tour; later launches go
-  straight to Explore (`/?tour=1` replays it from Account).
+- **Mobile apps open on the map.** First launch shows the 3-step welcome tour (`/welcome`); later
+  launches go straight to Explore. Account > Welcome tour replays it.
+- **Palette balance.** Cream paper, navy ink; postal red (`#cf1830`) only on the intro, the Passport
+  and guest-account heroes, primary buttons and the active tab. Red surfaces use `.kp-red`
+  (engraved guilloche texture). Warnings and errors are amber (`--color-warn`) with an icon and words,
+  never a red fill. Visited stays green, always with a check.
+- **Stamp it** never blocks: a banner says whether you are at the office (within 150 m) or far away,
+  and past visits can still be logged. After stamping, a "Stamped!" sheet confirms it.
+- **Location** is explained in a sheet before the first system prompt; a "Location is off" sheet
+  explains how to re-enable it.
 - Touch: 44px targets, 16px inputs, no tap flash or double-tap delay, no rubber-banding, safe-area
   insets for the notch and home bar (see docs/MOBILE.md).

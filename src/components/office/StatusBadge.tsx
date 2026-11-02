@@ -2,7 +2,7 @@ import { STATUS_LABEL } from "@/lib/office-status";
 import type { OfficeStatus } from "@/types";
 
 const STYLES: Record<OfficeStatus, string> = {
-  unvisited: "bg-postal-soft text-postal-dark",
+  unvisited: "bg-sand text-ink",
   planned: "bg-planned-soft text-planned-ink",
   visited: "bg-visited-soft text-visited-ink",
 };

@@ -150,3 +150,18 @@ export const ChevronRightIcon = (props: IconProps) => (
     <path d="M9 6l6 6-6 6" />
   </Icon>
 );
+
+export const AlertIcon = (props: IconProps) => (
+  <Icon {...props}>
+    <path d="M12 4 3 20h18z" />
+    <path d="M12 10v4M12 17h.01" />
+  </Icon>
+);
+
+export const TargetIcon = (props: IconProps) => (
+  <Icon {...props}>
+    <circle cx="12" cy="12" r="9" />
+    <circle cx="12" cy="12" r="4" />
+    <path d="M12 1v3M12 20v3M1 12h3M20 12h3" />
+  </Icon>
+);

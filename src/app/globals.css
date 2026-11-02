@@ -4,13 +4,13 @@
 @theme {
   /* Surfaces and text */
   /* Classic printed stamp: cream paper, indigo ink (see DESIGN.md). */
-  --color-paper: #fbf5e9;
-  --color-sand: #f3ead8;
+  --color-paper: #fcf6e8;
+  --color-sand: #f1e8d3;
   --color-card: #ffffff;
-  --color-ink: #1c2b6b;
-  --color-muted: #4b5380;
-  --color-line: #e6d9bf;
-  --color-line-strong: #d2c3a3;
+  --color-ink: #16204f;
+  --color-muted: #565c80;
+  --color-line: #e6dcc3;
+  --color-line-strong: #d9cfb6;
   --color-coral: #e8583a;
 
   /* Postal red: primary actions and unvisited pins */
@@ -25,6 +25,10 @@
   --color-planned: #ffc94d;
   --color-planned-soft: #fff1c7;
   --color-planned-ink: #6b4b00;
+
+  /* Warnings and problems: amber with an icon and words, never a red fill (red is the brand). */
+  --color-warn: #8a4306;
+  --color-warn-soft: #fdebd3;
 
   --color-focus: #1b73b3;
 
@@ -97,7 +101,7 @@ body {
   height: 22px;
   border: 3px solid #fff;
   border-radius: 9999px;
-  box-shadow: 0 1px 4px rgb(28 43 107 / 0.45);
+  box-shadow: 0 1px 4px rgb(22 32 79 / 0.45);
   transition: transform 0.15s;
 }
 
@@ -108,7 +112,7 @@ body {
 
 /* Red dot with a white centre: not visited yet. */
 .kp-pin--unvisited {
-  background: var(--color-postal);
+  background: var(--color-ink);
 }
 .kp-pin--unvisited::after {
   content: "";
@@ -148,7 +152,7 @@ body {
   color: #fff;
   font-weight: 700;
   font-size: 13px;
-  box-shadow: 0 2px 8px rgb(28 43 107 / 0.45);
+  box-shadow: 0 2px 8px rgb(22 32 79 / 0.45);
   transition: transform 0.15s;
 }
 .kp-cluster--some {
@@ -224,4 +228,30 @@ select,
 summary,
 label {
   touch-action: manipulation;
+}
+
+/* Engraved security-print texture for the red surfaces (Passport header, welcome tour, guest card). */
+.kp-red {
+  background-color: var(--color-postal);
+  background-image: url("/brand/guilloche.svg");
+  background-repeat: no-repeat;
+  background-position: right top;
+  background-size: cover;
+}
+
+/* The "stamped" moment: the stamp drops and presses, then the postmark inks in with a ripple. */
+@keyframes kp-press {
+  0% { opacity: 0; transform: translateY(-60px) scale(1.4) rotate(-10deg); }
+  45% { opacity: 1; transform: translateY(0) scale(1) rotate(-4deg); }
+  60% { transform: translateY(4px) scale(0.97) rotate(-4deg); }
+  100% { opacity: 1; transform: translateY(0) scale(1) rotate(-4deg); }
+}
+@keyframes kp-ink {
+  0%, 40% { opacity: 0; transform: scale(1.7) rotate(-6deg); }
+  60%, 100% { opacity: 0.9; transform: scale(1) rotate(-6deg); }
+}
+@keyframes kp-ripple {
+  0%, 45% { opacity: 0; transform: scale(0.7); }
+  55% { opacity: 0.6; }
+  100% { opacity: 0; transform: scale(1.7); }
 }

@@ -1,5 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { directionsUrl, distanceKm, formatDistance } from "@/lib/geo";
+import {
+  AT_OFFICE_KM,
+  directionsUrl,
+  distanceKm,
+  formatDistance,
+  formatShortDistance,
+  proximity,
+} from "@/lib/geo";
 
 describe("distanceKm", () => {
   it("is zero for the same point", () => {
@@ -30,5 +37,20 @@ describe("directionsUrl", () => {
     expect(directionsUrl({ lat: 12.5, lng: 76.25 })).toBe(
       "https://www.google.com/maps/dir/?api=1&destination=12.5,76.25",
     );
+  });
+});
+
+describe("proximity", () => {
+  it("is unknown without a location", () => {
+    expect(proximity(null)).toBe("unknown");
+  });
+  it("counts within 150 m as here", () => {
+    expect(proximity(0.1)).toBe("here");
+    expect(proximity(AT_OFFICE_KM)).toBe("here");
+    expect(proximity(0.4)).toBe("away");
+  });
+  it("shows short distances in metres", () => {
+    expect(formatShortDistance(0.06)).toBe("60 m");
+    expect(formatShortDistance(0.004)).toBe("10 m");
   });
 });

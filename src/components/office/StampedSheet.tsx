@@ -26,8 +26,8 @@ export function StampedSheet({ office, collected, total, onClose, onAddNote }: S
               aria-hidden="true"
               className="absolute inset-0 animate-[kp-ripple_1.1s_ease-out_0.2s_both] rounded-full border-2 border-visited"
             />
-            <span className="animate-[kp-press_1.1s_ease-out_0.2s_both]">
-              <StampThumb path={office.stampImagePath} status="visited" className="size-28" />
+            <span className="kp-perf animate-[kp-press_1.1s_ease-out_0.2s_both] drop-shadow-md">
+              <StampThumb path={office.stampImagePath} status="visited" className="size-24" />
             </span>
             <span
               aria-hidden="true"

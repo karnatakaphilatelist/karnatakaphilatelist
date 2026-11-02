@@ -110,6 +110,28 @@ export function ExploreView({
     requestLocation();
   }
 
+  // If location was already allowed, check the distance quietly when an office is opened.
+  useEffect(() => {
+    if (selectedId === null || userLocation !== null) return;
+    let cancelled = false;
+    navigator.permissions
+      ?.query({ name: "geolocation" })
+      .then((status) => {
+        if (cancelled || status.state !== "granted") return;
+        navigator.geolocation.getCurrentPosition(
+          ({ coords }) => {
+            if (!cancelled) setUserLocation({ lat: coords.latitude, lng: coords.longitude });
+          },
+          () => undefined,
+          { enableHighAccuracy: false, timeout: 10_000 }
+        );
+      })
+      .catch(() => undefined);
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedId, userLocation]);
+
   function requestLocation() {
     if (!navigator.geolocation) {
       showToast({ message: "Your browser does not support location." });
@@ -232,6 +254,7 @@ export function ExploreView({
             onClose={() => setSelectedId(null)}
             onMarkVisited={handleMarkVisited}
             onEditVisit={setEditingId}
+            onCheckDistance={handleFindNearMe}
           />
         ) : null}
       </section>

@@ -11,6 +11,7 @@ import {
   GlobeIcon,
   LockIcon,
   NavigationIcon,
+  TargetIcon,
 } from "@/components/ui/icons";
 import { directionsUrl, formatDistance, formatShortDistance, proximity } from "@/lib/geo";
 import { hasCoordinates } from "@/lib/office-status";
@@ -21,6 +22,8 @@ interface OfficeDetailProps {
   onClose: () => void;
   onMarkVisited: (officeId: number) => void;
   onEditVisit: (officeId: number) => void;
+  /** Asks for the person's location so the banner can say whether they are at the office. */
+  onCheckDistance?: () => void;
 }
 
 const SECONDARY_BUTTON =
@@ -35,6 +38,7 @@ export function OfficeDetail({
   onClose,
   onMarkVisited,
   onEditVisit,
+  onCheckDistance,
 }: OfficeDetailProps) {
   const { visits, togglePlanned, removeVisit } = useVisits();
   const visit = visits[office.id];
@@ -107,7 +111,9 @@ export function OfficeDetail({
           </div>
         ) : null}
 
-        {!visit ? <ProximityBanner km={office.distanceKm} /> : null}
+        {!visit ? (
+          <ProximityBanner km={office.distanceKm} onCheckDistance={onCheckDistance} />
+        ) : null}
 
         <dl className="mt-4 rounded-2xl border border-line bg-paper px-4 py-1 text-sm">
           <div className="flex justify-between gap-4 py-2.5">
@@ -176,9 +182,26 @@ export function OfficeDetail({
 }
 
 /** Says whether the person is at the post office. It informs; it never blocks, so past visits can still be logged. */
-function ProximityBanner({ km }: { km: number | null }) {
+function ProximityBanner({
+  km,
+  onCheckDistance,
+}: {
+  km: number | null;
+  onCheckDistance?: () => void;
+}) {
   const state = proximity(km);
-  if (state === "unknown" || km === null) return null;
+  if (state === "unknown" || km === null) {
+    return onCheckDistance ? (
+      <button
+        type="button"
+        onClick={onCheckDistance}
+        className="mt-4 flex min-h-11 w-full items-center justify-center gap-2 rounded-2xl bg-sand text-sm font-semibold text-ink"
+      >
+        <TargetIcon className="size-4" />
+        Check if you&apos;re here
+      </button>
+    ) : null;
+  }
   if (state === "here") {
     return (
       <p className="mt-4 flex items-start gap-2 rounded-2xl bg-visited-soft p-3 text-sm font-semibold text-visited-ink">

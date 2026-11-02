@@ -39,3 +39,16 @@ describe("OfficeDetail stamping", () => {
     expect(screen.queryByText(/log a past visit/)).toBeNull();
   });
 });
+
+describe("OfficeDetail distance check", () => {
+  it("offers to check the distance when location is unknown", () => {
+    const office: OfficeWithStatus = {
+      id: 1, name: "Mysuru HO", pincode: "570001", district: "Mysuru", state: "KA",
+      lat: 12.3, lng: 76.6, stampImagePath: null, status: "unvisited", distanceKm: null,
+    };
+    const onCheck = vi.fn();
+    render(<OfficeDetail office={office} onClose={vi.fn()} onMarkVisited={vi.fn()} onEditVisit={vi.fn()} onCheckDistance={onCheck} />);
+    screen.getByRole("button", { name: /Check if you're here/ }).click();
+    expect(onCheck).toHaveBeenCalled();
+  });
+});

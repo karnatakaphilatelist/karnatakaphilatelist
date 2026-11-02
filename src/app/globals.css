@@ -263,3 +263,21 @@ label {
   animation-iteration-count: 1 !important;
   transition-duration: 0.01ms !important;
 }
+
+/* Postage-stamp edge: a row of round holes along each side, cut with intersecting masks. */
+.kp-perf {
+  background: #fff;
+  padding: 10px;
+  -webkit-mask:
+    radial-gradient(circle at 50% 0, #0000 4px, #000 4.5px) 0 0 / 12px 100% repeat-x,
+    radial-gradient(circle at 50% 100%, #0000 4px, #000 4.5px) 0 0 / 12px 100% repeat-x,
+    radial-gradient(circle at 0 50%, #0000 4px, #000 4.5px) 0 0 / 100% 12px repeat-y,
+    radial-gradient(circle at 100% 50%, #0000 4px, #000 4.5px) 0 0 / 100% 12px repeat-y;
+  -webkit-mask-composite: source-in;
+  mask:
+    radial-gradient(circle at 50% 0, #0000 4px, #000 4.5px) 0 0 / 12px 100% repeat-x,
+    radial-gradient(circle at 50% 100%, #0000 4px, #000 4.5px) 0 0 / 12px 100% repeat-x,
+    radial-gradient(circle at 0 50%, #0000 4px, #000 4.5px) 0 0 / 100% 12px repeat-y,
+    radial-gradient(circle at 100% 50%, #0000 4px, #000 4.5px) 0 0 / 100% 12px repeat-y;
+  mask-composite: intersect;
+}

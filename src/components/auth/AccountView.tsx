@@ -139,6 +139,11 @@ export function AccountView() {
             </button>
           </li>
           <li>
+            <Link href="/account/settings" className={ROW}>
+              <Row>Settings</Row>
+            </Link>
+          </li>
+          <li>
             <Link href="/welcome" className={ROW}>
               <Row>Welcome tour</Row>
             </Link>

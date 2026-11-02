@@ -1,5 +1,7 @@
 "use client";
 
+import { AlertIcon } from "@/components/ui/icons";
+
 interface ErrorPageProps {
   error: Error & { digest?: string };
   retry: () => void;
@@ -10,6 +12,9 @@ export default function ErrorPage({ retry }: ErrorPageProps) {
   return (
     <div role="alert" className="grid h-full place-items-center px-6 text-center">
       <div>
+        <span className="mx-auto mb-4 grid size-14 place-items-center rounded-full bg-warn-soft text-warn">
+          <AlertIcon className="size-7" />
+        </span>
         <h1 className="font-display text-2xl font-bold">We couldn&apos;t load the post offices</h1>
         <p className="mt-2 text-muted">Check your connection and try again.</p>
         <button

@@ -255,3 +255,11 @@ label {
   55% { opacity: 0.6; }
   100% { opacity: 0; transform: scale(1.7); }
 }
+
+/* Lite mode: drop decoration and motion. Set on <html> from Settings. */
+[data-lite] .kp-red { background-image: none; }
+[data-lite] *, [data-lite] *::before, [data-lite] *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+}

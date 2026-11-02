@@ -28,8 +28,10 @@ async function ExploreContent({
 
 function ExploreSkeleton() {
   return (
-    <div role="status" className="grid h-full place-items-center text-muted">
-      Loading post offices…
+    <div role="status" className="h-full space-y-3 p-4 text-muted">
+      <div className="h-13 animate-pulse rounded-full bg-sand" />
+      <div className="h-[55%] animate-pulse rounded-2xl bg-sand" />
+      <p className="text-center text-sm">Loading post offices…</p>
     </div>
   );
 }

@@ -24,3 +24,5 @@ export const DISCLAIMER =
 export const ONBOARDED_KEY = "kp:onboarded:v1";
 /** Set once we have explained why we ask for location, before the first system prompt. */
 export const LOCATION_PRIMED_KEY = "kp:location-primed:v1";
+/** Lite mode: no textures or motion, for older phones and battery saving. */
+export const LITE_MODE_KEY = "kp:lite:v1";

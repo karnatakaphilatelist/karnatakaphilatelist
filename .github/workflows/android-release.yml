@@ -1,0 +1,57 @@
+name: Android release bundle (Play)
+
+# Builds a signed .aab for Google Play, loading the production site.
+# Needs four repository secrets (see docs/RELEASE.md):
+#   ANDROID_KEYSTORE_BASE64, ANDROID_KEYSTORE_PASSWORD, ANDROID_KEY_ALIAS, ANDROID_KEY_PASSWORD
+on:
+  workflow_dispatch:
+    inputs:
+      version_name:
+        description: "Version shown to people, e.g. 1.0.0"
+        required: true
+        default: "1.0.0"
+
+jobs:
+  bundle:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check signing secrets exist
+        env:
+          K: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          P: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          A: ${{ secrets.ANDROID_KEY_ALIAS }}
+          KP: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          for v in K P A KP; do
+            if [ -z "${!v}" ]; then echo "::error::Missing a signing secret. See docs/RELEASE.md"; exit 1; fi
+          done
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+      - run: npm ci
+      - name: Sync Capacitor (production site)
+        run: npx cap sync android
+      - name: Write keystore
+        env:
+          K: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+        run: echo "$K" | base64 --decode > "$RUNNER_TEMP/upload.jks"
+      - name: Build signed bundle
+        working-directory: android
+        env:
+          KEYSTORE_FILE: ${{ runner.temp }}/upload.jks
+          KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          VERSION_CODE: ${{ github.run_number }}
+          VERSION_NAME: ${{ inputs.version_name }}
+        run: ./gradlew bundleRelease
+      - uses: actions/upload-artifact@v4
+        with:
+          name: philatrail-release-aab
+          path: android/app/build/outputs/bundle/release/app-release.aab

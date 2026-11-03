@@ -12,6 +12,9 @@ const config: CapacitorConfig = {
     // CI can point a test build at a preview deployment with CAP_SERVER_URL.
     url: process.env.CAP_SERVER_URL || "https://karnatakaphilatelist.vercel.app",
     cleartext: false,
+    // If the site cannot be reached (for example no connection at launch), show native-www/index.html
+    // instead of the browser's raw error page.
+    errorPath: "index.html",
     // Sign-in with Google happens in the system browser and returns through this scheme.
     allowNavigation: ["karnatakaphilatelist.vercel.app", "*.supabase.co"],
   },

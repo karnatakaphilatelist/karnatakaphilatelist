@@ -122,7 +122,11 @@ export function Landing({ offices }: { offices: PostOffice[] }) {
     if (!isNativeApp()) return;
     const tour = new URLSearchParams(window.location.search).has("tour");
     const seen = readJson<boolean>(ONBOARDED_KEY, false);
-    router.replace(seen && !tour ? "/explore" : "/welcome");
+    const target = seen && !tour ? "/explore" : "/welcome";
+    router.replace(target);
+    // If the client router stalls inside the app, a plain navigation still gets people out of the intro.
+    const fallback = setTimeout(() => window.location.replace(target), 1500);
+    return () => clearTimeout(fallback);
   }, [router]);
 
   // The intro: runs once per session, skipped when motion is reduced or it was already seen.

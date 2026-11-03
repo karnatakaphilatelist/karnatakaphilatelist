@@ -30,7 +30,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <script
           dangerouslySetInnerHTML={{
             __html:
-              'var h=document.documentElement;if(/(?:^|; )kp_skip_intro=1/.test(document.cookie))h.setAttribute("data-intro-seen","");else if(location.pathname==="/"){window.__kpIntroT0=performance.now();h.setAttribute("data-intro-go","")}',
+              '(function(){var h=document.documentElement;try{var c=window.Capacitor;if(location.pathname==="/"&&c&&c.isNativePlatform&&c.isNativePlatform()){var q=location.search.indexOf("tour")>-1,o=localStorage.getItem("kp:onboarded:v1")==="true";h.setAttribute("data-intro-seen","");location.replace(o&&!q?"/explore":"/welcome");return}}catch(e){}if(/(?:^|; )kp_skip_intro=1/.test(document.cookie))h.setAttribute("data-intro-seen","");else if(location.pathname==="/"){window.__kpIntroT0=performance.now();h.setAttribute("data-intro-go","")}})()',
           }}
         />
       </head>

@@ -21,7 +21,7 @@ const config: CapacitorConfig = {
     scheme: "Philatrail",
     backgroundColor: "#fcf6e8",
   },
-  android: { allowMixedContent: false },
+  android: { allowMixedContent: false, backgroundColor: "#cf1830" },
   plugins: {
     SystemBars: { insetsHandling: "native" },
     SplashScreen: { launchShowDuration: 800, backgroundColor: "#cf1830" },

@@ -1,6 +1,6 @@
 # Store submission kit
 
-Working name **Philatelist** (placeholder brand, see HANDOFF.md). Everything here is copy-paste ready for Google Play Console and App Store Connect. Update the name, contact email and URLs in one pass once the brand is final.
+Working name **Philatrail** (placeholder brand, see HANDOFF.md). Everything here is copy-paste ready for Google Play Console and App Store Connect. Update the name, contact email and URLs in one pass once the brand is final.
 
 ## Assets (in `store/`)
 
@@ -16,7 +16,7 @@ Screenshot order: 1 welcome, 2 explore map, 3 list sheet, 4 office detail, 5 pas
 
 ## Listing copy
 
-**Name:** Philatelist (30 chars max on both stores)
+**Name:** Philatrail (30 chars max on both stores)
 
 **Subtitle (App Store, 30):** Stamp every post office
 
@@ -26,9 +26,9 @@ Screenshot order: 1 welcome, 2 explore map, 3 list sheet, 4 office detail, 5 pas
 
 **Long description (4000):**
 
-> Philatelist is a passport for India's post offices.
+> Philatrail is a passport for India's post offices.
 >
-> Every post office has its own postmark. Philatelist helps you find them, visit them and keep a record of the stamps you collect.
+> Every post office has its own postmark. Philatrail helps you find them, visit them and keep a record of the stamps you collect.
 >
 > EXPLORE
 > - A map of post offices with filters for visited, planned and not visited
@@ -48,7 +48,7 @@ Screenshot order: 1 welcome, 2 explore map, 3 list sheet, 4 office detail, 5 pas
 >
 > Karnataka is available now. More states are on the way, starting with Tamil Nadu.
 >
-> Philatelist is an independent project. It is not run, endorsed or sponsored by India Post or any state or central government.
+> Philatrail is an independent project. It is not run, endorsed or sponsored by India Post or any state or central government.
 
 **Keywords (App Store, 100 chars, comma separated, no spaces):**
 `philately,stamps,postmark,post office,india,passport,collector,travel,pincode,hobby`
@@ -106,7 +106,7 @@ Answer "None" to all content questions (violence, sexual content, profanity, hor
 
 ## App Review notes (paste into App Store Connect and the Play "App access" form)
 
-> Philatelist works without an account. Open the app and tap through the welcome tour, then use Explore, the Passport tab and the Account tab. No login is needed to review any feature.
+> Philatrail works without an account. Open the app and tap through the welcome tour, then use Explore, the Passport tab and the Account tab. No login is needed to review any feature.
 >
 > Signing in is optional (Google, or email and password) and only syncs the passport across devices. If you want to test sign-in, a demo account is: `<create a demo email + password before submitting>`.
 >

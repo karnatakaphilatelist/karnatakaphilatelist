@@ -246,7 +246,7 @@ export function PassportView({
         onClose={() => setSharing(false)}
         onShare={async () => {
           const result = await shareContent({
-            title: "Philatelist",
+            title: "Philatrail",
             text: progressShareText(visitedOffices.length, total, stateName(stateCode)),
             url: window.location.origin,
           });

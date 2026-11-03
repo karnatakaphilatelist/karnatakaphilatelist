@@ -36,7 +36,7 @@ export function AccountView() {
 
   async function handleShare() {
     const result = await shareContent({
-      title: "Philatelist",
+      title: "Philatrail",
       text: "Collect a stamp from every post office in India.",
       url: window.location.origin,
     });
@@ -142,7 +142,7 @@ export function AccountView() {
           ) : null}
           <li>
             <button type="button" onClick={handleShare} className={ROW}>
-              <Row>Share Philatelist</Row>
+              <Row>Share Philatrail</Row>
             </button>
           </li>
           <li>

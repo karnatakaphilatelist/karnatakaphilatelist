@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">Philatelist</string>
-    <string name="title_activity_main">Philatelist</string>
-    <string name="package_name">com.karnatakaphilatelist.passport</string>
-    <string name="custom_url_scheme">com.karnatakaphilatelist.passport</string>
+    <string name="app_name">Philatrail</string>
+    <string name="title_activity_main">Philatrail</string>
+    <string name="package_name">app.vinvi.philatrail</string>
+    <string name="custom_url_scheme">app.vinvi.philatrail</string>
 </resources>

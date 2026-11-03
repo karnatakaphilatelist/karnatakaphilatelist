@@ -8,7 +8,7 @@ export default function TermsPage() {
   return (
     <LegalPage title="Terms of Use" updated={LEGAL_LAST_UPDATED}>
       <p>
-        By using Philatelist you agree to these terms. They are short on purpose.
+        By using Philatrail you agree to these terms. They are short on purpose.
       </p>
 
       <LegalSection heading="Using the service">

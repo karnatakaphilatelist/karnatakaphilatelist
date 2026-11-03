@@ -8,7 +8,7 @@ export default function PrivacyPage() {
   return (
     <LegalPage title="Privacy Policy" updated={LEGAL_LAST_UPDATED}>
       <p>
-        Philatelist helps you find post offices on the map and keep a record of
+        Philatrail helps you find post offices on the map and keep a record of
         the ones you have visited. This page explains what we keep about you and why, in plain
         words.
       </p>

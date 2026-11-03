@@ -2,7 +2,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { progressShareText, shareContent } from "@/lib/share";
 
 const content = {
-  title: "Philatelist",
+  title: "Philatrail",
   text: "Hello",
   url: "https://example.com",
 };

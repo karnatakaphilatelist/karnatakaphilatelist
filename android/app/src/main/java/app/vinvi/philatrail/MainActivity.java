@@ -1,4 +1,4 @@
-package com.karnatakaphilatelist.passport;
+package app.vinvi.philatrail;
 
 import com.getcapacitor.BridgeActivity;
 

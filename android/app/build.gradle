@@ -1,10 +1,10 @@
 apply plugin: 'com.android.application'
 
 android {
-    namespace = "com.karnatakaphilatelist.passport"
+    namespace = "app.vinvi.philatrail"
     compileSdk = rootProject.ext.compileSdkVersion
     defaultConfig {
-        applicationId "com.karnatakaphilatelist.passport"
+        applicationId "app.vinvi.philatrail"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1

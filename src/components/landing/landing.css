@@ -1237,3 +1237,18 @@ html[data-intro-playing] {
     --top0: calc(var(--row-top) + 56px);
   }
 }
+
+/* Last resort that needs no script: if the page never reveals itself (slow or blocked scripts), show it after 7s.
+   The rule stops matching as soon as the script adds `.in`, so normal behaviour is untouched. */
+.kpl:not(.in) .kpl-meta,
+.kpl:not(.in) .kpl-row,
+.kpl:not(.in) .kpl-track,
+.kpl:not(.in) .kpl-dock {
+  animation: kpl-show 0.5s ease 7s forwards;
+}
+@keyframes kpl-show {
+  to {
+    opacity: 1;
+    filter: none;
+  }
+}

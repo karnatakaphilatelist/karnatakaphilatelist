@@ -19,3 +19,10 @@ export const LEGAL_LAST_UPDATED = "27 October 2026";
 /** Shown in the footer of the passport and legal pages. */
 export const DISCLAIMER =
   "Philatelist is an independent project. It is not run, endorsed or sponsored by India Post or any state or central government. India Post and related names belong to their owners.";
+
+/** Set once a person has seen (or skipped) the first-launch welcome tour. */
+export const ONBOARDED_KEY = "kp:onboarded:v1";
+/** Set once we have explained why we ask for location, before the first system prompt. */
+export const LOCATION_PRIMED_KEY = "kp:location-primed:v1";
+/** Lite mode: no textures or motion, for older phones and battery saving. */
+export const LITE_MODE_KEY = "kp:lite:v1";

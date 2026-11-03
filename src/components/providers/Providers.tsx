@@ -3,6 +3,7 @@
 import { Suspense, type ReactNode } from "react";
 import { AuthStatusNotice } from "@/components/auth/AuthStatusNotice";
 import { GuestSignInPrompt } from "@/components/auth/GuestSignInPrompt";
+import { LiteModeApplier } from "@/components/settings/LiteModeApplier";
 import { AuthProvider } from "@/components/providers/AuthProvider";
 import { StateProvider } from "@/components/providers/StateProvider";
 import { ToastProvider } from "@/components/providers/ToastProvider";
@@ -16,6 +17,7 @@ export function Providers({ children }: { children: ReactNode }) {
         <VisitsProvider>
           <StateProvider>{children}</StateProvider>
           <GuestSignInPrompt />
+          <LiteModeApplier />
           <Suspense>
             <AuthStatusNotice />
           </Suspense>

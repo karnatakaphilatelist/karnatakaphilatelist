@@ -7,11 +7,11 @@ import { ArrowLeftIcon, ArrowRightIcon } from "@/components/ui/icons";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { useRouter } from "next/navigation";
 import { isNativeApp } from "@/lib/native";
-import { readJson, writeJson } from "@/lib/local-storage";
+import { readJson } from "@/lib/local-storage";
 import { useStateOffices } from "@/components/providers/StateProvider";
 import { stateName } from "@/lib/states";
 import { useVisits } from "@/components/providers/VisitsProvider";
-import { CONTACT_EMAIL, DISCLAIMER } from "@/lib/constants";
+import { CONTACT_EMAIL, DISCLAIMER, ONBOARDED_KEY } from "@/lib/constants";
 import {
   cardProgress,
   formatCounter,
@@ -83,7 +83,6 @@ function Wordmark({ white = false }: { white?: boolean }) {
  * scrolling grows the map card until it fills the screen. Plays once per browser
  * session (never for people who ask for reduced motion) and can be skipped.
  */
-const ONBOARDED_KEY = "kp:onboarded:v1";
 
 export function Landing({ offices }: { offices: PostOffice[] }) {
   const { user, isLoading, openSignIn, signOut } = useAuth();
@@ -118,13 +117,12 @@ export function Landing({ offices }: { offices: PostOffice[] }) {
   const shownStamped = isSample ? Math.min(12, stateTotal) : stamped;
   const firstName = user ? getFirstName(user) : null;
 
-  // In the mobile apps the welcome page is a first-launch tour; after that the app opens on the map.
+  // In the mobile apps the first launch shows the welcome tour; after that the app opens on the map.
   useEffect(() => {
     if (!isNativeApp()) return;
     const tour = new URLSearchParams(window.location.search).has("tour");
     const seen = readJson<boolean>(ONBOARDED_KEY, false);
-    if (seen && !tour) router.replace("/explore");
-    else writeJson(ONBOARDED_KEY, true);
+    router.replace(seen && !tour ? "/explore" : "/welcome");
   }, [router]);
 
   // The intro: runs once per session, skipped when motion is reduced or it was already seen.
@@ -431,12 +429,12 @@ export function Landing({ offices }: { offices: PostOffice[] }) {
                         width="100"
                         height="100"
                         fill="#f1e8d3"
-                        stroke="#1c2b6b"
+                        stroke="#16204f"
                         strokeWidth="2"
                       />
                       <path
                         d="M25 90 L45 55 L62 78 L75 62 L95 90 Z"
-                        fill="#1c2b6b"
+                        fill="#16204f"
                       />
                       <circle cx="80" cy="34" r="9" fill="#cf1830" />
                       <text
@@ -445,7 +443,7 @@ export function Landing({ offices }: { offices: PostOffice[] }) {
                         textAnchor="middle"
                         fontSize="13"
                         fontWeight="700"
-                        fill="#1c2b6b"
+                        fill="#16204f"
                       >
                         {stateName_.toUpperCase()}
                       </text>
@@ -454,7 +452,7 @@ export function Landing({ offices }: { offices: PostOffice[] }) {
                         y="145"
                         textAnchor="middle"
                         fontSize="9"
-                        fill="#1c2b6b"
+                        fill="#16204f"
                       >
                         INDIA · POST
                       </text>
@@ -471,7 +469,7 @@ export function Landing({ offices }: { offices: PostOffice[] }) {
                       cy="50"
                       r="46"
                       fill="none"
-                      stroke="#1c2b6b"
+                      stroke="#16204f"
                       strokeWidth="2.5"
                     />
                     <circle
@@ -479,7 +477,7 @@ export function Landing({ offices }: { offices: PostOffice[] }) {
                       cy="50"
                       r="38"
                       fill="none"
-                      stroke="#1c2b6b"
+                      stroke="#16204f"
                       strokeWidth="1.5"
                     />
                     <text
@@ -488,7 +486,7 @@ export function Landing({ offices }: { offices: PostOffice[] }) {
                       textAnchor="middle"
                       fontSize="11"
                       fontWeight="700"
-                      fill="#1c2b6b"
+                      fill="#16204f"
                     >
                       BENGALURU
                     </text>
@@ -497,7 +495,7 @@ export function Landing({ offices }: { offices: PostOffice[] }) {
                       y="60"
                       textAnchor="middle"
                       fontSize="9"
-                      fill="#1c2b6b"
+                      fill="#16204f"
                     >
                       STAMPED
                     </text>
@@ -661,17 +659,17 @@ export function Landing({ offices }: { offices: PostOffice[] }) {
           <div className="kpl-mono kpl-hint">Post here &raquo;</div>
           <div className="kpl-postbox">
             <svg viewBox="0 0 44 64" width="44" height="64">
-              <rect x="4" y="6" width="36" height="56" rx="4" fill="#fbf5e9" />
+              <rect x="4" y="6" width="36" height="56" rx="4" fill="#fcf6e8" />
               <rect
                 x="8"
                 y="14"
                 width="28"
                 height="5"
                 rx="2.5"
-                fill="#1c2b6b"
+                fill="#16204f"
               />
               <rect x="14" y="30" width="16" height="3" fill="#cf1830" />
-              <rect x="0" y="2" width="44" height="8" rx="4" fill="#fbf5e9" />
+              <rect x="0" y="2" width="44" height="8" rx="4" fill="#fcf6e8" />
             </svg>
           </div>
           <div ref={cardRef} className="kpl-flycard" />

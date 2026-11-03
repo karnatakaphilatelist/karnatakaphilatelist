@@ -81,7 +81,11 @@ export function AccountView() {
           Account
         </h1>
 
-        <section className="mt-4 rounded-[18px] border border-line bg-white p-4">
+        <section
+          className={`mt-4 rounded-[18px] p-4 ${
+            user ? "border border-line bg-white" : "kp-red text-white"
+          }`}
+        >
           {user ? (
             <div className="flex items-center gap-3">
               <span className="grid size-14 shrink-0 place-items-center overflow-hidden rounded-full bg-visited-soft text-xl font-bold text-visited-ink">
@@ -107,13 +111,13 @@ export function AccountView() {
           ) : (
             <div>
               <p className="font-semibold">You&apos;re browsing as a guest</p>
-              <p className="mt-1 text-sm text-muted">
+              <p className="mt-1 text-sm text-white/90">
                 Sign in to keep your passport safe and use it on every device.
               </p>
               <button
                 type="button"
                 onClick={() => openSignIn("manual")}
-                className="mt-3 min-h-12 w-full rounded-full bg-ink text-base font-semibold text-white"
+                className="mt-3 min-h-12 w-full rounded-full bg-white text-base font-semibold text-ink"
               >
                 Sign in
               </button>
@@ -122,6 +126,13 @@ export function AccountView() {
         </section>
 
         <ul className="mt-4 divide-y divide-line overflow-hidden rounded-[18px] border border-line bg-white">
+          {user ? (
+            <li>
+              <Link href="/account/profile" className={ROW}>
+                <Row>Edit profile</Row>
+              </Link>
+            </li>
+          ) : null}
           {user ? (
             <li>
               <Link href="/account/password" className={ROW}>
@@ -135,7 +146,12 @@ export function AccountView() {
             </button>
           </li>
           <li>
-            <Link href="/?tour=1" className={ROW}>
+            <Link href="/account/settings" className={ROW}>
+              <Row>Settings</Row>
+            </Link>
+          </li>
+          <li>
+            <Link href="/welcome" className={ROW}>
               <Row>Welcome tour</Row>
             </Link>
           </li>
@@ -196,7 +212,7 @@ export function AccountView() {
             type="button"
             onClick={handleDelete}
             disabled={isDeleting}
-            className="min-h-12 w-full rounded-full bg-postal text-base font-semibold text-white disabled:opacity-60"
+            className="min-h-12 w-full rounded-full border-[1.5px] border-postal-dark bg-white text-base font-semibold text-postal-dark disabled:opacity-60"
           >
             {isDeleting ? "Deleting…" : "Yes, delete everything"}
           </button>

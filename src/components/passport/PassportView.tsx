@@ -4,6 +4,8 @@ import Link from "next/link";
 import { useState } from "react";
 import { VisitDialog } from "@/components/office/VisitDialog";
 import { DistrictProgress } from "@/components/passport/DistrictProgress";
+import { ShareProgressSheet } from "@/components/passport/ShareProgressSheet";
+import { StampDetailSheet } from "@/components/passport/StampDetailSheet";
 import { ProgressRing } from "@/components/passport/ProgressRing";
 import { VisitedCard } from "@/components/passport/VisitedCard";
 import { useAuth } from "@/components/providers/AuthProvider";
@@ -33,6 +35,8 @@ export function PassportView({
   const { visits, isReady } = useVisits();
   const { showToast } = useToast();
   const [editingId, setEditingId] = useState<number | null>(null);
+  const [stampId, setStampId] = useState<number | null>(null);
+  const [sharing, setSharing] = useState(false);
 
   const total = offices.length;
   const visitedOffices = offices.filter((office) => visits[office.id]);
@@ -52,24 +56,61 @@ export function PassportView({
 
   return (
     <div className="h-full overflow-y-auto">
-      <div className="mx-auto max-w-2xl px-5 pb-10 pt-6">
-        <h1 className="font-display text-3xl font-bold tracking-tight">
-          My Passport
-        </h1>
-        <p className="mt-1 text-sm text-muted">
-          Every stamp you collect, in one place.
-        </p>
-        <div className="mt-3 max-w-xs">
-          <StateSwitcher
-            states={states}
-            value={stateCode}
-            onChange={choose}
-            idSuffix="passport"
-          />
+      <header className="kp-red px-5 pb-6 pt-6 text-white">
+        <div className="mx-auto max-w-2xl">
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <h1 className="font-display text-3xl font-bold tracking-tight">
+                My Passport
+              </h1>
+              <p className="mt-1 text-sm text-white/90">
+                Every stamp you collect, in one place.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setSharing(true)}
+              className="min-h-11 shrink-0 rounded-full bg-white/20 px-5 text-sm font-semibold text-white"
+            >
+              Share my progress
+            </button>
+          </div>
+          <div className="mt-3 max-w-xs">
+            <StateSwitcher
+              states={states}
+              value={stateCode}
+              onChange={choose}
+              idSuffix="passport"
+              onRed
+            />
+          </div>
+          <section
+            aria-label="Overall progress"
+            className="mt-5 flex items-center gap-5"
+          >
+            <ProgressRing visited={visitedOffices.length} total={total} onRed />
+            <div>
+              <p className="flex items-baseline gap-1.5 whitespace-nowrap font-display font-bold leading-none">
+                <span className="text-5xl font-semibold italic">
+                  {visitedOffices.length}
+                </span>
+                <span className="text-lg font-semibold text-white/90">
+                  of {total}
+                </span>
+              </p>
+              <p className="mt-1 text-sm text-white/90">
+                post offices stamped in {stateName(stateCode)}
+              </p>
+              <p className="mt-2 text-sm font-semibold">
+                {total - visitedOffices.length} to go
+              </p>
+            </div>
+          </section>
         </div>
-
+      </header>
+      <div className="mx-auto max-w-2xl px-5 pb-10 pt-5">
         {!user && !isAuthLoading ? (
-          <div className="mt-4 flex items-center gap-3 rounded-2xl bg-planned-soft p-3.5">
+          <div className="mb-4 flex items-center gap-3 rounded-2xl bg-planned-soft p-3.5">
             <p className="flex-1 text-sm leading-[18px] text-planned-ink">
               You&apos;re browsing as a guest. Sign in to keep your passport on
               every device.
@@ -106,28 +147,6 @@ export function PassportView({
             </p>
           </div>
         </section>
-
-        <button
-          type="button"
-          onClick={async () => {
-            const result = await shareContent({
-              title: "Philatelist",
-              text: progressShareText(
-                visitedOffices.length,
-                total,
-                stateName(stateCode)
-              ),
-              url: window.location.origin,
-            });
-            if (result === "copied")
-              showToast({ message: "Copied. Paste it anywhere to share." });
-            if (result === "failed")
-              showToast({ message: "Could not share. Please try again." });
-          }}
-          className="mt-4 min-h-11 rounded-full border-[1.5px] border-postal bg-white px-5 text-sm font-semibold text-postal-dark"
-        >
-          Share my progress
-        </button>
 
         {user ? (
           <p className="mt-4 text-sm text-muted">
@@ -166,7 +185,7 @@ export function PassportView({
           </h2>
           {visitedOffices.length === 0 ? (
             <div className="mt-2.5 rounded-[18px] border border-line bg-white p-6 text-center text-muted">
-              <p>No stamps yet. Find a post office and tap Mark as visited.</p>
+              <p>No stamps yet. Find a post office and tap Stamp it.</p>
               <Link
                 href="/explore"
                 className="mt-3.5 inline-flex min-h-12 items-center rounded-full bg-postal px-6 text-base font-semibold text-white"
@@ -182,6 +201,7 @@ export function PassportView({
                   office={office}
                   visit={visits[office.id]}
                   onEdit={setEditingId}
+                  onOpenStamp={setStampId}
                 />
               ))}
             </ul>
@@ -218,6 +238,30 @@ export function PassportView({
         </footer>
       </div>
 
+      <ShareProgressSheet
+        open={sharing}
+        stamped={visitedOffices.length}
+        total={total}
+        stateName={stateName(stateCode)}
+        onClose={() => setSharing(false)}
+        onShare={async () => {
+          const result = await shareContent({
+            title: "Philatelist",
+            text: progressShareText(visitedOffices.length, total, stateName(stateCode)),
+            url: window.location.origin,
+          });
+          setSharing(false);
+          if (result === "copied")
+            showToast({ message: "Copied. Paste it anywhere to share." });
+          if (result === "failed")
+            showToast({ message: "Could not share. Please try again." });
+        }}
+      />
+      <StampDetailSheet
+        office={offices.find((office) => office.id === stampId) ?? null}
+        visit={stampId === null ? undefined : visits[stampId]}
+        onClose={() => setStampId(null)}
+      />
       <VisitDialog office={editingOffice} onClose={() => setEditingId(null)} />
     </div>
   );

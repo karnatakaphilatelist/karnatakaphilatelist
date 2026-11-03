@@ -9,7 +9,8 @@ const config: CapacitorConfig = {
   appName: "Philatelist",
   webDir: "native-www",
   server: {
-    url: "https://karnatakaphilatelist.vercel.app",
+    // CI can point a test build at a preview deployment with CAP_SERVER_URL.
+    url: process.env.CAP_SERVER_URL || "https://karnatakaphilatelist.vercel.app",
     cleartext: false,
     // Sign-in with Google happens in the system browser and returns through this scheme.
     allowNavigation: ["karnatakaphilatelist.vercel.app", "*.supabase.co"],
@@ -18,7 +19,7 @@ const config: CapacitorConfig = {
   ios: {
     contentInset: "always",
     scheme: "Philatelist",
-    backgroundColor: "#fbf5e9",
+    backgroundColor: "#fcf6e8",
   },
   android: { allowMixedContent: false },
   plugins: {

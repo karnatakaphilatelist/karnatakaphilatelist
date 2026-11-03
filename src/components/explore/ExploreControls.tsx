@@ -28,14 +28,14 @@ export function ExploreControls({
         <label htmlFor={inputId} className="sr-only">
           Search by post office, district or pincode
         </label>
-        <SearchIcon className="pointer-events-none absolute left-3.5 top-3.5 size-5 text-muted" />
+        <SearchIcon className="pointer-events-none absolute left-4.5 top-4 size-5 text-muted" />
         <input
           id={inputId}
           type="search"
           value={query}
           onChange={(event) => onQueryChange(event.target.value)}
           placeholder="Search post office, district or pincode"
-          className="h-12 w-full rounded-xl border border-line-strong bg-paper pl-11 pr-3 text-base"
+          className="h-13 w-full rounded-full border border-line bg-white pl-12 pr-4 text-base shadow-[0_1px_2px_rgb(22_32_79/0.1),0_10px_22px_-10px_rgb(22_32_79/0.35)]"
         />
       </div>
       <FilterChips value={filter} onChange={onFilterChange} />

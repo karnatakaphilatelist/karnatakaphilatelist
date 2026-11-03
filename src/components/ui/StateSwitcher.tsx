@@ -7,6 +7,8 @@ interface StateSwitcherProps {
   value: string;
   onChange: (code: string) => void;
   idSuffix: string;
+  /** Style for sitting on a red surface: translucent white with white text. */
+  onRed?: boolean;
 }
 
 /** Pick which state's post offices to browse. States still being added show as coming soon. */
@@ -15,6 +17,7 @@ export function StateSwitcher({
   value,
   onChange,
   idSuffix,
+  onRed = false,
 }: StateSwitcherProps) {
   const id = `state-${idSuffix}`;
   const soon = COMING_SOON_STATES.filter(
@@ -29,7 +32,11 @@ export function StateSwitcher({
         id={id}
         value={value}
         onChange={(event) => onChange(event.target.value)}
-        className="min-h-11 w-full rounded-full border border-line-strong bg-paper px-4 text-sm font-semibold text-ink"
+        className={`min-h-11 w-full rounded-full border px-4 text-sm font-semibold ${
+          onRed
+            ? "border-white/30 bg-white/15 text-white [&>option]:text-ink"
+            : "border-line-strong bg-paper text-ink"
+        }`}
       >
         {states.map((state) => (
           <option key={state.code} value={state.code}>

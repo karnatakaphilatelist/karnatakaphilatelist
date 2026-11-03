@@ -28,3 +28,27 @@ Authentication -> URL Configuration -> Redirect URLs: add `com.karnatakaphilatel
 Apple can reject apps that are only a website in a wrapper. Native touches that help: location,
 camera for stamp photos, share sheet, and push reminders. Add at least one real native feature
 before submitting.
+
+## Building from a branch (previews)
+
+The shells load the live site, so a branch build must point at that branch's Vercel preview.
+Set `CAP_SERVER_URL` before `npx cap sync`; the **Android debug APK** and **iOS simulator build**
+workflows take a `server_url` input that does this. Leave it blank for production.
+
+- Android: run *Android debug APK* with the preview URL, download `philatelist-debug-apk`, install it.
+- iOS: *iOS simulator build* only proves the shell compiles (unsigned). To run on an iPhone or ship
+  to TestFlight you need an Apple Developer account: open `ios/App` in Xcode, set the signing team,
+  Product > Archive, upload.
+
+## Sign-in code (one-time code in the email)
+
+The sign-in dialog can also take the 6-digit code from the "email me a sign-in link" message,
+which is easier than links inside the phone app. It needs one dashboard change: in Supabase,
+Authentication > Email Templates > **Magic Link**, add the code to the body, for example:
+
+    <h2>Your Philatelist sign-in</h2>
+    <p>Enter this code in the app: <strong>{{ .Token }}</strong></p>
+    <p>Or <a href="{{ .ConfirmationURL }}">tap here to sign in</a>.</p>
+
+Until the template includes `{{ .Token }}`, the link still works and the code box simply gets
+no code to enter.

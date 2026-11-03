@@ -35,8 +35,8 @@ export function FilterChips({ value, onChange }: FilterChipsProps) {
             <span
               className={`block rounded-full border px-3.5 py-1.5 text-sm font-semibold ${
                 active
-                  ? "border-ink bg-ink text-white"
-                  : "border-line-strong bg-white text-ink"
+                  ? "border-ink bg-ink text-white shadow-[0_1px_2px_rgb(22_32_79/0.3),0_10px_18px_-8px_rgb(22_32_79/0.5)]"
+                  : "border-line bg-white text-ink"
               }`}
             >
               {filter.label}

@@ -24,3 +24,19 @@ export function formatDistance(km: number): string {
 export function directionsUrl({ lat, lng }: Coordinates): string {
   return `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
 }
+
+/** How close (km) someone has to be for the app to say they are at the post office. */
+export const AT_OFFICE_KM = 0.15;
+
+/** Short distance for status messages: metres under a kilometre, kilometres above. */
+export function formatShortDistance(km: number): string {
+  return km < 1 ? `${Math.max(10, Math.round((km * 1000) / 10) * 10)} m` : formatDistance(km);
+}
+
+export type Proximity = "unknown" | "here" | "away";
+
+/** Whether a measured distance counts as being at the post office. `null` means no location yet. */
+export function proximity(km: number | null): Proximity {
+  if (km === null) return "unknown";
+  return km <= AT_OFFICE_KM ? "here" : "away";
+}

@@ -7,7 +7,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleDisplayName</key>
-        <string>Philatelist</string>
+        <string>Philatrail</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -76,10 +76,10 @@
 	<array>
 		<dict>
 			<key>CFBundleURLName</key>
-			<string>com.karnatakaphilatelist.passport</string>
+			<string>app.vinvi.philatrail</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>com.karnatakaphilatelist.passport</string>
+				<string>app.vinvi.philatrail</string>
 			</array>
 		</dict>
 	</array>

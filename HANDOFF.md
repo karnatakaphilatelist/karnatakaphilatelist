@@ -1,4 +1,4 @@
-# Handoff: Philatelist (post office stamp passport for India)
+# Handoff: Philatrail (post office stamp passport for India)
 
 Context for a new Claude Code session picking this project up. Read `AGENTS.md` (Next.js version differs from older docs; check `node_modules/next/dist/docs/`) and `docs/SETUP.md` first.
 

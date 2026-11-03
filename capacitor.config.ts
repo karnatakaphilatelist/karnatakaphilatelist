@@ -5,8 +5,8 @@ import type { CapacitorConfig } from "@capacitor/cli";
  * `native-www` is only the offline fallback page shown when the site cannot be reached.
  */
 const config: CapacitorConfig = {
-  appId: "com.karnatakaphilatelist.passport",
-  appName: "Philatelist",
+  appId: "app.vinvi.philatrail",
+  appName: "Philatrail",
   webDir: "native-www",
   server: {
     // CI can point a test build at a preview deployment with CAP_SERVER_URL.
@@ -18,7 +18,7 @@ const config: CapacitorConfig = {
   // Keep the page clear of the notch and home bar; Android pads the web view itself.
   ios: {
     contentInset: "always",
-    scheme: "Philatelist",
+    scheme: "Philatrail",
     backgroundColor: "#fcf6e8",
   },
   android: { allowMixedContent: false },

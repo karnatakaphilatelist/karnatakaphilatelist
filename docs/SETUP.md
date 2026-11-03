@@ -1,4 +1,4 @@
-# Philatelist: developer setup
+# Philatrail: developer setup
 
 A Next.js (App Router) + TypeScript app backed by Supabase. Visitors browse every
 passport post office on a map without signing in, mark the ones they have visited,

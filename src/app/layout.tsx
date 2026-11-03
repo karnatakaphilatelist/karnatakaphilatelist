@@ -9,8 +9,8 @@ import { Providers } from "@/components/providers/Providers";
 
 export const metadata: Metadata = {
   title: {
-    default: "Philatelist: the post office stamp passport for India",
-    template: "%s · Philatelist",
+    default: "Philatrail: the post office stamp passport for India",
+    template: "%s · Philatrail",
   },
   description:
     "Find post offices across India on the map, plan your day, and keep a passport of the stamps you have collected.",

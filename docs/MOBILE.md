@@ -4,10 +4,10 @@ The apps are Capacitor shells around the live site (`capacitor.config.ts` -> `se
 every website release reaches both apps at once. `native-www/` is only the offline fallback page.
 
 ## What is native
-- App id `com.karnatakaphilatelist.passport`, name "Philatelist", crimson stamp icon and splash
+- App id `app.vinvi.philatrail`, name "Philatrail", crimson stamp icon and splash
   (regenerate from `resources/` with `npx capacitor-assets generate`).
 - Google sign-in opens the system browser (Google refuses embedded web views) and returns through
-  `com.karnatakaphilatelist.passport://auth/callback`. Handled in `AuthProvider` + `src/lib/native.ts`.
+  `app.vinvi.philatrail://auth/callback`. Handled in `AuthProvider` + `src/lib/native.ts`.
 - Location, camera and photo permissions are declared for "Near me" and stamp photos.
 - Stamp photos use the phone's own camera/library sheet (`src/lib/native-photo.ts`); "Share my progress" on
   Passport opens the phone's share sheet (`src/lib/share.ts`).
@@ -15,7 +15,7 @@ every website release reaches both apps at once. `native-www/` is only the offli
   (`SystemBars.insetsHandling: native`).
 
 ## One-time setup in Supabase
-Authentication -> URL Configuration -> Redirect URLs: add `com.karnatakaphilatelist.passport://auth/callback`.
+Authentication -> URL Configuration -> Redirect URLs: add `app.vinvi.philatrail://auth/callback`.
 
 ## Build
 - Android: GitHub Actions "Android debug APK" (Actions tab -> Run workflow) uploads an installable
@@ -46,7 +46,7 @@ The sign-in dialog can also take the 6-digit code from the "email me a sign-in l
 which is easier than links inside the phone app. It needs one dashboard change: in Supabase,
 Authentication > Email Templates > **Magic Link**, add the code to the body, for example:
 
-    <h2>Your Philatelist sign-in</h2>
+    <h2>Your Philatrail sign-in</h2>
     <p>Enter this code in the app: <strong>{{ .Token }}</strong></p>
     <p>Or <a href="{{ .ConfirmationURL }}">tap here to sign in</a>.</p>
 

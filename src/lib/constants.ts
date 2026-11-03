@@ -18,7 +18,7 @@ export const LEGAL_LAST_UPDATED = "27 October 2026";
 
 /** Shown in the footer of the passport and legal pages. */
 export const DISCLAIMER =
-  "Philatelist is an independent project. It is not run, endorsed or sponsored by India Post or any state or central government. India Post and related names belong to their owners.";
+  "Philatrail is an independent project. It is not run, endorsed or sponsored by India Post or any state or central government. India Post and related names belong to their owners.";
 
 /** Set once a person has seen (or skipped) the first-launch welcome tour. */
 export const ONBOARDED_KEY = "kp:onboarded:v1";

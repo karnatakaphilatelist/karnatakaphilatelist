@@ -36,7 +36,7 @@ view). Status is never shown by colour alone: pins and badges also change icon o
 
 ## Typography
 
-- Display: **Fraunces** (variable, italic for accents such as "one stamp at a time.") for headings and stamp numerals. The PHILATELIST word-mark on the landing page is a PNG mask (`public/brand/wordmark*.png`).
+- Display: **Fraunces** (variable, italic for accents such as "one stamp at a time.") for headings and stamp numerals. The PHILATRAIL word-mark on the landing page is a PNG mask (`public/brand/wordmark*.png`).
 - Text: **Figtree** (variable) for everything else. **Noto Sans Kannada** is in both stacks as the
   fallback for Kannada text.
 - Scale (size / line height): 12/16 caption, 14/20 small, 16/24 body, 18/28 lead, 22/28 h3,
@@ -110,7 +110,7 @@ post box, the screen splits open and the page appears. It plays once per session
 for `prefers-reduced-motion`, has a Skip button, and ends itself after 7 seconds or three
 janky frames in a row so a slow browser is never stuck on the red screen.
 
-After the intro: the crimson PHILATELIST wordmark (vector, used as a CSS mask), then seven
+After the intro: the crimson PHILATRAIL wordmark (vector, used as a CSS mask), then seven
 cream cards that slide sideways as the page scrolls (scroll-driven `--p`, 0 to 1 across the
 whole scroll, no dead zone): welcome, progress sample, Find, Visit, Stamp, a mini map, and the
 disclaimer. Moving between cards:

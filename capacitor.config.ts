@@ -22,9 +22,11 @@ const config: CapacitorConfig = {
   ios: {
     contentInset: "always",
     scheme: "Philatrail",
+    appendUserAgent: "PhilatrailApp",
     backgroundColor: "#fcf6e8",
   },
-  android: { allowMixedContent: false, backgroundColor: "#cf1830" },
+  // The user-agent tag lets the site recognise the app before any script runs.
+  android: { allowMixedContent: false, backgroundColor: "#cf1830", appendUserAgent: "PhilatrailApp" },
   plugins: {
     SystemBars: { insetsHandling: "native" },
     SplashScreen: { launchShowDuration: 800, backgroundColor: "#cf1830" },

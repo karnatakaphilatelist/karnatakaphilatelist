@@ -31,6 +31,18 @@ interface OfficeMapProps {
 const FOCUS_ZOOM = 12;
 const NEAR_ME_ZOOM = 11;
 
+/** The map screen is hidden, not destroyed, between visits; tell Leaflet when it gets its size back. */
+function KeepSized() {
+  const map = useMap();
+  useEffect(() => {
+    const container = map.getContainer();
+    const observer = new ResizeObserver(() => map.invalidateSize());
+    observer.observe(container);
+    return () => observer.disconnect();
+  }, [map]);
+  return null;
+}
+
 /** Moves the camera in response to selection and location changes. */
 function MapViewport({
   offices,
@@ -179,6 +191,7 @@ export function OfficeMap({
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
       <ZoomControl position="topleft" />
+      <KeepSized />
       <MapViewport
         offices={offices}
         selectedId={selectedId}

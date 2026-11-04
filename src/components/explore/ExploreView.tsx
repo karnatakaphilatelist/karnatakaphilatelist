@@ -43,16 +43,6 @@ export function ExploreView({
   const { visits, plannedIds, markVisited, isReady } = useVisits();
   const { showToast } = useToast();
 
-  // A link to one office (for example from the passport) opens that office's state.
-  useEffect(() => {
-    const linked = indiaOffices.find(
-      (office) => office.id === initialSelectedId
-    );
-    if (linked) choose(linked.state);
-    // Only on first load; later choices belong to the person.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
   const [sheetOpen, setSheetOpen] = useState(false);
   const [filter, setFilter] = useState<StatusFilter>("all");
   const [query, setQuery] = useState("");
@@ -64,6 +54,19 @@ export function ExploreView({
   const [isLocating, setIsLocating] = useState(false);
   const [stampedId, setStampedId] = useState<number | null>(null);
   const [locationSheet, setLocationSheet] = useState<"prime" | "denied" | null>(null);
+
+  // A link to one office (for example from the passport) opens that office's state.
+  // The screen stays mounted between visits, so this also runs for each later link.
+  useEffect(() => {
+    const linked = indiaOffices.find((office) => office.id === initialSelectedId);
+    if (!linked) return;
+    choose(linked.state);
+    // A link is an event from outside this screen, so reacting to it here is the point of the effect.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setSelectedId(linked.id);
+    // Only when the link changes; later choices belong to the person.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialSelectedId]);
 
   const allOffices = useMemo(
     () => withStatus(offices, visits, plannedIds, userLocation),

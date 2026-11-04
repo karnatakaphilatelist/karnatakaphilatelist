@@ -1,24 +1,55 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import type { ReactNode } from "react";
+import { Suspense, useState, type ReactNode } from "react";
 import { AppHeader } from "@/components/layout/AppHeader";
 import { OfflineBanner } from "@/components/layout/OfflineBanner";
 import { TabBar } from "@/components/layout/TabBar";
 
+function ExploreSkeleton() {
+  return (
+    <div role="status" className="h-full space-y-3 p-4 text-muted">
+      <div className="h-13 animate-pulse rounded-full bg-sand" />
+      <div className="h-[55%] animate-pulse rounded-2xl bg-sand" />
+      <p className="text-center text-sm">Loading post offices…</p>
+    </div>
+  );
+}
+
 /**
  * Page frame: top bar, scrolling content area, and a bottom tab bar on phones.
  * The landing page (`/`) and the welcome tour (`/welcome`) draw their own full-screen layouts, so they get no frame.
+ *
+ * The map screen (`explore`) is mounted the first time it is opened and then only hidden, so coming
+ * back to it is instant: no map rebuild, no tile reload, and filters and selection stay as they were.
  */
-export function AppShell({ children }: { children: ReactNode }) {
+export function AppShell({
+  children,
+  explore,
+}: {
+  children: ReactNode;
+  explore: ReactNode;
+}) {
   const pathname = usePathname();
+  const onExplore = pathname === "/explore";
+  const [exploreOpened, setExploreOpened] = useState(onExplore);
+  // Adjusting state while rendering is React's supported way to react to a route change.
+  if (onExplore && !exploreOpened) setExploreOpened(true);
+
   if (pathname === "/" || pathname === "/welcome") return <>{children}</>;
 
   return (
     <div className="flex h-dvh flex-col">
       <AppHeader />
       <OfflineBanner />
-      <main className="min-h-0 flex-1">{children}</main>
+      <main className="min-h-0 flex-1">
+        {exploreOpened ? (
+          <div hidden={!onExplore} className="size-full">
+            <Suspense fallback={<ExploreSkeleton />}>{explore}</Suspense>
+          </div>
+        ) : null}
+        {children}
+      </main>
       <TabBar />
     </div>
   );

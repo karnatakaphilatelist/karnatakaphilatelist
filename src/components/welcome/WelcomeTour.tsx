@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { CheckIcon, MailIcon, NavigationIcon, TargetIcon } from "@/components/ui/icons";
 import { ONBOARDED_KEY } from "@/lib/constants";
 import { writeJson } from "@/lib/local-storage";
@@ -65,15 +65,21 @@ function FindArt() {
 function StampArt() {
   return (
     <div className="relative grid h-full place-items-center">
-      <div className="relative">
-        <div className="grid h-36 w-44 place-items-center rounded-lg bg-white/90 shadow-[0_18px_30px_-12px_rgb(0_0_0/0.5)]">
-          <MailIcon className="size-12 text-muted" />
+      <div
+        className="kpt-pop relative h-40 w-64 rounded-xl bg-paper p-4 text-ink shadow-[0_18px_30px_-12px_rgb(0_0_0/0.5)]"
+        style={{ "--r": "-3deg" } as React.CSSProperties}
+        aria-hidden="true"
+      >
+        {/* A postcard: address lines on the left, the stamp in the corner, a postmark over the edge. */}
+        <div className="mt-14 space-y-2.5">
+          <span className="block h-1.5 w-28 rounded-full bg-line-strong" />
+          <span className="block h-1.5 w-20 rounded-full bg-line-strong" />
+          <span className="block h-1.5 w-24 rounded-full bg-line-strong" />
         </div>
-        <span className="kpt-ripple absolute inset-0 -m-6 rounded-full border-2 border-white/70" />
-        <span className="kpt-stamp absolute -bottom-5 -right-6 grid size-24 place-items-center rounded-lg bg-white text-ink shadow-[0_14px_24px_-10px_rgb(0_0_0/0.5)]">
-          <TargetIcon className="size-10" />
+        <span className="kpt-stamp kp-perforated absolute right-4 top-4 grid h-[4.5rem] w-14 place-items-center text-white">
+          <TargetIcon className="size-7" />
         </span>
-        <span className="kpt-ink absolute -left-5 -top-4 grid size-20 place-items-center rounded-full border-[3px] border-white text-center text-[11px] font-bold uppercase leading-tight tracking-wide text-white">
+        <span className="kpt-ink absolute right-14 top-8 grid size-[4.5rem] place-items-center rounded-full border-[3px] border-ink/70 text-center text-[9px] font-bold uppercase leading-tight tracking-wide text-ink/70">
           Stamped
         </span>
       </div>
@@ -126,8 +132,12 @@ export function WelcomeTour() {
   const last = step === STEPS.length - 1;
   const current = STEPS[step];
 
-  function finish() {
+  // Counts as seen the moment it appears, so closing the app halfway never brings the tour back.
+  useEffect(() => {
     writeJson(ONBOARDED_KEY, true);
+  }, []);
+
+  function finish() {
     router.replace("/explore");
   }
 

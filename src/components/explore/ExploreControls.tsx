@@ -34,7 +34,7 @@ export function ExploreControls({
           type="search"
           value={query}
           onChange={(event) => onQueryChange(event.target.value)}
-          placeholder="Search post office, district or pincode"
+          placeholder="Search name, district or pincode"
           className="h-13 w-full rounded-full border border-line bg-white pl-12 pr-4 text-base shadow-[0_1px_2px_rgb(22_32_79/0.1),0_10px_22px_-10px_rgb(22_32_79/0.35)]"
         />
       </div>

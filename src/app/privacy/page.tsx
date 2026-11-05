@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { LegalList, LegalPage, LegalSection } from "@/components/legal/LegalPage";
 import { CONTACT_EMAIL, LEGAL_LAST_UPDATED } from "@/lib/constants";
 
@@ -78,7 +79,8 @@ export default function PrivacyPage() {
           Your information stays until you remove it. You can delete any visit, with its note and
           photo, at any time from your passport. To delete your whole account and everything in it,
           open the Account page and choose Delete my account. It removes your stamps, notes and
-          photos straight away. You can also email us and we will do it for you.
+          photos straight away. You can also email us and we will do it for you. The steps are
+          also set out on one page: <Link className="font-semibold text-focus underline" href="/delete-account">how to delete your account</Link>.
         </p>
       </LegalSection>
 

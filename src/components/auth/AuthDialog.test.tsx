@@ -69,6 +69,21 @@ describe("Google sign-in", () => {
     expect(handlers.onGoogle).toHaveBeenCalledTimes(1);
   });
 
+  it("works again when Google opened in a separate browser window, as in the phone apps", async () => {
+    handlers.onGoogle.mockResolvedValue("handed-off");
+    renderDialog();
+
+    fireEvent.click(
+      screen.getByRole("button", { name: "Continue with Google" })
+    );
+
+    const button = await screen.findByRole("button", {
+      name: "Continue with Google",
+    });
+    expect((button as HTMLButtonElement).disabled).toBe(false);
+    expect(screen.queryByRole("button", { name: "Opening Google…" })).toBeNull();
+  });
+
   it("re-enables the button and shows the error when Google sign-in fails to start", async () => {
     handlers.onGoogle.mockRejectedValue(new Error("Unsupported provider"));
     renderDialog();

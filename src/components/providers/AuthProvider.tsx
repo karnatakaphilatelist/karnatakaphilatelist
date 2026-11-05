@@ -149,7 +149,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
   const closeSignIn = useCallback(() => setDialogReason(null), []);
 
-  const signInWithGoogle = useCallback(async () => {
+  const signInWithGoogle = useCallback(async (): Promise<void | "handed-off"> => {
     const supabase = await getClient();
     if (isNativeApp()) {
       const { data, error } = await supabase.auth.signInWithOAuth({
@@ -163,7 +163,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (error) throw error;
       const { Browser } = await import("@capacitor/browser");
       await Browser.open({ url: data.url });
-      return;
+      return "handed-off";
     }
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",

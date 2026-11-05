@@ -18,6 +18,7 @@ export function TabBar() {
               key={href}
               href={href}
               aria-current={active ? "page" : undefined}
+              data-tour={href === "/passport" ? "passport" : undefined}
               className={`flex h-[52px] flex-1 flex-col items-center justify-center gap-0.5 rounded-full text-xs font-semibold ${
                 active ? "bg-postal text-white" : "text-muted"
               }`}

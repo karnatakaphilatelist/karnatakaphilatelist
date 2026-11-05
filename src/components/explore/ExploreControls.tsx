@@ -24,7 +24,7 @@ export function ExploreControls({
   const inputId = `post-office-search-${idSuffix}`;
   return (
     <>
-      <div className="relative">
+      <div className="relative" data-tour="search">
         <label htmlFor={inputId} className="sr-only">
           Search by post office, district or pincode
         </label>
@@ -38,7 +38,9 @@ export function ExploreControls({
           className="h-13 w-full rounded-full border border-line bg-white pl-12 pr-4 text-base shadow-[0_1px_2px_rgb(22_32_79/0.1),0_10px_22px_-10px_rgb(22_32_79/0.35)]"
         />
       </div>
-      <FilterChips value={filter} onChange={onFilterChange} />
+      <div data-tour="filters">
+        <FilterChips value={filter} onChange={onFilterChange} />
+      </div>
     </>
   );
 }

@@ -22,6 +22,8 @@ export const DISCLAIMER =
 
 /** Set once a person has seen (or skipped) the first-launch welcome tour. */
 export const ONBOARDED_KEY = "kp:onboarded:v1";
+/** Set once a person has finished or skipped the pointer-by-pointer tour of the map screen. */
+export const TOUR_SEEN_KEY = "kp:tour:v1";
 /** Set once we have explained why we ask for location, before the first system prompt. */
 export const LOCATION_PRIMED_KEY = "kp:location-primed:v1";
 /** Lite mode: no textures or motion, for older phones and battery saving. */

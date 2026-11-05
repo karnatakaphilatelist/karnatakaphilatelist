@@ -1,7 +1,7 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { Suspense, useState, type ReactNode } from "react";
+import { Suspense, useEffect, useState, type ReactNode } from "react";
 import { AppHeader } from "@/components/layout/AppHeader";
 import { OfflineBanner } from "@/components/layout/OfflineBanner";
 import { TabBar } from "@/components/layout/TabBar";
@@ -35,6 +35,19 @@ export function AppShell({
   const [exploreOpened, setExploreOpened] = useState(onExplore);
   // Adjusting state while rendering is React's supported way to react to a route change.
   if (onExplore && !exploreOpened) setExploreOpened(true);
+
+  // People often land on another tab first (the passport, say) and tap through to the map.
+  // Download the map code quietly while they look around, so it is ready the moment they arrive.
+  useEffect(() => {
+    if (onExplore) return;
+    const warm = () => void import("@/components/map/OfficeMap").catch(() => undefined);
+    if ("requestIdleCallback" in window) {
+      const idle = window.requestIdleCallback(warm, { timeout: 3000 });
+      return () => window.cancelIdleCallback(idle);
+    }
+    const timer = setTimeout(warm, 1500);
+    return () => clearTimeout(timer);
+  }, [onExplore]);
 
   if (pathname === "/" || pathname === "/welcome") return <>{children}</>;
 

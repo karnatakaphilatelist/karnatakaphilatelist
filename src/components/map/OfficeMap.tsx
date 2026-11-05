@@ -26,6 +26,8 @@ interface OfficeMapProps {
   selectedId: number | null;
   userLocation: Coordinates | null;
   onSelect: (officeId: number) => void;
+  /** Called once the map has been built and is on screen. */
+  onReady?: () => void;
 }
 
 const FOCUS_ZOOM = 12;
@@ -48,7 +50,7 @@ function MapViewport({
   offices,
   selectedId,
   userLocation,
-}: Omit<OfficeMapProps, "onSelect">) {
+}: Pick<OfficeMapProps, "offices" | "selectedId" | "userLocation">) {
   const map = useMap();
   const hasFitted = useRef(false);
 
@@ -178,6 +180,7 @@ export function OfficeMap({
   selectedId,
   userLocation,
   onSelect,
+  onReady,
 }: OfficeMapProps) {
   return (
     <MapContainer
@@ -185,6 +188,7 @@ export function OfficeMap({
       zoom={MAP_START_ZOOM}
       className="kp-map size-full"
       zoomControl={false}
+      whenReady={onReady}
     >
       <TileLayer
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'

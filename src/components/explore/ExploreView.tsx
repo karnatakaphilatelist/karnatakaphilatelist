@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { CoachTour } from "@/components/explore/CoachTour";
 import { ExploreControls } from "@/components/explore/ExploreControls";
 import type { StatusFilter } from "@/components/explore/FilterChips";
 import { LocationSheet } from "@/components/explore/LocationSheet";
@@ -58,6 +59,14 @@ export function ExploreView({
   const [isLocating, setIsLocating] = useState(false);
   const [stampedId, setStampedId] = useState<number | null>(null);
   const [locationSheet, setLocationSheet] = useState<"prime" | "denied" | null>(null);
+
+  // On phones the list sheet waits for the map, so opening this screen shows the map first and the
+  // sheet then slides up over it. If the map is slow or fails to start, show the list after a moment anyway.
+  const [mapReady, setMapReady] = useState(false);
+  useEffect(() => {
+    const timer = window.setTimeout(() => setMapReady(true), 3000);
+    return () => window.clearTimeout(timer);
+  }, []);
 
   // A link to one office (for example from the passport) opens that office's state.
   // The screen stays mounted between visits, so this also runs for each later link.
@@ -215,8 +224,12 @@ export function ExploreView({
         style={sheetStyle}
         className={`absolute inset-x-0 bottom-0 z-[1050] flex min-h-0 flex-col rounded-t-3xl border-t border-line bg-white shadow-[0_-10px_30px_-12px_rgb(22_32_79/0.35)] md:h-auto! md:static md:z-auto md:h-auto md:w-[26rem] md:shrink-0 md:rounded-none md:border-r md:border-t-0 md:shadow-none ${
           ""
-        } ${dragHeight === null ? "transition-[height] duration-300 ease-out" : ""} ${
-          selectedOffice ? "max-md:hidden" : ""
+        } ${
+          dragHeight === null
+            ? "transition-[height,transform,opacity] duration-300 ease-out"
+            : ""
+        } ${selectedOffice ? "max-md:hidden" : ""} ${
+          mapReady ? "" : "max-md:pointer-events-none max-md:translate-y-full max-md:opacity-0"
         }`}
       >
         <div className="shrink-0 touch-none md:touch-auto" {...dragProps}>
@@ -308,6 +321,7 @@ export function ExploreView({
           selectedId={selectedId}
           userLocation={userLocation}
           onSelect={setSelectedId}
+          onReady={() => setMapReady(true)}
         />
         {selectedOffice ? (
           <OfficeDetail
@@ -339,6 +353,16 @@ export function ExploreView({
         }}
       />
       <VisitDialog office={editingOffice} onClose={() => setEditingId(null)} />
+      <CoachTour
+        ready={
+          mapReady &&
+          isReady &&
+          selectedId === null &&
+          stampedId === null &&
+          editingId === null &&
+          locationSheet === null
+        }
+      />
     </div>
   );
 }
@@ -357,6 +381,7 @@ function SheetHandle({
       aria-label={open ? "Collapse the list" : "Expand the list"}
       aria-expanded={open}
       onClick={() => onChange(!open)}
+      data-tour="list"
       className="grid h-9 w-full shrink-0 place-items-center md:hidden"
     >
       <span className="h-1.5 w-11 rounded-full bg-line-strong" />
@@ -378,6 +403,7 @@ function NearMeButton({
       type="button"
       onClick={onClick}
       disabled={isLocating}
+      data-tour="near-me"
       className={`flex min-h-11 shrink-0 items-center gap-1.5 rounded-full px-3 text-sm font-semibold text-postal disabled:opacity-60 ${className}`}
     >
       <LocateIcon className="size-4" />

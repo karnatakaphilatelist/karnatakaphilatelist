@@ -24,6 +24,7 @@ export function AppHeader() {
                   key={href}
                   href={href}
                   aria-current={active ? "page" : undefined}
+                  data-tour={href === "/passport" ? "passport" : undefined}
                   className={`flex min-h-11 items-center rounded-full px-4 text-sm font-semibold ${
                     active ? "bg-postal-soft text-postal-dark" : "text-ink"
                   }`}

@@ -18,7 +18,12 @@ interface AuthDialogProps {
   onClose: () => void;
   /** False when Google sign-in is known to be switched off for this project. */
   googleAvailable: boolean;
-  onGoogle: () => Promise<void>;
+  /**
+   * Starts Google sign-in. Resolves to "handed-off" when Google opened in a separate browser
+   * window (the phone apps), so this screen stays put and its button must work again on return.
+   * On the web the page itself navigates away, so the button stays busy until it unloads.
+   */
+  onGoogle: () => Promise<void | "handed-off">;
   /** Sends a one-time sign-in link; also how someone who forgot their password gets back in. */
   onEmail: (email: string) => Promise<void>;
   /** Signs in with the 6-digit code from the email (works in the phone app, where links open in a browser). */
@@ -153,8 +158,11 @@ export function AuthDialog({
     setError(null);
     setIsOpeningGoogle(true);
     try {
-      await onGoogle();
-      // The browser is now heading to Google, so the button stays disabled.
+      const result = await onGoogle();
+      // In the phone apps Google opens in a separate window and this screen stays here,
+      // so the button must not be left saying "Opening Google…" when the person comes back.
+      if (result === "handed-off") setIsOpeningGoogle(false);
+      // Otherwise the browser is heading to Google, so the button stays disabled.
     } catch (caught) {
       setIsOpeningGoogle(false);
       setError(

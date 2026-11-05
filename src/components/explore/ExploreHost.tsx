@@ -1,6 +1,6 @@
 "use client";
 
-import { useSearchParams } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { ExploreView } from "@/components/explore/ExploreView";
 import type { PostOffice } from "@/types";
 
@@ -10,9 +10,11 @@ import type { PostOffice } from "@/types";
  */
 export function ExploreHost({ offices }: { offices: PostOffice[] }) {
   const requested = Number(useSearchParams().get("office"));
+  const active = usePathname() === "/explore";
   return (
     <ExploreView
       offices={offices}
+      active={active}
       initialSelectedId={Number.isInteger(requested) && requested > 0 ? requested : null}
     />
   );

@@ -27,11 +27,14 @@ interface ExploreViewProps {
   offices: PostOffice[];
   /** Office to open on load, e.g. when linked from the passport page. */
   initialSelectedId: number | null;
+  /** False while another tab is showing; the screen stays mounted but out of sight. */
+  active?: boolean;
 }
 
 export function ExploreView({
   offices: indiaOffices,
   initialSelectedId,
+  active = true,
 }: ExploreViewProps) {
   const {
     states,
@@ -47,6 +50,12 @@ export function ExploreView({
   const [snap, setSnap] = useState<0 | 1 | 2>(0);
   const [dragHeight, setDragHeight] = useState<number | null>(null);
   const sheetOpen = snap > 0;
+  // Each time the map tab is opened, start with the map in view and the list tucked away.
+  useEffect(() => {
+    // Arriving on the tab is an event from outside this screen, so resetting here is the point of the effect.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    if (active) setSnap(0);
+  }, [active]);
   const setSheetOpen = (open: boolean) => setSnap(open ? 1 : 0);
   const [filter, setFilter] = useState<StatusFilter>("all");
   const [query, setQuery] = useState("");
@@ -259,7 +268,7 @@ export function ExploreView({
                 idSuffix="mobile"
               />
             </div>
-            <NearMeButton onClick={handleFindNearMe} isLocating={isLocating} />
+            <NearMeButton onClick={handleFindNearMe} isLocating={isLocating} tourId="near-me" />
           </div>
           <div className="flex items-center justify-between pb-1.5 md:pb-2">
             <p className="text-sm text-muted" aria-live="polite">
@@ -357,6 +366,7 @@ function SheetHandle({
       aria-label={open ? "Collapse the list" : "Expand the list"}
       aria-expanded={open}
       onClick={() => onChange(!open)}
+      data-tour="sheet"
       className="grid h-9 w-full shrink-0 place-items-center md:hidden"
     >
       <span className="h-1.5 w-11 rounded-full bg-line-strong" />
@@ -368,16 +378,19 @@ function NearMeButton({
   onClick,
   isLocating,
   className = "",
+  tourId,
 }: {
   onClick: () => void;
   isLocating: boolean;
   className?: string;
+  tourId?: string;
 }) {
   return (
     <button
       type="button"
       onClick={onClick}
       disabled={isLocating}
+      data-tour={tourId}
       className={`flex min-h-11 shrink-0 items-center gap-1.5 rounded-full px-3 text-sm font-semibold text-postal disabled:opacity-60 ${className}`}
     >
       <LocateIcon className="size-4" />

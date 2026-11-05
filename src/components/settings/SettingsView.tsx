@@ -1,11 +1,14 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { COACH_EVENT } from "@/lib/constants";
 import { readLiteMode, saveLiteMode } from "@/components/settings/lite-mode";
 
 /** App settings. For now: Lite mode. */
 export function SettingsView() {
+  const router = useRouter();
   const [lite, setLite] = useState(() => readLiteMode());
 
   return (
@@ -43,6 +46,20 @@ export function SettingsView() {
             <span className="sr-only">{lite ? "On" : "Off"}</span>
           </button>
         </div>
+        <button
+          type="button"
+          onClick={() => {
+            router.push("/explore");
+            window.dispatchEvent(new Event(COACH_EVENT));
+          }}
+          className="mt-3 flex min-h-14 w-full items-center justify-between rounded-[18px] border border-line bg-white p-4 text-left"
+        >
+          <span>
+            <span className="block font-semibold">Replay the walkthrough</span>
+            <span className="mt-1 block text-sm text-muted">A quick look at what each button does.</span>
+          </span>
+          <span aria-hidden="true" className="text-muted">›</span>
+        </button>
       </div>
     </div>
   );

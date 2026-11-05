@@ -17,6 +17,7 @@ export function TabBar() {
             <Link
               key={href}
               href={href}
+              data-tour={`tab-${label.toLowerCase()}`}
               aria-current={active ? "page" : undefined}
               className={`flex h-[52px] flex-1 flex-col items-center justify-center gap-0.5 rounded-full text-xs font-semibold ${
                 active ? "bg-postal text-white" : "text-muted"

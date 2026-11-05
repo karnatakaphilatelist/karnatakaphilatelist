@@ -24,5 +24,9 @@ export const DISCLAIMER =
 export const ONBOARDED_KEY = "kp:onboarded:v1";
 /** Set once we have explained why we ask for location, before the first system prompt. */
 export const LOCATION_PRIMED_KEY = "kp:location-primed:v1";
+/** Remembers that the pointing-out walkthrough on the map has been shown. */
+export const COACH_KEY = "kp:coach:v1";
+/** Fired to start the walkthrough again, for example from Settings. */
+export const COACH_EVENT = "kp:start-coach";
 /** Lite mode: no textures or motion, for older phones and battery saving. */
 export const LITE_MODE_KEY = "kp:lite:v1";

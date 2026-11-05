@@ -5,7 +5,6 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import "./landing.css";
 import { ArrowLeftIcon, ArrowRightIcon } from "@/components/ui/icons";
 import { useAuth } from "@/components/providers/AuthProvider";
-import { useRouter } from "next/navigation";
 import { isNativeApp } from "@/lib/native";
 import { readJson } from "@/lib/local-storage";
 import { useStateOffices } from "@/components/providers/StateProvider";
@@ -90,7 +89,6 @@ export function Landing({ offices }: { offices: PostOffice[] }) {
 
   const rootRef = useRef<HTMLDivElement>(null);
   const scrollerRef = useRef<HTMLDivElement>(null);
-  const router = useRouter();
   const trackRef = useRef<HTMLDivElement>(null);
   const [cardIndex, setCardIndex] = useState(0);
   const [atStart, setAtStart] = useState(true);
@@ -117,17 +115,24 @@ export function Landing({ offices }: { offices: PostOffice[] }) {
   const shownStamped = isSample ? Math.min(12, stateTotal) : stamped;
   const firstName = user ? getFirstName(user) : null;
 
-  // In the mobile apps the first launch shows the welcome tour; after that the app opens on the map.
+  // In the mobile apps the very first launch plays the intro and then shows the welcome tour;
+  // every launch after that opens straight on the map.
+  const afterIntro = useRef<(() => void) | null>(null);
   useEffect(() => {
     if (!isNativeApp()) return;
     const tour = new URLSearchParams(window.location.search).has("tour");
     const seen = readJson<boolean>(ONBOARDED_KEY, false);
-    const target = seen && !tour ? "/explore" : "/welcome";
-    router.replace(target);
-    // If the client router stalls inside the app, a plain navigation still gets people out of the intro.
-    const fallback = setTimeout(() => window.location.replace(target), 1500);
+    if (seen || tour) {
+      const target = seen && !tour ? "/explore" : "/welcome";
+      // A full navigation, because the client router has been seen to stall on this page inside the app.
+      window.location.replace(target);
+      return;
+    }
+    // First launch: the intro hands over to the tour when it ends (or when it is skipped).
+    afterIntro.current = () => window.location.replace("/welcome");
+    const fallback = setTimeout(() => window.location.replace("/welcome"), 9000);
     return () => clearTimeout(fallback);
-  }, [router]);
+  }, []);
 
   // The intro: runs once per session, skipped when motion is reduced or it was already seen.
   useEffect(() => {
@@ -139,6 +144,7 @@ export function Landing({ offices }: { offices: PostOffice[] }) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setIntroState("done");
       setRevealed(true);
+      afterIntro.current?.();
       return;
     }
 
@@ -157,6 +163,7 @@ export function Landing({ offices }: { offices: PostOffice[] }) {
       rememberIntro();
       setIntroState("done");
       setRevealed(true);
+      afterIntro.current?.();
     };
     skipRef.current = finish;
 

@@ -31,7 +31,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <script
           dangerouslySetInnerHTML={{
             __html:
-              '(function(){var h=document.documentElement;try{var c=window.Capacitor;if(location.pathname==="/"&&(/PhilatrailApp/.test(navigator.userAgent)||(c&&c.isNativePlatform&&c.isNativePlatform()))){var q=location.search.indexOf("tour")>-1,o=localStorage.getItem("kp:onboarded:v1")==="true";h.setAttribute("data-intro-seen","");location.replace(o&&!q?"/explore":"/welcome");return}}catch(e){}if(/(?:^|; )kp_skip_intro=1/.test(document.cookie))h.setAttribute("data-intro-seen","");else if(location.pathname==="/"){window.__kpIntroT0=performance.now();h.setAttribute("data-intro-go","")}})()',
+              '(function(){var h=document.documentElement;try{var c=window.Capacitor;if(location.pathname==="/"&&(/PhilatrailApp/.test(navigator.userAgent)||(c&&c.isNativePlatform&&c.isNativePlatform()))){var q=location.search.indexOf("tour")>-1,o=localStorage.getItem("kp:onboarded:v1")==="true";if(o||q){h.setAttribute("data-intro-seen","");location.replace(o&&!q?"/explore":"/welcome");return}setTimeout(function(){if(location.pathname==="/")location.replace("/welcome")},9000)}}catch(e){}if(/(?:^|; )kp_skip_intro=1/.test(document.cookie))h.setAttribute("data-intro-seen","");else if(location.pathname==="/"){window.__kpIntroT0=performance.now();h.setAttribute("data-intro-go","")}})()',
           }}
         />
       </head>

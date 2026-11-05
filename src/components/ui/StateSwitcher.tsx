@@ -24,7 +24,7 @@ export function StateSwitcher({
     (code) => !states.some((state) => state.code === code)
   );
   return (
-    <div className="flex items-center gap-2">
+    <div className="relative flex items-center">
       <label htmlFor={id} className="sr-only">
         State
       </label>
@@ -32,7 +32,7 @@ export function StateSwitcher({
         id={id}
         value={value}
         onChange={(event) => onChange(event.target.value)}
-        className={`min-h-11 w-full rounded-full border px-4 text-sm font-semibold ${
+        className={`min-h-11 w-full appearance-none rounded-full border py-0 pl-4 pr-11 text-sm font-semibold ${
           onRed
             ? "border-white/30 bg-white/15 text-white [&>option]:text-ink"
             : "border-line-strong bg-paper text-ink"
@@ -49,6 +49,21 @@ export function StateSwitcher({
           </option>
         ))}
       </select>
+      {/* The browser's own arrow sits at an odd height and edge, so it is replaced with one we can centre. */}
+      <svg
+        aria-hidden="true"
+        viewBox="0 0 20 20"
+        className={`pointer-events-none absolute right-4 top-1/2 size-4 -translate-y-1/2 ${
+          onRed ? "text-white" : "text-muted"
+        }`}
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2.2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <path d="m5 7.5 5 5 5-5" />
+      </svg>
     </div>
   );
 }

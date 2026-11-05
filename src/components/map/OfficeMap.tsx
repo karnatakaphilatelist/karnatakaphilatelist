@@ -52,16 +52,27 @@ function MapViewport({
   const map = useMap();
   const hasFitted = useRef(false);
 
-  // Fit all pins once, as soon as there are some to show.
+  // Fit the pins that are showing, whenever the set changes (a filter, a search, another state).
+  // The very first fit yields to a linked office, which the next effect flies to.
+  const shown = offices.map((office) => office.id).join(",");
   useEffect(() => {
-    if (hasFitted.current) return;
     const points = offices
       .filter(hasCoordinates)
       .map((office): [number, number] => [office.lat, office.lng]);
     if (points.length === 0) return;
+    const first = !hasFitted.current;
     hasFitted.current = true;
-    if (points.length > 1) map.fitBounds(points, { padding: [40, 40] });
-  }, [map, offices]);
+    if (first && selectedId !== null) return;
+    // Leave room for the search bar above and the list sheet below.
+    const room = {
+      paddingTopLeft: [40, 130] as [number, number],
+      paddingBottomRight: [40, 160] as [number, number],
+    };
+    if (points.length > 1) map.fitBounds(points, { ...room, animate: !first });
+    else map.flyTo(points[0], FOCUS_ZOOM, { duration: 0.6 });
+    // Only when the set of pins changes, not when a pin's status does.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [map, shown]);
 
   useEffect(() => {
     if (selectedId === null) return;

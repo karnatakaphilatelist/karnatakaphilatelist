@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState, type FormEvent } from "react";
+import { isNativeApp } from "@/lib/native";
 import { GoogleIcon } from "@/components/ui/icons";
 import { Sheet } from "@/components/ui/Sheet";
 import {
@@ -77,6 +78,41 @@ export function AuthDialog({
     window.addEventListener("pageshow", reset);
     return () => window.removeEventListener("pageshow", reset);
   }, []);
+
+  // In the mobile apps Google opens in a separate browser and nothing tells this page when the person
+  // comes back (or gives up). Re-enable the button when the app returns to the front, with a time limit as backup.
+  useEffect(() => {
+    if (!isOpeningGoogle) return;
+    let left = false;
+    const onVisibility = () => {
+      if (document.visibilityState === "hidden") left = true;
+      else if (left) setIsOpeningGoogle(false);
+    };
+    document.addEventListener("visibilitychange", onVisibility);
+    let removeAppListener: (() => void) | undefined;
+    let cancelled = false;
+    if (isNativeApp()) {
+      import("@capacitor/app")
+        .then(({ App }) =>
+          App.addListener("appStateChange", ({ isActive }) => {
+            if (!isActive) left = true;
+            else if (left) setIsOpeningGoogle(false);
+          })
+        )
+        .then((handle) => {
+          if (cancelled) void handle.remove();
+          else removeAppListener = () => void handle.remove();
+        })
+        .catch(() => undefined);
+    }
+    const timer = window.setTimeout(() => setIsOpeningGoogle(false), 20_000);
+    return () => {
+      cancelled = true;
+      document.removeEventListener("visibilitychange", onVisibility);
+      removeAppListener?.();
+      window.clearTimeout(timer);
+    };
+  }, [isOpeningGoogle]);
 
   async function handlePasswordSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();

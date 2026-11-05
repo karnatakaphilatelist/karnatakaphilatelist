@@ -2,6 +2,7 @@
 
 import { usePathname } from "next/navigation";
 import { Suspense, useState, type ReactNode } from "react";
+import { CoachTour } from "@/components/layout/CoachTour";
 import { AppHeader } from "@/components/layout/AppHeader";
 import { OfflineBanner } from "@/components/layout/OfflineBanner";
 import { TabBar } from "@/components/layout/TabBar";
@@ -51,6 +52,7 @@ export function AppShell({
         {children}
       </main>
       <TabBar />
+      <CoachTour />
     </div>
   );
 }

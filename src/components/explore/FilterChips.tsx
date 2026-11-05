@@ -12,12 +12,15 @@ const FILTERS: { value: StatusFilter; label: string }[] = [
 interface FilterChipsProps {
   value: StatusFilter;
   onChange: (value: StatusFilter) => void;
+  /** Marks the row for the app walkthrough. */
+  tourId?: string;
 }
 
-export function FilterChips({ value, onChange }: FilterChipsProps) {
+export function FilterChips({ value, onChange, tourId }: FilterChipsProps) {
   return (
     <div
       role="group"
+      data-tour={tourId}
       aria-label="Filter by status"
       className="-mx-1 flex flex-nowrap overflow-x-auto md:flex-wrap md:overflow-visible [scrollbar-width:none]"
     >

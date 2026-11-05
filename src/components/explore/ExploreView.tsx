@@ -43,7 +43,11 @@ export function ExploreView({
   const { visits, plannedIds, markVisited, isReady } = useVisits();
   const { showToast } = useToast();
 
-  const [sheetOpen, setSheetOpen] = useState(false);
+  // Phone list sheet: 0 = peek, 1 = half, 2 = nearly full. While a finger is dragging, dragHeight (px) wins.
+  const [snap, setSnap] = useState<0 | 1 | 2>(0);
+  const [dragHeight, setDragHeight] = useState<number | null>(null);
+  const sheetOpen = snap > 0;
+  const setSheetOpen = (open: boolean) => setSnap(open ? 1 : 0);
   const [filter, setFilter] = useState<StatusFilter>("all");
   const [query, setQuery] = useState("");
   const [selectedId, setSelectedId] = useState<number | null>(
@@ -154,16 +158,70 @@ export function ExploreView({
     );
   }
 
+  const sheetRef = useRef<HTMLElement>(null);
+  const sheetStyle = {
+    height:
+      dragHeight ??
+      (snap === 0 ? "7.75rem" : snap === 1 ? "50%" : "calc(100% - 7.5rem)"),
+  };
+  const drag = useRef<{ y: number; h: number; moved: boolean } | null>(null);
+  const dragProps = {
+    onPointerDown: (event: React.PointerEvent<HTMLElement>) => {
+      const sheet = sheetRef.current;
+      if (!sheet) return;
+      drag.current = { y: event.clientY, h: sheet.offsetHeight, moved: false };
+    },
+    onPointerMove: (event: React.PointerEvent<HTMLElement>) => {
+      const state = drag.current;
+      const sheet = sheetRef.current;
+      if (!state || !sheet) return;
+      const dy = state.y - event.clientY;
+      if (!state.moved && Math.abs(dy) < 8) return;
+      if (!state.moved) {
+        state.moved = true;
+        // Only start owning the pointer once it is clearly a drag, so taps on buttons still land.
+        event.currentTarget.setPointerCapture(event.pointerId);
+      }
+      const parent = sheet.parentElement?.clientHeight ?? 0;
+      setDragHeight(Math.min(Math.max(state.h + dy, 124), Math.max(parent - 120, 124)));
+    },
+    onPointerUp: (event: React.PointerEvent<HTMLElement>) => finishDrag(event.clientY),
+    onPointerCancel: (event: React.PointerEvent<HTMLElement>) => finishDrag(event.clientY),
+  };
+  function finishDrag(clientY: number) {
+    const state = drag.current;
+    const sheet = sheetRef.current;
+    drag.current = null;
+    if (!state?.moved || !sheet) return;
+    const parent = sheet.parentElement?.clientHeight ?? 0;
+    const stops = [124, parent * 0.5, Math.max(parent - 120, 124)];
+    // A flick counts: lean the landing spot the way the finger was heading.
+    const flick = (state.y - clientY) * 1.5;
+    const target = Math.min(Math.max(state.h + flick, 124), stops[2]);
+    const nearest = stops.reduce(
+      (best, stop, index) =>
+        Math.abs(stop - target) < Math.abs(stops[best] - target) ? index : best,
+      0
+    );
+    setSnap(nearest as 0 | 1 | 2);
+    setDragHeight(null);
+  }
+
   return (
     <div className="relative flex h-full min-h-0 flex-col md:flex-row">
       <aside
+        ref={sheetRef}
         aria-label="Post offices"
-        className={`absolute inset-x-0 bottom-0 z-[1050] flex min-h-0 flex-col rounded-t-3xl border-t border-line bg-white shadow-[0_-10px_30px_-12px_rgb(22_32_79/0.35)] transition-[height] duration-300 ease-out md:static md:z-auto md:h-auto md:w-[26rem] md:shrink-0 md:rounded-none md:border-r md:border-t-0 md:shadow-none ${
-          sheetOpen ? "h-[64%]" : "h-[7.75rem]"
-        } ${selectedOffice ? "max-md:hidden" : ""}`}
+        style={sheetStyle}
+        className={`absolute inset-x-0 bottom-0 z-[1050] flex min-h-0 flex-col rounded-t-3xl border-t border-line bg-white shadow-[0_-10px_30px_-12px_rgb(22_32_79/0.35)] md:h-auto! md:static md:z-auto md:h-auto md:w-[26rem] md:shrink-0 md:rounded-none md:border-r md:border-t-0 md:shadow-none ${
+          ""
+        } ${dragHeight === null ? "transition-[height] duration-300 ease-out" : ""} ${
+          selectedOffice ? "max-md:hidden" : ""
+        }`}
       >
+        <div className="shrink-0 touch-none md:touch-auto" {...dragProps}>
         <SheetHandle open={sheetOpen} onChange={setSheetOpen} />
-        <div className="shrink-0 space-y-1 px-4 md:pt-4">
+        <div className="space-y-1 px-4 md:pt-4">
           {/* On phones the controls live over the map instead, so the detail sheet never covers them. */}
           <div className="hidden space-y-1 md:block">
             <StateSwitcher
@@ -214,6 +272,7 @@ export function ExploreView({
               className="max-md:hidden"
             />
           </div>
+        </div>
         </div>
         <div
           className={`min-h-0 flex-1 overflow-y-auto overscroll-contain ${
@@ -284,7 +343,7 @@ export function ExploreView({
   );
 }
 
-/** The grab bar of the phone list sheet: tap to toggle, or drag up or down. */
+/** The grab bar of the phone list sheet: tap to toggle. Dragging is handled by the whole header. */
 function SheetHandle({
   open,
   onChange,
@@ -292,27 +351,13 @@ function SheetHandle({
   open: boolean;
   onChange: (open: boolean) => void;
 }) {
-  const startY = useRef<number | null>(null);
   return (
     <button
       type="button"
       aria-label={open ? "Collapse the list" : "Expand the list"}
       aria-expanded={open}
-      onPointerDown={(event) => {
-        startY.current = event.clientY;
-      }}
-      onPointerUp={(event) => {
-        const dy = startY.current === null ? 0 : event.clientY - startY.current;
-        startY.current = null;
-        if (dy < -24) onChange(true);
-        else if (dy > 24) onChange(false);
-        else onChange(!open);
-      }}
-      onKeyDown={(event) => {
-        if (event.key === "Enter" || event.key === " ") event.preventDefault();
-        if (event.key === "Enter" || event.key === " ") onChange(!open);
-      }}
-      className="grid h-7 w-full shrink-0 touch-none place-items-center md:hidden"
+      onClick={() => onChange(!open)}
+      className="grid h-9 w-full shrink-0 place-items-center md:hidden"
     >
       <span className="h-1.5 w-11 rounded-full bg-line-strong" />
     </button>

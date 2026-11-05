@@ -21,6 +21,9 @@ export function Sheet({ open, onClose, title, description, children }: SheetProp
   // Several sheets are in the page at once (sign-in is always mounted), so each
   // needs its own id or every dialog would be named after the first one.
   const titleId = useId();
+  // Closing by tapping the dark backdrop only counts when the press began there too. When the keyboard
+  // opens the sheet moves, and a tap on a field can otherwise land on the backdrop and close the sheet.
+  const pressStartedOnBackdrop = useRef(false);
 
   useEffect(() => {
     const dialog = dialogRef.current;
@@ -37,8 +40,26 @@ export function Sheet({ open, onClose, title, description, children }: SheetProp
     <dialog
       ref={dialogRef}
       onClose={onClose}
+      onPointerDown={(event) => {
+        pressStartedOnBackdrop.current = event.target === dialogRef.current;
+      }}
       onClick={(event) => {
-        if (event.target === dialogRef.current) onClose();
+        const fromBackdrop =
+          event.target === dialogRef.current && pressStartedOnBackdrop.current;
+        pressStartedOnBackdrop.current = false;
+        if (fromBackdrop) onClose();
+      }}
+      onCancel={(event) => {
+        // The Back gesture that hides the keyboard should only hide the keyboard, not the whole sheet.
+        const active = document.activeElement;
+        if (
+          active instanceof HTMLElement &&
+          dialogRef.current?.contains(active) &&
+          active.matches("input, textarea, select")
+        ) {
+          event.preventDefault();
+          active.blur();
+        }
       }}
       aria-labelledby={titleId}
       tabIndex={-1}

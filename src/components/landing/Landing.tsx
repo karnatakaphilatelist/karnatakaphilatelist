@@ -141,10 +141,12 @@ export function Landing({ offices }: { offices: PostOffice[] }) {
     ).matches;
     if (reduced || hasSeenIntro()) {
       // Mounting is the only moment we can learn this (it needs browser APIs).
-      // eslint-disable-next-line react-hooks/set-state-in-effect
+      if (afterIntro.current) {
+        afterIntro.current();
+        return;
+      }
       setIntroState("done");
       setRevealed(true);
-      afterIntro.current?.();
       return;
     }
 
@@ -159,11 +161,15 @@ export function Landing({ offices }: { offices: PostOffice[] }) {
       finished = true;
       cancelAnimationFrame(frame);
       timers.forEach(clearTimeout);
-      html.removeAttribute("data-intro-playing");
       rememberIntro();
+      // First app launch: leave for the tour without ever showing the page behind the intro.
+      if (afterIntro.current) {
+        afterIntro.current();
+        return;
+      }
+      html.removeAttribute("data-intro-playing");
       setIntroState("done");
       setRevealed(true);
-      afterIntro.current?.();
     };
     skipRef.current = finish;
 
@@ -207,6 +213,10 @@ export function Landing({ offices }: { offices: PostOffice[] }) {
         countRef.current.textContent = formatCounter(progress, total);
 
       if (seconds >= SPLIT_AT && !opened) {
+        if (afterIntro.current) {
+          finish();
+          return;
+        }
         opened = true;
         setIntroState("open");
         timers.push(

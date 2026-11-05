@@ -4,7 +4,8 @@ import { WelcomeTour } from "@/components/welcome/WelcomeTour";
 import { ONBOARDED_KEY } from "@/lib/constants";
 
 const replace = vi.fn();
-vi.mock("next/navigation", () => ({ useRouter: () => ({ replace }) }));
+vi.mock("next/navigation", () => ({ useRouter: () => ({ replace, prefetch: vi.fn() }) }));
+vi.mock("@/components/map/OfficeMap", () => ({}));
 
 describe("WelcomeTour", () => {
   afterEach(cleanup);
@@ -22,6 +23,14 @@ describe("WelcomeTour", () => {
     fireEvent.click(screen.getByRole("button", { name: "Start collecting" }));
     expect(replace).toHaveBeenCalledWith("/explore");
     expect(localStorage.getItem(ONBOARDED_KEY)).toBe("true");
+  });
+
+  it("moves between steps with the dots", () => {
+    render(<WelcomeTour />);
+    fireEvent.click(screen.getByRole("button", { name: /go to step 3/i }));
+    expect(screen.getByRole("heading", { name: "Fill your passport" })).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: /go to step 1/i }));
+    expect(screen.getByRole("heading", { name: "Find a post office" })).toBeTruthy();
   });
 
   it("can be skipped", () => {

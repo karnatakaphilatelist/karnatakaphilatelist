@@ -1,10 +1,11 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { CheckIcon, MailIcon, NavigationIcon, TargetIcon } from "@/components/ui/icons";
 import { ONBOARDED_KEY } from "@/lib/constants";
 import { writeJson } from "@/lib/local-storage";
+import { isNativeApp } from "@/lib/native";
 import "./tour.css";
 
 interface Step {
@@ -47,8 +48,7 @@ function FindArt() {
       <ChipRow reverse offset={3} />
       <ChipRow offset={5} />
       <div
-        className="kpt-pop absolute inset-x-8 bottom-6 flex items-center gap-3 rounded-2xl bg-white p-3 shadow-[0_18px_30px_-12px_rgb(0_0_0/0.45)]"
-        style={{ "--r": "-2deg" } as React.CSSProperties}
+        className="kpt-pop absolute inset-x-6 bottom-8 flex items-center gap-3 rounded-2xl bg-paper p-3.5 shadow-[0_18px_30px_-12px_rgb(0_0_0/0.45)]"
       >
         <span className="grid size-11 place-items-center rounded-full bg-postal text-white">
           <NavigationIcon className="size-5" />
@@ -137,12 +137,45 @@ export function WelcomeTour() {
     writeJson(ONBOARDED_KEY, true);
   }, []);
 
+  // Warm up the map while the tour is read, so "Start collecting" lands on a screen that is ready.
+  useEffect(() => {
+    router.prefetch("/explore");
+    void import("@/components/map/OfficeMap");
+    fetch("/explore", { credentials: "same-origin" }).catch(() => undefined);
+  }, [router]);
+
   function finish() {
-    router.replace("/explore");
+    // Inside the apps a plain page load has been far quicker and more dependable than the client router.
+    if (isNativeApp()) window.location.replace("/explore");
+    else router.replace("/explore");
+  }
+
+  // Swipe left for the next slide, right for the previous one.
+  const swipe = useRef<{ x: number; y: number } | null>(null);
+  function onTouchEnd(x: number, y: number) {
+    const start = swipe.current;
+    swipe.current = null;
+    if (!start) return;
+    const dx = x - start.x;
+    if (Math.abs(dx) < 50 || Math.abs(dx) < Math.abs(y - start.y) * 1.5) return;
+    if (dx < 0) {
+      if (last) finish();
+      else setStep(step + 1);
+    } else if (step > 0) setStep(step - 1);
   }
 
   return (
-    <main className="flex h-dvh flex-col bg-paper">
+    <main
+      className="flex h-dvh touch-pan-y flex-col bg-paper"
+      onTouchStart={(event) => {
+        const t = event.touches[0];
+        swipe.current = { x: t.clientX, y: t.clientY };
+      }}
+      onTouchEnd={(event) => {
+        const t = event.changedTouches[0];
+        onTouchEnd(t.clientX, t.clientY);
+      }}
+    >
       <section className="kp-red relative flex-[1.15] overflow-hidden text-white" aria-label="Illustration">
         <button
           type="button"
@@ -167,14 +200,22 @@ export function WelcomeTour() {
         <p className="sr-only">
           Step {step + 1} of {STEPS.length}
         </p>
-        <div className="mb-5 flex justify-center gap-2" aria-hidden="true">
-          {STEPS.map((_, i) => (
-            <span
-              key={i}
-              className={`h-2 rounded-full transition-all ${
-                i === step ? "w-7 bg-postal" : "w-2 bg-line-strong"
-              }`}
-            />
+        <div className="mb-3 flex justify-center">
+          {STEPS.map((item, i) => (
+            <button
+              key={item.title}
+              type="button"
+              aria-label={`Go to step ${i + 1}: ${item.title}`}
+              aria-current={i === step ? "step" : undefined}
+              onClick={() => setStep(i)}
+              className="grid h-9 min-w-6 place-items-center px-1"
+            >
+              <span
+                className={`h-2 rounded-full transition-all ${
+                  i === step ? "w-7 bg-postal" : "w-2 bg-line-strong"
+                }`}
+              />
+            </button>
           ))}
         </div>
 

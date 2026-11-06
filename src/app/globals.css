@@ -33,6 +33,7 @@
   --color-focus: #1b73b3;
 
   --font-sans: "Figtree Variable", "Noto Sans Kannada Variable", system-ui, sans-serif;
+  --font-mono: "Courier Prime", ui-monospace, monospace;
   --font-display: "Fraunces Variable", "Noto Sans Kannada Variable", Georgia, serif;
 
   --animate-rise: rise 0.25s ease-out;

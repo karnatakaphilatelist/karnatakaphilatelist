@@ -1,6 +1,5 @@
 "use client";
 
-import { StampThumb } from "@/components/office/StampThumb";
 import { StatusBadge } from "@/components/office/StatusBadge";
 import { useVisits } from "@/components/providers/VisitsProvider";
 import {
@@ -48,26 +47,25 @@ export function OfficeDetail({
     <div
       role="region"
       aria-label={`${office.name} details`}
-      className="fixed inset-x-0 bottom-0 z-[1100] flex max-h-[85dvh] animate-rise flex-col rounded-t-3xl bg-white shadow-[0_-8px_30px_rgb(43_43_43/0.18)] md:absolute md:inset-x-auto md:bottom-auto md:left-14 md:top-4 md:max-h-[calc(100%-2rem)] md:w-96 md:rounded-2xl md:shadow-xl"
+      className="fixed inset-x-0 bottom-0 z-[1100] flex max-h-[85dvh] animate-rise flex-col kp-glass-panel rounded-t-3xl md:bg-white md:absolute md:inset-x-auto md:bottom-auto md:left-14 md:top-4 md:max-h-[calc(100%-2rem)] md:w-96 md:rounded-2xl md:shadow-xl"
     >
       <div className="min-h-0 flex-1 overflow-y-auto px-5 pb-2 pt-4">
         <div className="flex items-start justify-between gap-3">
           <div className="flex min-w-0 items-center gap-3">
-            <StampThumb
-              path={office.stampImagePath}
-              status={office.status}
-              className="size-16"
-            />
-            <div className="min-w-0">
-              <h2 className="font-display text-2xl font-bold leading-tight tracking-tight">
+                        <div className="min-w-0">
+              <h2 className="text-[40px] font-medium uppercase leading-[44px] tracking-[0.01em] -ml-0.5">
                 {office.name}
               </h2>
-              <p className="mt-0.5 text-sm text-muted">
-                {office.district} district
-                {office.distanceKm !== null
-                  ? ` · ${formatDistance(office.distanceKm)} away`
-                  : ""}
+              <p className="mt-1 flex items-center gap-2 text-sm text-muted">
+                {office.district}
+                <span aria-hidden className="h-px w-5 bg-[#b8861b]" />
+                <span className="font-mono">{office.pincode || "No pincode"}</span>
               </p>
+              {office.distanceKm !== null ? (
+                <p className="mt-0.5 font-mono text-xs text-muted">
+                  {formatDistance(office.distanceKm)} away
+                </p>
+              ) : null}
             </div>
           </div>
           <button
@@ -155,23 +153,35 @@ export function OfficeDetail({
             <button
               type="button"
               onClick={() => onMarkVisited(office.id)}
-              className="min-h-13 w-full rounded-full bg-postal text-base font-bold text-white"
+              className="min-h-[62px] w-full rounded-full bg-gradient-to-b from-[#e0334a] to-postal text-base font-bold text-white"
             >
               <CheckIcon className="mr-1.5 inline size-5" strokeWidth={3} />
               Stamp it
             </button>
-            <div className="mt-2.5 flex gap-2.5">
+            <div className="mt-3 flex items-start justify-center gap-6">
               <button
                 type="button"
                 onClick={() => togglePlanned(office.id)}
                 aria-pressed={isPlanned}
-                className={SECONDARY_BUTTON}
+                className="flex flex-col items-center gap-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-muted"
               >
-                <FlagIcon className="size-4" />
-                {isPlanned ? "Planned" : "Plan a visit"}
+                <span className="kp-glass grid size-12 place-items-center rounded-full text-[#2f4aa8]">
+                  <FlagIcon className="size-5" />
+                </span>
+                {isPlanned ? "Planned" : "Plan"}
               </button>
               {hasCoordinates(office) ? (
-                <DirectionsLink office={office} />
+                <a
+                  href={directionsUrl({ lat: office.lat, lng: office.lng })}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex flex-col items-center gap-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-muted"
+                >
+                  <span className="kp-glass grid size-12 place-items-center rounded-full text-ink">
+                    <NavigationIcon className="size-5" />
+                  </span>
+                  Route
+                </a>
               ) : null}
             </div>
           </>

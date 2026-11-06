@@ -1,6 +1,8 @@
 "use client";
 
+import { Postmark } from "@/components/office/Postmark";
 import { StatusBadge } from "@/components/office/StatusBadge";
+import { useToast } from "@/components/providers/ToastProvider";
 import { useVisits } from "@/components/providers/VisitsProvider";
 import {
   CheckIcon,
@@ -11,9 +13,17 @@ import {
   LockIcon,
   NavigationIcon,
   TargetIcon,
+  ShareIcon,
+  NoteIcon,
 } from "@/components/ui/icons";
-import { directionsUrl, formatDistance, formatShortDistance, proximity } from "@/lib/geo";
+import {
+  directionsUrl,
+  formatDistance,
+  formatShortDistance,
+  proximity,
+} from "@/lib/geo";
 import { hasCoordinates } from "@/lib/office-status";
+import { shareContent } from "@/lib/share";
 import type { OfficeWithStatus } from "@/types";
 
 interface OfficeDetailProps {
@@ -23,14 +33,34 @@ interface OfficeDetailProps {
   onEditVisit: (officeId: number) => void;
   /** Asks for the person's location so the banner can say whether they are at the office. */
   onCheckDistance?: () => void;
+  /** Stamps collected in this state (including this one) and the state's total, for the stamped message. */
+  collected?: number;
+  total?: number;
+  stateName?: string;
 }
 
-const SECONDARY_BUTTON =
-  "flex min-h-12 flex-1 items-center justify-center gap-1.5 rounded-full border-[1.5px] border-line-strong bg-white text-sm font-semibold";
+function ordinal(n: number): string {
+  const rest = n % 100;
+  if (rest >= 11 && rest <= 13) return `${n}th`;
+  return `${n}${["th", "st", "nd", "rd"][n % 10 > 3 ? 0 : n % 10] ?? "th"}`;
+}
+
+/** Headline size follows the name's length so long names wrap to two lines at most. */
+function headlineClass(name: string): string {
+  if (name.length <= 10) return "text-[48px] leading-[52px]";
+  if (name.length <= 16) return "text-[38px] leading-[42px]";
+  return "text-[30px] leading-[34px]";
+}
+
+/** A small round glass button with a label underneath: the quiet actions of the card. */
+const ROUND_BTN =
+  "kp-glass grid size-14 place-items-center rounded-full text-ink";
+const ROUND_LABEL =
+  "text-[11px] font-semibold uppercase leading-3 tracking-[0.1em] text-muted";
 
 /**
- * Details and actions for one office. A bottom sheet on phones, a card
- * floating over the map on larger screens.
+ * Details and actions for one office. A docked panel on phones (it sits on top of the tab bar),
+ * a card floating over the map on larger screens.
  */
 export function OfficeDetail({
   office,
@@ -38,62 +68,95 @@ export function OfficeDetail({
   onMarkVisited,
   onEditVisit,
   onCheckDistance,
+  collected,
+  total,
+  stateName,
 }: OfficeDetailProps) {
   const { visits, togglePlanned, removeVisit } = useVisits();
+  const { showToast } = useToast();
   const visit = visits[office.id];
   const isPlanned = office.status === "planned";
+
+  async function handleShare() {
+    const result = await shareContent({
+      title: "Philatrail",
+      text: `I just stamped ${office.name}${
+        stateName ? ` in ${stateName}` : ""
+      } on Philatrail.`,
+      url: window.location.origin,
+    });
+    if (result === "copied")
+      showToast({ message: "Copied. Paste it anywhere to share." });
+    if (result === "failed")
+      showToast({ message: "Could not share. Please try again." });
+  }
 
   return (
     <div
       role="region"
       aria-label={`${office.name} details`}
-      className="fixed inset-x-0 bottom-0 z-[1100] flex max-h-[85dvh] animate-rise flex-col kp-glass-panel rounded-t-3xl md:bg-white md:absolute md:inset-x-auto md:bottom-auto md:left-14 md:top-4 md:max-h-[calc(100%-2rem)] md:w-96 md:rounded-2xl md:shadow-xl"
+      className="kp-glass-panel absolute inset-x-0 bottom-0 z-[1100] flex max-h-[85%] animate-rise flex-col rounded-t-[28px] md:inset-x-auto md:bottom-auto md:left-14 md:top-4 md:max-h-[calc(100%-2rem)] md:w-96 md:rounded-2xl md:bg-white md:shadow-xl"
     >
-      <div className="min-h-0 flex-1 overflow-y-auto px-5 pb-2 pt-4">
-        <div className="flex items-start justify-between gap-3">
-          <div className="flex min-w-0 items-center gap-3">
-                        <div className="min-w-0">
-              <h2 className="text-[40px] font-medium uppercase leading-[44px] tracking-[0.01em] -ml-0.5">
-                {office.name}
-              </h2>
-              <p className="mt-1 flex items-center gap-2 text-sm text-muted">
-                {office.district}
-                <span aria-hidden className="h-px w-5 bg-[#b8861b]" />
-                <span className="font-mono">{office.pincode || "No pincode"}</span>
-              </p>
-              {office.distanceKm !== null ? (
-                <p className="mt-0.5 font-mono text-xs text-muted">
-                  {formatDistance(office.distanceKm)} away
-                </p>
-              ) : null}
-            </div>
-          </div>
-          <button
-            type="button"
-            onClick={onClose}
-            aria-label="Close post office details"
-            className="-mr-2 -mt-1 grid size-11 shrink-0 place-items-center rounded-full bg-sand"
+      <div className="relative min-h-0 flex-1 overflow-y-auto px-4 pb-2 pt-4">
+        {/* Ghost stamp slot behind the headline: where the stamp will go. */}
+        {!visit ? (
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute -right-8 top-8 h-[139px] w-[125px] rotate-6 rounded-md bg-white/40 outline-2 -outline-offset-[10px] outline-dashed outline-[#8f640f]/30"
+          />
+        ) : null}
+
+        <button
+          type="button"
+          onClick={onClose}
+          aria-label="Close post office details"
+          className="kp-glass absolute right-4 top-3 z-10 grid size-9 place-items-center rounded-full text-ink"
+        >
+          <CloseIcon className="size-4" strokeWidth={2.8} />
+        </button>
+
+        <div className="relative pt-6">
+          <h2
+            className={`-ml-0.5 pr-10 font-medium uppercase tracking-[0.01em] ${headlineClass(
+              office.name
+            )}`}
           >
-            <CloseIcon className="size-5" />
-          </button>
+            {office.name}
+          </h2>
+          <p className="mt-2 flex items-center gap-2.5 text-sm leading-5 text-muted">
+            <span>{office.district}</span>
+            <span aria-hidden className="h-3.5 w-px bg-[#b8861b]" />
+            <span className="font-mono tracking-[0.08em]">
+              {office.pincode || "No pincode"}
+            </span>
+            {office.distanceKm !== null ? (
+              <>
+                <span aria-hidden className="h-3.5 w-px bg-[#b8861b]" />
+                <span className="font-mono text-[13px] font-bold uppercase">
+                  {formatDistance(office.distanceKm)}
+                </span>
+              </>
+            ) : null}
+          </p>
         </div>
 
-        <div className="mt-3">
-          <StatusBadge status={office.status} />
-        </div>
-
-        {visit ? (
-          <div className="mt-4 rounded-2xl bg-visited-soft p-3">
-            <div className="flex items-center gap-3">
-              <span className="grid size-10 shrink-0 animate-thump place-items-center rounded-full bg-visited text-white outline-2 outline-offset-1 outline-visited">
-                <CheckIcon className="size-5" strokeWidth={3} />
-              </span>
-              <div className="flex-1">
-                <p className="text-base font-bold text-visited-ink">
-                  Stamped in your passport
+        <div className="relative mt-3 flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <StatusBadge status={office.status} stampedOn={visit?.visitedAt} />
+            {visit ? (
+              <>
+                <p className="mt-3 text-sm leading-5">
+                  {collected && total ? (
+                    <>
+                      Your {ordinal(collected)} stamp
+                      {stateName ? ` in ${stateName}` : ""}.{" "}
+                      {Math.max(total - collected, 0)} to go.
+                    </>
+                  ) : (
+                    "Stamped in your passport."
+                  )}
                 </p>
-                <p className="flex items-center gap-1 text-sm text-visited-ink">
-                  Visited {visit.visitedAt} ·{" "}
+                <p className="mt-1 flex items-center gap-1 text-xs text-muted">
                   {visit.isPublic ? (
                     <GlobeIcon className="size-3.5" />
                   ) : (
@@ -101,92 +164,120 @@ export function OfficeDetail({
                   )}
                   {visit.isPublic ? "Public" : "Private"}
                 </p>
-              </div>
-            </div>
-            {visit.note ? (
-              <p className="mt-3 whitespace-pre-line text-sm leading-5">{visit.note}</p>
+                {visit.note ? (
+                  <p className="mt-2 line-clamp-2 whitespace-pre-line text-sm leading-5 text-muted">
+                    {visit.note}
+                  </p>
+                ) : null}
+              </>
             ) : null}
           </div>
-        ) : null}
+          {visit ? (
+            <Postmark
+              name={office.name}
+              date={visit.visitedAt}
+              pincode={office.pincode}
+              className="size-[116px] shrink-0 animate-thump"
+            />
+          ) : null}
+        </div>
 
         {!visit ? (
-          <ProximityBanner km={office.distanceKm} onCheckDistance={onCheckDistance} />
+          <ProximityBanner
+            km={office.distanceKm}
+            onCheckDistance={onCheckDistance}
+          />
         ) : null}
-
-        <dl className="mt-4 rounded-2xl border border-line bg-paper px-4 py-1 text-sm">
-          <div className="flex justify-between gap-4 py-2.5">
-            <dt className="text-muted">Pincode</dt>
-            <dd className="font-semibold">{office.pincode || "Not listed"}</dd>
-          </div>
-          <div className="flex justify-between gap-4 border-t border-line py-2.5">
-            <dt className="text-muted">District</dt>
-            <dd className="font-semibold">{office.district}</dd>
-          </div>
-        </dl>
       </div>
 
-      <div className="shrink-0 border-t border-line px-5 pb-5 pt-3">
+      <div className="relative shrink-0 px-4 pb-4 pt-3">
         {visit ? (
           <>
-            <button
-              type="button"
-              onClick={() => onEditVisit(office.id)}
-              className="min-h-13 w-full rounded-full bg-ink text-base font-bold text-white"
-            >
-              {visit.note || visit.photoPath ? "Edit note and photo" : "Add note and photo"}
-            </button>
-            <div className="mt-2.5 flex gap-2.5">
-              {hasCoordinates(office) ? (
-                <DirectionsLink office={office} />
-              ) : null}
+            <div className="flex items-start gap-3">
               <button
                 type="button"
-                onClick={() => void removeVisit(office.id)}
-                className={`${SECONDARY_BUTTON} text-postal-dark`}
+                onClick={() => void handleShare()}
+                className="flex h-[62px] flex-1 items-center justify-center gap-2 rounded-[28px] bg-gradient-to-b from-[#e0334a] to-postal pl-1 text-base font-bold uppercase tracking-[0.14em] text-white shadow-[inset_0_1.5px_0_rgb(255_255_255/0.35),0_8px_18px_-8px_rgb(207_24_48/0.7)]"
               >
-                Remove visit
+                <ShareIcon className="size-5" />
+                Share stamp
               </button>
+              <div className="flex w-14 flex-none flex-col items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => onEditVisit(office.id)}
+                  aria-label={
+                    visit.note || visit.photoPath
+                      ? "Edit note and photo"
+                      : "Add note and photo"
+                  }
+                  className={ROUND_BTN}
+                >
+                  <NoteIcon className="size-[22px]" />
+                </button>
+                <span className={ROUND_LABEL}>Notes</span>
+              </div>
+              {hasCoordinates(office) ? <RouteButton office={office} /> : null}
             </div>
+            <button
+              type="button"
+              onClick={() => void removeVisit(office.id)}
+              className="mx-auto mt-1 flex min-h-11 items-center px-3 text-xs font-semibold text-postal-dark"
+            >
+              Remove visit
+            </button>
           </>
         ) : (
-          <>
+          <div className="flex items-start gap-3">
             <button
               type="button"
               onClick={() => onMarkVisited(office.id)}
-              className="min-h-[62px] w-full rounded-full bg-gradient-to-b from-[#e0334a] to-postal text-base font-bold text-white"
+              className="flex h-[62px] flex-1 items-center justify-center gap-2 rounded-[28px] bg-gradient-to-b from-[#e0334a] to-postal pl-1 text-base font-bold uppercase tracking-[0.14em] text-white shadow-[inset_0_1.5px_0_rgb(255_255_255/0.35),0_8px_18px_-8px_rgb(207_24_48/0.7)]"
             >
-              <CheckIcon className="mr-1.5 inline size-5" strokeWidth={3} />
+              <CheckIcon className="size-5" strokeWidth={2.8} />
               Stamp it
             </button>
-            <div className="mt-3 flex items-start justify-center gap-6">
+            <div className="flex w-14 flex-none flex-col items-center gap-2">
               <button
                 type="button"
                 onClick={() => togglePlanned(office.id)}
                 aria-pressed={isPlanned}
-                className="flex flex-col items-center gap-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-muted"
+                aria-label={isPlanned ? "Remove from planned" : "Plan a visit"}
+                className={`${ROUND_BTN} ${
+                  isPlanned ? "ring-2 ring-[#2f4aa8]" : ""
+                }`}
               >
-                <span className="kp-glass grid size-12 place-items-center rounded-full text-[#2f4aa8]">
-                  <FlagIcon className="size-5" />
-                </span>
-                {isPlanned ? "Planned" : "Plan"}
+                <FlagIcon className="size-[22px] text-[#2f4aa8]" />
               </button>
-              {hasCoordinates(office) ? (
-                <a
-                  href={directionsUrl({ lat: office.lat, lng: office.lng })}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex flex-col items-center gap-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-muted"
-                >
-                  <span className="kp-glass grid size-12 place-items-center rounded-full text-ink">
-                    <NavigationIcon className="size-5" />
-                  </span>
-                  Route
-                </a>
-              ) : null}
+              <span className={ROUND_LABEL}>
+                {isPlanned ? "Planned" : "Plan"}
+              </span>
             </div>
-          </>
+            {hasCoordinates(office) ? <RouteButton office={office} /> : null}
+          </div>
         )}
       </div>
+    </div>
+  );
+}
+
+function RouteButton({
+  office,
+}: {
+  office: OfficeWithStatus & { lat: number; lng: number };
+}) {
+  return (
+    <div className="flex w-14 flex-none flex-col items-center gap-2">
+      <a
+        href={directionsUrl({ lat: office.lat, lng: office.lng })}
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="Directions"
+        className={ROUND_BTN}
+      >
+        <NavigationIcon className="size-[22px]" />
+      </a>
+      <span className={ROUND_LABEL}>Route</span>
     </div>
   );
 }
@@ -205,7 +296,7 @@ function ProximityBanner({
       <button
         type="button"
         onClick={onCheckDistance}
-        className="mt-4 flex min-h-11 w-full items-center justify-center gap-2 rounded-2xl bg-sand text-sm font-semibold text-ink"
+        className="mt-4 flex min-h-11 w-full items-center justify-center gap-2 kp-glass rounded-2xl text-sm font-semibold text-ink"
       >
         <TargetIcon className="size-4" />
         Check if you&apos;re here
@@ -216,7 +307,8 @@ function ProximityBanner({
     return (
       <p className="mt-4 flex items-start gap-2 rounded-2xl bg-visited-soft p-3 text-sm font-semibold text-visited-ink">
         <CheckIcon className="mt-0.5 size-4 shrink-0" strokeWidth={3} />
-        You&apos;re here · {formatShortDistance(km)} away. Ask for the postmark, then stamp it.
+        You&apos;re here · {formatShortDistance(km)} away. Ask for the postmark,
+        then stamp it.
       </p>
     );
   }
@@ -224,23 +316,9 @@ function ProximityBanner({
     <p className="mt-4 flex items-start gap-2 rounded-2xl bg-warn-soft p-3 text-sm text-warn">
       <AlertIcon className="mt-0.5 size-4 shrink-0" />
       <span>
-        <b>You&apos;re {formatDistance(km)} away.</b> Stamps are meant to be collected in
-        person. You can still log a past visit.
+        <b>You&apos;re {formatDistance(km)} away.</b> Stamps are meant to be
+        collected in person. You can still log a past visit.
       </span>
     </p>
-  );
-}
-
-function DirectionsLink({ office }: { office: OfficeWithStatus & { lat: number; lng: number } }) {
-  return (
-    <a
-      href={directionsUrl({ lat: office.lat, lng: office.lng })}
-      target="_blank"
-      rel="noopener noreferrer"
-      className={SECONDARY_BUTTON}
-    >
-      <NavigationIcon className="size-4" />
-      Directions
-    </a>
   );
 }

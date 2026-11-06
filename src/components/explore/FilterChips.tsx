@@ -1,3 +1,4 @@
+import { CheckIcon, FlagIcon } from "@/components/ui/icons";
 import type { OfficeStatus } from "@/types";
 
 export type StatusFilter = "all" | OfficeStatus;
@@ -22,7 +23,7 @@ export function FilterChips({ value, onChange, tourId }: FilterChipsProps) {
       role="group"
       data-tour={tourId}
       aria-label="Filter by status"
-      className="-mx-1 flex flex-nowrap overflow-x-auto md:flex-wrap md:overflow-visible [scrollbar-width:none]"
+      className="-mx-4 px-3 flex flex-nowrap overflow-x-auto md:flex-wrap md:overflow-visible [scrollbar-width:none]"
     >
       {FILTERS.map((filter) => {
         const active = filter.value === value;
@@ -36,12 +37,24 @@ export function FilterChips({ value, onChange, tourId }: FilterChipsProps) {
             className="min-h-11 shrink-0 px-1"
           >
             <span
-              className={`block rounded-full border px-3.5 py-1.5 text-sm font-semibold ${
+              className={`flex h-10 items-center gap-1.5 rounded-full px-4 text-[15px] ${
                 active
-                  ? "border-ink bg-ink text-white shadow-[0_1px_2px_rgb(22_32_79/0.3),0_10px_18px_-8px_rgb(22_32_79/0.5)]"
-                  : "kp-glass border-transparent text-ink"
+                  ? "bg-[#f3e2bd] font-bold text-ink shadow-[inset_0_0_0_1.5px_#16204f,0_2px_8px_rgb(0_0_0/0.12)]"
+                  : "kp-glass font-semibold text-ink"
               }`}
             >
+              {filter.value === "unvisited" ? (
+                <span
+                  aria-hidden
+                  className="size-3.5 rounded-full border-2 border-muted"
+                />
+              ) : null}
+              {filter.value === "planned" ? (
+                <FlagIcon className="size-4 text-[#2f4aa8]" />
+              ) : null}
+              {filter.value === "visited" ? (
+                <CheckIcon className="size-4 text-[#1f8a4d]" strokeWidth={3} />
+              ) : null}
               {filter.label}
             </span>
           </button>

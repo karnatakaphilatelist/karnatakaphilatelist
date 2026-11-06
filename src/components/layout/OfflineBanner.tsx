@@ -30,8 +30,8 @@ export function OfflineBanner() {
       <div>
         <p className="text-sm font-bold">You&apos;re offline</p>
         <p className="text-sm">
-          Post offices already loaded still show. Saving a stamp or photo needs a
-          connection.
+          Post offices already loaded still show. Saving a stamp or photo needs
+          a connection.
         </p>
       </div>
     </div>

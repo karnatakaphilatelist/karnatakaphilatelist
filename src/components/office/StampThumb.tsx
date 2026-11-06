@@ -18,7 +18,11 @@ interface StampThumbProps {
  * office is visited, then full colour. Falls back to a mail icon when there is
  * no stamp yet or the image fails to load.
  */
-export function StampThumb({ path, status, className = "size-[52px]" }: StampThumbProps) {
+export function StampThumb({
+  path,
+  status,
+  className = "size-[52px]",
+}: StampThumbProps) {
   const [failed, setFailed] = useState(false);
   const url = failed ? null : stampImageUrl(path);
 

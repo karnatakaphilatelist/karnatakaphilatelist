@@ -1,8 +1,8 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useRef, useState, type ReactNode } from "react";
-import { CheckIcon, MailIcon, NavigationIcon, TargetIcon } from "@/components/ui/icons";
+import { useEffect, useRef, useState } from "react";
+import { BookIcon, CheckIcon, FlagIcon } from "@/components/ui/icons";
 import { ONBOARDED_KEY } from "@/lib/constants";
 import { writeJson } from "@/lib/local-storage";
 import { isNativeApp } from "@/lib/native";
@@ -10,120 +10,56 @@ import "./tour.css";
 
 interface Step {
   title: string;
+  sub: string;
   body: string;
-  art: () => ReactNode;
-}
-
-const NAMES = ["Hubballi", "Mysuru", "Mangaluru", "Belagavi", "Hampi", "Udupi", "Coorg", "Bidar"];
-
-function Chip({ name, tone }: { name: string; tone: "paper" | "green" }) {
-  return (
-    <span
-      className={`flex shrink-0 items-center gap-1.5 rounded-full px-3.5 py-2 text-sm font-semibold ${
-        tone === "green" ? "bg-visited-soft text-visited-ink" : "bg-white text-ink"
-      }`}
-    >
-      {tone === "green" ? <CheckIcon className="size-4" strokeWidth={3} /> : <MailIcon className="size-4" />}
-      {name}
-    </span>
-  );
-}
-
-function ChipRow({ reverse = false, offset = 0 }: { reverse?: boolean; offset?: number }) {
-  const names = [...NAMES.slice(offset), ...NAMES.slice(0, offset)];
-  // Doubled so the loop can slide by exactly half its width.
-  return (
-    <div className={`kpt-row ${reverse ? "kpt-row--rev" : ""}`} aria-hidden="true">
-      {[...names, ...names].map((name, i) => (
-        <Chip key={i} name={name} tone={i % 3 === 0 ? "green" : "paper"} />
-      ))}
-    </div>
-  );
-}
-
-function FindArt() {
-  return (
-    <div className="relative flex h-full flex-col justify-center gap-2 overflow-hidden">
-      <ChipRow />
-      <ChipRow reverse offset={3} />
-      <ChipRow offset={5} />
-      <div
-        className="kpt-pop absolute inset-x-6 bottom-8 flex items-center gap-3 rounded-2xl bg-paper p-3.5 shadow-[0_18px_30px_-12px_rgb(0_0_0/0.45)]"
-      >
-        <span className="grid size-11 place-items-center rounded-full bg-postal text-white">
-          <NavigationIcon className="size-5" />
-        </span>
-        <div>
-          <p className="font-bold text-ink">Nearest post office</p>
-          <p className="text-sm text-muted">Tap a pin for directions</p>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function StampArt() {
-  return (
-    <div className="relative grid h-full place-items-center">
-      <div
-        className="kpt-pop relative h-40 w-64 rounded-xl bg-paper p-4 text-ink shadow-[0_18px_30px_-12px_rgb(0_0_0/0.5)]"
-        style={{ "--r": "-3deg" } as React.CSSProperties}
-        aria-hidden="true"
-      >
-        {/* A postcard: address lines on the left, the stamp in the corner, a postmark over the edge. */}
-        <div className="mt-14 space-y-2.5">
-          <span className="block h-1.5 w-28 rounded-full bg-line-strong" />
-          <span className="block h-1.5 w-20 rounded-full bg-line-strong" />
-          <span className="block h-1.5 w-24 rounded-full bg-line-strong" />
-        </div>
-        <span className="kpt-stamp kp-perforated absolute right-4 top-4 grid h-[4.5rem] w-14 place-items-center text-white">
-          <TargetIcon className="size-7" />
-        </span>
-        <span className="kpt-ink absolute right-14 top-8 grid size-[4.5rem] place-items-center rounded-full border-[3px] border-ink/70 text-center text-[9px] font-bold uppercase leading-tight tracking-wide text-ink/70">
-          Stamped
-        </span>
-      </div>
-    </div>
-  );
-}
-
-function PassportArt() {
-  return (
-    <div className="grid h-full place-items-center">
-      <div className="flex items-center gap-4">
-        {[-6, 3, -2].map((r, i) => (
-          <div
-            key={i}
-            className="kpt-pop grid h-28 w-24 place-items-center rounded-lg bg-white shadow-[0_18px_30px_-12px_rgb(0_0_0/0.45)]"
-            style={{ "--r": `${r}deg`, animationDelay: `${i * 0.18}s` } as React.CSSProperties}
-          >
-            <span className="grid size-10 place-items-center rounded-full bg-visited text-white">
-              <CheckIcon className="size-5" strokeWidth={3} />
-            </span>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
+  /** Mark shown inside the halo at the right of the red hero. */
+  mark: "pin" | "check" | "book";
 }
 
 const STEPS: Step[] = [
   {
-    title: "Find a post office",
-    body: "Every post office in the state is on the map. See what is nearby and which ones you have not been to yet.",
-    art: () => <FindArt />,
+    title: "Find it.",
+    sub: "A post office near you",
+    body: "Open the map and spot a post office close by. Green pins are places you have already stamped.",
+    mark: "pin",
   },
   {
-    title: "Get it stamped",
-    body: "Visit in person, ask for the postmark, then tap Stamp it. Add a note or photo if you like.",
-    art: () => <StampArt />,
+    title: "Visit it.",
+    sub: "Go in person",
+    body: "Visit the post office, ask for the postmark, then tap Stamp it. Add a note or photo if you like.",
+    mark: "check",
   },
   {
-    title: "Fill your passport",
+    title: "Stamp it.",
+    sub: "Fill your passport",
     body: "Each stamp lands in your passport. Watch your count grow, one post office at a time.",
-    art: () => <PassportArt />,
+    mark: "book",
   },
 ];
+
+/** The mark of each step: a glowing halo with the thing you are looking for inside. */
+function Halo({ mark }: { mark: Step["mark"] }) {
+  return (
+    <div
+      aria-hidden="true"
+      className="kpt-pop absolute bottom-6 right-6 grid size-28 place-items-center rounded-full bg-[#2f4aa8]/25"
+    >
+      <span className="absolute -inset-4 rounded-full border border-white/10" />
+      <span className="absolute -inset-9 rounded-full border border-white/10" />
+      {mark === "pin" ? (
+        <span className="size-[52px] rounded-full border-[5px] border-white bg-[#2f4aa8] shadow-[0_3px_10px_rgb(47_74_168/0.6)]" />
+      ) : mark === "check" ? (
+        <span className="grid size-[52px] place-items-center rounded-full border-[5px] border-white bg-[#1f8a4d] text-white shadow-[0_3px_10px_rgb(31_138_77/0.6)]">
+          <CheckIcon className="size-6" strokeWidth={3.4} />
+        </span>
+      ) : (
+        <span className="grid size-[52px] place-items-center rounded-full border-[5px] border-white bg-postal text-white shadow-lg">
+          <BookIcon className="size-6" />
+        </span>
+      )}
+    </div>
+  );
+}
 
 /** The three-step first-launch tour. Shown once, then the app opens on the map. */
 export function WelcomeTour() {
@@ -166,7 +102,7 @@ export function WelcomeTour() {
 
   return (
     <main
-      className="flex h-dvh touch-pan-y flex-col bg-paper"
+      className="flex h-dvh touch-pan-y flex-col"
       onTouchStart={(event) => {
         const t = event.touches[0];
         swipe.current = { x: t.clientX, y: t.clientY };
@@ -176,31 +112,66 @@ export function WelcomeTour() {
         onTouchEnd(t.clientX, t.clientY);
       }}
     >
-      <section className="kp-red relative flex-[1.15] overflow-hidden text-white" aria-label="Illustration">
-        <button
-          type="button"
-          onClick={finish}
-          className="absolute right-3 top-3 z-10 min-h-11 rounded-full px-4 text-sm font-semibold text-white"
-        >
-          Skip
-        </button>
-        <div key={step} className="size-full">
-          {current.art()}
+      <section
+        className="kp-red relative flex flex-[1.15] flex-col overflow-hidden px-4 pt-[calc(1.5rem+env(safe-area-inset-top))] text-white"
+        aria-label="Welcome"
+      >
+        <div className="flex h-10 items-center justify-between">
+          <span className="text-xs font-extrabold uppercase tracking-[0.22em]">
+            Philatrail
+          </span>
+          <button
+            type="button"
+            onClick={finish}
+            className="-mr-2 min-h-11 px-2 text-xs font-bold uppercase tracking-[0.18em]"
+          >
+            Skip
+          </button>
         </div>
-      </section>
-
-      <section className="flex flex-1 flex-col px-4 pb-8 pt-7">
-        <div key={step} className="kpt-pop flex-1">
-          <h1 className="text-5xl font-medium uppercase leading-[52px] tracking-[0.01em] text-ink">
+        <div key={step} className="kpt-pop mt-6">
+          <p className="flex items-center gap-3.5 text-xs font-bold uppercase tracking-[0.18em]">
+            How it works
+            <span aria-hidden className="h-4 w-px bg-[#f7c96b]" />
+            {step + 1} of {STEPS.length}
+          </p>
+          <h1 className="-ml-1 mt-5 text-[72px] font-medium uppercase leading-[76px] tracking-[0.01em]">
             {current.title}
           </h1>
-          <p className="mt-3 text-base leading-6 text-muted">{current.body}</p>
+          <p className="mt-3 text-xl font-bold italic uppercase leading-6 tracking-[0.08em] text-[#f7c96b]">
+            {current.sub}
+          </p>
+        </div>
+        <Halo key={`halo-${step}`} mark={current.mark} />
+      </section>
+
+      <section className="flex flex-1 flex-col px-4 pb-8 pt-6">
+        <div key={step} className="kpt-pop flex-1">
+          <p className="text-base leading-6 text-ink">{current.body}</p>
+          {step === 0 ? (
+            <div className="mt-6 flex flex-wrap gap-2" aria-label="Pin legend">
+              <span className="kp-glass flex h-10 items-center gap-2 rounded-full px-3.5 text-sm font-semibold">
+                <span
+                  aria-hidden
+                  className="size-3.5 rounded-full border-2 border-muted"
+                />
+                Not visited
+              </span>
+              <span className="kp-glass flex h-10 items-center gap-2 rounded-full px-3.5 text-sm font-semibold">
+                <FlagIcon className="size-4 text-[#2f4aa8]" />
+                Planned
+              </span>
+              <span className="kp-glass flex h-10 items-center gap-2 rounded-full px-3.5 text-sm font-semibold">
+                <CheckIcon className="size-4 text-[#1f8a4d]" strokeWidth={3} />
+                Visited
+              </span>
+            </div>
+          ) : null}
         </div>
 
         <p className="sr-only">
           Step {step + 1} of {STEPS.length}
         </p>
-        <div className="mb-3 flex justify-center">
+        <div className="mb-3 flex">
           {STEPS.map((item, i) => (
             <button
               key={item.title}
@@ -208,11 +179,11 @@ export function WelcomeTour() {
               aria-label={`Go to step ${i + 1}: ${item.title}`}
               aria-current={i === step ? "step" : undefined}
               onClick={() => setStep(i)}
-              className="grid h-9 min-w-6 place-items-center px-1"
+              className="grid h-9 min-w-6 place-items-center pr-1.5"
             >
               <span
                 className={`h-2 rounded-full transition-all ${
-                  i === step ? "w-7 bg-postal" : "w-2 bg-line-strong"
+                  i === step ? "w-7 bg-postal" : "w-2 bg-[#785a1e]/25"
                 }`}
               />
             </button>
@@ -222,8 +193,20 @@ export function WelcomeTour() {
         <button
           type="button"
           onClick={() => (last ? finish() : setStep(step + 1))}
-          className="min-h-[62px] w-full rounded-full bg-gradient-to-b from-[#e0334a] to-postal text-base font-bold uppercase tracking-[0.12em] text-white"
+          className="flex h-[62px] w-full items-center justify-center gap-2 rounded-[28px] bg-gradient-to-b from-[#e0334a] to-postal text-base font-bold uppercase tracking-[0.14em] text-white shadow-[inset_0_1.5px_0_rgb(255_255_255/0.35),0_8px_18px_-8px_rgb(207_24_48/0.7)]"
         >
+          <svg
+            aria-hidden
+            viewBox="0 0 24 24"
+            className="size-5"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.6"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M5 12h14M13 6l6 6-6 6" />
+          </svg>
           {last ? "Start collecting" : "Next"}
         </button>
       </section>

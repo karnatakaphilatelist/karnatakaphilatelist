@@ -2,6 +2,7 @@ import {
   FilterChips,
   type StatusFilter,
 } from "@/components/explore/FilterChips";
+import { AccountAvatar } from "@/components/layout/AccountAvatar";
 import { SearchIcon } from "@/components/ui/icons";
 
 interface ExploreControlsProps {
@@ -11,6 +12,8 @@ interface ExploreControlsProps {
   onQueryChange: (query: string) => void;
   filter: StatusFilter;
   onFilterChange: (filter: StatusFilter) => void;
+  /** Phone layout: the account button lives inside the search bar. */
+  withAvatar?: boolean;
 }
 
 /** Search box and status filter chips. */
@@ -20,6 +23,7 @@ export function ExploreControls({
   onQueryChange,
   filter,
   onFilterChange,
+  withAvatar = false,
 }: ExploreControlsProps) {
   const inputId = `post-office-search-${idSuffix}`;
   return (
@@ -34,11 +38,26 @@ export function ExploreControls({
           type="search"
           value={query}
           onChange={(event) => onQueryChange(event.target.value)}
-          placeholder="Search name, district or pincode"
-          className="kp-glass h-14 w-full rounded-full border-0 pl-14 pr-4 text-base placeholder:text-muted"
+          placeholder={
+            withAvatar
+              ? "Search post offices"
+              : "Search name, district or pincode"
+          }
+          className={`kp-glass h-14 w-full rounded-full border-0 pl-14 text-base placeholder:text-muted ${
+            withAvatar ? "pr-14" : "pr-4"
+          }`}
         />
+        {withAvatar ? (
+          <div className="absolute right-2 top-2">
+            <AccountAvatar />
+          </div>
+        ) : null}
       </div>
-      <FilterChips value={filter} onChange={onFilterChange} tourId={`filters-${idSuffix}`} />
+      <FilterChips
+        value={filter}
+        onChange={onFilterChange}
+        tourId={`filters-${idSuffix}`}
+      />
     </>
   );
 }

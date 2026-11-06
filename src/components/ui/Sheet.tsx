@@ -18,7 +18,14 @@ interface SheetProps {
  * screens. Built on the native <dialog>, which provides focus trapping and
  * Escape-to-close for free.
  */
-export function Sheet({ open, onClose, title, description, band = false, children }: SheetProps) {
+export function Sheet({
+  open,
+  onClose,
+  title,
+  description,
+  band = false,
+  children,
+}: SheetProps) {
   const dialogRef = useRef<HTMLDialogElement>(null);
   // Several sheets are in the page at once (sign-in is always mounted), so each
   // needs its own id or every dialog would be named after the first one.
@@ -67,7 +74,11 @@ export function Sheet({ open, onClose, title, description, band = false, childre
       tabIndex={-1}
       className="outline-none mx-auto mb-0 mt-auto max-h-[92dvh] w-full max-w-none animate-[rise_.25s_ease-out] overflow-y-auto kp-glass-panel rounded-t-3xl p-0 text-ink backdrop:bg-ink/45 md:m-auto md:max-w-md md:rounded-3xl"
     >
-      <div className={`flex items-start justify-between gap-3 px-5 pt-5 ${band ? "kp-red pb-5 text-white" : ""}`}>
+      <div
+        className={`flex items-start justify-between gap-3 px-5 pt-5 ${
+          band ? "kp-red pb-5 text-white" : ""
+        }`}
+      >
         <div>
           <h2
             id={titleId}
@@ -76,7 +87,13 @@ export function Sheet({ open, onClose, title, description, band = false, childre
             {title}
           </h2>
           {description ? (
-            <p className={`mt-1 text-sm ${band ? "text-white/90" : "text-muted"}`}>{description}</p>
+            <p
+              className={`mt-1 text-sm ${
+                band ? "text-white/90" : "text-muted"
+              }`}
+            >
+              {description}
+            </p>
           ) : null}
         </div>
         <button

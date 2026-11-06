@@ -1,5 +1,14 @@
 # Design system: Karnataka Philatelic Passport
 
+> **Update (Nov 2026): direction D is now the live look.** Cream and white frosted glass (blur 28px) with a bright top edge,
+> Figtree only (headlines weight 500, uppercase, tracked), Courier Prime for postal details (pincode, distance, dates),
+> tracked-caps kickers with a thin gold rule, one 16px left edge, no top bar on phones (the account button sits in the
+> search bar and the Passport masthead). Red `#cf1830` is for the main button, avatar, locate icon and active tab only;
+> green `#1f8a4d` always means stamped; cobalt `#2f4aa8` means pins and planned; tan `#8f640f` is "not yet stamped".
+> Where the sections below disagree (Fraunces, red hero cards, perforated edges), this note wins. Source boards: the
+> "Design" canvas artifact, boards prefixed `D-`.
+
+
 Direction: **classic printed stamp**. Cream paper, deep indigo ink, one postal-red accent.
 Vintage details (perforated edges, postmarks, paper grain) appear only on the collectible
 things: stamps, the passport, the "stamped" moment. Everything functional (map, search,

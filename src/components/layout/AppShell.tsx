@@ -41,7 +41,8 @@ export function AppShell({
   // Download the map code quietly while they look around, so it is ready the moment they arrive.
   useEffect(() => {
     if (onExplore) return;
-    const warm = () => void import("@/components/map/OfficeMap").catch(() => undefined);
+    const warm = () =>
+      void import("@/components/map/OfficeMap").catch(() => undefined);
     if ("requestIdleCallback" in window) {
       const idle = window.requestIdleCallback(warm, { timeout: 3000 });
       return () => window.cancelIdleCallback(idle);

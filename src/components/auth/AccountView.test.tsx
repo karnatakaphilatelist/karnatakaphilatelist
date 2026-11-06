@@ -72,7 +72,7 @@ describe("AccountView", () => {
     auth.user = { email: "asha@example.com", user_metadata: {} };
     auth.deleteAccount.mockResolvedValue(undefined);
     render(<AccountView />);
-    fireEvent.click(screen.getByRole("button", { name: "Delete my account" }));
+    fireEvent.click(screen.getByRole("button", { name: "Delete account" }));
     expect(auth.deleteAccount).not.toHaveBeenCalled();
     fireEvent.click(
       screen.getByRole("button", { name: /yes, delete everything/i })
@@ -87,7 +87,7 @@ describe("AccountView", () => {
       new Error("Could not delete your account. Please try again.")
     );
     render(<AccountView />);
-    fireEvent.click(screen.getByRole("button", { name: "Delete my account" }));
+    fireEvent.click(screen.getByRole("button", { name: "Delete account" }));
     fireEvent.click(
       screen.getByRole("button", { name: /yes, delete everything/i })
     );

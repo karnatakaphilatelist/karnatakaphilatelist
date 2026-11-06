@@ -15,7 +15,9 @@ export function ExploreHost({ offices }: { offices: PostOffice[] }) {
     <ExploreView
       offices={offices}
       active={active}
-      initialSelectedId={Number.isInteger(requested) && requested > 0 ? requested : null}
+      initialSelectedId={
+        Number.isInteger(requested) && requested > 0 ? requested : null
+      }
     />
   );
 }

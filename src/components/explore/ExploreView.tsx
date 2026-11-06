@@ -20,6 +20,7 @@ import { LOCATION_PRIMED_KEY } from "@/lib/constants";
 import { isNativeApp } from "@/lib/native";
 import { readJson, writeJson } from "@/lib/local-storage";
 import { sortByDistance, withStatus } from "@/lib/office-status";
+import { stateName } from "@/lib/states";
 import { getFirstName } from "@/lib/user-display";
 import type { Coordinates, PostOffice } from "@/types";
 
@@ -66,7 +67,9 @@ export function ExploreView({
   const [userLocation, setUserLocation] = useState<Coordinates | null>(null);
   const [isLocating, setIsLocating] = useState(false);
   const [stampedId, setStampedId] = useState<number | null>(null);
-  const [locationSheet, setLocationSheet] = useState<"prime" | "denied" | null>(null);
+  const [locationSheet, setLocationSheet] = useState<"prime" | "denied" | null>(
+    null
+  );
 
   // On phones the list sheet waits for the map, so opening this screen shows the map first and the
   // sheet then fades in over it. If the map is slow or fails to start, show the list after a moment anyway.
@@ -79,7 +82,9 @@ export function ExploreView({
   // A link to one office (for example from the passport) opens that office's state.
   // The screen stays mounted between visits, so this also runs for each later link.
   useEffect(() => {
-    const linked = indiaOffices.find((office) => office.id === initialSelectedId);
+    const linked = indiaOffices.find(
+      (office) => office.id === initialSelectedId
+    );
     if (!linked) return;
     choose(linked.state);
     // A link is an event from outside this screen, so reacting to it here is the point of the effect.
@@ -144,7 +149,8 @@ export function ExploreView({
         if (cancelled || status.state !== "granted") return;
         navigator.geolocation.getCurrentPosition(
           ({ coords }) => {
-            if (!cancelled) setUserLocation({ lat: coords.latitude, lng: coords.longitude });
+            if (!cancelled)
+              setUserLocation({ lat: coords.latitude, lng: coords.longitude });
           },
           () => undefined,
           { enableHighAccuracy: false, timeout: 10_000 }
@@ -175,11 +181,12 @@ export function ExploreView({
     );
   }
 
+  const stampedCount = offices.filter((office) => visits[office.id]).length;
   const sheetRef = useRef<HTMLElement>(null);
   const sheetStyle = {
     height:
       dragHeight ??
-      (snap === 0 ? "7.75rem" : snap === 1 ? "50%" : "calc(100% - 7.5rem)"),
+      (snap === 0 ? "6.75rem" : snap === 1 ? "50%" : "calc(100% - 7.5rem)"),
   };
   const drag = useRef<{ y: number; h: number; moved: boolean } | null>(null);
   const dragProps = {
@@ -200,10 +207,14 @@ export function ExploreView({
         event.currentTarget.setPointerCapture(event.pointerId);
       }
       const parent = sheet.parentElement?.clientHeight ?? 0;
-      setDragHeight(Math.min(Math.max(state.h + dy, 124), Math.max(parent - 120, 124)));
+      setDragHeight(
+        Math.min(Math.max(state.h + dy, 108), Math.max(parent - 120, 108))
+      );
     },
-    onPointerUp: (event: React.PointerEvent<HTMLElement>) => finishDrag(event.clientY),
-    onPointerCancel: (event: React.PointerEvent<HTMLElement>) => finishDrag(event.clientY),
+    onPointerUp: (event: React.PointerEvent<HTMLElement>) =>
+      finishDrag(event.clientY),
+    onPointerCancel: (event: React.PointerEvent<HTMLElement>) =>
+      finishDrag(event.clientY),
   };
   function finishDrag(clientY: number) {
     const state = drag.current;
@@ -211,10 +222,10 @@ export function ExploreView({
     drag.current = null;
     if (!state?.moved || !sheet) return;
     const parent = sheet.parentElement?.clientHeight ?? 0;
-    const stops = [124, parent * 0.5, Math.max(parent - 120, 124)];
+    const stops = [108, parent * 0.5, Math.max(parent - 120, 108)];
     // A flick counts: lean the landing spot the way the finger was heading.
     const flick = (state.y - clientY) * 1.5;
-    const target = Math.min(Math.max(state.h + flick, 124), stops[2]);
+    const target = Math.min(Math.max(state.h + flick, 108), stops[2]);
     const nearest = stops.reduce(
       (best, stop, index) =>
         Math.abs(stop - target) < Math.abs(stops[best] - target) ? index : best,
@@ -230,68 +241,128 @@ export function ExploreView({
         ref={sheetRef}
         aria-label="Post offices"
         style={sheetStyle}
-        className={`absolute inset-x-0 bottom-0 z-[1050] flex min-h-0 flex-col kp-glass-panel rounded-t-3xl md:bg-white md:shadow-none md:h-auto! md:static md:z-auto md:h-auto md:w-[26rem] md:shrink-0 md:rounded-none md:border-r md:border-t-0 md:shadow-none ${
-          ""
-        } ${
-          dragHeight === null ? "transition-[height,opacity] duration-300 ease-out" : ""
+        className={`absolute inset-x-0 bottom-0 z-[1050] flex min-h-0 flex-col kp-glass-panel rounded-t-3xl md:bg-white md:shadow-none md:h-auto! md:static md:z-auto md:h-auto md:w-[26rem] md:shrink-0 md:rounded-none md:border-r md:border-t-0 md:shadow-none ${""} ${
+          dragHeight === null
+            ? "transition-[height,opacity] duration-300 ease-out"
+            : ""
         } ${selectedOffice ? "max-md:hidden" : ""} ${
           mapReady ? "" : "max-md:pointer-events-none max-md:opacity-0"
         }`}
       >
         <div className="shrink-0 touch-none md:touch-auto" {...dragProps}>
-        <SheetHandle open={sheetOpen} onChange={setSheetOpen} />
-        <div className="space-y-1 px-4 md:pt-4">
-          {/* On phones the controls live over the map instead, so the detail sheet never covers them. */}
-          <div className="hidden space-y-1 md:block">
-            <StateSwitcher
-              states={states}
-              value={stateCode}
-              onChange={choose}
-              idSuffix="desktop"
-            />
-            <ExploreControls
-              idSuffix="desktop"
-              query={query}
-              onQueryChange={setQuery}
-              filter={filter}
-              onFilterChange={setFilter}
-            />
-          </div>
-          {isReady ? (
-            <div className={sheetOpen ? "" : "max-md:hidden"}>
-              <ProgressStrip
-                signedIn={isAuthLoading ? null : user !== null}
-                firstName={user ? getFirstName(user) : null}
-                stamped={offices.filter((office) => visits[office.id]).length}
-                total={offices.length}
-                onFindNext={() => setFilter("unvisited")}
-                onSignIn={() => openSignIn("manual")}
-              />
-            </div>
-          ) : null}
-          <div className="flex items-center gap-1 pb-1 md:hidden">
-            <div className="min-w-0 flex-1">
+          <SheetHandle open={sheetOpen} onChange={setSheetOpen} />
+          <div className="space-y-1 px-4 md:pt-4">
+            {/* On phones the controls live over the map instead, so the detail sheet never covers them. */}
+            <div className="hidden space-y-1 md:block">
               <StateSwitcher
                 states={states}
                 value={stateCode}
                 onChange={choose}
-                idSuffix="mobile"
+                idSuffix="desktop"
+              />
+              <ExploreControls
+                idSuffix="desktop"
+                query={query}
+                onQueryChange={setQuery}
+                filter={filter}
+                onFilterChange={setFilter}
               />
             </div>
-            <NearMeButton onClick={handleFindNearMe} isLocating={isLocating} tourId="near-me" />
+            {isReady ? (
+              <div className={sheetOpen ? "" : "max-md:hidden"}>
+                <ProgressStrip
+                  signedIn={isAuthLoading ? null : user !== null}
+                  firstName={user ? getFirstName(user) : null}
+                  stamped={offices.filter((office) => visits[office.id]).length}
+                  total={offices.length}
+                  onFindNext={() => setFilter("unvisited")}
+                  onSignIn={() => openSignIn("manual")}
+                />
+              </div>
+            ) : null}
+            {/* Phone: panel header of direction D. Peek shows state + progress + "Show list"; open shows the list heading. */}
+            <div className="flex items-center justify-between gap-3 pb-3 pt-1 md:hidden">
+              {sheetOpen ? (
+                <p
+                  className="flex items-center gap-3 text-xs font-bold uppercase tracking-[0.18em] text-ink"
+                  aria-live="polite"
+                >
+                  {userLocation ? "Nearby" : "Post offices"}
+                  <span aria-hidden className="h-3.5 w-px bg-[#b8861b]" />
+                  <span className="text-muted">
+                    {visibleOffices.length} total
+                  </span>
+                </p>
+              ) : (
+                <div className="min-w-0">
+                  <StateSwitcher
+                    states={states}
+                    value={stateCode}
+                    onChange={choose}
+                    idSuffix="mobile"
+                    title
+                  />
+                  <div className="flex items-center gap-2" aria-live="polite">
+                    <div
+                      role="progressbar"
+                      aria-label="Stamped post offices"
+                      aria-valuemin={0}
+                      aria-valuemax={offices.length}
+                      aria-valuenow={stampedCount}
+                      className="h-1.5 w-24 overflow-hidden rounded-full bg-[#785a1e]/15"
+                    >
+                      <div
+                        className="h-full bg-[#1f8a4d]"
+                        style={{
+                          width: `${
+                            offices.length
+                              ? Math.max(
+                                  (stampedCount / offices.length) * 100,
+                                  stampedCount ? 4 : 0
+                                )
+                              : 0
+                          }%`,
+                        }}
+                      />
+                    </div>
+                    <span className="font-mono text-[13px] text-muted">
+                      <b className="text-[#1f8a4d]">{stampedCount}</b> of{" "}
+                      {offices.length} stamped
+                    </span>
+                  </div>
+                </div>
+              )}
+              <button
+                type="button"
+                onClick={() => setSheetOpen(!sheetOpen)}
+                className="flex h-11 shrink-0 items-center gap-1.5 rounded-full bg-[#785a1e]/12 px-[18px] text-sm font-bold text-ink"
+              >
+                {sheetOpen ? "Show map" : "Show list"}
+                <svg
+                  aria-hidden
+                  viewBox="0 0 20 20"
+                  className={`size-3.5 ${sheetOpen ? "" : "rotate-180"}`}
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.6"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="m5 7.5 5 5 5-5" />
+                </svg>
+              </button>
+            </div>
+            <div className="hidden items-center justify-between pb-2 md:flex">
+              <p className="text-sm text-muted" aria-live="polite">
+                {visibleOffices.length} of {offices.length} post offices
+                {userLocation ? " · nearest first" : ""}
+              </p>
+              <NearMeButton
+                onClick={handleFindNearMe}
+                isLocating={isLocating}
+              />
+            </div>
           </div>
-          <div className="flex items-center justify-between pb-1.5 md:pb-2">
-            <p className="text-sm text-muted" aria-live="polite">
-              {visibleOffices.length} of {offices.length} post offices
-              {userLocation ? " · nearest first" : ""}
-            </p>
-            <NearMeButton
-              onClick={handleFindNearMe}
-              isLocating={isLocating}
-              className="max-md:hidden"
-            />
-          </div>
-        </div>
         </div>
         <div
           className={`min-h-0 flex-1 overflow-y-auto overscroll-contain ${
@@ -310,10 +381,11 @@ export function ExploreView({
         aria-label="Map"
         className="absolute inset-0 isolate md:relative md:inset-auto md:min-h-0 md:flex-1"
       >
-        <div className="pointer-events-none absolute inset-x-0 top-0 z-[1100] space-y-1 px-3 pt-3 md:hidden">
-          <div className="pointer-events-auto space-y-1 [&_input]:shadow-md">
+        <div className="pointer-events-none absolute inset-x-0 top-0 z-[1100] px-4 pt-4 md:hidden">
+          <div className="pointer-events-auto space-y-3">
             <ExploreControls
               idSuffix="mobile"
+              withAvatar
               query={query}
               onQueryChange={setQuery}
               filter={filter}
@@ -329,6 +401,21 @@ export function ExploreView({
           onSelect={setSelectedId}
           onReady={() => setMapReady(true)}
         />
+        {!selectedOffice && !sheetOpen && dragHeight === null ? (
+          <button
+            type="button"
+            onClick={handleFindNearMe}
+            disabled={isLocating}
+            data-tour="near-me"
+            aria-label="Show post offices near me"
+            style={{ bottom: `calc(${sheetStyle.height} + 1rem)` }}
+            className="kp-glass absolute right-4 z-[1100] grid size-[52px] place-items-center rounded-full text-postal disabled:opacity-60 md:hidden"
+          >
+            <LocateIcon
+              className={`size-6 ${isLocating ? "animate-pulse" : ""}`}
+            />
+          </button>
+        ) : null}
         {selectedOffice ? (
           <OfficeDetail
             key={selectedOffice.id}
@@ -337,13 +424,20 @@ export function ExploreView({
             onMarkVisited={handleMarkVisited}
             onEditVisit={setEditingId}
             onCheckDistance={handleFindNearMe}
+            collected={
+              allOffices.filter((office) => office.status === "visited").length
+            }
+            total={allOffices.length}
+            stateName={stateName(stateCode)}
           />
         ) : null}
       </section>
 
       <StampedSheet
         office={allOffices.find((office) => office.id === stampedId) ?? null}
-        collected={allOffices.filter((office) => office.status === "visited").length}
+        collected={
+          allOffices.filter((office) => office.status === "visited").length
+        }
         total={allOffices.length}
         onClose={() => setStampedId(null)}
         onAddNote={setEditingId}
@@ -378,9 +472,9 @@ function SheetHandle({
       aria-expanded={open}
       onClick={() => onChange(!open)}
       data-tour="sheet"
-      className="grid h-9 w-full shrink-0 place-items-center md:hidden"
+      className="grid h-7 w-full shrink-0 place-items-center md:hidden"
     >
-      <span className="h-1.5 w-11 rounded-full bg-line-strong" />
+      <span className="h-1 w-10 rounded-full bg-[#c7c7cc]" />
     </button>
   );
 }

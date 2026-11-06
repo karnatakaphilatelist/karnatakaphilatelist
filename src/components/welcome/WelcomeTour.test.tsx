@@ -16,9 +16,9 @@ describe("WelcomeTour", () => {
 
   it("walks through three steps and finishes on the map", () => {
     render(<WelcomeTour />);
-    expect(screen.getByRole("heading", { name: "Find a post office" })).toBeTruthy();
+    expect(screen.getByRole("heading", { name: "Find it." })).toBeTruthy();
     fireEvent.click(screen.getByRole("button", { name: "Next" }));
-    expect(screen.getByRole("heading", { name: "Get it stamped" })).toBeTruthy();
+    expect(screen.getByRole("heading", { name: "Visit it." })).toBeTruthy();
     fireEvent.click(screen.getByRole("button", { name: "Next" }));
     fireEvent.click(screen.getByRole("button", { name: "Start collecting" }));
     expect(replace).toHaveBeenCalledWith("/explore");
@@ -28,9 +28,9 @@ describe("WelcomeTour", () => {
   it("moves between steps with the dots", () => {
     render(<WelcomeTour />);
     fireEvent.click(screen.getByRole("button", { name: /go to step 3/i }));
-    expect(screen.getByRole("heading", { name: "Fill your passport" })).toBeTruthy();
+    expect(screen.getByRole("heading", { name: "Stamp it." })).toBeTruthy();
     fireEvent.click(screen.getByRole("button", { name: /go to step 1/i }));
-    expect(screen.getByRole("heading", { name: "Find a post office" })).toBeTruthy();
+    expect(screen.getByRole("heading", { name: "Find it." })).toBeTruthy();
   });
 
   it("can be skipped", () => {

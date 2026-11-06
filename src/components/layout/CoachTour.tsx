@@ -31,7 +31,7 @@ const STOPS: Stop[] = [
   {
     targets: ["sheet"],
     title: "The full list",
-    body: "Drag this bar up to see every post office, and down to get back to the map.",
+    body: "Tap Show list, or drag the bar up, to see every post office. Show map brings you back.",
   },
   {
     targets: ["tab-passport"],
@@ -52,7 +52,9 @@ interface Placed {
 
 function findVisible(targets: string[]) {
   for (const name of targets) {
-    for (const el of document.querySelectorAll<HTMLElement>(`[data-tour="${name}"]`)) {
+    for (const el of document.querySelectorAll<HTMLElement>(
+      `[data-tour="${name}"]`
+    )) {
       const box = el.getBoundingClientRect();
       if (box.width > 0 && box.height > 0) return box;
     }
@@ -98,7 +100,12 @@ export function CoachTour() {
         if (box)
           next.push({
             stop,
-            rect: { top: box.top, left: box.left, width: box.width, height: box.height },
+            rect: {
+              top: box.top,
+              left: box.left,
+              width: box.width,
+              height: box.height,
+            },
           });
       }
       setPlaced(next);
@@ -133,7 +140,12 @@ export function CoachTour() {
     : { bottom: window.innerHeight - rect.top + pad + 12 };
 
   return (
-    <div className="fixed inset-0 z-[3000]" role="dialog" aria-modal="true" aria-label="App walkthrough">
+    <div
+      className="fixed inset-0 z-[3000]"
+      role="dialog"
+      aria-modal="true"
+      aria-label="App walkthrough"
+    >
       {/* The cut-out: a clear box over the target, with a big shadow dimming everything else. */}
       <div
         className="pointer-events-none absolute rounded-2xl ring-2 ring-white/90 transition-all duration-300"
@@ -154,8 +166,12 @@ export function CoachTour() {
         <p className="text-xs font-semibold uppercase tracking-wide text-muted">
           {Math.min(index, placed.length - 1) + 1} of {placed.length}
         </p>
-        <h2 className="mt-1 font-display text-xl font-bold">{current.stop.title}</h2>
-        <p className="mt-1.5 text-base leading-6 text-muted">{current.stop.body}</p>
+        <h2 className="mt-1 font-display text-xl font-bold">
+          {current.stop.title}
+        </h2>
+        <p className="mt-1.5 text-base leading-6 text-muted">
+          {current.stop.body}
+        </p>
         <div className="mt-4 flex items-center justify-between gap-3">
           <button
             type="button"

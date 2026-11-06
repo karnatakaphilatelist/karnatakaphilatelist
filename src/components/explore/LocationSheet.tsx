@@ -13,12 +13,19 @@ interface LocationSheetProps {
 }
 
 /** Plain-words sheets around the location permission, so the system prompt is never a surprise. */
-export function LocationSheet({ mode, native, onContinue, onClose }: LocationSheetProps) {
+export function LocationSheet({
+  mode,
+  native,
+  onContinue,
+  onClose,
+}: LocationSheetProps) {
   return (
     <Sheet
       open={mode !== null}
       onClose={onClose}
-      title={mode === "denied" ? "Location is off" : "Find post offices near you"}
+      title={
+        mode === "denied" ? "Location is off" : "Find post offices near you"
+      }
     >
       {mode === "prime" ? (
         <>

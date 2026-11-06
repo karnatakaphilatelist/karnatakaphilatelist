@@ -16,7 +16,13 @@ interface StampedSheetProps {
 }
 
 /** The moment of reward after "Stamp it": the stamp presses into the passport. */
-export function StampedSheet({ office, collected, total, onClose, onAddNote }: StampedSheetProps) {
+export function StampedSheet({
+  office,
+  collected,
+  total,
+  onClose,
+  onAddNote,
+}: StampedSheetProps) {
   return (
     <Sheet open={office !== null} onClose={onClose} title="Stamped!">
       {office ? (
@@ -27,7 +33,11 @@ export function StampedSheet({ office, collected, total, onClose, onAddNote }: S
               className="absolute inset-0 animate-[kp-ripple_1.1s_ease-out_0.2s_both] rounded-full border-2 border-visited"
             />
             <span className="kp-perf animate-[kp-press_1.1s_ease-out_0.2s_both] drop-shadow-md">
-              <StampThumb path={office.stampImagePath} status="visited" className="size-24" />
+              <StampThumb
+                path={office.stampImagePath}
+                status="visited"
+                className="size-24"
+              />
             </span>
             <span
               aria-hidden="true"
@@ -36,8 +46,12 @@ export function StampedSheet({ office, collected, total, onClose, onAddNote }: S
               <CheckIcon className="size-5" strokeWidth={3} />
             </span>
           </div>
-          <p className="mt-4 text-4xl font-medium uppercase leading-10 tracking-[0.01em]">{office.name}</p>
-          <p className="mx-auto mt-2 w-fit rounded-full bg-visited/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.08em] text-visited-ink">Stamped</p>
+          <p className="mt-4 text-4xl font-medium uppercase leading-10 tracking-[0.01em]">
+            {office.name}
+          </p>
+          <p className="mx-auto mt-2 w-fit rounded-full bg-visited/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.08em] text-visited-ink">
+            Stamped
+          </p>
           <p className="mt-1 text-sm text-muted">
             {collected} of {total} in your passport
           </p>

@@ -165,3 +165,17 @@ export const TargetIcon = (props: IconProps) => (
     <path d="M12 1v3M12 20v3M1 12h3M20 12h3" />
   </Icon>
 );
+
+export const ShareIcon = (props: IconProps) => (
+  <Icon {...props}>
+    <path d="M12 15V4M8 8l4-4 4 4" />
+    <path d="M5 12v7h14v-7" />
+  </Icon>
+);
+
+export const NoteIcon = (props: IconProps) => (
+  <Icon {...props}>
+    <path d="M6 3h11a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H6z" />
+    <path d="M6 3v18M10 8h5" />
+  </Icon>
+);

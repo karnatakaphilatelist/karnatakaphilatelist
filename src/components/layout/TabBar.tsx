@@ -9,7 +9,10 @@ export function TabBar() {
   const pathname = usePathname();
 
   return (
-    <nav aria-label="Primary" className="kp-glass-panel shrink-0 px-4 pb-2 pt-1 md:hidden">
+    <nav
+      aria-label="Primary"
+      className="kp-tabbar shrink-0 px-4 pb-2 pt-1 md:hidden"
+    >
       <div className="flex h-16 items-center gap-1">
         {NAV_ITEMS.map(({ href, label, Icon }) => {
           const active = isActivePath(pathname, href);

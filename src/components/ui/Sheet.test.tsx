@@ -4,10 +4,14 @@ import { Sheet } from "@/components/ui/Sheet";
 
 // jsdom does not implement the modal <dialog> methods, so give it minimal ones.
 beforeAll(() => {
-  HTMLDialogElement.prototype.showModal ??= function showModal(this: HTMLDialogElement) {
+  HTMLDialogElement.prototype.showModal ??= function showModal(
+    this: HTMLDialogElement
+  ) {
     this.setAttribute("open", "");
   };
-  HTMLDialogElement.prototype.close ??= function close(this: HTMLDialogElement) {
+  HTMLDialogElement.prototype.close ??= function close(
+    this: HTMLDialogElement
+  ) {
     this.removeAttribute("open");
   };
 });
@@ -18,19 +22,25 @@ describe("Sheet", () => {
   it("gives every sheet its own title id so each dialog is named by its own heading", () => {
     const { container } = render(
       <>
-        <Sheet open={false} onClose={() => undefined} title="Sign in to your passport">
+        <Sheet
+          open={false}
+          onClose={() => undefined}
+          title="Sign in to your passport"
+        >
           one
         </Sheet>
         <Sheet open={false} onClose={() => undefined} title="Your visit">
           two
         </Sheet>
-      </>,
+      </>
     );
 
     const dialogs = [...container.querySelectorAll("dialog")];
     expect(dialogs).toHaveLength(2);
 
-    const labelIds = dialogs.map((dialog) => dialog.getAttribute("aria-labelledby"));
+    const labelIds = dialogs.map((dialog) =>
+      dialog.getAttribute("aria-labelledby")
+    );
     expect(new Set(labelIds).size).toBe(2);
 
     dialogs.forEach((dialog, index) => {
@@ -45,7 +55,7 @@ describe("Sheet", () => {
     const { container } = render(
       <Sheet open onClose={onClose} title="Sign in">
         <input aria-label="Email" />
-      </Sheet>,
+      </Sheet>
     );
     const dialog = container.querySelector("dialog")!;
     fireEvent.pointerDown(dialog);
@@ -58,7 +68,7 @@ describe("Sheet", () => {
     const { container, getByLabelText } = render(
       <Sheet open onClose={onClose} title="Sign in">
         <input aria-label="Email" />
-      </Sheet>,
+      </Sheet>
     );
     const dialog = container.querySelector("dialog")!;
     fireEvent.pointerDown(getByLabelText("Email"));
@@ -70,7 +80,7 @@ describe("Sheet", () => {
     const { container, getByLabelText } = render(
       <Sheet open onClose={() => undefined} title="Sign in">
         <input aria-label="Email" />
-      </Sheet>,
+      </Sheet>
     );
     const dialog = container.querySelector("dialog")!;
     const input = getByLabelText("Email");

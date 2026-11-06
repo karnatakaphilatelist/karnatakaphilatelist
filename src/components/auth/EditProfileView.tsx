@@ -27,7 +27,8 @@ export function EditProfileView() {
       await loadSupabase()
     ).auth.updateUser({ data: { full_name: value.slice(0, MAX_NAME) } });
     setIsBusy(false);
-    if (updateError) return setError("Could not save your name. Please try again.");
+    if (updateError)
+      return setError("Could not save your name. Please try again.");
     setDone(true);
   }
 
@@ -41,11 +42,16 @@ export function EditProfileView() {
 
   return (
     <div className="h-full overflow-y-auto">
-      <div className="mx-auto max-w-md px-5 pb-10 pt-6">
-        <Link href="/account" className="flex min-h-11 items-center text-sm font-semibold text-muted">
+      <div className="mx-auto max-w-md px-4 pb-10 pt-6">
+        <Link
+          href="/account"
+          className="flex min-h-11 items-center text-sm font-semibold text-muted"
+        >
           ← Account
         </Link>
-        <h1 className="mt-2 text-5xl font-medium uppercase leading-[52px] tracking-[0.01em] -ml-0.5">Your profile</h1>
+        <h1 className="mt-2 text-5xl font-medium uppercase leading-[52px] tracking-[0.01em] -ml-0.5">
+          Your profile
+        </h1>
 
         {!user ? (
           <div className="kp-glass mt-4 rounded-[18px] p-5">
@@ -53,13 +59,16 @@ export function EditProfileView() {
             <button
               type="button"
               onClick={() => openSignIn("manual")}
-              className="mt-4 min-h-11 rounded-full bg-ink px-5 text-sm font-semibold text-white"
+              className="mt-4 min-h-11 rounded-full bg-postal px-5 text-sm font-bold text-white"
             >
               Sign in
             </button>
           </div>
         ) : (
-          <form onSubmit={handleSubmit} className="kp-glass mt-4 rounded-[18px] p-5">
+          <form
+            onSubmit={handleSubmit}
+            className="kp-glass mt-4 rounded-[18px] p-5"
+          >
             <label htmlFor="profile-name" className="text-sm font-semibold">
               Your name
             </label>
@@ -79,7 +88,10 @@ export function EditProfileView() {
               </p>
             ) : null}
             {done ? (
-              <p role="status" className="mt-2 text-sm font-semibold text-visited-ink">
+              <p
+                role="status"
+                className="mt-2 text-sm font-semibold text-visited-ink"
+              >
                 Saved.
               </p>
             ) : null}

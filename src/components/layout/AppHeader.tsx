@@ -9,7 +9,7 @@ export function AppHeader() {
   const pathname = usePathname();
 
   return (
-    <header className="flex h-14 shrink-0 items-center justify-between gap-4 border-b border-line bg-card px-4 md:h-16 md:px-6">
+    <header className="hidden h-16 shrink-0 items-center justify-between gap-4 border-b border-line bg-card px-6 md:flex">
       <Link href="/" className="flex min-h-11 items-center">
         <span className="kp-wordmark" role="img" aria-label="Philatrail" />
       </Link>

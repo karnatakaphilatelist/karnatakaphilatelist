@@ -9,7 +9,7 @@ interface DistrictRow {
 /** Counts offices and visits per district, fullest districts first. */
 function summariseDistricts(
   offices: PostOffice[],
-  visits: Record<number, Visit>,
+  visits: Record<number, Visit>
 ): DistrictRow[] {
   const rows = new Map<string, DistrictRow>();
   for (const office of offices) {
@@ -24,7 +24,8 @@ function summariseDistricts(
   }
   return [...rows.values()].sort(
     (a, b) =>
-      b.visited / b.total - a.visited / a.total || a.district.localeCompare(b.district),
+      b.visited / b.total - a.visited / a.total ||
+      a.district.localeCompare(b.district)
   );
 }
 
@@ -44,7 +45,11 @@ export function DistrictProgress({ offices, visits }: DistrictProgressProps) {
           <li key={district}>
             <div className="flex items-baseline justify-between text-sm">
               <span className="font-semibold">{district}</span>
-              <span className={complete ? "font-bold text-visited-ink" : "text-muted"}>
+              <span
+                className={
+                  complete ? "font-bold text-visited-ink" : "text-muted"
+                }
+              >
                 {visited} of {total}
                 {complete ? " · complete" : ""}
               </span>

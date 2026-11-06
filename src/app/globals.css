@@ -70,7 +70,8 @@ html {
 }
 
 body {
-  background: var(--color-paper);
+  background: linear-gradient(180deg, #fffaf0 0, #f8eed8 100%) fixed;
+  background-color: var(--color-paper);
   color: var(--color-ink);
   font-family: var(--font-sans);
 }
@@ -281,6 +282,13 @@ label {
     radial-gradient(circle at 0 50%, #0000 4px, #000 4.5px) 0 0 / 100% 12px repeat-y,
     radial-gradient(circle at 100% 50%, #0000 4px, #000 4.5px) 0 0 / 100% 12px repeat-y;
   mask-composite: intersect;
+}
+
+/* Bottom nav shares the docked panel surface, so it has no highlight edge of its own. */
+.kp-tabbar {
+  background: linear-gradient(180deg, rgb(255 250 240 / 0.9), rgb(249 236 211 / 0.96));
+  -webkit-backdrop-filter: blur(28px) saturate(180%);
+  backdrop-filter: blur(28px) saturate(180%);
 }
 
 /* Direction D: frosted cream glass. Small controls are smooth cream with a white top sheen;

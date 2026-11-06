@@ -12,13 +12,26 @@ interface ShareProgressSheetProps {
 }
 
 /** A preview of the card being shared, so people see what they are sending. */
-export function ShareProgressSheet({ open, stamped, total, stateName, onShare, onClose }: ShareProgressSheetProps) {
+export function ShareProgressSheet({
+  open,
+  stamped,
+  total,
+  stateName,
+  onShare,
+  onClose,
+}: ShareProgressSheetProps) {
   return (
     <Sheet open={open} onClose={onClose} title="Share your progress">
       <div className="kp-red rounded-2xl p-5 text-center text-white">
-        <p className="text-sm font-semibold uppercase tracking-wide text-white/90">My post office passport</p>
-        <p className="mt-2 font-display text-6xl font-semibold italic leading-none">{stamped}</p>
-        <p className="mt-1 text-base font-semibold">of {total} stamped in {stateName}</p>
+        <p className="text-sm font-semibold uppercase tracking-wide text-white/90">
+          My post office passport
+        </p>
+        <p className="mt-2 font-display text-6xl font-semibold italic leading-none">
+          {stamped}
+        </p>
+        <p className="mt-1 text-base font-semibold">
+          of {total} stamped in {stateName}
+        </p>
       </div>
       <button
         type="button"

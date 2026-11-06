@@ -30,7 +30,7 @@ export function OfficeList({ offices, selectedId, onSelect }: OfficeListProps) {
               aria-current={selected ? "true" : undefined}
               className={`mb-1 flex min-h-[72px] w-full items-center gap-3 rounded-2xl border-[1.5px] px-2 py-2.5 text-left ${
                 selected
-                  ? "border-postal bg-postal-soft/50"
+                  ? "border-postal/30 bg-postal/5"
                   : "border-transparent"
               }`}
             >
@@ -41,10 +41,10 @@ export function OfficeList({ offices, selectedId, onSelect }: OfficeListProps) {
                 </span>
                 <span className="block truncate text-sm text-muted">
                   {office.district}
-                  {office.pincode ? ` · ${office.pincode}` : ""}
-                  {office.distanceKm !== null
-                    ? ` · ${formatDistance(office.distanceKm)}`
-                    : ""}
+                  {office.pincode ? <span className="font-mono"> · {office.pincode}</span> : null}
+                  {office.distanceKm !== null ? (
+                    <span className="font-mono"> · {formatDistance(office.distanceKm)}</span>
+                  ) : null}
                 </span>
               </span>
               <StatusBadge status={office.status} />

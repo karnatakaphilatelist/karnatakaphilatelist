@@ -212,7 +212,7 @@ export function AccountView() {
             type="button"
             onClick={handleDelete}
             disabled={isDeleting}
-            className="min-h-12 w-full rounded-full border-[1.5px] border-postal-dark bg-white text-base font-semibold text-postal-dark disabled:opacity-60"
+            className="min-h-12 w-full rounded-full bg-gradient-to-b from-[#e0334a] to-postal text-base font-bold text-white disabled:opacity-60"
           >
             {isDeleting ? "Deleting…" : "Yes, delete everything"}
           </button>
@@ -220,7 +220,7 @@ export function AccountView() {
             type="button"
             onClick={() => setConfirming(false)}
             disabled={isDeleting}
-            className="mt-2 min-h-12 w-full rounded-full text-base font-semibold text-ink"
+            className="kp-glass mt-2 min-h-12 w-full rounded-full text-base font-semibold text-ink"
           >
             Keep my account
           </button>

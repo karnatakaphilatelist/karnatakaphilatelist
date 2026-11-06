@@ -216,6 +216,7 @@ export function AuthDialog({
       onClose={onClose}
       title={copy.title}
       description={copy.description}
+      band
     >
       {notice ? (
         <div>
@@ -276,7 +277,7 @@ export function AuthDialog({
                 type="button"
                 onClick={handleGoogle}
                 disabled={isOpeningGoogle}
-                className="flex min-h-13 w-full items-center justify-center gap-3 rounded-full border-[1.5px] border-line-strong bg-white text-base font-semibold disabled:opacity-60"
+                className="flex min-h-13 w-full items-center justify-center gap-3 rounded-full border-[1.5px] border-ink bg-white text-base font-semibold disabled:opacity-60"
               >
                 <GoogleIcon className="size-5" />
                 {isOpeningGoogle ? "Opening Google…" : "Continue with Google"}

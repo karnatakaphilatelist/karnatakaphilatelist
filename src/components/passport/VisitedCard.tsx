@@ -17,7 +17,7 @@ export function VisitedCard({ office, visit, onEdit, onOpenStamp }: VisitedCardP
   const photoUrl = usePhotoUrl(visit.photoPath);
 
   return (
-    <li className="rounded-[18px] border border-line bg-white p-4">
+    <li className="kp-glass rounded-[18px] p-4">
       <div className="flex items-start gap-3">
         <button
           type="button"
@@ -28,9 +28,9 @@ export function VisitedCard({ office, visit, onEdit, onOpenStamp }: VisitedCardP
           <StampThumb path={office.stampImagePath} status="visited" className="size-12" />
         </button>
         <div className="min-w-0 flex-1">
-          <h3 className="text-base font-semibold">{office.name}</h3>
+          <h3 className="text-base font-semibold uppercase tracking-[0.04em]">{office.name}</h3>
           <p className="text-sm text-muted">
-            {office.district} · <span className="whitespace-nowrap">{visit.visitedAt}</span>
+            {office.district} · <span className="whitespace-nowrap font-mono">{visit.visitedAt}</span>
           </p>
         </div>
         <span className="flex shrink-0 items-center gap-1 rounded-[10px] bg-sand px-2 py-1 text-xs font-semibold text-muted">
@@ -68,7 +68,7 @@ export function VisitedCard({ office, visit, onEdit, onOpenStamp }: VisitedCardP
       <div className="mt-2 flex items-center justify-between">
         <Link
           href={`/explore?office=${office.id}`}
-          className="flex min-h-11 items-center text-sm font-semibold text-focus"
+          className="flex min-h-11 items-center text-sm font-semibold text-postal-dark"
         >
           View on map
         </Link>

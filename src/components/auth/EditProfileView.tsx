@@ -45,10 +45,10 @@ export function EditProfileView() {
         <Link href="/account" className="flex min-h-11 items-center text-sm font-semibold text-muted">
           ← Account
         </Link>
-        <h1 className="font-display text-3xl font-bold tracking-tight">Edit profile</h1>
+        <h1 className="mt-2 text-5xl font-medium uppercase leading-[52px] tracking-[0.01em] -ml-0.5">Your profile</h1>
 
         {!user ? (
-          <div className="mt-4 rounded-[18px] border border-line bg-white p-5">
+          <div className="kp-glass mt-4 rounded-[18px] p-5">
             <p className="text-sm text-muted">Sign in to edit your profile.</p>
             <button
               type="button"
@@ -59,7 +59,7 @@ export function EditProfileView() {
             </button>
           </div>
         ) : (
-          <form onSubmit={handleSubmit} className="mt-4 rounded-[18px] border border-line bg-white p-5">
+          <form onSubmit={handleSubmit} className="kp-glass mt-4 rounded-[18px] p-5">
             <label htmlFor="profile-name" className="text-sm font-semibold">
               Your name
             </label>
@@ -86,7 +86,7 @@ export function EditProfileView() {
             <button
               type="submit"
               disabled={isBusy}
-              className="mt-4 min-h-12 w-full rounded-full bg-ink text-base font-semibold text-white disabled:opacity-60"
+              className="mt-4 min-h-[62px] w-full rounded-full bg-gradient-to-b from-[#e0334a] to-postal text-base font-bold uppercase tracking-[0.12em] text-white disabled:opacity-60"
             >
               {isBusy ? "Saving…" : "Save"}
             </button>

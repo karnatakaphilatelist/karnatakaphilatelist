@@ -92,9 +92,15 @@ describe("Google sign-in", () => {
     expect(
       screen.getByText(/Google sign-in is not available right now/)
     ).toBeDefined();
-    expect(screen.getByLabelText("Email address")).toBeDefined();
+    expect(
+      screen.getByRole("button", { name: /Continue with email/ })
+    ).toBeDefined();
   });
 });
+
+function openEmail() {
+  fireEvent.click(screen.getByRole("button", { name: /Continue with email/ }));
+}
 
 function fill(label: string, value: string) {
   fireEvent.change(screen.getByLabelText(label), { target: { value } });
@@ -104,8 +110,9 @@ describe("password sign-in", () => {
   it("signs in with the email and password", async () => {
     handlers.onPassword.mockResolvedValue("signed-in");
     renderDialog();
+    openEmail();
 
-    fill("Email address", " asha@example.com ");
+    fill("Email", " asha@example.com ");
     fill("Password", "correct horse");
     fireEvent.click(screen.getByRole("button", { name: "Sign in" }));
 
@@ -123,8 +130,9 @@ describe("password sign-in", () => {
       new Error("That email and password do not match.")
     );
     renderDialog();
+    openEmail();
 
-    fill("Email address", "asha@example.com");
+    fill("Email", "asha@example.com");
     fill("Password", "wrong-password");
     fireEvent.click(screen.getByRole("button", { name: "Sign in" }));
 
@@ -140,16 +148,15 @@ describe("password sign-in", () => {
 
 describe("creating an account", () => {
   function openSignUp() {
-    fireEvent.click(
-      screen.getByRole("button", { name: "New here? Create an account" })
-    );
+    fireEvent.click(screen.getByRole("button", { name: "Create an account" }));
   }
 
   it("refuses a short password without calling the server", async () => {
     renderDialog();
+    openEmail();
     openSignUp();
 
-    fill("Email address", "asha@example.com");
+    fill("Email", "asha@example.com");
     fill("Password", "short");
     fireEvent.submit(
       screen.getByRole("button", { name: "Create account" }).closest("form")!
@@ -164,9 +171,10 @@ describe("creating an account", () => {
   it("creates the account", async () => {
     handlers.onPassword.mockResolvedValue("signed-in");
     renderDialog();
+    openEmail();
     openSignUp();
 
-    fill("Email address", "asha@example.com");
+    fill("Email", "asha@example.com");
     fill("Password", "long enough password");
     fireEvent.click(screen.getByRole("button", { name: "Create account" }));
 
@@ -182,9 +190,10 @@ describe("creating an account", () => {
   it("asks the person to confirm their email when the project requires it", async () => {
     handlers.onPassword.mockResolvedValue("confirm-email");
     renderDialog();
+    openEmail();
     openSignUp();
 
-    fill("Email address", "asha@example.com");
+    fill("Email", "asha@example.com");
     fill("Password", "long enough password");
     fireEvent.click(screen.getByRole("button", { name: "Create account" }));
 
@@ -192,15 +201,14 @@ describe("creating an account", () => {
       "confirmation link"
     );
     fireEvent.click(screen.getByRole("button", { name: "Back" }));
-    expect(screen.getByLabelText("Email address")).toBeDefined();
+    expect(screen.getByLabelText("Email")).toBeDefined();
   });
 
   it("can switch back to signing in", () => {
     renderDialog();
+    openEmail();
     openSignUp();
-    fireEvent.click(
-      screen.getByRole("button", { name: "Already have an account? Sign in" })
-    );
+    fireEvent.click(screen.getByRole("button", { name: "Sign in instead" }));
     expect(screen.getByRole("button", { name: "Sign in" })).toBeDefined();
   });
 });
@@ -209,8 +217,9 @@ describe("sign-in link", () => {
   it("emails a link and says so, without any code box", async () => {
     handlers.onEmail.mockResolvedValue(undefined);
     renderDialog();
+    openEmail();
 
-    fill("Email address", "asha@example.com");
+    fill("Email", "asha@example.com");
     fireEvent.click(screen.getByRole("button", { name: /Forgot password/ }));
 
     expect((await screen.findByRole("status")).textContent).toContain(
@@ -222,6 +231,7 @@ describe("sign-in link", () => {
 
   it("asks for an email address before sending a link", async () => {
     renderDialog();
+    openEmail();
     fireEvent.click(screen.getByRole("button", { name: /Forgot password/ }));
     expect((await screen.findByRole("alert")).textContent).toContain(
       "Enter your email"
@@ -232,7 +242,8 @@ describe("sign-in link", () => {
   it("shows an error when the link cannot be sent", async () => {
     handlers.onEmail.mockRejectedValue(new Error("Email rate limit exceeded"));
     renderDialog();
-    fill("Email address", "asha@example.com");
+    openEmail();
+    fill("Email", "asha@example.com");
     fireEvent.click(screen.getByRole("button", { name: /Forgot password/ }));
     expect((await screen.findByRole("alert")).textContent).toContain(
       "rate limit"
@@ -244,11 +255,10 @@ describe("sign-in code", () => {
   async function openCodeStep() {
     handlers.onEmail.mockResolvedValue(undefined);
     renderDialog();
-    fireEvent.click(
-      screen.getByRole("button", { name: "New here? Create an account" })
-    );
-    fill("Email address", "asha@example.com");
-    fireEvent.click(screen.getByRole("button", { name: /Skip the password/ }));
+    openEmail();
+    fireEvent.click(screen.getByRole("button", { name: "Create an account" }));
+    fill("Email", "asha@example.com");
+    fireEvent.click(screen.getByRole("button", { name: /sign-in link/ }));
     await screen.findByRole("status");
   }
 

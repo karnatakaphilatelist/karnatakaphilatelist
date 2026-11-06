@@ -1,10 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent, type ReactNode } from "react";
 import { isNativeApp } from "@/lib/native";
 import { GoogleIcon } from "@/components/ui/icons";
-import { Sheet } from "@/components/ui/Sheet";
+import { HeroSheet } from "@/components/ui/HeroSheet";
 import {
   MIN_PASSWORD_LENGTH,
   validatePassword,
@@ -69,6 +69,19 @@ export function AuthDialog({
   const [notice, setNotice] = useState<Notice | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [code, setCode] = useState("");
+  const [step, setStep] = useState<"choose" | "email">("choose");
+  const [showPassword, setShowPassword] = useState(false);
+  // Every time the dialog opens it starts on the first step.
+  const [lastReason, setLastReason] = useState<SignInReason | null>(null);
+  if (reason !== lastReason) {
+    setLastReason(reason);
+    if (reason !== null) {
+      setStep("choose");
+      setNotice(null);
+      setError(null);
+      setMode("signin");
+    }
+  }
 
   const copy = COPY[reason ?? "manual"];
   const isSignUp = mode === "signup";
@@ -147,7 +160,9 @@ export function AuthDialog({
     }
   }
 
-  async function handleSendLink() {
+  async function handleSendLink(
+    kind: "reset" | "magic" = isSignUp ? "magic" : "reset"
+  ) {
     if (isBusy) return;
     const trimmedEmail = email.trim();
     if (!trimmedEmail) {
@@ -157,11 +172,11 @@ export function AuthDialog({
     setIsBusy(true);
     setError(null);
     try {
-      await (isSignUp ? onEmail : onReset ?? onEmail)(trimmedEmail);
+      await (kind === "magic" ? onEmail : onReset ?? onEmail)(trimmedEmail);
       setNotice({
         kind: "link-sent",
         email: trimmedEmail,
-        withCode: isSignUp && !!onVerifyCode,
+        withCode: kind === "magic" && !!onVerifyCode,
       });
     } catch (caught) {
       setError(
@@ -214,19 +229,112 @@ export function AuthDialog({
     setError(null);
   }
 
-  function backToForm() {
-    setNotice(null);
-    setCode("");
-    setError(null);
-  }
+  const PRIMARY =
+    "flex h-14 w-full items-center justify-center gap-2.5 rounded-[28px] bg-gradient-to-b from-[#e0334a] to-postal text-base font-bold uppercase tracking-[0.14em] text-white shadow-[inset_0_1.5px_0_rgb(255_255_255/0.35),0_8px_18px_-8px_rgb(207_24_48/0.7)] disabled:opacity-60";
+  const inEmailStep = step === "email" && !notice;
+
+  const closeButton = (
+    <button
+      type="button"
+      onClick={onClose}
+      aria-label="Close"
+      className="grid size-10 place-items-center rounded-full bg-white/20 shadow-[inset_0_1px_0_rgb(255_255_255/0.4)]"
+    >
+      <svg
+        aria-hidden
+        viewBox="0 0 24 24"
+        className="size-4"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2.8"
+        strokeLinecap="round"
+      >
+        <path d="M6 6l12 12M18 6 6 18" />
+      </svg>
+    </button>
+  );
+
+  const hero = (
+    <>
+      <svg
+        aria-hidden="true"
+        viewBox="0 0 390 470"
+        className="pointer-events-none absolute right-[-80px] top-[-40px] size-[470px] opacity-100"
+      >
+        {Array.from({ length: 17 }, (_, i) => (
+          <circle
+            key={i}
+            cx="235"
+            cy="190"
+            r={24 + i * 16}
+            fill="none"
+            stroke="#fff"
+            strokeOpacity=".08"
+          />
+        ))}
+      </svg>
+      <div className="relative flex h-10 items-center justify-between">
+        {inEmailStep || notice ? (
+          <button
+            type="button"
+            onClick={() => {
+              // From the "check your inbox" screen go back to the form; from the form go back to the start.
+              if (!notice) setStep("choose");
+              setNotice(null);
+              setError(null);
+              setCode("");
+            }}
+            aria-label="Back"
+            className="grid size-10 place-items-center rounded-full bg-white/20 shadow-[inset_0_1px_0_rgb(255_255_255/0.4)]"
+          >
+            <svg
+              aria-hidden
+              viewBox="0 0 24 24"
+              className="size-[18px]"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.6"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="m15 6-6 6 6 6" />
+            </svg>
+          </button>
+        ) : (
+          <span className="text-xs font-extrabold uppercase tracking-[0.22em]">
+            Philatrail
+          </span>
+        )}
+        {closeButton}
+      </div>
+      {step === "choose" && !notice ? (
+        <div className="relative mt-[clamp(2rem,9dvh,5.5rem)]">
+          <p className="-ml-1 text-[clamp(44px,15vw,56px)] font-medium uppercase leading-[1.07] tracking-[0.01em]">
+            Save your
+            <br />
+            stamps.
+          </p>
+          <p className="mt-5 text-lg font-bold italic uppercase leading-6 tracking-[0.08em] text-[#f7c96b]">
+            One passport. Every device.
+          </p>
+        </div>
+      ) : (
+        <div className="relative mt-8">
+          <p className="-ml-0.5 text-[40px] font-medium uppercase leading-[44px] tracking-[0.01em]">
+            {notice ? "Check inbox" : isSignUp ? "Create account" : "Sign in"}
+          </p>
+        </div>
+      )}
+    </>
+  );
 
   return (
-    <Sheet
+    <HeroSheet
       open={reason !== null}
       onClose={onClose}
-      title={copy.title}
-      description={copy.description}
-      band
+      label={copy.title}
+      hero={hero}
+      compact={step === "email" || notice !== null}
     >
       {notice ? (
         <div>
@@ -265,51 +373,55 @@ export function AuthDialog({
               <button
                 type="submit"
                 disabled={isBusy}
-                className="mt-3 min-h-13 w-full rounded-full bg-ink text-base font-semibold text-white disabled:opacity-60"
+                className={`${PRIMARY} mt-3`}
               >
                 {isBusy ? "Checking…" : "Verify code"}
               </button>
             </form>
           ) : null}
+        </div>
+      ) : step === "choose" ? (
+        <div className="flex flex-col gap-3">
+          {googleAvailable ? (
+            <button
+              type="button"
+              onClick={handleGoogle}
+              disabled={isOpeningGoogle}
+              className="flex h-14 w-full items-center justify-center gap-3 rounded-[28px] border-[1.5px] border-ink bg-white text-base font-semibold disabled:opacity-60"
+            >
+              <GoogleIcon className="size-5" />
+              {isOpeningGoogle ? "Opening Google…" : "Continue with Google"}
+            </button>
+          ) : (
+            <p className="rounded-2xl bg-planned-soft p-3.5 text-sm text-planned-ink">
+              Google sign-in is not available right now. You can still sign in
+              with your email.
+            </p>
+          )}
           <button
             type="button"
-            onClick={backToForm}
-            className="mt-2 min-h-12 w-full text-base font-semibold text-focus"
+            onClick={() => setStep("email")}
+            className={PRIMARY}
           >
-            Back
+            <svg
+              aria-hidden
+              viewBox="0 0 24 24"
+              className="size-5"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.4"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <rect x="3" y="5" width="18" height="14" rx="2" />
+              <path d="m3 7 9 6 9-6" />
+            </svg>
+            Continue with email
           </button>
         </div>
       ) : (
-        <>
-          {googleAvailable ? (
-            <>
-              <button
-                type="button"
-                onClick={handleGoogle}
-                disabled={isOpeningGoogle}
-                className="flex min-h-13 w-full items-center justify-center gap-3 rounded-full border-[1.5px] border-ink bg-white text-base font-semibold disabled:opacity-60"
-              >
-                <GoogleIcon className="size-5" />
-                {isOpeningGoogle ? "Opening Google…" : "Continue with Google"}
-              </button>
-
-              <div className="my-4 flex items-center gap-3 text-xs text-muted">
-                <span className="h-px flex-1 bg-line" />
-                or use your email
-                <span className="h-px flex-1 bg-line" />
-              </div>
-            </>
-          ) : (
-            <p className="mb-4 rounded-2xl bg-planned-soft p-3.5 text-sm text-planned-ink">
-              Google sign-in is not available right now. You can still sign in
-              with your email below.
-            </p>
-          )}
-
-          <form onSubmit={handlePasswordSubmit} className="space-y-3">
-            <label htmlFor="auth-email" className="block text-sm font-semibold">
-              Email address
-            </label>
+        <form onSubmit={handlePasswordSubmit} className="flex flex-col gap-3">
+          <FloatingField label="Email" htmlFor="auth-email">
             <input
               id="auth-email"
               type="email"
@@ -318,18 +430,13 @@ export function AuthDialog({
               value={email}
               onChange={(event) => setEmail(event.target.value)}
               placeholder="you@example.com"
-              className="h-12 w-full rounded-xl border border-line-strong px-4 text-base"
+              className="absolute inset-0 size-full rounded-[20px] bg-transparent px-[18px] pt-6 text-base outline-none placeholder:text-[#9a9fb5] focus-visible:outline-2 focus-visible:outline-ink"
             />
-
-            <label
-              htmlFor="auth-password"
-              className="block text-sm font-semibold"
-            >
-              Password
-            </label>
+          </FloatingField>
+          <FloatingField label="Password" htmlFor="auth-password">
             <input
               id="auth-password"
-              type="password"
+              type={showPassword ? "text" : "password"}
               required
               autoComplete={isSignUp ? "new-password" : "current-password"}
               minLength={isSignUp ? MIN_PASSWORD_LENGTH : undefined}
@@ -340,53 +447,99 @@ export function AuthDialog({
                   ? `At least ${MIN_PASSWORD_LENGTH} characters`
                   : "Your password"
               }
-              className="h-12 w-full rounded-xl border border-line-strong px-4 text-base"
+              className="absolute inset-0 size-full rounded-[20px] bg-transparent px-[18px] pr-14 pt-6 text-base outline-none placeholder:text-[#9a9fb5] focus-visible:outline-2 focus-visible:outline-ink"
             />
-
             <button
-              type="submit"
-              disabled={isBusy}
-              className="min-h-13 w-full rounded-full bg-ink text-base font-semibold text-white disabled:opacity-60"
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              aria-label={showPassword ? "Hide password" : "Show password"}
+              className="absolute right-2 top-2 grid size-11 place-items-center text-muted"
             >
-              {isBusy
-                ? "Please wait…"
-                : isSignUp
-                ? "Create account"
-                : "Sign in"}
+              <svg
+                aria-hidden
+                viewBox="0 0 24 24"
+                className="size-[22px]"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                {showPassword ? (
+                  <>
+                    <path d="M3 3l18 18" />
+                    <path d="M10.6 6.1A9.8 9.8 0 0 1 12 6c6.5 0 10 6 10 6a17 17 0 0 1-3.2 3.9M6.4 6.9C3.8 8.6 2 12 2 12s3.5 7 10 7a9.7 9.7 0 0 0 4-.9" />
+                  </>
+                ) : (
+                  <>
+                    <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z" />
+                    <circle cx="12" cy="12" r="3" />
+                  </>
+                )}
+              </svg>
             </button>
-          </form>
+          </FloatingField>
 
-          <div className="mt-3 flex flex-col items-center gap-1 text-sm">
+          {error ? (
+            <p role="alert" className="text-sm font-semibold text-warn">
+              {error}
+            </p>
+          ) : null}
+
+          <button type="submit" disabled={isBusy} className={`${PRIMARY} mt-1`}>
+            {isBusy ? "Please wait…" : isSignUp ? "Create account" : "Sign in"}
+          </button>
+
+          <div className="mt-1 flex items-center justify-between text-sm font-semibold">
             <button
               type="button"
               onClick={() => switchMode(isSignUp ? "signin" : "signup")}
-              className="min-h-11 font-semibold text-focus"
+              className="min-h-11 text-ink"
             >
-              {isSignUp
-                ? "Already have an account? Sign in"
-                : "New here? Create an account"}
+              {isSignUp ? "Sign in instead" : "Create an account"}
             </button>
+            {isSignUp ? null : (
+              <button
+                type="button"
+                onClick={() => void handleSendLink("reset")}
+                disabled={isBusy}
+                className="min-h-11 text-muted disabled:opacity-60"
+              >
+                Forgot password?
+              </button>
+            )}
+          </div>
+          <p className="text-center text-sm text-muted">
+            Prefer no password?{" "}
             <button
               type="button"
-              onClick={handleSendLink}
+              onClick={() => void handleSendLink("magic")}
               disabled={isBusy}
-              className="min-h-11 text-muted underline disabled:opacity-60"
+              className="min-h-11 font-bold text-postal disabled:opacity-60"
             >
-              {isSignUp
-                ? "Skip the password: email me a sign-in link"
-                : "Forgot password? Email me a reset link"}
+              Email me a sign-in link
             </button>
-          </div>
-        </>
+          </p>
+        </form>
       )}
 
-      {error ? (
+      {error && !inEmailStep ? (
         <p role="alert" className="mt-3 text-sm font-semibold text-warn">
           {error}
         </p>
       ) : null}
 
-      <p className="mt-4 text-center text-xs text-muted">
+      {step === "choose" && !notice ? (
+        <button
+          type="button"
+          onClick={onClose}
+          className="mt-1 min-h-12 w-full text-[15px] font-semibold text-muted"
+        >
+          Maybe later
+        </button>
+      ) : null}
+
+      <p className="mt-3 text-center text-xs leading-[18px] text-muted">
         By continuing you agree to the{" "}
         <Link
           href="/terms"
@@ -407,14 +560,29 @@ export function AuthDialog({
         </Link>
         .
       </p>
+    </HeroSheet>
+  );
+}
 
-      <button
-        type="button"
-        onClick={onClose}
-        className="mt-1 min-h-12 w-full text-base font-semibold text-muted"
+/** A field with its label inside the top edge, like the sign-in board. */
+function FloatingField({
+  label,
+  htmlFor,
+  children,
+}: {
+  label: string;
+  htmlFor: string;
+  children: ReactNode;
+}) {
+  return (
+    <div className="relative h-[60px] rounded-[20px] bg-white/75 shadow-[inset_0_0_0_1.5px_rgb(140_100_40/0.22)]">
+      <label
+        htmlFor={htmlFor}
+        className="pointer-events-none absolute left-[18px] top-2 z-10 text-[11px] font-bold uppercase leading-[14px] tracking-[0.12em] text-muted"
       >
-        Maybe later
-      </button>
-    </Sheet>
+        {label}
+      </label>
+      {children}
+    </div>
   );
 }

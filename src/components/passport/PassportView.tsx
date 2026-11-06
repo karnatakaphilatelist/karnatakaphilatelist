@@ -58,10 +58,10 @@ export function PassportView({
     <div className="h-full overflow-y-auto">
       <header className="kp-red px-5 pb-6 pt-6 text-white">
         <div className="mx-auto max-w-2xl">
-          <div className="flex items-start justify-between gap-3">
+          <div className="flex flex-wrap items-start justify-between gap-x-3 gap-y-3">
             <div>
-              <h1 className="font-display text-3xl font-bold tracking-tight">
-                My Passport
+              <h1 className="text-5xl font-medium uppercase leading-[52px] tracking-[0.01em] -ml-0.5">
+                {stateName(stateCode)}
               </h1>
               <p className="mt-1 text-sm text-white/90">
                 Every stamp you collect, in one place.
@@ -90,8 +90,8 @@ export function PassportView({
           >
             <ProgressRing visited={visitedOffices.length} total={total} onRed />
             <div>
-              <p className="flex items-baseline gap-1.5 whitespace-nowrap font-display font-bold leading-none">
-                <span className="text-5xl font-semibold italic">
+              <p className="flex items-baseline gap-1.5 whitespace-nowrap font-bold leading-none">
+                <span className="text-5xl font-semibold italic text-[#f7c96b]">
                   {visitedOffices.length}
                 </span>
                 <span className="text-lg font-semibold text-white/90">
@@ -127,11 +127,11 @@ export function PassportView({
 
         <section
           aria-label="Overall progress"
-          className="mt-4 flex items-center gap-5 rounded-[18px] border border-line bg-white p-5"
+          className="mt-4 flex items-center gap-5 kp-glass rounded-[18px] p-5"
         >
           <ProgressRing visited={visitedOffices.length} total={total} />
           <div>
-            <p className="flex items-baseline gap-1.5 whitespace-nowrap font-display font-bold leading-none">
+            <p className="flex items-baseline gap-1.5 whitespace-nowrap font-bold leading-none">
               <span className="text-5xl font-semibold italic text-postal">
                 {visitedOffices.length}
               </span>
@@ -162,7 +162,7 @@ export function PassportView({
 
         {upNext.length > 0 ? (
           <section aria-labelledby="up-next-heading" className="mt-7">
-            <h2 id="up-next-heading" className="font-display text-xl font-bold">
+            <h2 id="up-next-heading" className="flex items-center gap-3 text-xs font-semibold uppercase tracking-[0.18em] text-muted before:h-px before:w-6 before:bg-[#b8861b]">
               Up next
             </h2>
             <div className="mt-2.5 flex flex-wrap gap-2">
@@ -170,7 +170,7 @@ export function PassportView({
                 <Link
                   key={office.id}
                   href={`/explore?office=${office.id}`}
-                  className="flex min-h-11 items-center rounded-full border-[1.5px] border-postal bg-white px-4 text-sm font-semibold text-postal-dark"
+                  className="flex min-h-11 items-center rounded-full kp-glass px-4 text-sm font-semibold text-ink"
                 >
                   {office.name}
                 </Link>
@@ -180,11 +180,11 @@ export function PassportView({
         ) : null}
 
         <section aria-labelledby="visited-heading" className="mt-7">
-          <h2 id="visited-heading" className="font-display text-xl font-bold">
-            Visited
+          <h2 id="visited-heading" className="flex items-center gap-3 text-xs font-semibold uppercase tracking-[0.18em] text-muted before:h-px before:w-6 before:bg-[#b8861b]">
+            Your stamps
           </h2>
           {visitedOffices.length === 0 ? (
-            <div className="mt-2.5 rounded-[18px] border border-line bg-white p-6 text-center text-muted">
+            <div className="mt-2.5 kp-glass rounded-[18px] p-6 text-center text-muted">
               <p>No stamps yet. Find a post office and tap Stamp it.</p>
               <Link
                 href="/explore"
@@ -209,10 +209,10 @@ export function PassportView({
         </section>
 
         <section aria-labelledby="districts-heading" className="mt-7">
-          <h2 id="districts-heading" className="font-display text-xl font-bold">
+          <h2 id="districts-heading" className="flex items-center gap-3 text-xs font-semibold uppercase tracking-[0.18em] text-muted before:h-px before:w-6 before:bg-[#b8861b]">
             By district
           </h2>
-          <div className="mt-3 rounded-[18px] border border-line bg-white p-4">
+          <div className="mt-3 kp-glass rounded-[18px] p-4">
             <DistrictProgress offices={offices} visits={visits} />
           </div>
         </section>

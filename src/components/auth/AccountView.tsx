@@ -77,7 +77,7 @@ export function AccountView() {
   return (
     <div className="h-full overflow-y-auto">
       <div className="mx-auto max-w-md px-5 pb-8 pt-6">
-        <h1 className="font-display text-3xl font-bold tracking-tight">
+        <h1 className="text-5xl font-medium uppercase leading-[52px] tracking-[0.01em] -ml-0.5">
           Account
         </h1>
 
@@ -125,7 +125,7 @@ export function AccountView() {
           )}
         </section>
 
-        <ul className="mt-4 divide-y divide-line overflow-hidden rounded-[18px] border border-line bg-white">
+        <ul className="mt-4 kp-glass divide-y divide-line overflow-hidden rounded-[18px]">
           {user ? (
             <li>
               <Link href="/account/profile" className={ROW}>
@@ -176,7 +176,7 @@ export function AccountView() {
           <button
             type="button"
             onClick={() => void signOut()}
-            className="mt-4 min-h-12 w-full rounded-full border-[1.5px] border-line-strong bg-white text-base font-semibold text-postal-dark"
+            className="mt-4 min-h-12 w-full kp-glass rounded-full text-base font-semibold text-postal-dark"
           >
             Sign out
           </button>
@@ -212,7 +212,7 @@ export function AccountView() {
             type="button"
             onClick={handleDelete}
             disabled={isDeleting}
-            className="min-h-12 w-full rounded-full border-[1.5px] border-postal-dark bg-white text-base font-semibold text-postal-dark disabled:opacity-60"
+            className="min-h-12 w-full rounded-full bg-gradient-to-b from-[#e0334a] to-postal text-base font-bold text-white disabled:opacity-60"
           >
             {isDeleting ? "Deleting…" : "Yes, delete everything"}
           </button>
@@ -220,7 +220,7 @@ export function AccountView() {
             type="button"
             onClick={() => setConfirming(false)}
             disabled={isDeleting}
-            className="mt-2 min-h-12 w-full rounded-full text-base font-semibold text-ink"
+            className="kp-glass mt-2 min-h-12 w-full rounded-full text-base font-semibold text-ink"
           >
             Keep my account
           </button>

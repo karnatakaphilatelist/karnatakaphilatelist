@@ -2,7 +2,7 @@ import { STATUS_LABEL } from "@/lib/office-status";
 import type { OfficeStatus } from "@/types";
 
 const STYLES: Record<OfficeStatus, string> = {
-  unvisited: "bg-sand text-ink",
+  unvisited: "bg-[#8f640f]/12 text-[#8f640f]",
   planned: "bg-planned-soft text-planned-ink",
   visited: "bg-visited-soft text-visited-ink",
 };
@@ -11,7 +11,7 @@ const STYLES: Record<OfficeStatus, string> = {
 export function StatusBadge({ status }: { status: OfficeStatus }) {
   return (
     <span
-      className={`shrink-0 rounded-xl px-2.5 py-1 text-xs font-semibold ${STYLES[status]}`}
+      className={`shrink-0 rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-[0.08em] ${STYLES[status]}`}
     >
       {STATUS_LABEL[status]}
     </span>

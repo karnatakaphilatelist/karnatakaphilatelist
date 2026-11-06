@@ -189,9 +189,9 @@ export function WelcomeTour() {
         </div>
       </section>
 
-      <section className="flex flex-1 flex-col px-7 pb-8 pt-7">
+      <section className="flex flex-1 flex-col px-4 pb-8 pt-7">
         <div key={step} className="kpt-pop flex-1">
-          <h1 className="font-display text-3xl font-bold leading-tight tracking-tight text-ink">
+          <h1 className="text-5xl font-medium uppercase leading-[52px] tracking-[0.01em] text-ink">
             {current.title}
           </h1>
           <p className="mt-3 text-base leading-6 text-muted">{current.body}</p>
@@ -222,7 +222,7 @@ export function WelcomeTour() {
         <button
           type="button"
           onClick={() => (last ? finish() : setStep(step + 1))}
-          className="min-h-13 w-full rounded-full bg-postal text-base font-bold text-white"
+          className="min-h-[62px] w-full rounded-full bg-gradient-to-b from-[#e0334a] to-postal text-base font-bold uppercase tracking-[0.12em] text-white"
         >
           {last ? "Start collecting" : "Next"}
         </button>

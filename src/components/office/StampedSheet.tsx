@@ -36,7 +36,8 @@ export function StampedSheet({ office, collected, total, onClose, onAddNote }: S
               <CheckIcon className="size-5" strokeWidth={3} />
             </span>
           </div>
-          <p className="mt-4 font-display text-xl font-bold">{office.name}</p>
+          <p className="mt-4 text-4xl font-medium uppercase leading-10 tracking-[0.01em]">{office.name}</p>
+          <p className="mx-auto mt-2 w-fit rounded-full bg-visited/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.08em] text-visited-ink">Stamped</p>
           <p className="mt-1 text-sm text-muted">
             {collected} of {total} in your passport
           </p>
@@ -47,7 +48,7 @@ export function StampedSheet({ office, collected, total, onClose, onAddNote }: S
               onClose();
               onAddNote(id);
             }}
-            className="mt-6 min-h-13 w-full rounded-full bg-ink text-base font-bold text-white"
+            className="mt-6 min-h-[62px] w-full rounded-full bg-ink text-base font-bold text-white"
           >
             Add note and photo
           </button>

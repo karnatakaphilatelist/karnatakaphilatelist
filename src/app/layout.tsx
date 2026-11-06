@@ -3,6 +3,7 @@ import "@fontsource-variable/figtree";
 import "@fontsource-variable/fraunces";
 import "@fontsource-variable/fraunces/wght-italic.css";
 import "@fontsource-variable/noto-sans-kannada";
+import "@fontsource/courier-prime/400.css";
 import "./globals.css";
 import { ExploreHostLoader } from "@/components/explore/ExploreHostLoader";
 import { AppShell } from "@/components/layout/AppShell";

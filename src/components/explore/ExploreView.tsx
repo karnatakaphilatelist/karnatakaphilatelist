@@ -230,7 +230,7 @@ export function ExploreView({
         ref={sheetRef}
         aria-label="Post offices"
         style={sheetStyle}
-        className={`absolute inset-x-0 bottom-0 z-[1050] flex min-h-0 flex-col rounded-t-3xl border-t border-line bg-white shadow-[0_-10px_30px_-12px_rgb(22_32_79/0.35)] md:h-auto! md:static md:z-auto md:h-auto md:w-[26rem] md:shrink-0 md:rounded-none md:border-r md:border-t-0 md:shadow-none ${
+        className={`absolute inset-x-0 bottom-0 z-[1050] flex min-h-0 flex-col kp-glass-panel rounded-t-3xl md:bg-white md:shadow-none md:h-auto! md:static md:z-auto md:h-auto md:w-[26rem] md:shrink-0 md:rounded-none md:border-r md:border-t-0 md:shadow-none ${
           ""
         } ${
           dragHeight === null ? "transition-[height,opacity] duration-300 ease-out" : ""

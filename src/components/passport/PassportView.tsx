@@ -125,28 +125,6 @@ export function PassportView({
           </div>
         ) : null}
 
-        <section
-          aria-label="Overall progress"
-          className="mt-4 flex items-center gap-5 kp-glass rounded-[18px] p-5"
-        >
-          <ProgressRing visited={visitedOffices.length} total={total} />
-          <div>
-            <p className="flex items-baseline gap-1.5 whitespace-nowrap font-bold leading-none">
-              <span className="text-5xl font-semibold italic text-postal">
-                {visitedOffices.length}
-              </span>
-              <span className="text-lg font-semibold text-muted">
-                of {total}
-              </span>
-            </p>
-            <p className="mt-1 text-sm text-muted">
-              post offices stamped in {stateName(stateCode)}
-            </p>
-            <p className="mt-2 text-sm font-semibold text-visited-ink">
-              {total - visitedOffices.length} to go
-            </p>
-          </div>
-        </section>
 
         {user ? (
           <p className="mt-4 text-sm text-muted">

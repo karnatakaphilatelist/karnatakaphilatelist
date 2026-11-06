@@ -27,7 +27,9 @@ describe("SettingsView", () => {
     const started = vi.fn();
     window.addEventListener(COACH_EVENT, started);
     render(<SettingsView />);
-    fireEvent.click(screen.getByRole("button", { name: /replay the walkthrough/i }));
+    fireEvent.click(
+      screen.getByRole("button", { name: /replay the walkthrough/i })
+    );
     expect(push).toHaveBeenCalledWith("/explore");
     expect(started).toHaveBeenCalled();
     window.removeEventListener(COACH_EVENT, started);

@@ -21,3 +21,11 @@ describe("todayIso", () => {
     expect(todayIso(new Date(2026, 9, 27))).toBe("2026-10-27");
   });
 });
+
+import { formatVisitDate as fmtVisit } from "@/lib/date";
+describe("formatVisitDate", () => {
+  it("writes the date the way the stamp shows it", () => {
+    expect(fmtVisit("2026-11-06")).toBe("6 Nov 2026");
+    expect(fmtVisit("not a date")).toBe("not a date");
+  });
+});

@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { Postmark } from "@/components/office/Postmark";
 import { StatusBadge } from "@/components/office/StatusBadge";
 import { useToast } from "@/components/providers/ToastProvider";
@@ -9,8 +10,6 @@ import {
   CloseIcon,
   FlagIcon,
   AlertIcon,
-  GlobeIcon,
-  LockIcon,
   NavigationIcon,
   TargetIcon,
   ShareIcon,
@@ -22,6 +21,7 @@ import {
   formatShortDistance,
   proximity,
 } from "@/lib/geo";
+import { formatVisitDate } from "@/lib/date";
 import { hasCoordinates } from "@/lib/office-status";
 import { shareContent } from "@/lib/share";
 import type { OfficeWithStatus } from "@/types";
@@ -30,7 +30,7 @@ interface OfficeDetailProps {
   office: OfficeWithStatus;
   onClose: () => void;
   onMarkVisited: (officeId: number) => void;
-  onEditVisit: (officeId: number) => void;
+  onEditVisit?: (officeId: number) => void;
   /** Asks for the person's location so the banner can say whether they are at the office. */
   onCheckDistance?: () => void;
   /** Stamps collected in this state (including this one) and the state's total, for the stamped message. */
@@ -66,13 +66,12 @@ export function OfficeDetail({
   office,
   onClose,
   onMarkVisited,
-  onEditVisit,
   onCheckDistance,
   collected,
   total,
   stateName,
 }: OfficeDetailProps) {
-  const { visits, togglePlanned, removeVisit } = useVisits();
+  const { visits, togglePlanned } = useVisits();
   const { showToast } = useToast();
   const visit = visits[office.id];
   const isPlanned = office.status === "planned";
@@ -142,7 +141,10 @@ export function OfficeDetail({
 
         <div className="relative mt-3 flex items-start justify-between gap-3">
           <div className="min-w-0">
-            <StatusBadge status={office.status} stampedOn={visit?.visitedAt} />
+            <StatusBadge
+              status={office.status}
+              stampedOn={visit ? formatVisitDate(visit.visitedAt) : undefined}
+            />
             {visit ? (
               <>
                 <p className="mt-3 text-sm leading-5">
@@ -156,26 +158,13 @@ export function OfficeDetail({
                     "Stamped in your passport."
                   )}
                 </p>
-                <p className="mt-1 flex items-center gap-1 text-xs text-muted">
-                  {visit.isPublic ? (
-                    <GlobeIcon className="size-3.5" />
-                  ) : (
-                    <LockIcon className="size-3.5" />
-                  )}
-                  {visit.isPublic ? "Public" : "Private"}
-                </p>
-                {visit.note ? (
-                  <p className="mt-2 line-clamp-2 whitespace-pre-line text-sm leading-5 text-muted">
-                    {visit.note}
-                  </p>
-                ) : null}
               </>
             ) : null}
           </div>
           {visit ? (
             <Postmark
               name={office.name}
-              date={visit.visitedAt}
+              date={formatVisitDate(visit.visitedAt)}
               pincode={office.pincode}
               className="size-[116px] shrink-0 animate-thump"
             />
@@ -197,35 +186,23 @@ export function OfficeDetail({
               <button
                 type="button"
                 onClick={() => void handleShare()}
-                className="flex h-[62px] flex-1 items-center justify-center gap-2 rounded-[28px] bg-gradient-to-b from-[#e0334a] to-postal pl-1 text-base font-bold uppercase tracking-[0.14em] text-white shadow-[inset_0_1.5px_0_rgb(255_255_255/0.35),0_8px_18px_-8px_rgb(207_24_48/0.7)]"
+                className="flex h-14 flex-1 items-center justify-center gap-2.5 rounded-[28px] bg-gradient-to-b from-[#e0334a] to-postal text-base font-bold uppercase tracking-[0.14em] text-white shadow-[inset_0_1.5px_0_rgb(255_255_255/0.35),0_8px_18px_-8px_rgb(207_24_48/0.7)]"
               >
-                <ShareIcon className="size-5" />
+                <ShareIcon className="size-5" strokeWidth={2.8} />
                 Share stamp
               </button>
               <div className="flex w-14 flex-none flex-col items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => onEditVisit(office.id)}
-                  aria-label={
-                    visit.note || visit.photoPath
-                      ? "Edit note and photo"
-                      : "Add note and photo"
-                  }
+                <Link
+                  href="/passport"
+                  aria-label="Stamps"
                   className={ROUND_BTN}
                 >
                   <NoteIcon className="size-[22px]" />
-                </button>
-                <span className={ROUND_LABEL}>Notes</span>
+                </Link>
+                <span className={ROUND_LABEL}>Stamps</span>
               </div>
               {hasCoordinates(office) ? <RouteButton office={office} /> : null}
             </div>
-            <button
-              type="button"
-              onClick={() => void removeVisit(office.id)}
-              className="mx-auto mt-1 flex min-h-11 items-center px-3 text-xs font-semibold text-postal-dark"
-            >
-              Remove visit
-            </button>
           </>
         ) : (
           <div className="flex items-start gap-3">

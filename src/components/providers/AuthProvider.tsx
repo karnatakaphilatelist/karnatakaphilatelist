@@ -229,7 +229,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         token: code,
         type: "email",
       });
-      if (error) throw new Error("That code did not work. Check it or ask for a new one.");
+      if (error)
+        throw new Error(
+          "That code did not work. Check it or ask for a new one."
+        );
     },
     [getClient]
   );

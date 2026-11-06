@@ -20,7 +20,9 @@ export function getPinIcon(status: OfficeStatus, selected: boolean): L.DivIcon {
   if (!icon) {
     icon = L.divIcon({
       className: "kp-marker",
-      html: `<span class="kp-pin kp-pin--${status}${selected ? " kp-pin--selected" : ""}">${GLYPHS[status]}</span>`,
+      html: `<span class="kp-pin kp-pin--${status}${
+        selected ? " kp-pin--selected" : ""
+      }">${GLYPHS[status]}</span>`,
       iconSize: [26, 26],
       iconAnchor: [13, 13],
     });
@@ -34,13 +36,19 @@ const clusterCache = new Map<string, L.DivIcon>();
 /** How many of a cluster's offices are stamped: none, some, or all. */
 export type ClusterProgress = "none" | "some" | "all";
 
-export function clusterProgress(visited: number, total: number): ClusterProgress {
+export function clusterProgress(
+  visited: number,
+  total: number
+): ClusterProgress {
   if (visited <= 0) return "none";
   return visited >= total ? "all" : "some";
 }
 
 /** Returns a (cached) bubble icon showing how many post offices it stands for. */
-export function getClusterIcon(count: number, progress: ClusterProgress = "none"): L.DivIcon {
+export function getClusterIcon(
+  count: number,
+  progress: ClusterProgress = "none"
+): L.DivIcon {
   const key = `${count}:${progress}`;
   let icon = clusterCache.get(key);
   if (!icon) {

@@ -130,7 +130,10 @@ export function Landing({ offices }: { offices: PostOffice[] }) {
     }
     // First launch: the intro hands over to the tour when it ends (or when it is skipped).
     afterIntro.current = () => window.location.replace("/welcome");
-    const fallback = setTimeout(() => window.location.replace("/welcome"), 9000);
+    const fallback = setTimeout(
+      () => window.location.replace("/welcome"),
+      9000
+    );
     return () => clearTimeout(fallback);
   }, []);
 

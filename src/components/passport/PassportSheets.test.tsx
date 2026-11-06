@@ -4,6 +4,9 @@ import { ShareProgressSheet } from "@/components/passport/ShareProgressSheet";
 import { StampDetailSheet } from "@/components/passport/StampDetailSheet";
 import { polyfillDialog } from "@/test-helpers-dialog";
 
+vi.mock("@/components/providers/VisitsProvider", () => ({
+  useVisits: () => ({ removeVisit: vi.fn() }),
+}));
 vi.mock("@/lib/stamp-image", () => ({ stampImageUrl: () => null }));
 beforeAll(polyfillDialog);
 afterEach(cleanup);

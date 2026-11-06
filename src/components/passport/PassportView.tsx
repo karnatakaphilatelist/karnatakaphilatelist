@@ -16,6 +16,7 @@ import { COMING_SOON_STATES } from "@/lib/states";
 import { stateName } from "@/lib/states";
 import { progressShareText, shareContent } from "@/lib/share";
 import { useToast } from "@/components/providers/ToastProvider";
+import { formatVisitDate } from "@/lib/date";
 import { DISCLAIMER } from "@/lib/constants";
 import type { PostOffice } from "@/types";
 
@@ -114,7 +115,10 @@ export function PassportView({
         ? visitedOffices
         : stampFilter === "togo"
         ? offices.filter((office) => !visits[office.id])
-        : offices;
+        : [
+            ...visitedOffices,
+            ...offices.filter((office) => !visits[office.id]),
+          ];
     return (
       <div className="h-full overflow-y-auto px-4 pb-10 pt-6">
         <div className="mx-auto max-w-2xl">
@@ -186,7 +190,7 @@ export function PassportView({
                   >
                     <Postmark
                       name={office.name}
-                      date={visit.visitedAt}
+                      date={formatVisitDate(visit.visitedAt)}
                       pincode={office.pincode}
                       className="mx-auto size-[104px]"
                     />
@@ -194,7 +198,7 @@ export function PassportView({
                       {office.name}
                     </span>
                     <span className="font-mono text-[13px] text-muted">
-                      {visit.visitedAt}
+                      {formatVisitDate(visit.visitedAt)}
                     </span>
                   </button>
                 </li>

@@ -244,7 +244,9 @@ describe("sign-in code", () => {
   async function openCodeStep() {
     handlers.onEmail.mockResolvedValue(undefined);
     renderDialog();
-    fireEvent.click(screen.getByRole("button", { name: "New here? Create an account" }));
+    fireEvent.click(
+      screen.getByRole("button", { name: "New here? Create an account" })
+    );
     fill("Email address", "asha@example.com");
     fireEvent.click(screen.getByRole("button", { name: /Skip the password/ }));
     await screen.findByRole("status");
@@ -256,7 +258,10 @@ describe("sign-in code", () => {
     fill("Or enter the code from the email", "123456");
     fireEvent.click(screen.getByRole("button", { name: "Verify code" }));
     await vi.waitFor(() =>
-      expect(handlers.onVerifyCode).toHaveBeenCalledWith("asha@example.com", "123456")
+      expect(handlers.onVerifyCode).toHaveBeenCalledWith(
+        "asha@example.com",
+        "123456"
+      )
     );
   });
 
@@ -264,16 +269,22 @@ describe("sign-in code", () => {
     await openCodeStep();
     fill("Or enter the code from the email", "12");
     fireEvent.click(screen.getByRole("button", { name: "Verify code" }));
-    expect((await screen.findByRole("alert")).textContent).toContain("6 to 8 digits");
+    expect((await screen.findByRole("alert")).textContent).toContain(
+      "6 to 8 digits"
+    );
     expect(handlers.onVerifyCode).not.toHaveBeenCalled();
   });
 
   it("shows the server's message when the code is wrong", async () => {
-    handlers.onVerifyCode.mockRejectedValue(new Error("That code did not work."));
+    handlers.onVerifyCode.mockRejectedValue(
+      new Error("That code did not work.")
+    );
     await openCodeStep();
     fill("Or enter the code from the email", "123456");
     fireEvent.click(screen.getByRole("button", { name: "Verify code" }));
-    expect((await screen.findByRole("alert")).textContent).toContain("did not work");
+    expect((await screen.findByRole("alert")).textContent).toContain(
+      "did not work"
+    );
   });
 });
 

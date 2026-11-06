@@ -14,15 +14,23 @@ export function SettingsView() {
   return (
     <div className="h-full overflow-y-auto">
       <div className="mx-auto max-w-md px-5 pb-8 pt-6">
-        <Link href="/account" className="flex min-h-11 items-center text-sm font-semibold text-muted">
+        <Link
+          href="/account"
+          className="flex min-h-11 items-center text-sm font-semibold text-muted"
+        >
           ← Account
         </Link>
-        <h1 className="font-display text-3xl font-bold tracking-tight">Settings</h1>
+        <h1 className="font-display text-3xl font-bold tracking-tight">
+          Settings
+        </h1>
         <div className="mt-4 flex items-center gap-4 rounded-[18px] border border-line bg-white p-4">
           <div className="flex-1">
-            <p id="lite-label" className="font-semibold">Lite mode</p>
+            <p id="lite-label" className="font-semibold">
+              Lite mode
+            </p>
             <p className="mt-1 text-sm text-muted">
-              Turns off textures and animations. Helps older phones and saves battery.
+              Turns off textures and animations. Helps older phones and saves
+              battery.
             </p>
           </div>
           <button
@@ -56,9 +64,13 @@ export function SettingsView() {
         >
           <span>
             <span className="block font-semibold">Replay the walkthrough</span>
-            <span className="mt-1 block text-sm text-muted">A quick look at what each button does.</span>
+            <span className="mt-1 block text-sm text-muted">
+              A quick look at what each button does.
+            </span>
           </span>
-          <span aria-hidden="true" className="text-muted">›</span>
+          <span aria-hidden="true" className="text-muted">
+            ›
+          </span>
         </button>
       </div>
     </div>

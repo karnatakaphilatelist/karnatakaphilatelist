@@ -12,3 +12,25 @@ export function todayIso(now: Date = new Date()): string {
 }
 
 export const ISO_DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
+
+const MONTHS = [
+  "Jan",
+  "Feb",
+  "Mar",
+  "Apr",
+  "May",
+  "Jun",
+  "Jul",
+  "Aug",
+  "Sep",
+  "Oct",
+  "Nov",
+  "Dec",
+];
+
+/** "2026-11-06" as "6 Nov 2026". Anything that is not a plain ISO date is returned unchanged. */
+export function formatVisitDate(iso: string): string {
+  if (!ISO_DATE_PATTERN.test(iso)) return iso;
+  const [year, month, day] = iso.split("-");
+  return `${Number(day)} ${MONTHS[Number(month) - 1]} ${year}`;
+}

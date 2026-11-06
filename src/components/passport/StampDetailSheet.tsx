@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import { Postmark } from "@/components/office/Postmark";
+import { useVisits } from "@/components/providers/VisitsProvider";
+import { formatVisitDate } from "@/lib/date";
 import { Sheet } from "@/components/ui/Sheet";
 import type { PostOffice, Visit } from "@/types";
 
@@ -20,6 +22,7 @@ export function StampDetailSheet({
   onClose,
   onEdit,
 }: StampDetailSheetProps) {
+  const { removeVisit } = useVisits();
   return (
     <Sheet
       open={office !== null && visit !== undefined}
@@ -30,14 +33,16 @@ export function StampDetailSheet({
         <div className="text-center">
           <Postmark
             name={office.name}
-            date={visit.visitedAt}
+            date={formatVisitDate(visit.visitedAt)}
             pincode={office.pincode}
             className="mx-auto size-40"
           />
           <p className="mt-4 text-base font-semibold">
             {office.district} district · {office.pincode}
           </p>
-          <p className="mt-1 text-sm text-muted">Collected {visit.visitedAt}</p>
+          <p className="mt-1 text-sm text-muted">
+            Collected {formatVisitDate(visit.visitedAt)}
+          </p>
           {visit.note ? (
             <p className="mt-3 whitespace-pre-line text-sm leading-5">
               {visit.note}
@@ -63,6 +68,16 @@ export function StampDetailSheet({
               View on map
             </Link>
           </div>
+          <button
+            type="button"
+            onClick={() => {
+              void removeVisit(office.id);
+              onClose();
+            }}
+            className="mx-auto mt-2 flex min-h-11 items-center px-3 text-xs font-semibold text-postal-dark"
+          >
+            Remove visit
+          </button>
         </div>
       ) : null}
     </Sheet>

@@ -45,7 +45,11 @@ const COPY: Record<SignInReason, { title: string; description: string }> = {
   },
 };
 
-type Notice = { kind: "link-sent" | "confirm-email"; email: string; withCode?: boolean };
+type Notice = {
+  kind: "link-sent" | "confirm-email";
+  email: string;
+  withCode?: boolean;
+};
 
 export function AuthDialog({
   reason,
@@ -154,7 +158,11 @@ export function AuthDialog({
     setError(null);
     try {
       await (isSignUp ? onEmail : onReset ?? onEmail)(trimmedEmail);
-      setNotice({ kind: "link-sent", email: trimmedEmail, withCode: isSignUp && !!onVerifyCode });
+      setNotice({
+        kind: "link-sent",
+        email: trimmedEmail,
+        withCode: isSignUp && !!onVerifyCode,
+      });
     } catch (caught) {
       setError(
         caught instanceof Error ? caught.message : "Could not send the link."
@@ -178,7 +186,9 @@ export function AuthDialog({
       await onVerifyCode(notice.email, token);
       // The provider closes this dialog once the person is signed in.
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : "That code did not work.");
+      setError(
+        caught instanceof Error ? caught.message : "That code did not work."
+      );
     } finally {
       setIsBusy(false);
     }

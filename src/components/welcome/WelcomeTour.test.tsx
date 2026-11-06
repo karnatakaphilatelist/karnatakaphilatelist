@@ -4,7 +4,9 @@ import { WelcomeTour } from "@/components/welcome/WelcomeTour";
 import { ONBOARDED_KEY } from "@/lib/constants";
 
 const replace = vi.fn();
-vi.mock("next/navigation", () => ({ useRouter: () => ({ replace, prefetch: vi.fn() }) }));
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ replace, prefetch: vi.fn() }),
+}));
 vi.mock("@/components/map/OfficeMap", () => ({}));
 
 describe("WelcomeTour", () => {

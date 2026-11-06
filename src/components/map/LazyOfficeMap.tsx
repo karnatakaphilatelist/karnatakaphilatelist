@@ -18,5 +18,5 @@ export const LazyOfficeMap = dynamic(
         Loading map…
       </div>
     ),
-  },
+  }
 );

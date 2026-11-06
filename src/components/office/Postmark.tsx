@@ -13,6 +13,9 @@ export function Postmark({
   className?: string;
 }) {
   const id = useId();
+  const parts = date.toUpperCase().split(" ");
+  const dayMonth = parts.slice(0, 2).join(" ");
+  const year = parts.slice(2).join(" ");
   const top = `${name.replace(/ SO$| BO$/i, "")} SO · KA`.toUpperCase();
   return (
     <svg
@@ -55,15 +58,26 @@ export function Postmark({
       </text>
       <text
         x="60"
-        y="64"
+        y="58"
         fill="currentColor"
         stroke="none"
-        fontSize="11"
+        fontSize="9.5"
+        fontWeight="700"
+        textAnchor="middle"
+      >
+        {dayMonth}
+      </text>
+      <text
+        x="60"
+        y="71"
+        fill="currentColor"
+        stroke="none"
+        fontSize="9"
         fontWeight="700"
         textAnchor="middle"
         fontFamily="var(--font-mono)"
       >
-        {date.toUpperCase()}
+        {year}
       </text>
     </svg>
   );

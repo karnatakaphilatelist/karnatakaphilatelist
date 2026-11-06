@@ -58,7 +58,7 @@ export function PassportView({
     <div className="h-full overflow-y-auto">
       <header className="kp-red px-5 pb-6 pt-6 text-white">
         <div className="mx-auto max-w-2xl">
-          <div className="flex items-start justify-between gap-3">
+          <div className="flex flex-wrap items-start justify-between gap-x-3 gap-y-3">
             <div>
               <h1 className="text-5xl font-medium uppercase leading-[52px] tracking-[0.01em] -ml-0.5">
                 {stateName(stateCode)}
@@ -90,7 +90,7 @@ export function PassportView({
           >
             <ProgressRing visited={visitedOffices.length} total={total} onRed />
             <div>
-              <p className="flex items-baseline gap-1.5 whitespace-nowrap font-display font-bold leading-none">
+              <p className="flex items-baseline gap-1.5 whitespace-nowrap font-bold leading-none">
                 <span className="text-5xl font-semibold italic text-[#f7c96b]">
                   {visitedOffices.length}
                 </span>
@@ -131,7 +131,7 @@ export function PassportView({
         >
           <ProgressRing visited={visitedOffices.length} total={total} />
           <div>
-            <p className="flex items-baseline gap-1.5 whitespace-nowrap font-display font-bold leading-none">
+            <p className="flex items-baseline gap-1.5 whitespace-nowrap font-bold leading-none">
               <span className="text-5xl font-semibold italic text-postal">
                 {visitedOffices.length}
               </span>

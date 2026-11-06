@@ -77,7 +77,7 @@ export function AccountView() {
   return (
     <div className="h-full overflow-y-auto">
       <div className="mx-auto max-w-md px-5 pb-8 pt-6">
-        <h1 className="font-display text-3xl font-bold tracking-tight">
+        <h1 className="text-5xl font-medium uppercase leading-[52px] tracking-[0.01em] -ml-0.5">
           Account
         </h1>
 

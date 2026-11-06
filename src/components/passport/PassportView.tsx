@@ -255,7 +255,7 @@ export function PassportView({
               id="state-passport"
               value={stateCode}
               onChange={(event) => choose(event.target.value)}
-              className="h-14 w-full appearance-none bg-transparent pr-12 text-5xl font-medium uppercase tracking-[0.01em] text-white [&>option]:text-ink -ml-0.5"
+              className="h-14 w-full appearance-none bg-transparent pr-12 text-[clamp(30px,10vw,48px)] font-medium uppercase tracking-[0.01em] text-white [&>option]:text-ink -ml-0.5"
             >
               {states.map((state) => (
                 <option key={state.code} value={state.code}>

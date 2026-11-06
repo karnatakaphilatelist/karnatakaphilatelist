@@ -72,7 +72,7 @@ export function Sheet({
       }}
       aria-labelledby={titleId}
       tabIndex={-1}
-      className="outline-none mx-auto mb-0 mt-auto max-h-[92dvh] w-full max-w-none animate-[rise_.25s_ease-out] overflow-y-auto kp-glass-panel rounded-t-3xl p-0 text-ink backdrop:bg-ink/45 md:m-auto md:max-w-md md:rounded-3xl"
+      className="outline-none mx-auto mb-0 mt-auto max-h-[92dvh] w-full max-w-none animate-[rise_.25s_ease-out] overflow-y-auto kp-glass-panel rounded-t-3xl p-0 text-ink backdrop:bg-[#3a2a0c]/40 md:m-auto md:max-w-md md:rounded-3xl"
     >
       <div
         className={`flex items-start justify-between gap-3 px-5 pt-5 ${

@@ -32,7 +32,7 @@ export function ExploreControls({
         <label htmlFor={inputId} className="sr-only">
           Search by post office, district or pincode
         </label>
-        <SearchIcon className="pointer-events-none absolute left-5 top-4 size-6 text-muted" />
+        <SearchIcon className="pointer-events-none absolute left-5 top-4 z-10 size-6 text-muted" />
         <input
           id={inputId}
           type="search"
@@ -43,7 +43,7 @@ export function ExploreControls({
               ? "Search post offices"
               : "Search name, district or pincode"
           }
-          className={`kp-glass h-14 w-full rounded-full border-0 pl-14 text-base placeholder:text-muted ${
+          className={`kp-glass h-14 w-full rounded-full border-0 pl-14 text-base placeholder:text-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink ${
             withAvatar ? "pr-14" : "pr-4"
           }`}
         />

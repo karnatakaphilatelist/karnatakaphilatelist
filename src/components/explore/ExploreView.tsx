@@ -284,14 +284,18 @@ export function ExploreView({
             <div className="flex items-center justify-between gap-3 pb-3 pt-1 md:hidden">
               {sheetOpen ? (
                 <p
-                  className="flex items-center gap-3 text-xs font-bold uppercase tracking-[0.18em] text-ink"
+                  className="flex items-center gap-3 whitespace-nowrap text-xs font-bold uppercase tracking-[0.18em] text-ink"
                   aria-live="polite"
                 >
                   {userLocation ? "Nearby" : "Post offices"}
-                  <span aria-hidden className="h-3.5 w-px bg-[#b8861b]" />
-                  <span className="text-muted">
-                    {visibleOffices.length} total
-                  </span>
+                  {visibleOffices.length !== offices.length ? (
+                    <>
+                      <span aria-hidden className="h-3.5 w-px bg-[#b8861b]" />
+                      <span className="text-muted">
+                        {visibleOffices.length} shown
+                      </span>
+                    </>
+                  ) : null}
                 </p>
               ) : (
                 <div className="min-w-0">

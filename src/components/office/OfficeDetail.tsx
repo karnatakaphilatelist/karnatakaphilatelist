@@ -96,7 +96,11 @@ export function OfficeDetail({
       aria-label={`${office.name} details`}
       className="kp-glass-panel absolute inset-x-0 bottom-0 z-[1100] flex max-h-[85%] animate-rise flex-col rounded-t-[28px] md:inset-x-auto md:bottom-auto md:left-14 md:top-4 md:max-h-[calc(100%-2rem)] md:w-96 md:rounded-2xl md:bg-white md:shadow-xl"
     >
-      <div className="relative min-h-0 flex-1 overflow-y-auto px-4 pb-2 pt-4">
+      <div
+        aria-hidden="true"
+        className="mx-auto mt-3 h-1 w-10 shrink-0 rounded-full bg-[#c7c7cc] md:hidden"
+      />
+      <div className="relative min-h-0 flex-1 overflow-y-auto px-4 pb-2 pt-3">
         {/* Ghost stamp slot behind the headline: where the stamp will go. */}
         {!visit ? (
           <div
@@ -105,23 +109,24 @@ export function OfficeDetail({
           />
         ) : null}
 
-        <button
-          type="button"
-          onClick={onClose}
-          aria-label="Close post office details"
-          className="kp-glass absolute right-4 top-3 z-10 grid size-9 place-items-center rounded-full text-ink"
-        >
-          <CloseIcon className="size-4" strokeWidth={2.8} />
-        </button>
-
-        <div className="relative pt-6">
+        <div className="relative flex items-start justify-between gap-3 pt-2">
           <h2
-            className={`-ml-0.5 pr-10 font-medium uppercase tracking-[0.01em] ${headlineClass(
+            className={`-ml-0.5 min-w-0 font-medium uppercase tracking-[0.01em] ${headlineClass(
               office.name
             )}`}
           >
             {office.name}
           </h2>
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Close post office details"
+            className="kp-glass grid size-10 shrink-0 place-items-center rounded-full text-ink"
+          >
+            <CloseIcon className="size-4" strokeWidth={2.8} />
+          </button>
+        </div>
+        <div className="relative">
           <p className="mt-2 flex items-center gap-2.5 text-sm leading-5 text-muted">
             <span>{office.district}</span>
             <span aria-hidden className="h-3.5 w-px bg-[#b8861b]" />
@@ -273,9 +278,9 @@ function ProximityBanner({
       <button
         type="button"
         onClick={onCheckDistance}
-        className="mt-4 flex min-h-11 w-full items-center justify-center gap-2 kp-glass rounded-2xl text-sm font-semibold text-ink"
+        className="kp-glass mt-4 flex h-10 w-fit items-center gap-2 rounded-full px-4 text-sm font-semibold text-ink"
       >
-        <TargetIcon className="size-4" />
+        <TargetIcon className="size-4 text-postal" />
         Check if you&apos;re here
       </button>
     ) : null;

@@ -39,7 +39,7 @@ export function FilterChips({ value, onChange, tourId }: FilterChipsProps) {
               className={`block rounded-full border px-3.5 py-1.5 text-sm font-semibold ${
                 active
                   ? "border-ink bg-ink text-white shadow-[0_1px_2px_rgb(22_32_79/0.3),0_10px_18px_-8px_rgb(22_32_79/0.5)]"
-                  : "border-line bg-white text-ink"
+                  : "kp-glass border-transparent text-ink"
               }`}
             >
               {filter.label}

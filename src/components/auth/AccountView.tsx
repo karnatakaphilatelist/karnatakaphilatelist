@@ -125,7 +125,7 @@ export function AccountView() {
           )}
         </section>
 
-        <ul className="mt-4 divide-y divide-line overflow-hidden rounded-[18px] border border-line bg-white">
+        <ul className="mt-4 kp-glass divide-y divide-line overflow-hidden rounded-[18px]">
           {user ? (
             <li>
               <Link href="/account/profile" className={ROW}>
@@ -176,7 +176,7 @@ export function AccountView() {
           <button
             type="button"
             onClick={() => void signOut()}
-            className="mt-4 min-h-12 w-full rounded-full border-[1.5px] border-line-strong bg-white text-base font-semibold text-postal-dark"
+            className="mt-4 min-h-12 w-full kp-glass rounded-full text-base font-semibold text-postal-dark"
           >
             Sign out
           </button>

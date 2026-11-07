@@ -14,6 +14,8 @@ interface ExploreControlsProps {
   onFilterChange: (filter: StatusFilter) => void;
   /** Phone layout: the account button lives inside the search bar. */
   withAvatar?: boolean;
+  /** Phone layout with the list open: the chips move into the list panel so the panel never covers them. */
+  hideFilters?: boolean;
 }
 
 /** Search box and status filter chips. */
@@ -24,6 +26,7 @@ export function ExploreControls({
   filter,
   onFilterChange,
   withAvatar = false,
+  hideFilters = false,
 }: ExploreControlsProps) {
   const inputId = `post-office-search-${idSuffix}`;
   return (
@@ -53,11 +56,13 @@ export function ExploreControls({
           </div>
         ) : null}
       </div>
-      <FilterChips
-        value={filter}
-        onChange={onFilterChange}
-        tourId={`filters-${idSuffix}`}
-      />
+      {hideFilters ? null : (
+        <FilterChips
+          value={filter}
+          onChange={onFilterChange}
+          tourId={`filters-${idSuffix}`}
+        />
+      )}
     </>
   );
 }

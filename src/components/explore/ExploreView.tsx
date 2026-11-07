@@ -2,7 +2,10 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ExploreControls } from "@/components/explore/ExploreControls";
-import type { StatusFilter } from "@/components/explore/FilterChips";
+import {
+  FilterChips,
+  type StatusFilter,
+} from "@/components/explore/FilterChips";
 import { LocationSheet } from "@/components/explore/LocationSheet";
 import { OfficeList } from "@/components/explore/OfficeList";
 import { ProgressStrip } from "@/components/explore/ProgressStrip";
@@ -356,6 +359,12 @@ export function ExploreView({
                 </svg>
               </button>
             </div>
+            {/* Phone, list open: the filters sit right above the list, inside the panel. */}
+            {sheetOpen ? (
+              <div className="pb-1 md:hidden">
+                <FilterChips value={filter} onChange={setFilter} />
+              </div>
+            ) : null}
             <div className="hidden items-center justify-between pb-2 md:flex">
               <p className="text-sm text-muted" aria-live="polite">
                 {visibleOffices.length} of {offices.length} post offices
@@ -390,6 +399,7 @@ export function ExploreView({
             <ExploreControls
               idSuffix="mobile"
               withAvatar
+              hideFilters={sheetOpen}
               query={query}
               onQueryChange={setQuery}
               filter={filter}

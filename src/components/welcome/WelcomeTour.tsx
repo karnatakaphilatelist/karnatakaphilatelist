@@ -69,6 +69,11 @@ export function WelcomeTour() {
   const current = STEPS[step];
 
   // Counts as seen the moment it appears, so closing the app halfway never brings the tour back.
+  // Tells the script in <head> that the tour is running, so its escape hatch to the map stands down.
+  useEffect(() => {
+    (window as unknown as Record<string, unknown>).__kpTourAlive = true;
+  }, []);
+
   useEffect(() => {
     writeJson(ONBOARDED_KEY, true);
   }, []);

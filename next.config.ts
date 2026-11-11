@@ -1,25 +1,13 @@
 import type { NextConfig } from "next";
 
 /**
- * Browser-side protections. The CSP keeps the page's own scripts (Next.js needs inline ones) and
- * blocks everything else: no framing, no plugins, and only Supabase for data.
+ * Browser-side protections.
+ *
+ * No Content-Security-Policy here on purpose: the Android app loads this site inside a Capacitor web
+ * view, which injects its own bridge scripts into the page. A `script-src` rule blocks those, the page's
+ * code then never runs, and the app is left frozen on the intro. Everything below is safe for the app.
  */
-const CONTENT_SECURITY_POLICY = [
-  "default-src 'self'",
-  "script-src 'self' 'unsafe-inline'",
-  "style-src 'self' 'unsafe-inline'",
-  "img-src 'self' data: blob: https:",
-  "font-src 'self' data:",
-  "connect-src 'self' https://*.supabase.co wss://*.supabase.co",
-  "worker-src 'self' blob:",
-  "object-src 'none'",
-  "base-uri 'self'",
-  "form-action 'self'",
-  "frame-ancestors 'none'",
-].join("; ");
-
 const SECURITY_HEADERS = [
-  { key: "Content-Security-Policy", value: CONTENT_SECURITY_POLICY },
   { key: "X-Content-Type-Options", value: "nosniff" },
   { key: "X-Frame-Options", value: "DENY" },
   { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },

@@ -32,3 +32,4 @@ export const COACH_KEY = "kp:coach:v1";
 export const COACH_EVENT = "kp:start-coach";
 /** Lite mode: no textures or motion, for older phones and battery saving. */
 export const LITE_MODE_KEY = "kp:lite:v1";
+export const AFTER_AUTH_KEY = "kp:after-auth:v1";

@@ -12,6 +12,8 @@ import {
   type ReactNode,
 } from "react";
 import { AuthDialog, type SignInReason } from "@/components/auth/AuthDialog";
+import { AFTER_AUTH_KEY } from "@/lib/constants";
+import { readJson, writeJson } from "@/lib/local-storage";
 import { deleteMyAccount } from "@/lib/delete-account";
 import { fetchGoogleEnabled } from "@/lib/auth-settings";
 import {
@@ -40,6 +42,14 @@ interface AuthContextValue {
 const AuthContext = createContext<AuthContextValue | null>(null);
 
 /** Where the OAuth / magic-link flow returns to, preserving the current page. */
+/**
+ * Where links in sign-in emails lead. Inside the apps they must open the app itself: a link that opens
+ * the website in the phone's browser signs the person in there, and the app never learns about it.
+ */
+function emailRedirectUrl(): string {
+  return isNativeApp() ? NATIVE_AUTH_REDIRECT : buildRedirectUrl();
+}
+
 function buildRedirectUrl(): string {
   const next = `${window.location.pathname}${window.location.search}`;
   return `${window.location.origin}/auth/callback?next=${encodeURIComponent(
@@ -129,6 +139,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (!code) return;
         await (await getClient()).auth.exchangeCodeForSession(code);
         await Browser.close().catch(() => undefined);
+        // A password-reset link leads on to the new-password page.
+        const next = readJson<string | null>(AFTER_AUTH_KEY, null);
+        if (next) {
+          writeJson(AFTER_AUTH_KEY, null);
+          window.location.assign(next);
+        }
       });
       if (cancelled) void handle.remove();
       else remove = () => void handle.remove();
@@ -195,7 +211,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
-        options: { emailRedirectTo: buildRedirectUrl() },
+        options: { emailRedirectTo: emailRedirectUrl() },
       });
       if (error) throw new Error(friendlyPasswordError(error, mode));
       const outcome = interpretSignUp(data);
@@ -214,7 +230,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const supabase = await getClient();
       const { error } = await supabase.auth.signInWithOtp({
         email,
-        options: { emailRedirectTo: buildRedirectUrl() },
+        options: { emailRedirectTo: emailRedirectUrl() },
       });
       if (error) throw error;
     },
@@ -240,10 +256,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const resetPassword = useCallback(
     async (email: string) => {
       const supabase = await getClient();
+      // The link brings the app back with only a code, so remember where it should lead.
+      if (isNativeApp()) writeJson(AFTER_AUTH_KEY, "/account/password");
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${
-          window.location.origin
-        }/auth/callback?next=${encodeURIComponent("/account/password")}`,
+        redirectTo: isNativeApp()
+          ? `${NATIVE_AUTH_REDIRECT}?next=${encodeURIComponent(
+              "/account/password"
+            )}`
+          : `${window.location.origin}/auth/callback?next=${encodeURIComponent(
+              "/account/password"
+            )}`,
       });
       if (error) throw error;
     },

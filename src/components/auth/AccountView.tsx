@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import type { ReactNode } from "react";
 import { useAuth } from "@/components/providers/AuthProvider";
+import { Bone, PageSkeleton } from "@/components/ui/Skeleton";
 import { useToast } from "@/components/providers/ToastProvider";
 import { ChevronRightIcon } from "@/components/ui/icons";
 import { Sheet } from "@/components/ui/Sheet";
@@ -70,9 +71,29 @@ export function AccountView() {
 
   if (isLoading) {
     return (
-      <div role="status" className="grid h-full place-items-center text-muted">
-        Loading…
-      </div>
+      <PageSkeleton
+        className="mx-auto max-w-md px-4 pb-8 pt-[calc(2rem+env(safe-area-inset-top))] md:pt-8"
+        heading={
+          <h1 className="text-[28px] font-bold leading-8 tracking-[-0.01em]">
+            Account
+          </h1>
+        }
+      >
+        <div className="kp-glass mt-4 flex items-center gap-3.5 rounded-3xl p-4">
+          <Bone className="size-16 shrink-0 rounded-full" />
+          <div className="flex-1">
+            <Bone className="h-5 w-2/5 rounded" />
+            <Bone className="mt-2 h-4 w-3/5 rounded" />
+          </div>
+        </div>
+        <div className="kp-glass mt-4 divide-y divide-[#785a1e]/12 rounded-3xl">
+          {[0, 1, 2, 3].map((i) => (
+            <div key={i} className="flex min-h-14 items-center px-4">
+              <Bone className="h-4 w-1/2 rounded" />
+            </div>
+          ))}
+        </div>
+      </PageSkeleton>
     );
   }
 
@@ -175,7 +196,7 @@ export function AccountView() {
                 setLite(!lite);
                 saveLiteMode(!lite);
               }}
-              className={`relative h-8 w-14 shrink-0 rounded-full transition-colors ${
+              className={`kp-hit h-8 w-14 shrink-0 rounded-full transition-colors ${
                 lite ? "bg-[#1f8a4d]" : "bg-[#785a1e]/25"
               }`}
             >

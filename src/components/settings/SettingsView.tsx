@@ -42,7 +42,7 @@ export function SettingsView() {
               setLite(!lite);
               saveLiteMode(!lite);
             }}
-            className={`relative h-8 w-14 shrink-0 rounded-full transition-colors ${
+            className={`kp-hit h-8 w-14 shrink-0 rounded-full transition-colors ${
               lite ? "bg-visited" : "bg-line-strong"
             }`}
           >

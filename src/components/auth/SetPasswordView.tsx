@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState, type FormEvent } from "react";
 import { useAuth } from "@/components/providers/AuthProvider";
+import { FormCardSkeleton, PageSkeleton } from "@/components/ui/Skeleton";
 import { friendlyPasswordError, validatePassword } from "@/lib/password-auth";
 import { loadSupabase } from "@/lib/supabase/lazy";
 
@@ -35,9 +36,16 @@ export function SetPasswordView() {
 
   if (isLoading) {
     return (
-      <div role="status" className="grid h-full place-items-center text-muted">
-        Loading…
-      </div>
+      <PageSkeleton
+        className="mx-auto max-w-md px-5 pb-10 pt-8"
+        heading={
+          <h1 className="font-display text-3xl font-bold tracking-tight">
+            Set a password
+          </h1>
+        }
+      >
+        <FormCardSkeleton fields={2} />
+      </PageSkeleton>
     );
   }
 

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState, type FormEvent } from "react";
 import { useAuth } from "@/components/providers/AuthProvider";
+import { Bone, FormCardSkeleton, PageSkeleton } from "@/components/ui/Skeleton";
 import { loadSupabase } from "@/lib/supabase/lazy";
 import { getDisplayName } from "@/lib/user-display";
 
@@ -34,9 +35,18 @@ export function EditProfileView() {
 
   if (isLoading) {
     return (
-      <div role="status" className="grid h-full place-items-center text-muted">
-        Loading…
-      </div>
+      <PageSkeleton
+        heading={
+          <>
+            <Bone className="my-3.5 h-4 w-20 rounded" />
+            <h1 className="mt-2 text-5xl font-medium uppercase leading-[52px] tracking-[0.01em] -ml-0.5">
+              Your profile
+            </h1>
+          </>
+        }
+      >
+        <FormCardSkeleton />
+      </PageSkeleton>
     );
   }
 

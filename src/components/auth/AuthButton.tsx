@@ -30,7 +30,7 @@ export function AuthButton() {
         href="/account"
         aria-label="Your account"
         title={getDisplayName(user) ?? undefined}
-        className="grid size-9 place-items-center overflow-hidden rounded-full bg-visited-soft text-sm font-bold text-visited-ink"
+        className="kp-hit grid size-9 place-items-center rounded-full bg-visited-soft text-sm font-bold text-visited-ink"
       >
         {avatarUrl ? (
           // Google profile photos come from another host; a plain img with no referrer avoids hotlink blocks.
@@ -39,7 +39,7 @@ export function AuthButton() {
             src={avatarUrl}
             alt=""
             referrerPolicy="no-referrer"
-            className="size-full object-cover"
+            className="size-full rounded-full object-cover"
           />
         ) : (
           getInitial(user)

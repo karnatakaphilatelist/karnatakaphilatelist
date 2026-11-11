@@ -920,6 +920,49 @@ html[data-intro-go] .kpl-intro .kpl-top .kpl-wm-stack {
 html[data-intro-go] .kpl-intro .kpl-postbox {
   animation: kpl-fade 0.4s 0.6s forwards;
 }
+/*
+ * The intro's whole timeline lives here, in CSS, so it plays the same on every phone whether or not the
+ * page's own code has loaded yet. Scripts only count the number up. The times match CARD_TRAVEL and
+ * SPLIT_AT in src/lib/landing.ts: the card travels 0.5s to 3.0s, then the screen splits at 3.5s.
+ */
+html[data-intro-go] .kpl-intro .kpl-flycard {
+  animation: kpl-fly 2.5s cubic-bezier(0.45, 0, 0.55, 1) 0.5s both;
+}
+@keyframes kpl-fly {
+  from {
+    opacity: 1;
+    transform: translateX(0) rotate(-6deg);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(calc(100vw + 64px)) rotate(0deg);
+  }
+}
+html[data-intro-go] .kpl-intro .kpl-solid {
+  animation: kpl-fill 2.5s cubic-bezier(0.45, 0, 0.55, 1) 0.5s both;
+}
+@keyframes kpl-fill {
+  from {
+    width: 0;
+  }
+  to {
+    width: 100%;
+  }
+}
+html[data-intro-go] .kpl-intro .kpl-top {
+  animation: kpl-open-top 1.3s cubic-bezier(0.7, 0, 0.2, 1) 3.5s forwards;
+}
+html[data-intro-go] .kpl-intro .kpl-bot {
+  animation: kpl-open-bot 1.3s cubic-bezier(0.7, 0, 0.2, 1) 3.5s forwards;
+}
+html[data-intro-go] .kpl-intro .kpl-fx {
+  animation: kpl-dim 0.15s linear 3.5s forwards;
+}
+@keyframes kpl-dim {
+  to {
+    opacity: 0;
+  }
+}
 @keyframes kpl-fade {
   to {
     opacity: 1;

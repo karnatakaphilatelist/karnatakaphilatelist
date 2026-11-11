@@ -44,9 +44,6 @@ const STEPS = [
 
 const SKIP_COOKIE = new RegExp(`(?:^|; )${SKIP_INTRO_COOKIE}=1`);
 
-/** Width of the flying postcard in px (matches the CSS). */
-const CARD_WIDTH = 64;
-
 type IntroState = "playing" | "open" | "done";
 
 /** The intro plays on every fresh load, but not twice in one load or straight after signing in. */
@@ -102,8 +99,6 @@ export function Landing({ offices }: { offices: PostOffice[] }) {
   const [atStart, setAtStart] = useState(true);
   const [atEnd, setAtEnd] = useState(false);
   const [cardCount, setCardCount] = useState(0);
-  const cardRef = useRef<HTMLDivElement>(null);
-  const solidRef = useRef<HTMLDivElement>(null);
   const countRef = useRef<HTMLDivElement>(null);
   const introRef = useRef<HTMLDivElement>(null);
   const skipRef = useRef<() => void>(() => undefined);
@@ -173,9 +168,15 @@ export function Landing({ offices }: { offices: PostOffice[] }) {
       cancelAnimationFrame(frame);
       timers.forEach(clearTimeout);
       rememberIntro();
-      // First app launch: leave for the tour without ever showing the page behind the intro.
-      if (afterIntro.current) {
-        afterIntro.current();
+      // First app launch: leave for the tour without ever showing the page behind the intro. The flag from
+      // the <head> script is the backstop for a web view where Capacitor itself cannot be reached.
+      const leave =
+        afterIntro.current ??
+        ((window as unknown as { __kpApp?: boolean }).__kpApp
+          ? () => window.location.replace("/welcome")
+          : null);
+      if (leave) {
+        leave();
         return;
       }
       html.removeAttribute("data-intro-playing");
@@ -183,10 +184,10 @@ export function Landing({ offices }: { offices: PostOffice[] }) {
       setRevealed(true);
     };
     skipRef.current = finish;
-    // From here on this handler does the skipping; before it, a tiny script in <head> covers a slow start.
-    (window as unknown as Record<string, unknown>).__kpSkipReady = true;
 
-    // The inline script in <head> normally started the clock already, so a slow load does not delay the intro.
+    // The CSS owns the picture: the card, the line and the split all run from `data-intro-go`, set by the
+    // script in <head>. Everything below only counts the number up and hands over at the end, so a slow
+    // phone shows exactly the same animation, just with a counter that may join late.
     const earlyStart = (window as unknown as { __kpIntroT0?: number })
       .__kpIntroT0;
     const begun = performance.now();
@@ -194,54 +195,41 @@ export function Landing({ offices }: { offices: PostOffice[] }) {
       earlyStart !== undefined && begun - earlyStart < 6000
         ? earlyStart
         : begun;
-    html.setAttribute("data-intro-go", "");
-    let opened = false;
-    let last = begun;
-    let slowFrames = 0;
-    // Safety nets for slow or throttled browsers: never leave someone staring at the red screen.
-    timers.push(setTimeout(finish, 5000));
-    const tick = (now: number) => {
-      // Three janky frames in a row (over 200ms each) means this device cannot play the intro smoothly.
-      slowFrames = now - last > 200 ? slowFrames + 1 : 0;
-      last = now;
-      if (slowFrames >= 3) {
-        finish();
-        return;
-      }
-      const seconds = (now - start) / 1000;
-      const progress = cardProgress(seconds);
-      // The card rides the line from just off the left edge to just off the right edge.
-      const travel = window.innerWidth + CARD_WIDTH;
-      const card = cardRef.current;
-      if (card) {
-        card.style.opacity = seconds > 0.4 && progress < 1 ? "1" : "0";
-        card.style.transform = `translateX(${progress * travel}px) rotate(${
-          -6 + progress * 6
-        }deg)`;
-      }
-      if (solidRef.current) {
-        solidRef.current.style.width =
-          progress >= 1 ? "100%" : `${progress * travel}px`;
-      }
-      if (countRef.current)
-        countRef.current.textContent = formatCounter(progress, total);
 
-      if (seconds >= SPLIT_AT && !opened) {
-        if (afterIntro.current) {
-          finish();
-          return;
-        }
-        opened = true;
-        setIntroState("open");
-        timers.push(
-          setTimeout(() => setRevealed(true), SPLIT_DURATION_MS * 0.55)
+    const tick = (now: number) => {
+      const seconds = (now - start) / 1000;
+      if (countRef.current) {
+        countRef.current.textContent = formatCounter(
+          cardProgress(seconds),
+          total
         );
-        timers.push(setTimeout(finish, SPLIT_DURATION_MS));
-        return;
       }
-      frame = requestAnimationFrame(tick);
+      if (seconds < SPLIT_AT) frame = requestAnimationFrame(tick);
     };
-    frame = requestAnimationFrame(tick);
+    // The number is written out already finished, so a phone whose code arrives late leaves it alone
+    // rather than snapping it backwards mid-flight.
+    if ((begun - start) / 1000 < 1) frame = requestAnimationFrame(tick);
+
+    // Hand over on the CSS timeline: the screen splits at SPLIT_AT and has finished opening 1.3s later.
+    const elapsed = (performance.now() - start) / 1000;
+    const toSplit = Math.max(0, SPLIT_AT - elapsed) * 1000;
+    if (
+      afterIntro.current ||
+      (window as unknown as { __kpApp?: boolean }).__kpApp
+    ) {
+      // In the app the intro leads to the tour, so there is no page behind it to uncover.
+      timers.push(setTimeout(finish, toSplit));
+    } else {
+      timers.push(
+        setTimeout(() => {
+          setIntroState("open");
+          timers.push(
+            setTimeout(() => setRevealed(true), SPLIT_DURATION_MS * 0.55)
+          );
+          timers.push(setTimeout(finish, SPLIT_DURATION_MS));
+        }, toSplit)
+      );
+    }
 
     return () => {
       finished = true;
@@ -687,9 +675,9 @@ export function Landing({ offices }: { offices: PostOffice[] }) {
           </div>
         </div>
         <div className="kpl-fx" aria-hidden="true">
-          <div ref={solidRef} className="kpl-solid" />
+          <div className="kpl-solid" />
           <div ref={countRef} className="kpl-mono kpl-count">
-            000
+            {formatCounter(1, total)}
           </div>
           <div className="kpl-mono kpl-hint">Post here &raquo;</div>
           <div className="kpl-postbox">
@@ -707,7 +695,7 @@ export function Landing({ offices }: { offices: PostOffice[] }) {
               <rect x="0" y="2" width="44" height="8" rx="4" fill="#fcf6e8" />
             </svg>
           </div>
-          <div ref={cardRef} className="kpl-flycard" />
+          <div className="kpl-flycard" />
         </div>
         <button
           type="button"

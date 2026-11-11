@@ -77,6 +77,8 @@ describe("projectPins", () => {
 
   it("handles no offices and a single office", () => {
     expect(projectPins([])).toEqual([]);
-    expect(projectPins([{ id: 9, lat: 12, lng: 77 }])).toEqual([{ id: 9, x: 50, y: 50 }]);
+    expect(projectPins([{ id: 9, lat: 12, lng: 77 }])).toEqual([
+      { id: 9, x: 50, y: 50 },
+    ]);
   });
 });

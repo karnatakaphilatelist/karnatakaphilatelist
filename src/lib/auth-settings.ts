@@ -14,7 +14,9 @@ export function parseGoogleEnabled(body: unknown): boolean | null {
  * Returns null when that cannot be determined (offline, blocked, unexpected reply),
  * in which case the app simply offers Google and lets the sign-in attempt decide.
  */
-export async function fetchGoogleEnabled(signal?: AbortSignal): Promise<boolean | null> {
+export async function fetchGoogleEnabled(
+  signal?: AbortSignal
+): Promise<boolean | null> {
   try {
     const response = await fetch(`${env.supabaseUrl}/auth/v1/settings`, {
       headers: { apikey: env.supabasePublishableKey },

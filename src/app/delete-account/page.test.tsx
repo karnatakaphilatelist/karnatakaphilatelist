@@ -13,7 +13,9 @@ describe("delete-account page", () => {
       screen.getByRole("heading", { name: "Delete your Philatrail account" })
     ).toBeTruthy();
     expect(screen.getByText("Delete my account")).toBeTruthy();
-    expect(screen.getByRole("heading", { name: "What is deleted" })).toBeTruthy();
+    expect(
+      screen.getByRole("heading", { name: "What is deleted" })
+    ).toBeTruthy();
 
     const mail = screen.getByRole("link", { name: CONTACT_EMAIL });
     expect(mail.getAttribute("href")).toBe(`mailto:${CONTACT_EMAIL}`);

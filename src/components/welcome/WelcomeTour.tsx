@@ -102,7 +102,7 @@ export function WelcomeTour() {
 
   return (
     <main
-      className="flex h-dvh touch-pan-y flex-col"
+      className="flex h-dvh touch-pan-y flex-col md:mx-auto md:mt-6 md:h-[calc(100dvh-3rem)] md:max-h-[860px] md:max-w-[430px] md:overflow-hidden md:rounded-[32px] md:shadow-[0_30px_80px_-30px_rgb(22_32_79/0.45)]"
       onTouchStart={(event) => {
         const t = event.touches[0];
         swipe.current = { x: t.clientX, y: t.clientY };

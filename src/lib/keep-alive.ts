@@ -8,8 +8,11 @@ interface PingClient {
   from: (table: string) => {
     select: (
       columns: string,
-      options: { count: "exact"; head: true },
-    ) => PromiseLike<{ count: number | null; error: { message: string } | null }>;
+      options: { count: "exact"; head: true }
+    ) => PromiseLike<{
+      count: number | null;
+      error: { message: string } | null;
+    }>;
   };
 }
 
@@ -25,7 +28,10 @@ export async function pingDatabase(client: PingClient): Promise<PingResult> {
     if (error) return { ok: false, error: error.message };
     return { ok: true, postOffices: count };
   } catch (caught) {
-    return { ok: false, error: caught instanceof Error ? caught.message : "Unknown error" };
+    return {
+      ok: false,
+      error: caught instanceof Error ? caught.message : "Unknown error",
+    };
   }
 }
 
@@ -34,7 +40,10 @@ export async function pingDatabase(client: PingClient): Promise<PingResult> {
  * so only the scheduler (not a random visitor) can trigger the query. When it
  * is not set the route stays open: it is read-only and cheap.
  */
-export function isAuthorised(authorizationHeader: string | null, secret: string | undefined): boolean {
+export function isAuthorised(
+  authorizationHeader: string | null,
+  secret: string | undefined
+): boolean {
   if (!secret) return true;
   return authorizationHeader === `Bearer ${secret}`;
 }

@@ -11,18 +11,29 @@ const clientReturning = (result: Promise<unknown>) => {
 describe("pingDatabase", () => {
   it("reports success with the row count", async () => {
     const client = clientReturning(Promise.resolve({ count: 99, error: null }));
-    await expect(pingDatabase(client)).resolves.toEqual({ ok: true, postOffices: 99 });
+    await expect(pingDatabase(client)).resolves.toEqual({
+      ok: true,
+      postOffices: 99,
+    });
     expect(client.from).toHaveBeenCalledWith("post_offices");
   });
 
   it("reports a database error without throwing", async () => {
-    const client = clientReturning(Promise.resolve({ count: null, error: { message: "paused" } }));
-    await expect(pingDatabase(client)).resolves.toEqual({ ok: false, error: "paused" });
+    const client = clientReturning(
+      Promise.resolve({ count: null, error: { message: "paused" } })
+    );
+    await expect(pingDatabase(client)).resolves.toEqual({
+      ok: false,
+      error: "paused",
+    });
   });
 
   it("reports a network failure without throwing", async () => {
     const client = clientReturning(Promise.reject(new Error("fetch failed")));
-    await expect(pingDatabase(client)).resolves.toEqual({ ok: false, error: "fetch failed" });
+    await expect(pingDatabase(client)).resolves.toEqual({
+      ok: false,
+      error: "fetch failed",
+    });
   });
 });
 

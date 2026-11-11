@@ -28,7 +28,7 @@ describe("clusterPoints", () => {
   it("never merges points that must stay single", () => {
     const clusters = clusterPoints(near, 7, 52, new Set([2]));
     expect(clusters.some((c) => c.ids.length === 1 && c.ids[0] === 2)).toBe(
-      true,
+      true
     );
     expect(clusters.flatMap((c) => c.ids).sort()).toEqual([1, 2, 3]);
   });

@@ -8,8 +8,10 @@ vi.mock("@/lib/supabase/server", () => ({
   }),
 }));
 
-const call = (query: string) => GET(new Request(`https://site.test/auth/callback${query}`));
-const location = (response: Response) => new URL(response.headers.get("location") ?? "");
+const call = (query: string) =>
+  GET(new Request(`https://site.test/auth/callback${query}`));
+const location = (response: Response) =>
+  new URL(response.headers.get("location") ?? "");
 
 beforeEach(() => {
   exchange.mockReset();
@@ -49,7 +51,11 @@ describe("GET /auth/callback", () => {
 
   it("explains a link opened in the wrong browser and logs the cause", async () => {
     exchange.mockResolvedValue({
-      error: { status: 400, code: "flow_state_not_found", message: "PKCE code verifier not found" },
+      error: {
+        status: 400,
+        code: "flow_state_not_found",
+        message: "PKCE code verifier not found",
+      },
     });
     const response = await call("?code=abc");
     expect(location(response).searchParams.get("reason")).toBe("other-device");

@@ -8,7 +8,7 @@ let browserClient: SupabaseClient | undefined;
 export function getSupabaseBrowserClient(): SupabaseClient {
   browserClient ??= createBrowserClient(
     env.supabaseUrl,
-    env.supabasePublishableKey,
+    env.supabasePublishableKey
   );
   return browserClient;
 }

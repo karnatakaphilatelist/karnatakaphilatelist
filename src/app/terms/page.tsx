@@ -1,5 +1,9 @@
 import type { Metadata } from "next";
-import { LegalList, LegalPage, LegalSection } from "@/components/legal/LegalPage";
+import {
+  LegalList,
+  LegalPage,
+  LegalSection,
+} from "@/components/legal/LegalPage";
 import { CONTACT_EMAIL, LEGAL_LAST_UPDATED } from "@/lib/constants";
 
 export const metadata: Metadata = { title: "Terms of Use" };
@@ -34,31 +38,37 @@ export default function TermsPage() {
 
       <LegalSection heading="Post office information">
         <p>
-          Post office names, pincodes and locations are collected with care but may be out of date
-          or wrong. Check before you travel. Stamp artwork and names belong to their respective
-          owners.
+          Post office names, pincodes and locations are collected with care but
+          may be out of date or wrong. Check before you travel. Stamp artwork
+          and names belong to their respective owners.
         </p>
       </LegalSection>
 
       <LegalSection heading="Availability">
         <p>
-          The service is provided as it is, without promises that it will always be available or
-          free of errors. We may change, pause or stop it. To the extent the law allows, we are not
-          liable for losses that come from using it.
+          The service is provided as it is, without promises that it will always
+          be available or free of errors. We may change, pause or stop it. To
+          the extent the law allows, we are not liable for losses that come from
+          using it.
         </p>
       </LegalSection>
 
       <LegalSection heading="Ending your use">
         <p>
-          You can stop using the service at any time and delete your account yourself from the Account page, or ask us to. See the
-          Privacy Policy for how your data is handled.
+          You can stop using the service at any time and delete your account
+          yourself from the Account page, or ask us to. See the Privacy Policy
+          for how your data is handled.
         </p>
       </LegalSection>
 
       <LegalSection heading="Changes and contact">
         <p>
-          We may update these terms and will change the date above when we do. Questions:{" "}
-          <a className="font-semibold text-focus underline" href={`mailto:${CONTACT_EMAIL}`}>
+          We may update these terms and will change the date above when we do.
+          Questions:{" "}
+          <a
+            className="font-semibold text-focus underline"
+            href={`mailto:${CONTACT_EMAIL}`}
+          >
             {CONTACT_EMAIL}
           </a>
           .

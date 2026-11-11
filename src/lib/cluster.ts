@@ -19,11 +19,11 @@ export const CLUSTER_MAX_ZOOM = 12;
 function project(
   lat: number,
   lng: number,
-  zoom: number,
+  zoom: number
 ): { x: number; y: number } {
   const scale = 256 * 2 ** zoom;
   const sin = Math.sin(
-    (Math.max(-85.0511, Math.min(85.0511, lat)) * Math.PI) / 180,
+    (Math.max(-85.0511, Math.min(85.0511, lat)) * Math.PI) / 180
   );
   return {
     x: ((lng + 180) / 360) * scale,
@@ -40,7 +40,7 @@ export function clusterPoints(
   points: ClusterInput[],
   zoom: number,
   cellPx = 52,
-  keepSingle: ReadonlySet<number> = new Set(),
+  keepSingle: ReadonlySet<number> = new Set()
 ): Cluster[] {
   if (zoom >= CLUSTER_MAX_ZOOM) {
     return points.map((p) => ({

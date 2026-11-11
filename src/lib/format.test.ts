@@ -13,8 +13,14 @@ describe("formatPlaceName", () => {
     ["NAL SO", "NAL SO"],
     ["museum Road SO", "Museum Road SO"],
     ["jayanagar 3rd block so", "Jayanagar 3rd Block SO"],
-    ["the high court of karnataka - high court so", "The High Court of Karnataka - High Court SO"],
-    ["the vidana soudha - bengaluru gpo pb", "The Vidana Soudha - Bengaluru GPO PB"],
+    [
+      "the high court of karnataka - high court so",
+      "The High Court of Karnataka - High Court SO",
+    ],
+    [
+      "the vidana soudha - bengaluru gpo pb",
+      "The Vidana Soudha - Bengaluru GPO PB",
+    ],
   ])("formats %j as %j", (input, expected) => {
     expect(formatPlaceName(input)).toBe(expected);
   });

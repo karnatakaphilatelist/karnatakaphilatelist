@@ -39,4 +39,6 @@ export interface Visit {
 }
 
 /** Fields a user can change after marking an office as visited. */
-export type VisitPatch = Partial<Pick<Visit, "note" | "photoPath" | "isPublic">>;
+export type VisitPatch = Partial<
+  Pick<Visit, "note" | "photoPath" | "isPublic">
+>;

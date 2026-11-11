@@ -229,8 +229,8 @@ export function PassportView({
   return (
     <div className="h-full overflow-y-auto">
       <header className="kp-red rounded-b-[28px] px-4 pb-6 pt-[calc(1.5rem+env(safe-area-inset-top))] text-white">
-        <div className="mx-auto max-w-2xl">
-          <div className="flex h-10 items-center justify-between">
+        <div className="mx-auto max-w-2xl md:px-4">
+          <div className="flex h-10 items-center justify-between md:hidden">
             <span className="text-xs font-extrabold uppercase tracking-[0.22em]">
               Philatrail
             </span>

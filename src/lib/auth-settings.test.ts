@@ -1,7 +1,10 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("@/lib/env", () => ({
-  env: { supabaseUrl: "https://example.supabase.co", supabasePublishableKey: "pk" },
+  env: {
+    supabaseUrl: "https://example.supabase.co",
+    supabasePublishableKey: "pk",
+  },
 }));
 
 import { fetchGoogleEnabled, parseGoogleEnabled } from "@/lib/auth-settings";
@@ -12,7 +15,9 @@ afterEach(() => {
 
 describe("parseGoogleEnabled", () => {
   it("reads the provider flag", () => {
-    expect(parseGoogleEnabled({ external: { google: true, email: true } })).toBe(true);
+    expect(
+      parseGoogleEnabled({ external: { google: true, email: true } })
+    ).toBe(true);
     expect(parseGoogleEnabled({ external: { google: false } })).toBe(false);
   });
 
@@ -35,15 +40,21 @@ describe("fetchGoogleEnabled", () => {
     await expect(fetchGoogleEnabled()).resolves.toBe(false);
     expect(fetchMock).toHaveBeenCalledWith(
       "https://example.supabase.co/auth/v1/settings",
-      expect.objectContaining({ headers: { apikey: "pk" } }),
+      expect.objectContaining({ headers: { apikey: "pk" } })
     );
   });
 
   it("returns null when the request fails or is rejected", async () => {
-    vi.stubGlobal("fetch", vi.fn(async () => ({ ok: false, json: async () => ({}) })));
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => ({ ok: false, json: async () => ({}) }))
+    );
     await expect(fetchGoogleEnabled()).resolves.toBeNull();
 
-    vi.stubGlobal("fetch", vi.fn(async () => Promise.reject(new Error("offline"))));
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => Promise.reject(new Error("offline")))
+    );
     await expect(fetchGoogleEnabled()).resolves.toBeNull();
   });
 });

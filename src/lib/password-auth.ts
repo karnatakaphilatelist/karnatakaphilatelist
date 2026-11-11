@@ -29,7 +29,7 @@ interface SignUpResult {
  *   already has an account (so sign-up cannot be used to discover who is registered).
  */
 export function interpretSignUp(
-  result: SignUpResult,
+  result: SignUpResult
 ): PasswordOutcome | "exists" {
   if (result.session) return "signed-in";
   if (
@@ -52,7 +52,7 @@ interface AuthErrorLike {
 export function friendlyPasswordError(
   error: AuthErrorLike,
   mode: PasswordMode,
-  action: "auth" | "update" = "auth",
+  action: "auth" | "update" = "auth"
 ): string {
   switch (error.code) {
     case "invalid_credentials":

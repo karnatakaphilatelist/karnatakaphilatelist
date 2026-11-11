@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { getAvatarUrl, getDisplayName, getFirstName, getInitial } from "@/lib/user-display";
+import {
+  getAvatarUrl,
+  getDisplayName,
+  getFirstName,
+  getInitial,
+} from "@/lib/user-display";
 
 const user = (email: string | null, meta: Record<string, unknown> = {}) => ({
   email: email ?? undefined,
@@ -8,7 +13,9 @@ const user = (email: string | null, meta: Record<string, unknown> = {}) => ({
 
 describe("getDisplayName", () => {
   it("prefers the name from Google", () => {
-    expect(getDisplayName(user("a@b.co", { full_name: " Asha Rao " }))).toBe("Asha Rao");
+    expect(getDisplayName(user("a@b.co", { full_name: " Asha Rao " }))).toBe(
+      "Asha Rao"
+    );
     expect(getDisplayName(user("a@b.co", { name: "Asha" }))).toBe("Asha");
   });
 
@@ -18,25 +25,33 @@ describe("getDisplayName", () => {
   });
 
   it("limits an absurdly long name", () => {
-    expect(getDisplayName(user(null, { full_name: "x".repeat(500) }))).toHaveLength(200);
+    expect(
+      getDisplayName(user(null, { full_name: "x".repeat(500) }))
+    ).toHaveLength(200);
   });
 });
 
 describe("getAvatarUrl", () => {
   it("accepts an https photo from either metadata key", () => {
-    expect(getAvatarUrl(user(null, { avatar_url: "https://img.test/a.png" }))).toBe(
-      "https://img.test/a.png",
-    );
-    expect(getAvatarUrl(user(null, { picture: "https://img.test/b.png" }))).toBe(
-      "https://img.test/b.png",
-    );
+    expect(
+      getAvatarUrl(user(null, { avatar_url: "https://img.test/a.png" }))
+    ).toBe("https://img.test/a.png");
+    expect(
+      getAvatarUrl(user(null, { picture: "https://img.test/b.png" }))
+    ).toBe("https://img.test/b.png");
   });
 
   it("rejects anything that is not a plain https URL", () => {
-    expect(getAvatarUrl(user(null, { avatar_url: "javascript:alert(1)" }))).toBeNull();
-    expect(getAvatarUrl(user(null, { avatar_url: "http://img.test/a.png" }))).toBeNull();
+    expect(
+      getAvatarUrl(user(null, { avatar_url: "javascript:alert(1)" }))
+    ).toBeNull();
+    expect(
+      getAvatarUrl(user(null, { avatar_url: "http://img.test/a.png" }))
+    ).toBeNull();
     expect(getAvatarUrl(user(null, { avatar_url: 42 }))).toBeNull();
-    expect(getAvatarUrl(user(null, { avatar_url: `https://x/${"a".repeat(3000)}` }))).toBeNull();
+    expect(
+      getAvatarUrl(user(null, { avatar_url: `https://x/${"a".repeat(3000)}` }))
+    ).toBeNull();
     expect(getAvatarUrl(user(null))).toBeNull();
   });
 });

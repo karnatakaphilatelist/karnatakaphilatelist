@@ -35,7 +35,7 @@ describe("formatDistance", () => {
 describe("directionsUrl", () => {
   it("targets the given coordinates", () => {
     expect(directionsUrl({ lat: 12.5, lng: 76.25 })).toBe(
-      "https://www.google.com/maps/dir/?api=1&destination=12.5,76.25",
+      "https://www.google.com/maps/dir/?api=1&destination=12.5,76.25"
     );
   });
 });

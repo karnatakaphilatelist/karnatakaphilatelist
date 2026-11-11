@@ -42,7 +42,9 @@ describe("parseGuestVisits", () => {
   });
 
   it("never carries a photo path or a truthy-but-wrong privacy value", () => {
-    const [visit] = parseGuestVisits([{ ...valid, photoPath: "a/b.jpg", isPublic: "yes" }]);
+    const [visit] = parseGuestVisits([
+      { ...valid, photoPath: "a/b.jpg", isPublic: "yes" },
+    ]);
     expect(visit.photoPath).toBeNull();
     expect(visit.isPublic).toBe(false);
   });

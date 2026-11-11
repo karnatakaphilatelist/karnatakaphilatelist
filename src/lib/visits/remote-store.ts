@@ -41,7 +41,7 @@ function toRow(userId: string, visit: Visit) {
 
 export async function fetchVisits(
   client: SupabaseClient,
-  userId: string,
+  userId: string
 ): Promise<Visit[]> {
   const { data, error } = await client
     .from("visits")
@@ -60,14 +60,12 @@ export async function fetchVisits(
 export async function insertVisitIfMissing(
   client: SupabaseClient,
   userId: string,
-  visit: Visit,
+  visit: Visit
 ): Promise<void> {
-  const { error } = await client
-    .from("visits")
-    .upsert(toRow(userId, visit), {
-      onConflict: VISIT_CONFLICT_TARGET,
-      ignoreDuplicates: true,
-    });
+  const { error } = await client.from("visits").upsert(toRow(userId, visit), {
+    onConflict: VISIT_CONFLICT_TARGET,
+    ignoreDuplicates: true,
+  });
   if (error) throw new Error(error.message);
 }
 
@@ -79,7 +77,7 @@ export async function insertVisitIfMissing(
 export async function updateVisitDetails(
   client: SupabaseClient,
   userId: string,
-  visit: Visit,
+  visit: Visit
 ): Promise<void> {
   const { data, error } = await client
     .from("visits")
@@ -93,7 +91,9 @@ export async function updateVisitDetails(
     .select("post_office_id");
   if (error) throw new Error(error.message);
   if (!data || data.length === 0) {
-    throw new Error("This visit was removed on another device. Reload to see your latest passport.");
+    throw new Error(
+      "This visit was removed on another device. Reload to see your latest passport."
+    );
   }
 }
 
@@ -105,14 +105,14 @@ export async function updateVisitDetails(
 export async function mergeGuestVisits(
   client: SupabaseClient,
   userId: string,
-  visits: Visit[],
+  visits: Visit[]
 ): Promise<void> {
   if (visits.length === 0) return;
 
   const upsertRows = (rows: Visit[]) =>
     client.from("visits").upsert(
       rows.map((visit) => toRow(userId, visit)),
-      { onConflict: VISIT_CONFLICT_TARGET, ignoreDuplicates: true },
+      { onConflict: VISIT_CONFLICT_TARGET, ignoreDuplicates: true }
     );
 
   const { error } = await upsertRows(visits);
@@ -129,7 +129,7 @@ export async function mergeGuestVisits(
 export async function deleteVisit(
   client: SupabaseClient,
   userId: string,
-  officeId: number,
+  officeId: number
 ): Promise<void> {
   const { error } = await client
     .from("visits")
@@ -144,7 +144,7 @@ export async function uploadStampPhoto(
   client: SupabaseClient,
   userId: string,
   officeId: number,
-  photo: Blob,
+  photo: Blob
 ): Promise<string> {
   const path = `${userId}/${officeId}-${Date.now()}.jpg`;
   const { error } = await client.storage
@@ -156,7 +156,7 @@ export async function uploadStampPhoto(
 
 export async function removeStampPhoto(
   client: SupabaseClient,
-  path: string,
+  path: string
 ): Promise<void> {
   const { error } = await client.storage.from(PHOTO_BUCKET).remove([path]);
   if (error) throw new Error(error.message);

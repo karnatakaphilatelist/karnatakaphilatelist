@@ -34,10 +34,10 @@ export function FilterChips({ value, onChange, tourId }: FilterChipsProps) {
             type="button"
             aria-pressed={active}
             onClick={() => onChange(filter.value)}
-            className="min-h-11 shrink-0 px-1"
+            className="min-h-11 shrink-0 px-1 md:px-0.5"
           >
             <span
-              className={`flex h-10 items-center gap-1.5 rounded-full px-4 text-[15px] ${
+              className={`flex h-10 items-center gap-1.5 rounded-full px-4 text-[15px] md:px-3 md:text-sm ${
                 active
                   ? "bg-[#f3e2bd] font-bold text-ink shadow-[inset_0_0_0_1.5px_#16204f,0_2px_8px_rgb(0_0_0/0.12)]"
                   : "kp-glass font-semibold text-ink"

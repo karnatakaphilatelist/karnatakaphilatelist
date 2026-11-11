@@ -6,8 +6,13 @@ const JPEG_QUALITY = 0.82;
  * (phone photos are often 5 MB or more, which would exhaust storage quickly).
  */
 export async function compressImage(file: File): Promise<Blob> {
-  const bitmap = await createImageBitmap(file, { imageOrientation: "from-image" });
-  const scale = Math.min(1, MAX_EDGE_PX / Math.max(bitmap.width, bitmap.height));
+  const bitmap = await createImageBitmap(file, {
+    imageOrientation: "from-image",
+  });
+  const scale = Math.min(
+    1,
+    MAX_EDGE_PX / Math.max(bitmap.width, bitmap.height)
+  );
   const width = Math.round(bitmap.width * scale);
   const height = Math.round(bitmap.height * scale);
 
@@ -24,9 +29,11 @@ export async function compressImage(file: File): Promise<Blob> {
   return new Promise<Blob>((resolve, reject) => {
     canvas.toBlob(
       (blob) =>
-        blob ? resolve(blob) : reject(new Error("Could not compress the image.")),
+        blob
+          ? resolve(blob)
+          : reject(new Error("Could not compress the image.")),
       "image/jpeg",
-      JPEG_QUALITY,
+      JPEG_QUALITY
     );
   });
 }

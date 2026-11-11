@@ -5,9 +5,14 @@ type DisplayableUser = Pick<User, "email" | "user_metadata">;
 const MAX_NAME_LENGTH = 200;
 const MAX_AVATAR_URL_LENGTH = 2048;
 
-function metadataString(user: DisplayableUser, ...keys: string[]): string | null {
+function metadataString(
+  user: DisplayableUser,
+  ...keys: string[]
+): string | null {
   for (const key of keys) {
-    const value = (user.user_metadata as Record<string, unknown> | undefined)?.[key];
+    const value = (user.user_metadata as Record<string, unknown> | undefined)?.[
+      key
+    ];
     if (typeof value === "string" && value.trim()) return value.trim();
   }
   return null;
@@ -16,7 +21,7 @@ function metadataString(user: DisplayableUser, ...keys: string[]): string | null
 /** The person's name from Google, else their email address. */
 export function getDisplayName(user: DisplayableUser): string | null {
   const name = metadataString(user, "full_name", "name");
-  return name ? name.slice(0, MAX_NAME_LENGTH) : (user.email ?? null);
+  return name ? name.slice(0, MAX_NAME_LENGTH) : user.email ?? null;
 }
 
 /** The profile photo, only if it is a plain https URL (sign-up data is not trusted). */

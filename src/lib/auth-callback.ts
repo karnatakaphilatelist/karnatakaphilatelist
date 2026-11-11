@@ -1,15 +1,22 @@
 /** Why a sign-in did not complete. Only these short codes ever travel in a URL. */
-export type AuthFailureReason = "denied" | "other-device" | "expired" | "failed";
+export type AuthFailureReason =
+  | "denied"
+  | "other-device"
+  | "expired"
+  | "failed";
 
 export const AUTH_FAILURE_MESSAGES: Record<AuthFailureReason, string> = {
   denied: "Sign-in was cancelled. You can try again whenever you like.",
   "other-device":
     "That sign-in link only works in the browser where you asked for it. Open it there, or ask for a new link on this device.",
-  expired: "That sign-in link has expired or was already used. Please ask for a new one.",
+  expired:
+    "That sign-in link has expired or was already used. Please ask for a new one.",
   failed: "Sign-in did not complete. Please try again.",
 };
 
-export function isAuthFailureReason(value: string | null): value is AuthFailureReason {
+export function isAuthFailureReason(
+  value: string | null
+): value is AuthFailureReason {
   return value !== null && Object.hasOwn(AUTH_FAILURE_MESSAGES, value);
 }
 
@@ -40,8 +47,10 @@ export function classifyAuthFailure({
   if (providerError === "access_denied") return "denied";
 
   const message = (exchangeMessage ?? "").toLowerCase();
-  if (message.includes("code verifier") || message.includes("pkce")) return "other-device";
-  if (message.includes("expired") || message.includes("already used")) return "expired";
+  if (message.includes("code verifier") || message.includes("pkce"))
+    return "other-device";
+  if (message.includes("expired") || message.includes("already used"))
+    return "expired";
   return "failed";
 }
 
@@ -49,7 +58,7 @@ export function classifyAuthFailure({
 export function failureRedirectUrl(
   origin: string,
   next: string | null,
-  reason: AuthFailureReason,
+  reason: AuthFailureReason
 ): string {
   const url = new URL(safeRedirectPath(next), origin);
   url.searchParams.set("auth", "failed");

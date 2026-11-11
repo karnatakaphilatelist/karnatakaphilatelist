@@ -1,9 +1,21 @@
 /** Short postal terms that are always written in capitals, e.g. "Mysuru HO". */
-const ACRONYMS = new Set(["so", "bo", "ho", "gpo", "hpo", "mdg", "pb", "po", "nal", "sgs"]);
+const ACRONYMS = new Set([
+  "so",
+  "bo",
+  "ho",
+  "gpo",
+  "hpo",
+  "mdg",
+  "pb",
+  "po",
+  "nal",
+  "sgs",
+]);
 /** Small words that stay lower case unless they start the name. */
 const SMALL_WORDS = new Set(["of", "the", "and", "at", "in", "on", "for"]);
 
-const capitalise = (word: string) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+const capitalise = (word: string) =>
+  word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
 
 /**
  * Tidies a place name for display: consistent capitals, "h o" written as "HO",

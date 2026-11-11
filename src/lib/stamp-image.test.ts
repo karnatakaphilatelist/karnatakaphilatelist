@@ -1,7 +1,10 @@
 import { describe, expect, it, vi } from "vitest";
 
 vi.mock("@/lib/env", () => ({
-  env: { supabaseUrl: "https://example.supabase.co", supabasePublishableKey: "key" },
+  env: {
+    supabaseUrl: "https://example.supabase.co",
+    supabasePublishableKey: "key",
+  },
 }));
 
 import { stampImageUrl } from "@/lib/stamp-image";
@@ -14,7 +17,7 @@ describe("stampImageUrl", () => {
 
   it("builds the public bucket URL", () => {
     expect(stampImageUrl("123.webp")).toBe(
-      "https://example.supabase.co/storage/v1/object/public/office-stamps/123.webp",
+      "https://example.supabase.co/storage/v1/object/public/office-stamps/123.webp"
     );
   });
 

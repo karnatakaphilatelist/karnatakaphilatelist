@@ -20,7 +20,11 @@ export function parseGuestVisits(raw: unknown): Visit[] {
     const row = item as Record<string, unknown>;
 
     const officeId = row.officeId;
-    if (typeof officeId !== "number" || !Number.isSafeInteger(officeId) || officeId <= 0) {
+    if (
+      typeof officeId !== "number" ||
+      !Number.isSafeInteger(officeId) ||
+      officeId <= 0
+    ) {
       continue;
     }
 
@@ -28,7 +32,8 @@ export function parseGuestVisits(raw: unknown): Visit[] {
       typeof row.visitedAt === "string" && ISO_DATE_PATTERN.test(row.visitedAt)
         ? row.visitedAt
         : todayIso();
-    const note = typeof row.note === "string" ? row.note.slice(0, MAX_NOTE_LENGTH) : "";
+    const note =
+      typeof row.note === "string" ? row.note.slice(0, MAX_NOTE_LENGTH) : "";
 
     byOffice.set(officeId, {
       officeId,
@@ -45,6 +50,7 @@ export function parseGuestVisits(raw: unknown): Visit[] {
 export function parsePlannedIds(raw: unknown): number[] {
   if (!Array.isArray(raw)) return [];
   return raw.filter(
-    (value): value is number => typeof value === "number" && Number.isSafeInteger(value),
+    (value): value is number =>
+      typeof value === "number" && Number.isSafeInteger(value)
   );
 }

@@ -53,7 +53,9 @@ async function selectPostOffices(columns: string) {
 }
 
 async function loadFromDatabase(): Promise<PostOfficeRow[]> {
-  let result = await selectPostOffices(`${BASE_COLUMNS}, state_code, stamp_image_path`);
+  let result = await selectPostOffices(
+    `${BASE_COLUMNS}, state_code, stamp_image_path`
+  );
   // Keep the app working before the newer migrations have been run.
   if (result.error?.code === UNDEFINED_COLUMN) {
     result = await selectPostOffices(`${BASE_COLUMNS}, stamp_image_path`);
@@ -90,11 +92,13 @@ export async function getPostOffices(): Promise<PostOffice[]> {
   } catch (error) {
     console.error(
       "[offices] Database unavailable, showing the bundled list of post offices.",
-      error,
+      error
     );
     cacheLife("minutes");
     rows = SNAPSHOT_ROWS;
   }
 
-  return rows.map(toPostOffice).sort((a, b) => a.name.localeCompare(b.name, "en"));
+  return rows
+    .map(toPostOffice)
+    .sort((a, b) => a.name.localeCompare(b.name, "en"));
 }

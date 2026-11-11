@@ -9,7 +9,10 @@ export default function PassportPage() {
   return (
     <Suspense
       fallback={
-        <div role="status" className="grid h-full place-items-center text-muted">
+        <div
+          role="status"
+          className="grid h-full place-items-center text-muted"
+        >
           Loading your passport…
         </div>
       }

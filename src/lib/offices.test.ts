@@ -4,7 +4,10 @@ const cache = vi.hoisted(() => ({ cacheLife: vi.fn(), cacheTag: vi.fn() }));
 vi.mock("next/cache", () => cache);
 
 const db = vi.hoisted(() => ({
-  responses: [] as { data: unknown[] | null; error: { code?: string; message: string } | null }[],
+  responses: [] as {
+    data: unknown[] | null;
+    error: { code?: string; message: string } | null;
+  }[],
   queries: [] as string[],
 }));
 vi.mock("@/lib/supabase/public", () => ({
@@ -15,7 +18,10 @@ vi.mock("@/lib/supabase/public", () => ({
         return {
           order: () => ({
             overrideTypes: async () =>
-              db.responses.shift() ?? { data: null, error: { message: "no response queued" } },
+              db.responses.shift() ?? {
+                data: null,
+                error: { message: "no response queued" },
+              },
           }),
         };
       },
@@ -47,12 +53,21 @@ const row = (id: number, name: string, extra = {}) => ({
 describe("getPostOffices", () => {
   it("returns formatted offices from the database and caches them for hours", async () => {
     db.responses = [
-      { data: [row(2, "museum road so"), row(1, "Basavangudi h o", { stamp_image_path: "1.webp" })], error: null },
+      {
+        data: [
+          row(2, "museum road so"),
+          row(1, "Basavangudi h o", { stamp_image_path: "1.webp" }),
+        ],
+        error: null,
+      },
     ];
 
     const offices = await getPostOffices();
 
-    expect(offices.map((office) => office.name)).toEqual(["Basavangudi HO", "Museum Road SO"]);
+    expect(offices.map((office) => office.name)).toEqual([
+      "Basavangudi HO",
+      "Museum Road SO",
+    ]);
     expect(offices[0]).toMatchObject({
       id: 1,
       pincode: "560001",
@@ -66,8 +81,14 @@ describe("getPostOffices", () => {
 
   it("falls back to fewer columns before the newer migrations have run", async () => {
     db.responses = [
-      { data: null, error: { code: "42703", message: "column does not exist" } },
-      { data: null, error: { code: "42703", message: "column does not exist" } },
+      {
+        data: null,
+        error: { code: "42703", message: "column does not exist" },
+      },
+      {
+        data: null,
+        error: { code: "42703", message: "column does not exist" },
+      },
       { data: [row(1, "Hampi SO")], error: null },
     ];
 
@@ -83,7 +104,9 @@ describe("getPostOffices", () => {
   });
 
   it("uses the bundled list, cached only briefly, when the database cannot be reached", async () => {
-    db.responses = [{ data: null, error: { message: "TypeError: fetch failed" } }];
+    db.responses = [
+      { data: null, error: { message: "TypeError: fetch failed" } },
+    ];
 
     const offices = await getPostOffices();
 
@@ -127,13 +150,17 @@ describe("the bundled list", () => {
     expect(names).toEqual([...names].sort((a, b) => a.localeCompare(b, "en")));
     expect(offices.find((office) => office.id === 61)?.name).toBe("Agumbe SO");
     expect(offices.find((office) => office.id === 66)?.name).toBe("Karkala HO");
-    expect(offices.find((office) => office.id === 61)?.district).toBe("Shivamogga");
+    expect(offices.find((office) => office.id === 61)?.district).toBe(
+      "Shivamogga"
+    );
   });
 });
 
 describe("district spellings in the bundled list", () => {
   it("has none of the known misspellings", () => {
-    const districts = new Set(snapshot.map((office) => office.district.toLowerCase()));
+    const districts = new Set(
+      snapshot.map((office) => office.district.toLowerCase())
+    );
     for (const wrong of ["vjaypura", "shivmogga", "chikkamangaluru"]) {
       expect(districts.has(wrong)).toBe(false);
     }

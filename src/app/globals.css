@@ -230,6 +230,48 @@ body {
   }
 }
 
+/* No system blue anywhere: tapped selects, selected text and autofilled fields all stay in the warm palette. */
+::selection {
+  background: rgb(247 201 107 / 0.45);
+  color: inherit;
+}
+button,
+a,
+nav,
+label,
+select,
+summary {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+select {
+  -webkit-tap-highlight-color: transparent;
+}
+@media (pointer: coarse) {
+  select:focus,
+  select:focus-visible {
+    outline: none;
+  }
+}
+input:-webkit-autofill,
+input:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0 100px #fffaf0 inset;
+  -webkit-text-fill-color: #16204f;
+  caret-color: #16204f;
+}
+.leaflet-container,
+.leaflet-container a,
+.leaflet-interactive {
+  -webkit-tap-highlight-color: transparent !important;
+}
+@media (pointer: coarse) {
+  .leaflet-container :focus,
+  .leaflet-container .leaflet-interactive:focus {
+    outline: none;
+  }
+}
+
 /* App-like touch behaviour: no grey tap flash, no double-tap zoom delay, no rubber-banding. */
 html {
   -webkit-tap-highlight-color: transparent;

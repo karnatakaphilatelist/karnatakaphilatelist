@@ -42,7 +42,7 @@ function Halo({ mark }: { mark: Step["mark"] }) {
   return (
     <div
       aria-hidden="true"
-      className="kpt-pop absolute bottom-6 right-6 grid size-28 place-items-center rounded-full bg-[#2f4aa8]/25"
+      className="kpt-pop absolute bottom-6 right-6 grid size-28 [@media(max-height:720px)]:hidden place-items-center rounded-full bg-[#2f4aa8]/25"
     >
       <span className="absolute -inset-4 rounded-full border border-white/10" />
       <span className="absolute -inset-9 rounded-full border border-white/10" />
@@ -102,7 +102,7 @@ export function WelcomeTour() {
 
   return (
     <main
-      className="flex h-dvh touch-pan-y flex-col md:mx-auto md:mt-6 md:h-[calc(100dvh-3rem)] md:max-h-[860px] md:max-w-[430px] md:overflow-hidden md:rounded-[32px] md:shadow-[0_30px_80px_-30px_rgb(22_32_79/0.45)]"
+      className="fixed inset-0 flex touch-pan-y flex-col md:relative md:inset-auto md:mx-auto md:mt-6 md:h-[calc(100dvh-3rem)] md:max-h-[860px] md:max-w-[430px] md:overflow-hidden md:rounded-[32px] md:shadow-[0_30px_80px_-30px_rgb(22_32_79/0.45)]"
       onTouchStart={(event) => {
         const t = event.touches[0];
         swipe.current = { x: t.clientX, y: t.clientY };

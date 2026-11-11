@@ -67,7 +67,7 @@ export function HeroSheet({
       }}
       aria-labelledby={labelId}
       tabIndex={-1}
-      className="m-0 h-dvh max-h-none w-full max-w-none [background:linear-gradient(180deg,#fffaf0,#f8eed8)] p-0 text-ink outline-none backdrop:bg-[#3a2a0c]/40 md:m-auto md:h-auto md:max-h-[92dvh] md:max-w-md md:overflow-hidden md:rounded-3xl"
+      className="m-0 h-full max-h-none w-full max-w-none [background:linear-gradient(180deg,#fffaf0,#f8eed8)] p-0 text-ink outline-none backdrop:bg-[#3a2a0c]/40 md:m-auto md:h-auto md:max-h-[92dvh] md:max-w-md md:overflow-hidden md:rounded-3xl"
     >
       <h2 id={labelId} className="sr-only">
         {label}

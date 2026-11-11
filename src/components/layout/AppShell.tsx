@@ -54,7 +54,9 @@ export function AppShell({
   if (pathname === "/" || pathname === "/welcome") return <>{children}</>;
 
   return (
-    <div className="flex h-dvh flex-col">
+    // Pinned to the screen edges instead of sized with dvh: some iPhone web views measure dvh too short, which left a
+    // blank band under the tab bar.
+    <div className="fixed inset-0 flex flex-col">
       <AppHeader />
       <OfflineBanner />
       <main className="min-h-0 flex-1">

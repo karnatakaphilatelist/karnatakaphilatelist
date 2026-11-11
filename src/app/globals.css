@@ -302,6 +302,14 @@ label {
 [data-lite] .kp-red {
   background-image: none;
 }
+/* Blur is the heaviest effect for older graphics chips: swap it for a solid cream. */
+[data-lite] .kp-glass,
+[data-lite] .kp-glass-panel,
+[data-lite] .kp-tabbar {
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  background: #fffaf0;
+}
 [data-lite] *,
 [data-lite] *::before,
 [data-lite] *::after {

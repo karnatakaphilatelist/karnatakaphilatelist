@@ -54,7 +54,12 @@ function hasSeenIntro(): boolean {
   const flagged = (window as unknown as Record<string, unknown>)[
     INTRO_PLAYED_FLAG
   ];
-  return flagged === true || SKIP_COOKIE.test(document.cookie);
+  return (
+    flagged === true ||
+    SKIP_COOKIE.test(document.cookie) ||
+    // Lite mode (chosen, or switched on for older phones) plays no intro.
+    document.documentElement.hasAttribute("data-lite")
+  );
 }
 
 function rememberIntro(): void {

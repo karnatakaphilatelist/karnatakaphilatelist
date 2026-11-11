@@ -486,7 +486,9 @@ function SheetHandle({
       aria-expanded={open}
       onClick={() => onChange(!open)}
       data-tour="sheet"
-      className="grid h-7 w-full shrink-0 place-items-center md:hidden"
+      // 44px tall for thumbs, but the extra height reaches up past the sheet's top edge so the peek
+      // layout (and the grey bar's position, 12px from the top) stays exactly as before.
+      className="-mt-4 flex h-11 w-full shrink-0 items-end justify-center pb-3 md:hidden"
     >
       <span className="h-1 w-10 rounded-full bg-[#c7c7cc]" />
     </button>

@@ -121,7 +121,7 @@ export function OfficeDetail({
             type="button"
             onClick={onClose}
             aria-label="Close post office details"
-            className="kp-glass grid size-10 shrink-0 place-items-center rounded-full text-ink"
+            className="kp-glass kp-hit grid size-10 shrink-0 place-items-center rounded-full text-ink"
           >
             <CloseIcon className="size-4" strokeWidth={2.8} />
           </button>
@@ -278,7 +278,7 @@ function ProximityBanner({
       <button
         type="button"
         onClick={onCheckDistance}
-        className="kp-glass mt-4 flex h-10 w-fit items-center gap-2 rounded-full px-4 text-sm font-semibold text-ink"
+        className="kp-glass kp-hit mt-4 flex h-10 w-fit items-center gap-2 rounded-full px-4 text-sm font-semibold text-ink"
       >
         <TargetIcon className="size-4 text-postal" />
         Check if you&apos;re here

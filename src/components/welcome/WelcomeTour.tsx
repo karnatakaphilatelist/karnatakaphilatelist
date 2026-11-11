@@ -171,7 +171,7 @@ export function WelcomeTour() {
         <p className="sr-only">
           Step {step + 1} of {STEPS.length}
         </p>
-        <div className="mb-3 flex">
+        <div className="mb-1 flex">
           {STEPS.map((item, i) => (
             <button
               key={item.title}
@@ -179,7 +179,7 @@ export function WelcomeTour() {
               aria-label={`Go to step ${i + 1}: ${item.title}`}
               aria-current={i === step ? "step" : undefined}
               onClick={() => setStep(i)}
-              className="grid h-9 min-w-6 place-items-center pr-1.5"
+              className="kp-hit grid h-11 min-w-6 place-items-center pr-1.5"
             >
               <span
                 className={`h-2 rounded-full transition-all ${

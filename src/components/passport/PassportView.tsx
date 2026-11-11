@@ -168,7 +168,7 @@ export function PassportView({
                 type="button"
                 aria-pressed={stampFilter === value}
                 onClick={() => setStampFilter(value)}
-                className={`h-10 rounded-full px-4 text-[15px] ${
+                className={`kp-hit h-10 rounded-full px-4 text-[15px] ${
                   stampFilter === value
                     ? "bg-[#f3e2bd] font-bold shadow-[inset_0_0_0_1.5px_#16204f,0_2px_8px_rgb(0_0_0/0.12)]"
                     : "kp-glass font-semibold"
@@ -242,7 +242,7 @@ export function PassportView({
             <button
               type="button"
               onClick={() => setSharing(true)}
-              className="-my-2.5 py-2.5 uppercase tracking-[0.18em]"
+              className="-my-3.5 py-3.5 uppercase tracking-[0.18em]"
             >
               Share progress
             </button>
@@ -337,7 +337,7 @@ export function PassportView({
                 <Link
                   key={office.id}
                   href={`/explore?office=${office.id}`}
-                  className="kp-glass flex h-10 items-center rounded-full px-3.5 text-sm font-semibold text-ink"
+                  className="kp-glass kp-hit flex h-10 items-center rounded-full px-3.5 text-sm font-semibold text-ink"
                 >
                   {office.name}
                 </Link>
@@ -354,7 +354,7 @@ export function PassportView({
             <button
               type="button"
               onClick={() => setShowAll(true)}
-              className="-my-3 py-3 text-xs font-semibold uppercase tracking-[0.14em] text-muted"
+              className="-my-3.5 py-3.5 text-xs font-semibold uppercase tracking-[0.14em] text-muted"
             >
               See all
             </button>
@@ -406,13 +406,13 @@ export function PassportView({
           <div className="flex justify-center gap-5">
             <Link
               href="/privacy"
-              className="flex min-h-11 items-center underline"
+              className="-mx-2 flex min-h-11 items-center px-2 underline"
             >
               Privacy
             </Link>
             <Link
               href="/terms"
-              className="flex min-h-11 items-center underline"
+              className="-mx-2 flex min-h-11 items-center px-2 underline"
             >
               Terms
             </Link>

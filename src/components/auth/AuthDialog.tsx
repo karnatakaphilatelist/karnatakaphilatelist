@@ -243,7 +243,7 @@ export function AuthDialog({
       type="button"
       onClick={onClose}
       aria-label="Close"
-      className="grid size-10 place-items-center rounded-full bg-white/20 shadow-[inset_0_1px_0_rgb(255_255_255/0.4)]"
+      className="kp-hit grid size-10 place-items-center rounded-full bg-white/20 shadow-[inset_0_1px_0_rgb(255_255_255/0.4)]"
     >
       <svg
         aria-hidden
@@ -290,7 +290,7 @@ export function AuthDialog({
               setCode("");
             }}
             aria-label="Back"
-            className="grid size-10 place-items-center rounded-full bg-white/20 shadow-[inset_0_1px_0_rgb(255_255_255/0.4)]"
+            className="kp-hit grid size-10 place-items-center rounded-full bg-white/20 shadow-[inset_0_1px_0_rgb(255_255_255/0.4)]"
           >
             <svg
               aria-hidden

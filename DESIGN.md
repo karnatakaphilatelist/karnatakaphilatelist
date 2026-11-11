@@ -174,3 +174,12 @@ Phones get their own patterns rather than a squeezed desktop layout:
   explains how to re-enable it.
 - Touch: 44px targets, 16px inputs, no tap flash or double-tap delay, no rubber-banding, safe-area
   insets for the notch and home bar (see docs/MOBILE.md).
+- **Tap areas:** a control that looks smaller than 44px (40px close buttons and pills, the 40px
+  avatar, the Lite switch, tour dots) gets the `kp-hit` class, which adds an invisible 44 x 44 tap
+  area without changing the look. Don't combine it with `overflow-hidden` (round photos instead) or
+  absolute positioning. The list sheet's grab bar taps at 44px by reaching above the sheet edge.
+- **Pressed state:** because the grey tap flash is off, every button and link dims to 72% while
+  pressed, and round pills and buttons also shrink to 96% (globals.css). No shrink with Reduce
+  Motion or Lite mode. Nothing to add per component.
+- **Loading:** pages show their real heading plus placeholder shapes (`ui/Skeleton.tsx`), never a
+  bare "Loading…".

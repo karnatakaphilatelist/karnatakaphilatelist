@@ -286,6 +286,53 @@ label {
   touch-action: manipulation;
 }
 
+/*
+ * Pressed feedback. The grey tap flash is off (above), so every control dims while pressed and round
+ * pills and icon buttons also shrink a little. :where() keeps this at zero specificity, so a component's
+ * own transition or opacity classes still win. `scale` is its own property, so it never fights a
+ * component's transform or translate.
+ */
+:where(button, a[href], [role="button"], [role="switch"], summary) {
+  transition: opacity 0.15s ease-out, scale 0.15s ease-out;
+}
+:where(button, a[href], [role="button"], [role="switch"], summary):active:not(
+    :disabled,
+    [aria-disabled="true"],
+    .leaflet-container *
+  ) {
+  opacity: 0.72;
+  transition-duration: 0s;
+}
+:where(button, a[href]):where(.rounded-full, [class*="rounded-["]):active:not(
+    :disabled,
+    [aria-disabled="true"],
+    .leaflet-container *
+  ) {
+  scale: 0.96;
+}
+@media (prefers-reduced-motion: reduce) {
+  :where(button, a[href]):active {
+    scale: none !important;
+  }
+}
+[data-lite] :where(button, a[href]):active {
+  scale: none !important;
+}
+
+/*
+ * Touch target helper: grows the tappable area of a small control to at least 44 x 44 px without
+ * changing how it looks (the extra area is an invisible ::before). Do not combine with overflow-hidden
+ * (it would clip the extra area) or with absolute/fixed positioning (it sets position: relative).
+ */
+.kp-hit {
+  position: relative;
+}
+.kp-hit::before {
+  content: "";
+  position: absolute;
+  inset: min(0px, calc(50% - 22px));
+}
+
 /* Engraved security-print texture for the red surfaces (Passport header, welcome tour, guest card). */
 .kp-red {
   background-color: var(--color-postal);

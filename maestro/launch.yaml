@@ -1,0 +1,34 @@
+# First-launch path: the part that has broken before.
+# Run with: maestro test maestro/launch.yaml
+appId: app.vinvi.philatrail
+---
+- clearState
+- launchApp
+
+# The intro plays, and Skip ends it at any moment.
+- assertVisible: "SKIP"
+- tapOn: "SKIP"
+
+# Skip leads to the welcome tour, not a frozen red screen.
+- assertVisible:
+    text: "FIND IT."
+    timeout: 8000
+- tapOn: "NEXT"
+- tapOn: "NEXT"
+- tapOn:
+    text: "OPEN THE MAP|START|FINISH"
+    optional: true
+
+# The map, with the search bar and the tab bar.
+- assertVisible:
+    text: "Search post offices"
+    timeout: 20000
+- assertVisible: "Passport"
+
+# Reopening goes straight to the map: no intro the second time.
+- stopApp
+- launchApp
+- assertVisible:
+    text: "Search post offices"
+    timeout: 20000
+- assertNotVisible: "SKIP"

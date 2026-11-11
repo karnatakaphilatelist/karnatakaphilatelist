@@ -44,6 +44,9 @@ const STEPS = [
 
 const SKIP_COOKIE = new RegExp(`(?:^|; )${SKIP_INTRO_COOKIE}=1`);
 
+/** Width of the flying postcard in px (matches the CSS). */
+const CARD_WIDTH = 64;
+
 type IntroState = "playing" | "open" | "done";
 
 /** The intro plays on every fresh load, but not twice in one load or straight after signing in. */
@@ -175,6 +178,8 @@ export function Landing({ offices }: { offices: PostOffice[] }) {
       setRevealed(true);
     };
     skipRef.current = finish;
+    // From here on this handler does the skipping; before it, a tiny script in <head> covers a slow start.
+    (window as unknown as Record<string, unknown>).__kpSkipReady = true;
 
     // The inline script in <head> normally started the clock already, so a slow load does not delay the intro.
     const earlyStart = (window as unknown as { __kpIntroT0?: number })
@@ -200,7 +205,8 @@ export function Landing({ offices }: { offices: PostOffice[] }) {
       }
       const seconds = (now - start) / 1000;
       const progress = cardProgress(seconds);
-      const travel = Math.max(0, window.innerWidth - 110);
+      // The card rides the line from just off the left edge to just off the right edge.
+      const travel = window.innerWidth + CARD_WIDTH;
       const card = cardRef.current;
       if (card) {
         card.style.opacity = seconds > 0.4 && progress < 1 ? "1" : "0";
@@ -210,7 +216,7 @@ export function Landing({ offices }: { offices: PostOffice[] }) {
       }
       if (solidRef.current) {
         solidRef.current.style.width =
-          progress >= 1 ? "100%" : `${progress * travel + 30}px`;
+          progress >= 1 ? "100%" : `${progress * travel}px`;
       }
       if (countRef.current)
         countRef.current.textContent = formatCounter(progress, total);

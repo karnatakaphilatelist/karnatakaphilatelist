@@ -4,14 +4,22 @@ import {
   GuestSignInPrompt,
   PROMPT_DELAY_MS,
   PROMPT_RETRY_MS,
+  WELCOME_DELAY_MS,
 } from "@/components/auth/GuestSignInPrompt";
-import { SIGN_IN_PROMPTED_KEY } from "@/lib/constants";
+import {
+  COACH_KEY,
+  SIGN_IN_PROMPTED_KEY,
+  WELCOME_PROMPTED_KEY,
+} from "@/lib/constants";
 
 const state = vi.hoisted(() => ({
   user: null as { id: string } | null,
   visitCount: 0,
   openSignIn: vi.fn(),
+  path: "/passport",
 }));
+
+vi.mock("next/navigation", () => ({ usePathname: () => state.path }));
 
 vi.mock("@/components/providers/AuthProvider", () => ({
   useAuth: () => ({
@@ -34,6 +42,7 @@ beforeEach(() => {
   window.localStorage.clear();
   state.user = null;
   state.visitCount = 0;
+  state.path = "/passport";
   state.openSignIn.mockReset();
 });
 
@@ -107,5 +116,44 @@ describe("GuestSignInPrompt", () => {
     view.unmount();
     wait(PROMPT_DELAY_MS * 2);
     expect(state.openSignIn).not.toHaveBeenCalled();
+  });
+
+  describe("first invitation", () => {
+    it("opens once on the map after the tour, then never again", () => {
+      state.path = "/explore";
+      window.localStorage.setItem(COACH_KEY, "true");
+      const { unmount } = render(<GuestSignInPrompt />);
+      wait(WELCOME_DELAY_MS);
+      expect(state.openSignIn).toHaveBeenCalledWith("welcome");
+      expect(window.localStorage.getItem(WELCOME_PROMPTED_KEY)).toBe("true");
+      unmount();
+      state.openSignIn.mockReset();
+      render(<GuestSignInPrompt />);
+      wait(WELCOME_DELAY_MS * 3);
+      expect(state.openSignIn).not.toHaveBeenCalled();
+    });
+
+    it("waits for the tour to finish", () => {
+      state.path = "/explore";
+      render(<GuestSignInPrompt />);
+      wait(WELCOME_DELAY_MS + PROMPT_RETRY_MS * 3);
+      expect(state.openSignIn).not.toHaveBeenCalled();
+      window.localStorage.setItem(COACH_KEY, "true");
+      wait(PROMPT_RETRY_MS);
+      expect(state.openSignIn).toHaveBeenCalledWith("welcome");
+    });
+
+    it("stays away from other pages and signed-in people", () => {
+      window.localStorage.setItem(COACH_KEY, "true");
+      render(<GuestSignInPrompt />);
+      wait(WELCOME_DELAY_MS * 3);
+      expect(state.openSignIn).not.toHaveBeenCalled();
+      cleanup();
+      state.path = "/explore";
+      state.user = { id: "u1" };
+      render(<GuestSignInPrompt />);
+      wait(WELCOME_DELAY_MS * 3);
+      expect(state.openSignIn).not.toHaveBeenCalled();
+    });
   });
 });

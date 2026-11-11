@@ -12,7 +12,7 @@ import {
   type PasswordOutcome,
 } from "@/lib/password-auth";
 
-export type SignInReason = "manual" | "save-progress";
+export type SignInReason = "manual" | "save-progress" | "welcome";
 
 interface AuthDialogProps {
   reason: SignInReason | null;
@@ -37,6 +37,11 @@ const COPY: Record<SignInReason, { title: string; description: string }> = {
   manual: {
     title: "Sign in to your passport",
     description: "Track every stamp and keep your notes and photos safe.",
+  },
+  welcome: {
+    title: "Save your stamps",
+    description:
+      "Sign in once and your passport follows you to any phone or browser.",
   },
   "save-progress": {
     title: "Keep your stamps safe",

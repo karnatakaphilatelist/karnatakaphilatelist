@@ -17,6 +17,8 @@ interface PostOfficeRow {
   lng: number | null;
   /** Absent until the stamp-images migration has been run. */
   stamp_image_path?: string | null;
+  /** Absent until the about-place migration has been run; null until written for that office. */
+  about_place?: string | null;
 }
 
 const BASE_COLUMNS = "id, name, pincode, district, lat, lng";
@@ -41,6 +43,7 @@ export function toPostOffice(row: PostOfficeRow): PostOffice {
     lat: row.lat,
     lng: row.lng,
     stampImagePath: row.stamp_image_path ?? null,
+    aboutPlace: row.about_place ?? null,
   };
 }
 
@@ -54,9 +57,14 @@ async function selectPostOffices(columns: string) {
 
 async function loadFromDatabase(): Promise<PostOfficeRow[]> {
   let result = await selectPostOffices(
-    `${BASE_COLUMNS}, state_code, stamp_image_path`
+    `${BASE_COLUMNS}, state_code, stamp_image_path, about_place`
   );
   // Keep the app working before the newer migrations have been run.
+  if (result.error?.code === UNDEFINED_COLUMN) {
+    result = await selectPostOffices(
+      `${BASE_COLUMNS}, state_code, stamp_image_path`
+    );
+  }
   if (result.error?.code === UNDEFINED_COLUMN) {
     result = await selectPostOffices(`${BASE_COLUMNS}, stamp_image_path`);
   }

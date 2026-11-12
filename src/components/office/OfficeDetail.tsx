@@ -142,6 +142,14 @@ export function OfficeDetail({
               </>
             ) : null}
           </p>
+          {office.aboutPlace ? (
+            <div className="mt-3">
+              <p className="text-[11px] font-semibold uppercase leading-3 tracking-[0.1em] text-muted">
+                About this place
+              </p>
+              <p className="mt-1.5 text-sm leading-5">{office.aboutPlace}</p>
+            </div>
+          ) : null}
         </div>
 
         <div className="relative mt-3 flex items-start justify-between gap-3">

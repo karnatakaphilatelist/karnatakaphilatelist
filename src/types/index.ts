@@ -11,6 +11,8 @@ export interface PostOffice {
   lng: number | null;
   /** Path of the official stamp image in the public `office-stamps` bucket; null until uploaded. */
   stampImagePath: string | null;
+  /** A short original note on why this office is on the list. Optional: absent before the migration, null until written. */
+  aboutPlace?: string | null;
 }
 
 export interface Coordinates {

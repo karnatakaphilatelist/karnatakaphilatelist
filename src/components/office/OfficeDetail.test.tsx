@@ -97,3 +97,37 @@ describe("OfficeDetail distance check", () => {
     expect(onCheck).toHaveBeenCalled();
   });
 });
+
+describe("OfficeDetail about this place", () => {
+  function renderWithAbout(aboutPlace: string | null) {
+    const office: OfficeWithStatus = {
+      id: 1,
+      name: "Belur SO",
+      pincode: "573115",
+      district: "Hassan",
+      state: "KA",
+      lat: 13.16,
+      lng: 75.86,
+      stampImagePath: null,
+      aboutPlace,
+      status: "unvisited",
+      distanceKm: null,
+    };
+    render(
+      <OfficeDetail office={office} onClose={vi.fn()} onMarkVisited={vi.fn()} />
+    );
+  }
+
+  it("shows the note when the office has one", () => {
+    renderWithAbout("A postmark showing Darpana Sundari.");
+    expect(screen.getByText("About this place")).toBeTruthy();
+    expect(
+      screen.getByText("A postmark showing Darpana Sundari.")
+    ).toBeTruthy();
+  });
+
+  it("shows nothing when the office has no note", () => {
+    renderWithAbout(null);
+    expect(screen.queryByText("About this place")).toBeNull();
+  });
+});

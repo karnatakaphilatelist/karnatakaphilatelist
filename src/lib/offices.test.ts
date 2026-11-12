@@ -80,27 +80,46 @@ describe("getPostOffices", () => {
   });
 
   it("falls back to fewer columns before the newer migrations have run", async () => {
+    const columnError = {
+      data: null,
+      error: { code: "42703", message: "column does not exist" },
+    };
     db.responses = [
-      {
-        data: null,
-        error: { code: "42703", message: "column does not exist" },
-      },
-      {
-        data: null,
-        error: { code: "42703", message: "column does not exist" },
-      },
+      columnError,
+      columnError,
+      columnError,
       { data: [row(1, "Hampi SO")], error: null },
     ];
 
     const offices = await getPostOffices();
 
-    expect(db.queries).toHaveLength(3);
-    expect(db.queries[0]).toContain("state_code");
-    expect(db.queries[1]).not.toContain("state_code");
-    expect(db.queries[2]).not.toContain("stamp_image_path");
+    expect(db.queries).toHaveLength(4);
+    expect(db.queries[0]).toContain("about_place");
+    expect(db.queries[1]).not.toContain("about_place");
+    expect(db.queries[1]).toContain("state_code");
+    expect(db.queries[2]).not.toContain("state_code");
+    expect(db.queries[3]).not.toContain("stamp_image_path");
     expect(offices[0].stampImagePath).toBeNull();
+    expect(offices[0].aboutPlace).toBeNull();
     expect(offices[0].state).toBe("KA");
     expect(cache.cacheLife).toHaveBeenCalledWith("hours");
+  });
+
+  it("reads the about-place note when the column is present", async () => {
+    db.responses = [
+      {
+        data: [
+          row(1, "Belur SO", {
+            about_place: "A postmark showing Darpana Sundari.",
+          }),
+        ],
+        error: null,
+      },
+    ];
+
+    const offices = await getPostOffices();
+
+    expect(offices[0].aboutPlace).toBe("A postmark showing Darpana Sundari.");
   });
 
   it("uses the bundled list, cached only briefly, when the database cannot be reached", async () => {

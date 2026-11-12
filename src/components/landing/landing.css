@@ -94,13 +94,7 @@
 /* ---------------------------------------------------------------- page details */
 .kpl-meta {
   position: absolute;
-  opacity: 0;
-  filter: blur(8px);
-  transition: opacity 0.8s ease, filter 0.8s ease;
-}
-.kpl.in .kpl-meta {
   opacity: calc(1 - var(--p) * 4);
-  filter: none;
 }
 /* One row under the wordmark: tagline left, links centre, e-mail right. */
 .kpl-stage {
@@ -208,11 +202,6 @@
   align-items: stretch;
   min-height: 230px;
   transform: translateX(calc(-1 * var(--p) * (100% - 100vw)));
-  opacity: 0;
-  transition: opacity 0.8s ease 0.2s;
-}
-.kpl.in .kpl-track {
-  opacity: 1;
 }
 .kpl-card {
   position: relative;
@@ -426,8 +415,6 @@
   font-weight: 700;
   letter-spacing: 0.02em;
   box-shadow: 0 10px 24px -8px rgb(207 24 48 / 0.6);
-  opacity: 0;
-  transition: opacity 0.8s ease 0.4s;
 }
 
 /* ---- editorial finish: hairlines, square corners, mono labels, no shadows ---- */
@@ -541,7 +528,7 @@
   text-transform: uppercase;
   letter-spacing: 0.1em;
 }
-.kpl.in .kpl-row {
+.kpl-row {
   opacity: calc(1 - var(--p) * 4);
 }
 .kpl-mail {
@@ -627,11 +614,6 @@
   flex-direction: column;
   align-items: center;
   gap: 10px;
-  opacity: 0;
-  transition: opacity 0.8s ease 0.4s;
-}
-.kpl.in .kpl-dock {
-  opacity: 1;
 }
 .kpl-ticks {
   display: flex;
@@ -1284,48 +1266,20 @@ html[data-intro-playing] {
   }
 }
 
-/* Last resort that needs no script: if the page never reveals itself (slow or blocked scripts), show it after 7s.
-   The rule stops matching as soon as the script adds `.in`, so normal behaviour is untouched. */
-.kpl:not(.in) .kpl-meta,
-.kpl:not(.in) .kpl-row,
-.kpl:not(.in) .kpl-track,
-.kpl:not(.in) .kpl-dock {
-  animation: kpl-show 0.5s ease 7s forwards;
+/*
+ * The page is already laid out and painted behind the red intro, so the reveal needs no script: it is timed
+ * from the intro's own clock (data-intro-go, set in <head>) and starts as the screen splits open. Without an
+ * intro (seen, Lite mode, reduced motion) there is no animation and everything shows at once.
+ */
+html[data-intro-go] .kpl-meta,
+html[data-intro-go] .kpl-row,
+html[data-intro-go] .kpl-track,
+html[data-intro-go] .kpl-dock {
+  animation: kpl-reveal 0.7s ease 3.6s backwards;
 }
-@keyframes kpl-show {
-  to {
-    opacity: 1;
-    filter: none;
-  }
-}
-
-/* ---- short windows (laptops with bars, split screens): trade extras for room so nothing is squeezed ---- */
-@media (min-width: 641px) and (max-height: 720px) {
-  .kpl {
-    --wm-w: min(calc(100vw - 48px), calc(20dvh * 1181 / 161));
-  }
-  .kpl-stage {
-    --row-top: calc(var(--pad) + var(--wm-h) + 16px);
-  }
-  .kpl-row {
-    padding: 4px 0;
-  }
-  .kpl-track {
-    --top0: calc(var(--row-top) + 52px);
-    bottom: 84px;
-    min-height: 0;
-  }
-  .kpl-hero-copy p,
-  .kpl-time,
-  .kpl-open,
-  .kpl-ticks {
-    display: none;
-  }
-  .kpl-open-map {
-    min-height: 52px;
-    font-size: 16px;
-  }
-  .kpl-edge {
-    bottom: 96px;
+@keyframes kpl-reveal {
+  from {
+    opacity: 0;
+    filter: blur(8px);
   }
 }

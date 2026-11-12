@@ -239,6 +239,18 @@ export function Landing({ offices }: { offices: PostOffice[] }) {
     };
   }, [total]);
 
+  // Download the map code quietly once the page has settled, so "Open the map" opens it straight away.
+  useEffect(() => {
+    const warm = () =>
+      void import("@/components/map/OfficeMap").catch(() => undefined);
+    if ("requestIdleCallback" in window) {
+      const idle = window.requestIdleCallback(warm, { timeout: 6000 });
+      return () => window.cancelIdleCallback(idle);
+    }
+    const timer = setTimeout(warm, 3000);
+    return () => clearTimeout(timer);
+  }, []);
+
   // India time, ticking, as a small touch in the corner.
   useEffect(() => {
     const format = new Intl.DateTimeFormat("en-GB", {

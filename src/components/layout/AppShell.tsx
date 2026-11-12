@@ -19,7 +19,6 @@ function ExploreSkeleton() {
 
 /**
  * Page frame: top bar, scrolling content area, and a bottom tab bar on phones.
- * The landing page (`/`) and the welcome tour (`/welcome`) draw their own full-screen layouts, so they get no frame.
  *
  * The map screen (`explore`) is mounted the first time it is opened and then only hidden, so coming
  * back to it is instant: no map rebuild, no tile reload, and filters and selection stay as they were.
@@ -50,8 +49,6 @@ export function AppShell({
     const timer = setTimeout(warm, 1500);
     return () => clearTimeout(timer);
   }, [onExplore]);
-
-  if (pathname === "/" || pathname === "/welcome") return <>{children}</>;
 
   return (
     // Pinned to the screen edges instead of sized with dvh: some iPhone web views measure dvh too short, which left a

@@ -1,6 +1,6 @@
 import { cleanup, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it } from "vitest";
-import DeleteAccountPage from "@/app/delete-account/page";
+import DeleteAccountPage from "@/app/(app)/delete-account/page";
 import { CONTACT_EMAIL } from "@/lib/constants";
 
 describe("delete-account page", () => {

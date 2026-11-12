@@ -6,8 +6,6 @@ import "@fontsource-variable/fraunces/wght-italic.css";
 import "@fontsource-variable/noto-sans-kannada";
 import "@fontsource/courier-prime/400.css";
 import "./globals.css";
-import { ExploreHostLoader } from "@/components/explore/ExploreHostLoader";
-import { AppShell } from "@/components/layout/AppShell";
 import { Providers } from "@/components/providers/Providers";
 
 export const metadata: Metadata = {
@@ -38,7 +36,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       </head>
       <body className="min-h-dvh">
         <Providers>
-          <AppShell explore={<ExploreHostLoader />}>{children}</AppShell>
+          {children}
         </Providers>
       </body>
     </html>

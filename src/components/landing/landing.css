@@ -6,6 +6,7 @@
 
 .kpl {
   --p: 0;
+  --wm-w: min(calc(100vw - 48px), calc(26dvh * 1181 / 161));
   background: #fff;
   color: var(--color-postal);
 }
@@ -32,8 +33,9 @@
 .kpl-wm {
   position: absolute;
   left: 24px;
-  right: 24px;
   top: 24px;
+  /* Full width, but never taller than a quarter of the screen, so short windows keep room for the cards. */
+  width: var(--wm-w);
   aspect-ratio: 1181 / 161;
   background: var(--color-postal);
   -webkit-mask: url(/brand/wordmark.svg) center / 100% 100% no-repeat;
@@ -103,7 +105,7 @@
 /* One row under the wordmark: tagline left, links centre, e-mail right. */
 .kpl-stage {
   --pad: 24px;
-  --wm-h: calc((100vw - 2 * var(--pad)) * 161 / 1181);
+  --wm-h: calc(var(--wm-w) * 161 / 1181);
   --row-top: calc(var(--pad) + var(--wm-h) + clamp(24px, 3.2vw, 44px));
 }
 .kpl-row {
@@ -1167,6 +1169,7 @@ html[data-intro-playing] {
 /* ---- dock v2: arrows beside the ticks, the main button on its own ---- */
 .kpl-dock {
   gap: 12px;
+  bottom: max(14px, env(safe-area-inset-bottom));
 }
 .kpl-nav2 {
   display: flex;
@@ -1293,5 +1296,36 @@ html[data-intro-playing] {
   to {
     opacity: 1;
     filter: none;
+  }
+}
+
+/* ---- short windows (laptops with bars, split screens): trade extras for room so nothing is squeezed ---- */
+@media (min-width: 641px) and (max-height: 720px) {
+  .kpl {
+    --wm-w: min(calc(100vw - 48px), calc(20dvh * 1181 / 161));
+  }
+  .kpl-stage {
+    --row-top: calc(var(--pad) + var(--wm-h) + 16px);
+  }
+  .kpl-row {
+    padding: 4px 0;
+  }
+  .kpl-track {
+    --top0: calc(var(--row-top) + 52px);
+    bottom: 84px;
+    min-height: 0;
+  }
+  .kpl-hero-copy p,
+  .kpl-time,
+  .kpl-open,
+  .kpl-ticks {
+    display: none;
+  }
+  .kpl-open-map {
+    min-height: 52px;
+    font-size: 16px;
+  }
+  .kpl-edge {
+    bottom: 96px;
   }
 }

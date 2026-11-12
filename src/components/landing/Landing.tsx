@@ -420,8 +420,11 @@ export function Landing({ offices }: { offices: PostOffice[] }) {
               <div className="kpl-herobody">
                 <div className="kpl-hero-copy">
                   <h1>
-                    Collect a stamp from every post office in India,{" "}
-                    <span>one stamp</span> at a time.
+                    Collect a stamp from every post office in{" "}
+                    {liveCount > 1
+                      ? "each state's Philately Passport"
+                      : `${stateName_}'s Philately Passport`}
+                    , <span>one stamp</span> at a time.
                   </h1>
                   <p>
                     Find post offices on the map, visit them and keep every

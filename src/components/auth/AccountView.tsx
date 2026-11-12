@@ -39,7 +39,7 @@ export function AccountView() {
   async function handleShare() {
     const result = await shareContent({
       title: "Philatrail",
-      text: "Collect a stamp from every post office in India.",
+      text: "Collect a stamp from every post office in your state's Philately Passport.",
       url: window.location.origin,
     });
     if (result === "copied")

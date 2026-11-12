@@ -74,7 +74,7 @@ describe("Landing", () => {
   it("states the promise and links to the map", () => {
     render(<Landing offices={offices} />);
     expect(screen.getByRole("heading", { level: 1 }).textContent).toContain(
-      "every post office in India"
+      "Karnataka's Philately Passport"
     );
     const links = screen.getAllByRole("link", {
       name: /open the map|explore/i,

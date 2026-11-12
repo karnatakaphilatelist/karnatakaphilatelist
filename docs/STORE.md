@@ -20,7 +20,7 @@ Screenshot order: 1 welcome, 2 explore map, 3 list sheet, 4 office detail, 5 pas
 
 **Subtitle (App Store, 30):** Stamp every post office
 
-**Short description (Play, 80):** Collect a stamp from every post office in India. Map, passport, progress.
+**Short description (Play, 80):** Collect a stamp from every post office in Karnataka. Map, passport, progress.
 
 **Promotional text (App Store, 170):** Find post offices near you, mark the ones you have stamped and watch your passport fill up, state by state.
 

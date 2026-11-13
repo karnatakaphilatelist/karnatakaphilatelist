@@ -1,5 +1,5 @@
 import { cleanup, render, screen } from "@testing-library/react";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { OfficeDetail } from "@/components/office/OfficeDetail";
 import type { OfficeWithStatus } from "@/types";
 
@@ -15,9 +15,16 @@ vi.mock("@/components/providers/ToastProvider", () => ({
   useToast: () => ({ showToast: vi.fn() }),
 }));
 
-vi.mock("@/lib/stamp-image", () => ({ stampImageUrl: () => null }));
+const stampImage = vi.hoisted(() => ({
+  stampImageUrl: vi.fn((): string | null => null),
+}));
+vi.mock("@/lib/stamp-image", () => stampImage);
 
 afterEach(cleanup);
+
+beforeEach(() => {
+  stampImage.stampImageUrl.mockReset().mockReturnValue(null);
+});
 
 function renderAt(distanceKm: number | null) {
   const office: OfficeWithStatus = {
@@ -99,7 +106,10 @@ describe("OfficeDetail distance check", () => {
 });
 
 describe("OfficeDetail about this place", () => {
-  function renderWithAbout(aboutPlace: string | null) {
+  function renderWithAbout(
+    aboutPlace: string | null,
+    stampImagePath: string | null = null
+  ) {
     const office: OfficeWithStatus = {
       id: 1,
       name: "Belur SO",
@@ -108,7 +118,7 @@ describe("OfficeDetail about this place", () => {
       state: "KA",
       lat: 13.16,
       lng: 75.86,
-      stampImagePath: null,
+      stampImagePath,
       aboutPlace,
       status: "unvisited",
       distanceKm: null,
@@ -126,8 +136,27 @@ describe("OfficeDetail about this place", () => {
     ).toBeTruthy();
   });
 
-  it("shows nothing when the office has no note", () => {
+  it("shows nothing when the office has no note and no postmark", () => {
     renderWithAbout(null);
     expect(screen.queryByText("About this place")).toBeNull();
+  });
+
+  it("shows the real postmark specimen beside the note when the office has one", () => {
+    stampImage.stampImageUrl.mockReturnValue(
+      "https://example.supabase.co/storage/v1/object/public/office-stamps/belur.webp"
+    );
+    renderWithAbout("A postmark showing Darpana Sundari.", "belur.webp");
+    expect(screen.getByText("About this place")).toBeTruthy();
+    expect(screen.getByAltText("Belur SO postmark design")).toBeTruthy();
+    expect(screen.getByText("Postmark")).toBeTruthy();
+  });
+
+  it("still shows the section from the note alone when the postmark image fails to resolve", () => {
+    stampImage.stampImageUrl.mockReturnValue(null);
+    renderWithAbout("A postmark showing Darpana Sundari.", "belur.webp");
+    expect(
+      screen.getByText("A postmark showing Darpana Sundari.")
+    ).toBeTruthy();
+    expect(screen.queryByAltText("Belur SO postmark design")).toBeNull();
   });
 });

@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { Postmark } from "@/components/office/Postmark";
+import { PostmarkSpecimen } from "@/components/office/PostmarkSpecimen";
 import { StatusBadge } from "@/components/office/StatusBadge";
 import { useToast } from "@/components/providers/ToastProvider";
 import { useVisits } from "@/components/providers/VisitsProvider";
@@ -142,12 +143,25 @@ export function OfficeDetail({
               </>
             ) : null}
           </p>
-          {office.aboutPlace ? (
+          {office.aboutPlace || office.stampImagePath ? (
             <div className="mt-3">
               <p className="text-[11px] font-semibold uppercase leading-3 tracking-[0.1em] text-muted">
                 About this place
               </p>
-              <p className="mt-1.5 text-sm leading-5">{office.aboutPlace}</p>
+              <div className="mt-1.5 flex items-start gap-3">
+                {office.stampImagePath ? (
+                  <PostmarkSpecimen
+                    path={office.stampImagePath}
+                    visited={Boolean(visit)}
+                    name={office.name}
+                  />
+                ) : null}
+                {office.aboutPlace ? (
+                  <p className="min-w-0 flex-1 text-sm leading-5">
+                    {office.aboutPlace}
+                  </p>
+                ) : null}
+              </div>
             </div>
           ) : null}
         </div>

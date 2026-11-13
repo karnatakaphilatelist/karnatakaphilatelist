@@ -10,11 +10,11 @@ import { Providers } from "@/components/providers/Providers";
 
 export const metadata: Metadata = {
   title: {
-    default: "Philatrail: the post office stamp passport for India",
+    default: "Philatrail: the map and tracker for Karnataka's Philately Passport",
     template: "%s · Philatrail",
   },
   description:
-    "Find post offices across India on the map, plan your day, and keep a passport of the stamps you have collected.",
+    "Find the 100 post offices of Karnataka's Philately Passport on a map, plan your next visit, and keep track of every postmark you collect.",
 };
 
 export const viewport: Viewport = {

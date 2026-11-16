@@ -226,7 +226,7 @@ export function OfficeDetail({
               stampedOn={visit ? formatVisitDate(visit.visitedAt) : undefined}
             />
             {visit ? (
-              <p className="text-sm leading-5">
+              <p className="text-xs leading-4">
                 {collected && total ? (
                   <>
                     Your <b className="font-semibold">{ordinal(collected)}</b>{" "}
@@ -245,11 +245,13 @@ export function OfficeDetail({
               />
             )}
           </div>
-          {/* PPC image — always full colour; the green badge is the visited indicator */}
+          {/* PPC image — always full colour; the green badge is the visited indicator.
+              Nudged up slightly so its top visually lines up with the status badge/text
+              rather than the (slightly padded) edge of its own frame. */}
           <StampThumb
             path={office.stampImagePath}
             status="visited"
-            className="size-[140px] shrink-0 rounded-2xl border border-[#16204f]/10 shadow-[0_2px_8px_rgba(22,32,79,0.06)]"
+            className="-mt-1 size-[140px] shrink-0 rounded-2xl border border-[#16204f]/10 shadow-[0_2px_8px_rgba(22,32,79,0.06)]"
           />
         </div>
 
@@ -488,7 +490,7 @@ function ProximityButton({
       <button
         type="button"
         onClick={onCheckDistance}
-        className="kp-glass flex h-11 w-fit items-center gap-2 rounded-full px-4 text-sm font-semibold text-ink"
+        className="kp-glass flex h-11 w-fit items-center gap-2 rounded-full pl-2.5 pr-4 text-sm font-semibold text-ink"
       >
         <TargetIcon className="size-4 text-postal" />
         Check if you&apos;re here

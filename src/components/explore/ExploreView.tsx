@@ -14,6 +14,7 @@ import { OfficeDetail } from "@/components/office/OfficeDetail";
 import { StampedSheet } from "@/components/office/StampedSheet";
 import { VisitDialog } from "@/components/office/VisitDialog";
 import { useAuth } from "@/components/providers/AuthProvider";
+import { useOverlay } from "@/components/providers/OverlayProvider";
 import { useToast } from "@/components/providers/ToastProvider";
 import { useStateOffices } from "@/components/providers/StateProvider";
 import { useVisits } from "@/components/providers/VisitsProvider";
@@ -126,6 +127,15 @@ export function ExploreView({
   if (selectedId !== null && selectedOffice === null) setSelectedId(null);
   const editingOffice =
     offices.find((office) => office.id === editingId) ?? null;
+
+  // Hide the phone tab bar while the detail card is open: it's a plain bottom
+  // sheet (not a native dialog, which StampedSheet uses), so without this the
+  // bar used to peek out from underneath it.
+  const { setSheetOpen: setTabBarHidden } = useOverlay();
+  useEffect(() => {
+    setTabBarHidden(selectedOffice !== null);
+    return () => setTabBarHidden(false);
+  }, [selectedOffice, setTabBarHidden]);
 
   async function handleMarkVisited(officeId: number) {
     const saved = await markVisited(officeId);

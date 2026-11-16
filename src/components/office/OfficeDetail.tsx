@@ -85,7 +85,7 @@ function EmptyState({
   description: string;
 }) {
   return (
-    <div className="flex flex-col items-center px-4 py-6 text-center">
+    <div className="flex flex-col items-center px-4 py-4 text-center">
       <span
         aria-hidden
         className="mb-3 grid size-14 place-items-center rounded-full bg-[#16204f]/[0.04] text-muted"
@@ -178,7 +178,7 @@ export function OfficeDetail({
       />
 
       {/* Scrollable content */}
-      <div className="relative min-h-0 flex-1 overflow-y-auto px-4 pb-2 pt-3">
+      <div className="relative min-h-0 flex-1 overflow-y-auto px-4 pb-6 pt-3">
         {/* ── Name row + verified badge + close ── */}
         <div className="flex items-start justify-between gap-3 pt-2">
           <div className="flex min-w-0 items-center gap-2">

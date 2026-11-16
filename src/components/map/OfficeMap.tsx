@@ -70,8 +70,17 @@ function MapViewport({
       paddingTopLeft: [40, 130] as [number, number],
       paddingBottomRight: [40, 160] as [number, number],
     };
-    if (points.length > 1) map.fitBounds(points, { ...room, animate: !first });
-    else map.flyTo(points[0], FOCUS_ZOOM, { duration: 0.6 });
+    // On first mount the container can still report a stale/zero size (its height
+    // depends on layout that hasn't settled yet), which makes Leaflet compute a far
+    // too-zoomed-out fit. Re-measure right before fitting so the first fit always
+    // lands on Karnataka, not a whole-India view.
+    map.invalidateSize();
+    const fit = () => {
+      if (points.length > 1) map.fitBounds(points, { ...room, animate: !first });
+      else map.flyTo(points[0], FOCUS_ZOOM, { duration: 0.6 });
+    };
+    if (first) requestAnimationFrame(fit);
+    else fit();
     // Only when the set of pins changes, not when a pin's status does.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [map, shown]);
@@ -197,6 +206,12 @@ export function OfficeMap({
     <MapContainer
       center={[MAP_START_CENTER.lat, MAP_START_CENTER.lng]}
       zoom={MAP_START_ZOOM}
+      // Karnataka's bounding box rarely lands on a whole zoom level: with the
+      // default integer-only zoom, fitBounds has to round down to the nearest
+      // whole level to keep every pin on screen, which can show nearly double
+      // the intended area (most of South India instead of just the state).
+      // Fractional zoom lets the initial fit hug the real bounds.
+      zoomSnap={0.25}
       className="kp-map size-full"
       zoomControl={false}
       whenReady={onReady}

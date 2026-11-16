@@ -17,6 +17,9 @@ vi.mock("@/components/office/VisitDialog", () => ({ VisitDialog: () => null }));
 vi.mock("@/components/providers/ToastProvider", () => ({
   useToast: () => ({ showToast: vi.fn() }),
 }));
+vi.mock("@/components/providers/OverlayProvider", () => ({
+  useOverlay: () => ({ sheetOpen: false, setSheetOpen: vi.fn() }),
+}));
 
 const auth = vi.hoisted(() => ({
   user: null as {

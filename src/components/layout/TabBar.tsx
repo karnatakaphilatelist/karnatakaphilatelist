@@ -3,10 +3,17 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { isActivePath, NAV_ITEMS } from "@/components/layout/nav-items";
+import { useOverlay } from "@/components/providers/OverlayProvider";
 
 /** Bottom navigation for phones: a floating pill with the active tab filled in postal red. */
 export function TabBar() {
   const pathname = usePathname();
+  const { sheetOpen } = useOverlay();
+
+  // The office detail card is a phone-only bottom sheet sized to leave room for this
+  // bar, which used to leave an odd sliver of tab bar peeking out below it. Hiding the
+  // bar while a sheet is open reads as one continuous surface instead.
+  if (sheetOpen) return null;
 
   return (
     <nav

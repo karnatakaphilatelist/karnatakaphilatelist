@@ -179,7 +179,7 @@ export function OfficeDetail({
 
         {/* ── Status row: left (badge + proximity/progress) | right (PPC image) ── */}
         <div className="mt-3.5 flex items-start justify-between gap-4">
-          <div className="flex min-w-0 flex-1 flex-col gap-3">
+          <div className="flex min-w-0 flex-1 flex-col items-start gap-3">
             <StatusBadge
               status={office.status}
               stampedOn={visit ? formatVisitDate(visit.visitedAt) : undefined}
@@ -279,7 +279,7 @@ export function OfficeDetail({
             <button
               type="button"
               onClick={() => onMarkVisited(office.id)}
-              className="flex h-[62px] flex-1 items-center justify-center gap-2 rounded-[28px] bg-gradient-to-b from-[#e0334a] to-postal pl-1 text-base font-bold uppercase tracking-[0.14em] text-white shadow-[inset_0_1.5px_0_rgb(255_255_255/0.35),0_8px_18px_-8px_rgb(207_24_48/0.7)]"
+              className="flex h-14 flex-1 items-center justify-center gap-2 rounded-[28px] bg-gradient-to-b from-[#e0334a] to-postal pl-1 text-base font-bold uppercase tracking-[0.14em] text-white shadow-[inset_0_1.5px_0_rgb(255_255_255/0.35),0_8px_18px_-8px_rgb(207_24_48/0.7)]"
             >
               <CheckIcon className="size-5" strokeWidth={2.8} />
               Stamp it

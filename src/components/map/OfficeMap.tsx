@@ -206,6 +206,12 @@ export function OfficeMap({
     <MapContainer
       center={[MAP_START_CENTER.lat, MAP_START_CENTER.lng]}
       zoom={MAP_START_ZOOM}
+      // Karnataka's bounding box rarely lands on a whole zoom level: with the
+      // default integer-only zoom, fitBounds has to round down to the nearest
+      // whole level to keep every pin on screen, which can show nearly double
+      // the intended area (most of South India instead of just the state).
+      // Fractional zoom lets the initial fit hug the real bounds.
+      zoomSnap={0.25}
       className="kp-map size-full"
       zoomControl={false}
       whenReady={onReady}

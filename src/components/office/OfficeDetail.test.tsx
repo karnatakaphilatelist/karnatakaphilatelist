@@ -1,11 +1,13 @@
-import { cleanup, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { OfficeDetail } from "@/components/office/OfficeDetail";
-import type { OfficeWithStatus } from "@/types";
+import type { OfficeWithStatus, Visit } from "@/types";
+
+const mockVisits = vi.hoisted(() => ({ current: {} as Record<number, Visit> }));
 
 vi.mock("@/components/providers/VisitsProvider", () => ({
   useVisits: () => ({
-    visits: {},
+    visits: mockVisits.current,
     togglePlanned: vi.fn(),
     removeVisit: vi.fn(),
   }),
@@ -24,6 +26,7 @@ afterEach(cleanup);
 
 beforeEach(() => {
   stampImage.stampImageUrl.mockReset().mockReturnValue(null);
+  mockVisits.current = {};
 });
 
 function renderAt(distanceKm: number | null) {
@@ -161,5 +164,88 @@ describe("OfficeDetail about this place", () => {
     expect(
       screen.getByText(/A philatelic post office in Hassan district/)
     ).toBeTruthy();
+  });
+});
+
+describe("OfficeDetail tabs", () => {
+  function baseOffice(overrides: Partial<OfficeWithStatus> = {}): OfficeWithStatus {
+    return {
+      id: 1,
+      name: "Aihole BO",
+      pincode: "587124",
+      district: "Bagalkot",
+      state: "KA",
+      lat: 15.87,
+      lng: 75.88,
+      stampImagePath: null,
+      status: "unvisited",
+      distanceKm: null,
+      ...overrides,
+    };
+  }
+
+  it("shows the About tab's content by default", () => {
+    render(
+      <OfficeDetail
+        office={baseOffice()}
+        onClose={vi.fn()}
+        onMarkVisited={vi.fn()}
+      />
+    );
+    expect(screen.getByText("About this place")).toBeTruthy();
+  });
+
+  it("switches to the Notes tab and shows the empty state before any visit", () => {
+    render(
+      <OfficeDetail
+        office={baseOffice()}
+        onClose={vi.fn()}
+        onMarkVisited={vi.fn()}
+      />
+    );
+    fireEvent.click(screen.getByRole("button", { name: /^Notes/ }));
+    expect(screen.getByText("No notes yet")).toBeTruthy();
+    expect(
+      screen.getByText(/stamp your passport to start adding notes/)
+    ).toBeTruthy();
+  });
+
+  it("shows the visit's own note on the Notes tab, with an edit action", () => {
+    mockVisits.current = {
+      1: {
+        officeId: 1,
+        visitedAt: "2026-11-13",
+        note: "Counter was open 10am–1pm only.",
+        photoPath: null,
+        isPublic: false,
+      },
+    };
+    const onEditVisit = vi.fn();
+    render(
+      <OfficeDetail
+        office={baseOffice({ status: "visited" })}
+        onClose={vi.fn()}
+        onMarkVisited={vi.fn()}
+        onEditVisit={onEditVisit}
+      />
+    );
+    fireEvent.click(screen.getByRole("button", { name: /^Notes/ }));
+    expect(
+      screen.getByText("Counter was open 10am–1pm only.")
+    ).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "Edit note & photo" }));
+    expect(onEditVisit).toHaveBeenCalledWith(1);
+  });
+
+  it("shows an honest placeholder on the Public tab", () => {
+    render(
+      <OfficeDetail
+        office={baseOffice()}
+        onClose={vi.fn()}
+        onMarkVisited={vi.fn()}
+      />
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Public" }));
+    expect(screen.getByText("No public notes yet")).toBeTruthy();
   });
 });

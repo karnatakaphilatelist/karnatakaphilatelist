@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import Link from "next/link";
 import { StampThumb } from "@/components/office/StampThumb";
 import { StatusBadge } from "@/components/office/StatusBadge";
@@ -15,6 +15,7 @@ import {
   TargetIcon,
   ShareIcon,
   NoteIcon,
+  GlobeIcon,
 } from "@/components/ui/icons";
 import {
   directionsUrl,
@@ -61,6 +62,44 @@ const ROUND_BTN =
 const ROUND_LABEL =
   "text-[11px] font-semibold uppercase leading-3 tracking-[0.1em] text-muted";
 
+type DetailTab = "about" | "notes" | "public";
+
+/** A section label with the small postal-red accent bar, used throughout the About tab. */
+function SectionLabel({ children }: { children: string }) {
+  return (
+    <p className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[0.14em] text-muted">
+      <span aria-hidden className="h-3 w-[3px] shrink-0 rounded-sm bg-postal" />
+      {children}
+    </p>
+  );
+}
+
+/** Centered icon + title + description, used for every "nothing here yet" tab state. */
+function EmptyState({
+  icon,
+  title,
+  description,
+}: {
+  icon: ReactNode;
+  title: string;
+  description: string;
+}) {
+  return (
+    <div className="flex flex-col items-center px-4 py-6 text-center">
+      <span
+        aria-hidden
+        className="mb-3 grid size-14 place-items-center rounded-full bg-[#16204f]/[0.04] text-muted"
+      >
+        {icon}
+      </span>
+      <p className="text-[15px] font-semibold">{title}</p>
+      <p className="mt-1 max-w-[260px] text-[13px] leading-[18px] text-muted">
+        {description}
+      </p>
+    </div>
+  );
+}
+
 /** Instagram-style green starburst verified badge, shown only for visited offices. */
 function VerifiedBadge() {
   return (
@@ -98,6 +137,7 @@ export function OfficeDetail({
   office,
   onClose,
   onMarkVisited,
+  onEditVisit,
   onCheckDistance,
   collected,
   total,
@@ -109,6 +149,7 @@ export function OfficeDetail({
   const visit = visits[office.id];
   const isPlanned = office.status === "planned";
   const [aboutExpanded, setAboutExpanded] = useState(false);
+  const [activeTab, setActiveTab] = useState<DetailTab>("about");
 
   async function handleShare() {
     const result = await shareContent({
@@ -128,7 +169,7 @@ export function OfficeDetail({
     <div
       role="region"
       aria-label={`${office.name} details`}
-      className="kp-glass-panel absolute inset-x-0 bottom-0 z-[1100] flex max-h-[85%] animate-rise flex-col rounded-t-[28px] md:inset-x-auto md:bottom-auto md:left-14 md:top-4 md:max-h-[calc(100%-2rem)] md:w-96 md:rounded-2xl md:bg-white md:shadow-xl"
+      className="kp-glass-panel absolute inset-x-0 bottom-0 z-[1100] flex max-h-[85%] animate-rise flex-col rounded-t-[24px] md:inset-x-auto md:bottom-auto md:left-14 md:top-4 md:max-h-[calc(100%-2rem)] md:w-96 md:rounded-2xl md:bg-white md:shadow-xl"
     >
       {/* Grab handle (mobile only) */}
       <div
@@ -154,14 +195,14 @@ export function OfficeDetail({
             type="button"
             onClick={onClose}
             aria-label="Close post office details"
-            className="kp-glass grid size-10 shrink-0 place-items-center rounded-full text-ink"
+            className="kp-glass grid size-8 shrink-0 place-items-center rounded-full text-ink"
           >
-            <CloseIcon className="size-4" strokeWidth={2.8} />
+            <CloseIcon className="size-[11px]" strokeWidth={2.8} />
           </button>
         </div>
 
         {/* ── Meta: district · pincode · distance ── */}
-        <p className="mt-2 flex items-center gap-2.5 text-sm leading-5 text-muted">
+        <p className="mt-2 flex items-center gap-3 text-sm leading-5 text-muted">
           <span>{office.district}</span>
           <span aria-hidden className="h-3.5 w-px bg-[#b8861b]" />
           <span className="font-mono tracking-[0.08em]">
@@ -178,8 +219,8 @@ export function OfficeDetail({
         </p>
 
         {/* ── Status row: left (badge + proximity/progress) | right (PPC image) ── */}
-        <div className="mt-3.5 flex items-start justify-between gap-4">
-          <div className="flex min-w-0 flex-1 flex-col items-start gap-3">
+        <div className="mt-3 flex items-start justify-between gap-4">
+          <div className="flex min-w-0 flex-1 flex-col items-start gap-2">
             <StatusBadge
               status={office.status}
               stampedOn={visit ? formatVisitDate(visit.visitedAt) : undefined}
@@ -208,7 +249,7 @@ export function OfficeDetail({
           <StampThumb
             path={office.stampImagePath}
             status="visited"
-            className="size-[110px] shrink-0 rounded-full border border-[#16204f]/10 shadow-[0_2px_8px_rgba(22,32,79,0.06)]"
+            className="size-[140px] shrink-0 rounded-2xl border border-[#16204f]/10 shadow-[0_2px_8px_rgba(22,32,79,0.06)]"
           />
         </div>
 
@@ -217,37 +258,120 @@ export function OfficeDetail({
           <ProximityWarning km={office.distanceKm} />
         ) : null}
 
-        {/* ── Divider ── */}
-        <div
-          aria-hidden
-          className="my-4 h-px bg-gradient-to-r from-transparent via-[#16204f]/7 to-transparent"
-        />
-
-        {/* ── About this place ── */}
-        {office.district ? (
-          <div className="pb-2">
-            <p className="text-[12px] font-bold uppercase tracking-[0.14em] text-muted">
-              About this place
-            </p>
-            <p
-              className={`mt-2 text-sm leading-[21px] ${
-                !aboutExpanded ? "line-clamp-3" : ""
-              }`}
-            >
-              {office.aboutPlace ||
-                `A philatelic post office in ${office.district} district, Karnataka. Visit to collect its unique postmark cancellation stamp in your passport.`}
-            </p>
-            {!aboutExpanded ? (
-              <button
-                type="button"
-                onClick={() => setAboutExpanded(true)}
-                className="mt-1.5 text-[13px] font-semibold text-[#2f4aa8]"
-              >
-                Read more
-              </button>
+        {/* ── Tab bar: About · Notes · Public ── */}
+        <div className="mt-3.5 flex border-b border-[#16204f]/[0.06]">
+          <button
+            type="button"
+            onClick={() => setActiveTab("about")}
+            className={`relative flex-1 py-2.5 pb-2 text-[13px] font-semibold ${
+              activeTab === "about"
+                ? "font-bold text-ink after:absolute after:inset-x-4 after:-bottom-px after:h-[2.5px] after:rounded-sm after:bg-ink"
+                : "text-muted"
+            }`}
+          >
+            About
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab("notes")}
+            className={`relative flex-1 py-2.5 pb-2 text-[13px] font-semibold ${
+              activeTab === "notes"
+                ? "font-bold text-ink after:absolute after:inset-x-4 after:-bottom-px after:h-[2.5px] after:rounded-sm after:bg-ink"
+                : "text-muted"
+            }`}
+          >
+            Notes
+            {visit?.note ? (
+              <span className="ml-1 inline-flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-[#16204f]/10 px-[5px] text-[10px] font-bold align-text-top">
+                1
+              </span>
             ) : null}
-          </div>
-        ) : null}
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab("public")}
+            className={`relative flex-1 py-2.5 pb-2 text-[13px] font-semibold ${
+              activeTab === "public"
+                ? "font-bold text-ink after:absolute after:inset-x-4 after:-bottom-px after:h-[2.5px] after:rounded-sm after:bg-ink"
+                : "text-muted"
+            }`}
+          >
+            Public
+          </button>
+        </div>
+
+        {/* ── Tab content ── */}
+        <div className="pt-3.5">
+          {activeTab === "about" ? (
+            <>
+              {office.district ? (
+                <div className="mb-2 rounded-xl bg-[#16204f]/[0.025] p-3">
+                  <SectionLabel>About this place</SectionLabel>
+                  <p
+                    className={`mt-2 text-sm leading-[21px] ${
+                      !aboutExpanded ? "line-clamp-3" : ""
+                    }`}
+                  >
+                    {office.aboutPlace ||
+                      `A philatelic post office in ${office.district} district, Karnataka. Visit to collect its unique postmark cancellation stamp in your passport.`}
+                  </p>
+                  {!aboutExpanded ? (
+                    <button
+                      type="button"
+                      onClick={() => setAboutExpanded(true)}
+                      className="mt-1 text-[13px] font-semibold text-[#2f4aa8]"
+                    >
+                      Read more
+                    </button>
+                  ) : null}
+                </div>
+              ) : null}
+            </>
+          ) : null}
+
+          {activeTab === "notes" ? (
+            <>
+              {!visit ? (
+                <EmptyState
+                  icon={<NoteIcon className="size-7" strokeWidth={1.5} />}
+                  title="No notes yet"
+                  description="Visit this office and stamp your passport to start adding notes and photos."
+                />
+              ) : visit.note ? (
+                <div className="overflow-hidden rounded-2xl border border-[#16204f]/[0.06] bg-[#16204f]/[0.02]">
+                  <p className="whitespace-pre-line px-4 py-3 text-sm leading-[21px]">
+                    {visit.note}
+                  </p>
+                </div>
+              ) : (
+                <EmptyState
+                  icon={<NoteIcon className="size-7" strokeWidth={1.5} />}
+                  title="No notes yet"
+                  description="Add a note or photo from your visit — only you can see it unless you make it public."
+                />
+              )}
+              {visit && onEditVisit ? (
+                <button
+                  type="button"
+                  onClick={() => onEditVisit(office.id)}
+                  className="mt-2 text-[13px] font-semibold text-[#2f4aa8]"
+                >
+                  {visit.note || visit.photoPath
+                    ? "Edit note & photo"
+                    : "Add a note"}
+                </button>
+              ) : null}
+            </>
+          ) : null}
+
+          {activeTab === "public" ? (
+            <EmptyState
+              icon={<GlobeIcon className="size-7" strokeWidth={1.5} />}
+              title="No public notes yet"
+              description="Tips and photos other collectors choose to share publicly will show up here."
+            />
+          ) : null}
+        </div>
       </div>
 
       {/* ── Actions (pinned to bottom) ── */}

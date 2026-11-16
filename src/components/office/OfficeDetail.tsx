@@ -1,8 +1,8 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
-import { Postmark } from "@/components/office/Postmark";
-import { PostmarkSpecimen } from "@/components/office/PostmarkSpecimen";
+import { StampThumb } from "@/components/office/StampThumb";
 import { StatusBadge } from "@/components/office/StatusBadge";
 import { useToast } from "@/components/providers/ToastProvider";
 import { useVisits } from "@/components/providers/VisitsProvider";
@@ -38,6 +38,8 @@ interface OfficeDetailProps {
   collected?: number;
   total?: number;
   stateName?: string;
+  /** Called when the user wants to report a problem with this office. */
+  onReport?: (officeId: number) => void;
 }
 
 function ordinal(n: number): string {
@@ -59,6 +61,35 @@ const ROUND_BTN =
 const ROUND_LABEL =
   "text-[11px] font-semibold uppercase leading-3 tracking-[0.1em] text-muted";
 
+/** Instagram-style green starburst verified badge, shown only for visited offices. */
+function VerifiedBadge() {
+  return (
+    <span
+      aria-label="Stamped — verified"
+      className="mt-2.5 inline-block size-6 shrink-0"
+    >
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+        className="size-full"
+      >
+        <path
+          d="M12 1l2.09 3.07L17.5 3l.41 3.5L21.4 8l-1.6 3.12L21.4 14.2l-3.5 1.52L17.5 19.2l-3.41-1.07L12 21.2l-2.09-3.07L6.5 19.2l-.41-3.48L2.6 14.2l1.6-3.08L2.6 8l3.49-1.5L6.5 3l3.41 1.07L12 1z"
+          fill="#14653f"
+        />
+        <path
+          d="M8.5 12.5l2 2 5-5"
+          stroke="white"
+          strokeWidth={2}
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
+    </span>
+  );
+}
+
 /**
  * Details and actions for one office. A docked panel on phones (it sits on top of the tab bar),
  * a card floating over the map on larger screens.
@@ -71,11 +102,13 @@ export function OfficeDetail({
   collected,
   total,
   stateName,
+  onReport,
 }: OfficeDetailProps) {
   const { visits, togglePlanned } = useVisits();
   const { showToast } = useToast();
   const visit = visits[office.id];
   const isPlanned = office.status === "planned";
+  const [aboutExpanded, setAboutExpanded] = useState(false);
 
   async function handleShare() {
     const result = await shareContent({
@@ -97,27 +130,26 @@ export function OfficeDetail({
       aria-label={`${office.name} details`}
       className="kp-glass-panel absolute inset-x-0 bottom-0 z-[1100] flex max-h-[85%] animate-rise flex-col rounded-t-[28px] md:inset-x-auto md:bottom-auto md:left-14 md:top-4 md:max-h-[calc(100%-2rem)] md:w-96 md:rounded-2xl md:bg-white md:shadow-xl"
     >
+      {/* Grab handle (mobile only) */}
       <div
         aria-hidden="true"
         className="mx-auto mt-3 h-1 w-10 shrink-0 rounded-full bg-[#c7c7cc] md:hidden"
       />
-      <div className="relative min-h-0 flex-1 overflow-y-auto px-4 pb-2 pt-3">
-        {/* Ghost stamp slot behind the headline: where the stamp will go. */}
-        {!visit ? (
-          <div
-            aria-hidden="true"
-            className="pointer-events-none absolute -right-8 top-8 h-[139px] w-[125px] rotate-6 rounded-md bg-white/40 outline-2 -outline-offset-[10px] outline-dashed outline-[#8f640f]/30"
-          />
-        ) : null}
 
-        <div className="relative flex items-start justify-between gap-3 pt-2">
-          <h2
-            className={`-ml-0.5 min-w-0 font-medium uppercase tracking-[0.01em] ${headlineClass(
-              office.name
-            )}`}
-          >
-            {office.name}
-          </h2>
+      {/* Scrollable content */}
+      <div className="relative min-h-0 flex-1 overflow-y-auto px-4 pb-2 pt-3">
+        {/* ── Name row + verified badge + close ── */}
+        <div className="flex items-start justify-between gap-3 pt-2">
+          <div className="flex min-w-0 items-center gap-2">
+            <h2
+              className={`-ml-0.5 min-w-0 font-medium uppercase tracking-[0.01em] ${headlineClass(
+                office.name
+              )}`}
+            >
+              {office.name}
+            </h2>
+            {visit ? <VerifiedBadge /> : null}
+          </div>
           <button
             type="button"
             onClick={onClose}
@@ -127,110 +159,121 @@ export function OfficeDetail({
             <CloseIcon className="size-4" strokeWidth={2.8} />
           </button>
         </div>
-        <div className="relative">
-          <p className="mt-2 flex items-center gap-2.5 text-sm leading-5 text-muted">
-            <span>{office.district}</span>
-            <span aria-hidden className="h-3.5 w-px bg-[#b8861b]" />
-            <span className="font-mono tracking-[0.08em]">
-              {office.pincode || "No pincode"}
-            </span>
-            {office.distanceKm !== null ? (
-              <>
-                <span aria-hidden className="h-3.5 w-px bg-[#b8861b]" />
-                <span className="font-mono text-[13px] font-bold uppercase">
-                  {formatDistance(office.distanceKm)}
-                </span>
-              </>
-            ) : null}
-          </p>
-          {office.aboutPlace || office.stampImagePath ? (
-            <div className="mt-3">
-              <p className="text-[11px] font-semibold uppercase leading-3 tracking-[0.1em] text-muted">
-                About this place
-              </p>
-              <div className="mt-1.5 flex items-start gap-3">
-                {office.stampImagePath ? (
-                  <PostmarkSpecimen
-                    path={office.stampImagePath}
-                    visited={Boolean(visit)}
-                    name={office.name}
-                  />
-                ) : null}
-                {office.aboutPlace ? (
-                  <p className="min-w-0 flex-1 text-sm leading-5">
-                    {office.aboutPlace}
-                  </p>
-                ) : null}
-              </div>
-            </div>
-          ) : null}
-        </div>
 
-        <div className="relative mt-3 flex items-start justify-between gap-3">
-          <div className="min-w-0">
+        {/* ── Meta: district · pincode · distance ── */}
+        <p className="mt-2 flex items-center gap-2.5 text-sm leading-5 text-muted">
+          <span>{office.district}</span>
+          <span aria-hidden className="h-3.5 w-px bg-[#b8861b]" />
+          <span className="font-mono tracking-[0.08em]">
+            {office.pincode || "No pincode"}
+          </span>
+          {office.distanceKm !== null ? (
+            <>
+              <span aria-hidden className="h-3.5 w-px bg-[#b8861b]" />
+              <span className="font-mono text-[13px] font-bold uppercase">
+                {formatDistance(office.distanceKm)}
+              </span>
+            </>
+          ) : null}
+        </p>
+
+        {/* ── Status row: left (badge + proximity/progress) | right (PPC image) ── */}
+        <div className="mt-3.5 flex items-start justify-between gap-4">
+          <div className="flex min-w-0 flex-1 flex-col gap-3">
             <StatusBadge
               status={office.status}
               stampedOn={visit ? formatVisitDate(visit.visitedAt) : undefined}
             />
             {visit ? (
-              <>
-                <p className="mt-3 text-sm leading-5">
-                  {collected && total ? (
-                    <>
-                      Your {ordinal(collected)} stamp
-                      {stateName ? ` in ${stateName}` : ""}.{" "}
-                      {Math.max(total - collected, 0)} to go.
-                    </>
-                  ) : (
-                    "Stamped in your passport."
-                  )}
-                </p>
-              </>
-            ) : null}
+              <p className="text-sm leading-5">
+                {collected && total ? (
+                  <>
+                    Your <b className="font-semibold">{ordinal(collected)}</b>{" "}
+                    stamp
+                    {stateName ? ` in ${stateName}` : ""}.{" "}
+                    {Math.max(total - collected, 0)} to go.
+                  </>
+                ) : (
+                  "Stamped in your passport."
+                )}
+              </p>
+            ) : (
+              <ProximityButton
+                km={office.distanceKm}
+                onCheckDistance={onCheckDistance}
+              />
+            )}
           </div>
-          {visit ? (
-            <Postmark
-              name={office.name}
-              date={formatVisitDate(visit.visitedAt)}
-              pincode={office.pincode}
-              className="size-[116px] shrink-0 animate-thump"
-            />
-          ) : null}
+          {/* PPC image — always full colour; the green badge is the visited indicator */}
+          <StampThumb
+            path={office.stampImagePath}
+            status="visited"
+            className="size-[110px] shrink-0 rounded-full border border-[#16204f]/10 shadow-[0_2px_8px_rgba(22,32,79,0.06)]"
+          />
         </div>
 
+        {/* ── Proximity warning (when located but far away, unvisited only) ── */}
         {!visit ? (
-          <ProximityBanner
-            km={office.distanceKm}
-            onCheckDistance={onCheckDistance}
-          />
+          <ProximityWarning km={office.distanceKm} />
+        ) : null}
+
+        {/* ── Divider ── */}
+        <div
+          aria-hidden
+          className="my-4 h-px bg-gradient-to-r from-transparent via-[#16204f]/7 to-transparent"
+        />
+
+        {/* ── About this place ── */}
+        {office.district ? (
+          <div className="pb-2">
+            <p className="text-[12px] font-bold uppercase tracking-[0.14em] text-muted">
+              About this place
+            </p>
+            <p
+              className={`mt-2 text-sm leading-[21px] ${
+                !aboutExpanded ? "line-clamp-3" : ""
+              }`}
+            >
+              {office.aboutPlace ||
+                `A philatelic post office in ${office.district} district, Karnataka. Visit to collect its unique postmark cancellation stamp in your passport.`}
+            </p>
+            {!aboutExpanded ? (
+              <button
+                type="button"
+                onClick={() => setAboutExpanded(true)}
+                className="mt-1.5 text-[13px] font-semibold text-[#2f4aa8]"
+              >
+                Read more
+              </button>
+            ) : null}
+          </div>
         ) : null}
       </div>
 
-      <div className="relative shrink-0 px-4 pb-4 pt-3">
+      {/* ── Actions (pinned to bottom) ── */}
+      <div className="relative shrink-0 px-4 pb-2 pt-3">
         {visit ? (
-          <>
-            <div className="flex items-start gap-3">
-              <button
-                type="button"
-                onClick={() => void handleShare()}
-                className="flex h-14 flex-1 items-center justify-center gap-2.5 rounded-[28px] bg-gradient-to-b from-[#e0334a] to-postal text-base font-bold uppercase tracking-[0.14em] text-white shadow-[inset_0_1.5px_0_rgb(255_255_255/0.35),0_8px_18px_-8px_rgb(207_24_48/0.7)]"
+          <div className="flex items-start gap-3">
+            <button
+              type="button"
+              onClick={() => void handleShare()}
+              className="flex h-14 flex-1 items-center justify-center gap-2.5 rounded-[28px] bg-gradient-to-b from-[#e0334a] to-postal text-base font-bold uppercase tracking-[0.14em] text-white shadow-[inset_0_1.5px_0_rgb(255_255_255/0.35),0_8px_18px_-8px_rgb(207_24_48/0.7)]"
+            >
+              <ShareIcon className="size-5" strokeWidth={2.8} />
+              Share stamp
+            </button>
+            <div className="flex w-14 flex-none flex-col items-center gap-2">
+              <Link
+                href="/passport"
+                aria-label="Stamps"
+                className={ROUND_BTN}
               >
-                <ShareIcon className="size-5" strokeWidth={2.8} />
-                Share stamp
-              </button>
-              <div className="flex w-14 flex-none flex-col items-center gap-2">
-                <Link
-                  href="/passport"
-                  aria-label="Stamps"
-                  className={ROUND_BTN}
-                >
-                  <NoteIcon className="size-[22px]" />
-                </Link>
-                <span className={ROUND_LABEL}>Stamps</span>
-              </div>
-              {hasCoordinates(office) ? <RouteButton office={office} /> : null}
+                <NoteIcon className="size-[22px]" />
+              </Link>
+              <span className={ROUND_LABEL}>Stamps</span>
             </div>
-          </>
+            {hasCoordinates(office) ? <RouteButton office={office} /> : null}
+          </div>
         ) : (
           <div className="flex items-start gap-3">
             <button
@@ -260,6 +303,16 @@ export function OfficeDetail({
             {hasCoordinates(office) ? <RouteButton office={office} /> : null}
           </div>
         )}
+
+        {/* ── Report a problem ── */}
+        <button
+          type="button"
+          onClick={() => onReport?.(office.id)}
+          className="mt-2 flex w-full items-center justify-center gap-1.5 py-3 text-[13px] text-muted"
+        >
+          <AlertIcon className="size-3.5" />
+          Report a problem
+        </button>
       </div>
     </div>
   );
@@ -286,8 +339,11 @@ function RouteButton({
   );
 }
 
-/** Says whether the person is at the post office. It informs; it never blocks, so past visits can still be logged. */
-function ProximityBanner({
+/**
+ * The "Check if you're here" button — sits inside the status-left column,
+ * aligned with the badge above it.
+ */
+function ProximityButton({
   km,
   onCheckDistance,
 }: {
@@ -295,27 +351,37 @@ function ProximityBanner({
   onCheckDistance?: () => void;
 }) {
   const state = proximity(km);
+  if (state === "here" && km !== null) {
+    return (
+      <p className="flex items-center gap-2 text-sm font-semibold text-visited-ink">
+        <CheckIcon className="size-4 shrink-0" strokeWidth={3} />
+        You&apos;re here · {formatShortDistance(km)} away
+      </p>
+    );
+  }
   if (state === "unknown" || km === null) {
     return onCheckDistance ? (
       <button
         type="button"
         onClick={onCheckDistance}
-        className="kp-glass mt-4 flex h-10 w-fit items-center gap-2 rounded-full px-4 text-sm font-semibold text-ink"
+        className="kp-glass flex h-11 w-fit items-center gap-2 rounded-full px-4 text-sm font-semibold text-ink"
       >
         <TargetIcon className="size-4 text-postal" />
         Check if you&apos;re here
       </button>
     ) : null;
   }
-  if (state === "here") {
-    return (
-      <p className="mt-4 flex items-start gap-2 rounded-2xl bg-visited-soft p-3 text-sm font-semibold text-visited-ink">
-        <CheckIcon className="mt-0.5 size-4 shrink-0" strokeWidth={3} />
-        You&apos;re here · {formatShortDistance(km)} away. Ask for the postmark,
-        then stamp it.
-      </p>
-    );
-  }
+  return null;
+}
+
+/** Warning banner shown below the status row when the person is far from the office. */
+function ProximityWarning({
+  km,
+}: {
+  km: number | null;
+}) {
+  const state = proximity(km);
+  if (state !== "away" || km === null) return null;
   return (
     <p className="mt-4 flex items-start gap-2 rounded-2xl bg-warn-soft p-3 text-sm text-warn">
       <AlertIcon className="mt-0.5 size-4 shrink-0" />

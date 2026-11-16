@@ -14,9 +14,10 @@ interface StampThumbProps {
 }
 
 /**
- * The post office's official stamp as its icon. It is greyscale until the post
- * office is visited, then full colour. Falls back to a mail icon when there is
- * no stamp yet or the image fails to load.
+ * The post office's official PPC stamp image. Always shown in full colour —
+ * the green verified badge on the card is the visited indicator instead.
+ * Falls back to a mail icon placeholder when there is no stamp yet or the
+ * image fails to load.
  */
 export function StampThumb({
   path,
@@ -39,9 +40,7 @@ export function StampThumb({
           alt=""
           loading="lazy"
           onError={() => setFailed(true)}
-          className={`size-full object-contain p-1 ${
-            status === "visited" ? "" : "opacity-80 grayscale"
-          }`}
+          className="size-full object-contain p-1"
         />
       ) : (
         <MailIcon className="size-1/2" />

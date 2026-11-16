@@ -128,7 +128,7 @@ describe("OfficeDetail about this place", () => {
     );
   }
 
-  it("shows the note when the office has one", () => {
+  it("shows the aboutPlace text when the office has one", () => {
     renderWithAbout("A postmark showing Darpana Sundari.");
     expect(screen.getByText("About this place")).toBeTruthy();
     expect(
@@ -136,27 +136,30 @@ describe("OfficeDetail about this place", () => {
     ).toBeTruthy();
   });
 
-  it("shows nothing when the office has no note and no postmark", () => {
+  it("shows fallback about text when the office has no aboutPlace", () => {
     renderWithAbout(null);
-    expect(screen.queryByText("About this place")).toBeNull();
+    expect(screen.getByText("About this place")).toBeTruthy();
+    expect(
+      screen.getByText(/A philatelic post office in Hassan district/)
+    ).toBeTruthy();
   });
 
-  it("shows the real postmark specimen beside the note when the office has one", () => {
+  it("shows aboutPlace text even when a stamp image is present", () => {
     stampImage.stampImageUrl.mockReturnValue(
       "https://example.supabase.co/storage/v1/object/public/office-stamps/belur.webp"
     );
     renderWithAbout("A postmark showing Darpana Sundari.", "belur.webp");
     expect(screen.getByText("About this place")).toBeTruthy();
-    expect(screen.getByAltText("Belur SO postmark design")).toBeTruthy();
-    expect(screen.getByText("Postmark")).toBeTruthy();
-  });
-
-  it("still shows the section from the note alone when the postmark image fails to resolve", () => {
-    stampImage.stampImageUrl.mockReturnValue(null);
-    renderWithAbout("A postmark showing Darpana Sundari.", "belur.webp");
     expect(
       screen.getByText("A postmark showing Darpana Sundari.")
     ).toBeTruthy();
-    expect(screen.queryByAltText("Belur SO postmark design")).toBeNull();
+  });
+
+  it("shows fallback about text when stamp image fails to resolve", () => {
+    stampImage.stampImageUrl.mockReturnValue(null);
+    renderWithAbout(null, "belur.webp");
+    expect(
+      screen.getByText(/A philatelic post office in Hassan district/)
+    ).toBeTruthy();
   });
 });

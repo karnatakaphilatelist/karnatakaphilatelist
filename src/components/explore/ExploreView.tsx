@@ -256,13 +256,29 @@ export function ExploreView({
           <SheetHandle open={sheetOpen} onChange={setSheetOpen} />
           <div className="space-y-1 px-4 md:pt-4">
             {/* On phones the controls live over the map instead, so the detail sheet never covers them. */}
-            <div className="hidden space-y-1 md:block">
-              <StateSwitcher
-                states={states}
-                value={stateCode}
-                onChange={choose}
-                idSuffix="desktop"
-              />
+            <div className="hidden md:block">
+              <div className="flex items-center justify-between pb-3">
+                <div className="flex items-baseline gap-2 min-w-0">
+                  <StateSwitcher
+                    states={states}
+                    value={stateCode}
+                    onChange={choose}
+                    idSuffix="desktop"
+                    title
+                  />
+                  <span className="shrink-0 text-sm text-muted" aria-live="polite">
+                    ·{" "}
+                    {visibleOffices.length === offices.length
+                      ? `${offices.length} offices`
+                      : `${visibleOffices.length} of ${offices.length}`}
+                    {userLocation ? " · nearest" : ""}
+                  </span>
+                </div>
+                <NearMeButton
+                  onClick={handleFindNearMe}
+                  isLocating={isLocating}
+                />
+              </div>
               <ExploreControls
                 idSuffix="desktop"
                 query={query}
@@ -365,16 +381,6 @@ export function ExploreView({
                 <FilterChips value={filter} onChange={setFilter} />
               </div>
             ) : null}
-            <div className="hidden items-center justify-between pb-2 md:flex">
-              <p className="text-sm text-muted" aria-live="polite">
-                {visibleOffices.length} of {offices.length} post offices
-                {userLocation ? " · nearest first" : ""}
-              </p>
-              <NearMeButton
-                onClick={handleFindNearMe}
-                isLocating={isLocating}
-              />
-            </div>
           </div>
         </div>
         <div

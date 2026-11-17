@@ -39,7 +39,7 @@ Clickable design canvas (mobile and desktop): https://claude.ai/artifact/Rd59uog
 ## Next tasks
 1. The explore and passport flows were smoke-tested in headless Chromium (phone and desktop) against a stub of the Supabase data; real Supabase, Google sign-in, photo upload and map tiles (blocked in the sandbox) are still untested. On phones, search and filters sit over the top of the map so the detail sheet never covers them.
 2. Run both migrations, then upload stamp photos named by id and fill `stamp_image_path`. Confirm the stamp artwork may be published.
-3. ~~Deploy to Vercel~~ Done: live at https://karnatakaphilatelist.vercel.app (Vercel project `karnatakaphilatelist`, framework Next.js, env vars `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` set, Vercel Authentication off so the site is public). Every push to `main` redeploys.
+3. ~~Deploy to Vercel~~ Done: live at https://philatrail.com (GoDaddy domain, DNS records point at Vercel; the old https://karnatakaphilatelist.vercel.app address still works) (Vercel project `karnatakaphilatelist`, framework Next.js, env vars `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` set, Vercel Authentication off so the site is public). Every push to `main` redeploys.
 4. ~~Run migrations / enable Google~~ Done on 2026-10-27 (all four migrations applied through the Supabase connector; Google provider on and published). Remaining: decide Confirm email and custom SMTP (see docs/SETUP.md), stamp images, domain name, legal text review.
 
 Note: the free Supabase project pauses after about a week of inactivity and must be restored (it was restored on 2026-10-18).

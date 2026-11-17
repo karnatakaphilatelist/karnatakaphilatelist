@@ -21,3 +21,23 @@ export function parseNativeAuthCode(url: string): string | null {
     return null;
   }
 }
+
+/**
+ * For a tapped philatrail.com link that opened the app, the page path to show
+ * (for example "/offices/hampi-so-583239"). Null for any other link.
+ */
+export function pathFromSiteLink(url: string): string | null {
+  try {
+    const link = new URL(url);
+    if (link.protocol !== "https:") return null;
+    if (
+      link.hostname !== "philatrail.com" &&
+      link.hostname !== "www.philatrail.com"
+    ) {
+      return null;
+    }
+    return `${link.pathname}${link.search}`;
+  } catch {
+    return null;
+  }
+}

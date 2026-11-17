@@ -2,7 +2,13 @@
 
 import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { COACH_EVENT, COACH_KEY, COACH_RUNNING_ATTR } from "@/lib/constants";
+import { useAuth } from "@/components/providers/AuthProvider";
+import {
+  COACH_EVENT,
+  COACH_KEY,
+  COACH_RUNNING_ATTR,
+  WELCOME_PROMPTED_KEY,
+} from "@/lib/constants";
 import { readJson, writeJson } from "@/lib/local-storage";
 
 interface Stop {
@@ -65,6 +71,7 @@ function findVisible(targets: string[]) {
 /** A short "here is what this does" walkthrough over the map screen. Shown once; can be skipped or replayed. */
 export function CoachTour() {
   const pathname = usePathname();
+  const { user, isLoading } = useAuth();
   const [running, setRunning] = useState(false);
   const [index, setIndex] = useState(0);
   const [placed, setPlaced] = useState<Placed[]>([]);
@@ -76,12 +83,29 @@ export function CoachTour() {
     setRunning(true);
   }, []);
 
-  // First visit to the map: begin once the screen has settled.
+  // First visit to the map: begin once the screen has settled, and after a guest has answered the
+  // sign-in invitation (it opens first, so the walkthrough never plays behind it).
   useEffect(() => {
-    if (pathname !== "/explore" || readJson<boolean>(COACH_KEY, false)) return;
-    const timer = window.setTimeout(start, 1200);
+    if (pathname !== "/explore" || isLoading) return;
+    if (readJson<boolean>(COACH_KEY, false)) return;
+    let timer: number;
+    const inviteOpenOrPending = () =>
+      (!user && !readJson<boolean>(WELCOME_PROMPTED_KEY, false)) ||
+      document.querySelector("dialog[open]") !== null;
+    const attempt = () => {
+      if (inviteOpenOrPending()) {
+        timer = window.setTimeout(attempt, 500);
+        return;
+      }
+      // Look once more a moment later: the dialog takes a beat to appear after the invitation is queued.
+      timer = window.setTimeout(() => {
+        if (inviteOpenOrPending()) attempt();
+        else start();
+      }, 300);
+    };
+    timer = window.setTimeout(attempt, 1200);
     return () => window.clearTimeout(timer);
-  }, [pathname, start]);
+  }, [pathname, isLoading, user, start]);
 
   // "Replay the walkthrough" in Settings.
   useEffect(() => {

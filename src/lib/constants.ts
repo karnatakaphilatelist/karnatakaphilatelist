@@ -41,3 +41,8 @@ export const COACH_EVENT = "kp:start-coach";
 /** Lite mode: no textures or motion, for older phones and battery saving. */
 export const LITE_MODE_KEY = "kp:lite:v1";
 export const AFTER_AUTH_KEY = "kp:after-auth:v1";
+
+export const PLAY_STORE_URL =
+  "https://play.google.com/store/apps/details?id=app.vinvi.philatrail";
+/** Flip to true once the app is public on Google Play (closed testing links don't work for everyone). */
+export const PLAY_STORE_LIVE = false;

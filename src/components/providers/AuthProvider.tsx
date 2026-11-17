@@ -12,6 +12,7 @@ import {
   type ReactNode,
 } from "react";
 import { AuthDialog, type SignInReason } from "@/components/auth/AuthDialog";
+import { trackEvent } from "@/lib/analytics";
 import { AFTER_AUTH_KEY } from "@/lib/constants";
 import { readJson, writeJson } from "@/lib/local-storage";
 import { deleteMyAccount } from "@/lib/delete-account";
@@ -166,6 +167,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const closeSignIn = useCallback(() => setDialogReason(null), []);
 
   const signInWithGoogle = useCallback(async () => {
+    // Sign-in with Google is counted when it starts: this page cannot tell a new account from a returning one.
+    trackEvent("sign_in_start", { method: "google" });
     const supabase = await getClient();
     if (isNativeApp()) {
       const { data, error } = await supabase.auth.signInWithOAuth({
@@ -220,6 +223,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           friendlyPasswordError({ code: "user_already_exists" }, mode)
         );
       }
+      trackEvent("sign_up", { method: "email" });
       return outcome;
     },
     [getClient]
@@ -227,6 +231,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signInWithEmail = useCallback(
     async (email: string) => {
+      trackEvent("sign_in_start", { method: "email_link" });
       const supabase = await getClient();
       const { error } = await supabase.auth.signInWithOtp({
         email,

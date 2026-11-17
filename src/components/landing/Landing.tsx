@@ -616,6 +616,8 @@ export function Landing({ offices }: { offices: PostOffice[] }) {
               </header>
               <p className="kpl-fine">{DISCLAIMER}</p>
               <p className="kpl-links">
+                <Link href="/offices">Post offices</Link>
+                <Link href="/learn">Guide</Link>
                 <Link href="/privacy">Privacy</Link>
                 <Link href="/terms">Terms</Link>
                 <a href={`mailto:${CONTACT_EMAIL}`}>Contact</a>

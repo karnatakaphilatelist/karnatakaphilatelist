@@ -40,7 +40,11 @@ export const STATE_NAMES: Record<string, string> = {
 
 export const DEFAULT_STATE = "KA";
 
-/** States announced in the app before their post offices have been added. */
+/**
+ * States announced in the app but not yet browsable. A state stays here while its data is
+ * being assembled — its offices may already be in the database without coordinates, which
+ * would otherwise show an empty map. Remove a state from this list to switch it on.
+ */
 export const COMING_SOON_STATES = ["TN"] as const;
 
 export function stateName(code: string): string {
@@ -54,13 +58,20 @@ export interface StateOption {
   count: number;
 }
 
-/** The states that have post offices, with how many each, ordered by name. */
+/**
+ * The states a person can browse, with how many offices each, ordered by name.
+ * A state still listed in `COMING_SOON_STATES` is left out even when its offices are
+ * already loaded, so data can be staged before the state goes live.
+ */
 export function liveStates(
   offices: readonly { state: string }[]
 ): StateOption[] {
+  const soon: readonly string[] = COMING_SOON_STATES;
   const counts = new Map<string, number>();
-  for (const office of offices)
+  for (const office of offices) {
+    if (soon.includes(office.state)) continue;
     counts.set(office.state, (counts.get(office.state) ?? 0) + 1);
+  }
   return [...counts]
     .map(([code, count]) => ({ code, name: stateName(code), count }))
     .sort((a, b) => a.name.localeCompare(b.name, "en"));

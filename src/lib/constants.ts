@@ -17,6 +17,9 @@ export const MAP_START_ZOOM = 5;
 /** The public address of the site. Used for canonical links and social previews. */
 export const SITE_URL = "https://philatrail.com";
 
+/** The share image. A page that sets its own openGraph replaces the site-wide one, so each such page repeats this. */
+export const OG_IMAGE = { url: "/og-image.png", width: 1024, height: 500, alt: "Philatrail" };
+
 /** Where people write to ask about their data or report a problem. Shown on the legal pages. */
 export const CONTACT_EMAIL = "karnatakaphilatelist@gmail.com";
 export const LEGAL_LAST_UPDATED = "27 October 2026";

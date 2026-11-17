@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { OG_IMAGE } from "@/lib/constants";
 import { getPostOffices } from "@/lib/offices";
 import { officePath } from "@/lib/seo";
 import type { PostOffice } from "@/types";
@@ -19,7 +20,9 @@ export async function generateMetadata(): Promise<Metadata> {
       description,
       url: "/offices",
       siteName: "Philatrail",
+      images: [OG_IMAGE],
     },
+    twitter: { card: "summary_large_image", images: [OG_IMAGE.url] },
   };
 }
 

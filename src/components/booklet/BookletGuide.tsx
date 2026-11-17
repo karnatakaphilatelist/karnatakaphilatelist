@@ -7,8 +7,7 @@ import {
   mapsUrl,
 } from "@/lib/booklet";
 
-const KICKER =
-  "text-xs font-bold uppercase tracking-[0.18em] text-muted";
+const KICKER = "text-xs font-bold uppercase tracking-[0.18em] text-muted";
 const BUTTON =
   "inline-flex min-h-11 items-center justify-center gap-2 rounded-full px-5 text-sm font-bold";
 
@@ -52,8 +51,8 @@ export function BookletGuide() {
             Where to get it
           </h2>
           <p className="mt-2 text-base leading-7 text-muted">
-            Reported on sale at these four post offices. Copies come in
-            batches, so ask before you travel.
+            Reported on sale at these four post offices. Copies come in batches,
+            so ask before you travel.
           </p>
           <ul className="mt-4 space-y-3">
             {BOOKLET_OUTLETS.map((outlet) => (
@@ -88,7 +87,9 @@ export function BookletGuide() {
             Bengaluru GPO. It is where the booklet first went on sale.
           </p>
           <a
-            href={`mailto:${BUREAU_EMAIL}?subject=${encodeURIComponent("Philately Passport booklet")}`}
+            href={`mailto:${BUREAU_EMAIL}?subject=${encodeURIComponent(
+              "Philately Passport booklet"
+            )}`}
             className={`${BUTTON} mt-3 bg-postal text-white`}
           >
             Email the bureau

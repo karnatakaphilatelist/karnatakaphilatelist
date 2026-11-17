@@ -38,5 +38,7 @@ export const BUREAU_EMAIL = "philatelybggpo.ka@indiapost.gov.in";
 export const BOOKLET_PRICE_NOTE = "about ₹600";
 
 export function mapsUrl(query: string) {
-  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`;
+  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+    query
+  )}`;
 }

@@ -152,44 +152,22 @@ describe("Landing", () => {
     expect(screen.getByText("Namaskara, Asha")).toBeDefined();
   });
 
-  it("offers previous and next arrows, with previous disabled on the first card", () => {
-    render(<Landing offices={offices} />);
-    const prev = screen.getByRole("button", {
-      name: "Previous card",
-    }) as HTMLButtonElement;
-    expect(prev.disabled).toBe(true);
-    expect(screen.getByRole("button", { name: "Next card" })).toBeDefined();
-  });
-
-  it("has a progress tick for every card", () => {
+  it("offers one Open the map button, and the hero button links to Learn", () => {
     render(<Landing offices={offices} />);
     expect(
-      screen.getAllByRole("button", { name: /Go to card \d+ of \d+/ }).length
-    ).toBeGreaterThan(0);
+      screen.getAllByRole("link", { name: /open the map/i })
+    ).toHaveLength(1);
+    expect(
+      screen.getByRole("link", { name: "See how it works" }).getAttribute("href")
+    ).toBe("/learn");
   });
 
-  it("moves through the cards with the arrow keys and ignores typing in fields", () => {
-    mockMotion(true);
-    window.scrollTo = vi.fn() as unknown as typeof window.scrollTo;
+  it("links the how-it-works teaser to Learn and lists four steps", () => {
     render(<Landing offices={offices} />);
-    fireEvent.keyDown(window, { key: "ArrowRight" });
-    expect(window.scrollTo).toHaveBeenCalledTimes(1);
-
-    const input = document.createElement("input");
-    document.body.appendChild(input);
-    fireEvent.keyDown(input, { key: "ArrowRight" });
-    expect(window.scrollTo).toHaveBeenCalledTimes(1);
-    input.remove();
-  });
-
-  it("offers one Open the map button, and the hero button scrolls to how it works", () => {
-    mockMotion(true);
-    window.scrollTo = vi.fn() as unknown as typeof window.scrollTo;
-    render(<Landing offices={offices} />);
-    expect(screen.getAllByRole("link", { name: /open the map/i })).toHaveLength(
-      1
-    );
-    fireEvent.click(screen.getByRole("button", { name: /see how it works/i }));
-    expect(window.scrollTo).toHaveBeenCalled();
+    expect(
+      screen.getByRole("link", { name: /see how it works on learn/i })
+        .getAttribute("href")
+    ).toBe("/learn");
+    expect(screen.getByText("Get stamped")).toBeDefined();
   });
 });

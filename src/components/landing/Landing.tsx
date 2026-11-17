@@ -1,9 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import "./landing.css";
-import { ArrowLeftIcon, ArrowRightIcon } from "@/components/ui/icons";
+import { ArrowRightIcon } from "@/components/ui/icons";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { isNativeApp } from "@/lib/native";
 import { readJson } from "@/lib/local-storage";
@@ -16,31 +16,11 @@ import {
   formatCounter,
   INTRO_PLAYED_FLAG,
   SKIP_INTRO_COOKIE,
-  projectPins,
-  scrollProgress,
   SPLIT_AT,
   SPLIT_DURATION_MS,
 } from "@/lib/landing";
 import { getFirstName } from "@/lib/user-display";
 import type { PostOffice } from "@/types";
-
-const STEPS = [
-  {
-    n: 1,
-    title: "Find",
-    text: "Search or browse the map to spot post offices near you.",
-  },
-  {
-    n: 2,
-    title: "Visit",
-    text: "Go there. Plan your route and tick it off as you travel.",
-  },
-  {
-    n: 3,
-    title: "Stamp",
-    text: "Get your passport stamped and mark it visited to fill your collection.",
-  },
-];
 
 const SKIP_COOKIE = new RegExp(`(?:^|; )${SKIP_INTRO_COOKIE}=1`);
 
@@ -83,40 +63,54 @@ function Wordmark({ white = false }: { white?: boolean }) {
 }
 
 /**
- * The front door: a postcard posts itself into a post box, the page splits open, and
- * scrolling grows the map card until it fills the screen. Plays once per browser
- * session (never for people who ask for reduced motion) and can be skipped.
+ * The front door: a postcard posts itself into a post box, the page splits open, and the
+ * real masthead is revealed in exactly the spot the intro's wordmark was. Plays once per
+ * browser session (never for people who ask for reduced motion) and can be skipped.
  */
 
 export function Landing({ offices }: { offices: PostOffice[] }) {
   const { user, isLoading, openSignIn, signOut } = useAuth();
   const { visits } = useVisits();
 
-  const rootRef = useRef<HTMLDivElement>(null);
-  const scrollerRef = useRef<HTMLDivElement>(null);
-  const trackRef = useRef<HTMLDivElement>(null);
-  const [cardIndex, setCardIndex] = useState(0);
-  const [atStart, setAtStart] = useState(true);
-  const [atEnd, setAtEnd] = useState(false);
-  const [cardCount, setCardCount] = useState(0);
   const countRef = useRef<HTMLDivElement>(null);
-  const introRef = useRef<HTMLDivElement>(null);
   const skipRef = useRef<() => void>(() => undefined);
   const [introState, setIntroState] = useState<IntroState>("playing");
   const [revealed, setRevealed] = useState(false);
   const [clock, setClock] = useState("--:--:--");
 
-  const pins = useMemo(() => projectPins(offices), [offices]);
   const total = offices.length;
   const { stateCode, stateOffices } = useStateOffices(offices);
   const stateTotal = stateOffices.length;
   const stateName_ = stateName(stateCode);
   const liveCount = new Set(offices.map((office) => office.state)).size;
   const stamped = stateOffices.filter((office) => visits[office.id]).length;
-  // Until someone has a stamp of their own, show an example so the card still makes sense.
+  // Until someone has a postmark of their own, show an example so the card still makes sense.
   const isSample = stamped === 0;
   const shownStamped = isSample ? Math.min(12, stateTotal) : stamped;
   const firstName = user ? getFirstName(user) : null;
+
+  const STEPS = [
+    {
+      n: 1,
+      title: "Find",
+      text: `Pick a post office from ${stateName_}'s ${stateTotal}-office list.`,
+    },
+    {
+      n: 2,
+      title: "Go there",
+      text: "Travel there in person. The trip is the point.",
+    },
+    {
+      n: 3,
+      title: "Check in",
+      text: "The app confirms you're actually there before you log it.",
+    },
+    {
+      n: 4,
+      title: "Get stamped",
+      text: "Counter staff postmark your passport — mark it collected and move on.",
+    },
+  ];
 
   // In the mobile apps the very first launch plays the intro and then shows the welcome tour;
   // every launch after that opens straight on the map.
@@ -266,411 +260,234 @@ export function Landing({ offices }: { offices: PostOffice[] }) {
     return () => clearInterval(id);
   }, []);
 
-  // The map card opens in step with the scroll, so its speed follows the person's hand.
-  useEffect(() => {
-    let frame = 0;
-    const update = () => {
-      frame = 0;
-      const scroller = scrollerRef.current;
-      const root = rootRef.current;
-      if (!scroller || !root) return;
-      const max = scroller.offsetHeight - window.innerHeight;
-      const p = scrollProgress(window.scrollY, max, 1);
-      root.style.setProperty("--p", p.toFixed(4));
-      setAtStart(p < 0.01);
-      setAtEnd(p > 0.99);
-
-      // Which card is currently at the left edge, for the arrows and the progress ticks.
-      const track = trackRef.current;
-      if (track) {
-        const cards = Array.from(track.children) as HTMLElement[];
-        const pad = parseFloat(getComputedStyle(track).paddingLeft) || 0;
-        const span = Math.max(1, track.offsetWidth - window.innerWidth);
-        let current = 0;
-        cards.forEach((card, i) => {
-          const stop = Math.min(1, (card.offsetLeft - pad) / span);
-          if (stop <= p + 0.01) current = i;
-        });
-        // Cards scrolled out of sight must not be reachable with the Tab key.
-        cards.forEach((card) => {
-          const rect = card.getBoundingClientRect();
-          const visible = rect.right > 0 && rect.left < window.innerWidth;
-          if (visible) card.removeAttribute("inert");
-          else card.setAttribute("inert", "");
-        });
-        setCardCount(cards.length);
-        // Without a layout (for example before styles load) keep the first card selected.
-        setCardIndex(track.offsetWidth > 0 ? current : 0);
-      }
-    };
-    const onScroll = () => {
-      if (!frame) frame = requestAnimationFrame(update);
-    };
-    update();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("resize", onScroll);
-    return () => {
-      window.removeEventListener("scroll", onScroll);
-      window.removeEventListener("resize", onScroll);
-      if (frame) cancelAnimationFrame(frame);
-    };
-  }, []);
-
-  /** Where (0-1) card `index` sits along the track; cards past the end share the final stop. */
-  const stopOf = (index: number) => {
-    const track = trackRef.current;
-    if (!track) return 0;
-    const cards = Array.from(track.children) as HTMLElement[];
-    const target = cards[Math.max(0, Math.min(cards.length - 1, index))];
-    if (!target) return 0;
-    const pad = parseFloat(getComputedStyle(track).paddingLeft) || 0;
-    const span = Math.max(1, track.offsetWidth - window.innerWidth);
-    return Math.max(0, Math.min(1, (target.offsetLeft - pad) / span));
-  };
-
-  /** Scrolls the page so that card `index` sits at the left edge (works backwards too). */
-  const goToCard = (index: number) => scrollToStop(stopOf(index));
-
-  const scrollToStop = (p: number) => {
-    const scroller = scrollerRef.current;
-    if (!scroller) return;
-    const max = scroller.offsetHeight - window.innerHeight;
-    const reduced = window.matchMedia(
-      "(prefers-reduced-motion: reduce)"
-    ).matches;
-    window.scrollTo({ top: p * max, behavior: reduced ? "auto" : "smooth" });
-  };
-
-  /** Steps to the neighbouring stop, skipping cards that share the end of the track. */
-  const step = (dir: 1 | -1) => {
-    const scroller = scrollerRef.current;
-    if (!scroller) return;
-    const max = Math.max(1, scroller.offsetHeight - window.innerHeight);
-    const now = window.scrollY / max;
-    const stops = Array.from({ length: cardCount }, (_, i) => stopOf(i));
-    const next =
-      dir === 1
-        ? stops.find((v) => v > now + 0.015)
-        : [...stops].reverse().find((v) => v < now - 0.015);
-    scrollToStop(next ?? (dir === 1 ? 1 : 0));
-  };
-
-  // Arrow keys and horizontal swipes move through the cards too.
-  useEffect(() => {
-    const onKey = (event: KeyboardEvent) => {
-      const target = event.target;
-      if (
-        target instanceof HTMLElement &&
-        target.closest("input, textarea, select, [contenteditable], dialog")
-      )
-        return;
-      if (event.key === "ArrowRight") step(1);
-      else if (event.key === "ArrowLeft") step(-1);
-    };
-    let startX = 0;
-    let startY = 0;
-    const onStart = (event: TouchEvent) => {
-      startX = event.touches[0].clientX;
-      startY = event.touches[0].clientY;
-    };
-    const onEnd = (event: TouchEvent) => {
-      const dx = event.changedTouches[0].clientX - startX;
-      const dy = event.changedTouches[0].clientY - startY;
-      if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.5)
-        step(dx < 0 ? 1 : -1);
-    };
-    window.addEventListener("keydown", onKey);
-    window.addEventListener("touchstart", onStart, { passive: true });
-    window.addEventListener("touchend", onEnd, { passive: true });
-    return () => {
-      window.removeEventListener("keydown", onKey);
-      window.removeEventListener("touchstart", onStart);
-      window.removeEventListener("touchend", onEnd);
-    };
-  });
-
   return (
-    <div ref={rootRef} className={`kpl${revealed ? " in" : ""}`}>
+    <div className={`kpl${revealed ? " in" : ""}`}>
       <noscript>
         <style>{".kpl-intro{display:none}"}</style>
       </noscript>
 
-      <div ref={scrollerRef} className="kpl-scroller">
-        <div className="kpl-stage">
-          <Wordmark />
-          <div className="kpl-row">
-            <p className="kpl-meta kpl-sub">The philately passport for India</p>
-            <nav className="kpl-meta kpl-nav" aria-label="Main">
-              <Link href="/explore">Explore</Link>
-              <Link href="/passport">Passport</Link>
-              {isLoading ? null : user ? (
-                <button type="button" onClick={() => void signOut()}>
-                  Sign out
-                </button>
-              ) : (
-                <button type="button" onClick={() => openSignIn("manual")}>
-                  Sign in
-                </button>
-              )}
-            </nav>
-            <a className="kpl-meta kpl-mail" href={`mailto:${CONTACT_EMAIL}`}>
-              {CONTACT_EMAIL}
-            </a>
-          </div>
-          <p className="kpl-meta kpl-mono kpl-time">Local time {clock} (IST)</p>
+      {/* Quiet paper grain, so the light background isn't flat. */}
+      <svg className="kpl-grain" aria-hidden="true">
+        <filter id="kpl-grain-filter">
+          <feTurbulence
+            type="fractalNoise"
+            baseFrequency="0.85"
+            numOctaves="2"
+            stitchTiles="stitch"
+          />
+          <feColorMatrix type="saturate" values="0" />
+        </filter>
+        <rect width="100%" height="100%" filter="url(#kpl-grain-filter)" />
+      </svg>
+
+      <header className="kpl-head">
+        <Wordmark />
+        <div className="kpl-row">
+          <p className="kpl-meta kpl-sub">The philately passport for India</p>
+          <nav className="kpl-meta kpl-nav" aria-label="Main">
+            <Link href="/explore">Explore</Link>
+            <Link href="/passport">Passport</Link>
+            {isLoading ? null : user ? (
+              <button type="button" onClick={() => void signOut()}>
+                Sign out
+              </button>
+            ) : (
+              <button type="button" onClick={() => openSignIn("manual")}>
+                Sign in
+              </button>
+            )}
+          </nav>
+          <a className="kpl-meta kpl-mail" href={`mailto:${CONTACT_EMAIL}`}>
+            {CONTACT_EMAIL}
+          </a>
+        </div>
+        <div className="kpl-stats">
+          <p className="kpl-meta kpl-mono kpl-time">
+            Local time {clock} (IST)
+          </p>
           <p className="kpl-meta kpl-mono kpl-open">
             <span className="kpl-dot" />
             {total} post offices
           </p>
+        </div>
+      </header>
 
-          <div ref={trackRef} className="kpl-track">
-            <article className="kpl-card kpl-card--hero">
-              <header className="kpl-cardhead">
-                <span>01</span>
-                <span>Welcome</span>
-              </header>
-              <div className="kpl-herobody">
-                <div className="kpl-hero-copy">
-                  <h1>
-                    Collect a stamp from every post office in{" "}
-                    {liveCount > 1
-                      ? "each state's Philately Passport"
-                      : `${stateName_}'s Philately Passport`}
-                    , <span>one stamp</span> at a time.
-                  </h1>
-                  <p>
-                    Find post offices on the map, visit them and keep every
-                    stamp in one place.{" "}
-                    {liveCount > 1
-                      ? `${liveCount} states are live.`
-                      : `${stateName_} is live; more states are on the way.`}
-                  </p>
-                  <div className="kpl-btns">
-                    <button
-                      type="button"
-                      className="kpl-btn kpl-btn--red"
-                      onClick={() => goToCard(2)}
-                    >
-                      See how it works
-                    </button>
-                    <Link href="/passport" className="kpl-btn kpl-btn--line">
-                      My passport
-                    </Link>
-                  </div>
-                </div>
-                <div className="kpl-coral" aria-hidden="true">
-                  <div className="kp-perforated kpl-stampart">
-                    <svg viewBox="0 0 120 150" width="100%" height="100%">
-                      <rect
-                        x="10"
-                        y="10"
-                        width="100"
-                        height="100"
-                        fill="#f1e8d3"
-                        stroke="#16204f"
-                        strokeWidth="2"
-                      />
-                      <path
-                        d="M25 90 L45 55 L62 78 L75 62 L95 90 Z"
-                        fill="#16204f"
-                      />
-                      <circle cx="80" cy="34" r="9" fill="#cf1830" />
-                      <text
-                        x="60"
-                        y="132"
-                        textAnchor="middle"
-                        fontSize="13"
-                        fontWeight="700"
-                        fill="#16204f"
-                      >
-                        {stateName_.toUpperCase()}
-                      </text>
-                      <text
-                        x="60"
-                        y="145"
-                        textAnchor="middle"
-                        fontSize="9"
-                        fill="#16204f"
-                      >
-                        INDIA · POST
-                      </text>
-                    </svg>
-                  </div>
-                  <svg
-                    className="kpl-postmark"
-                    viewBox="0 0 100 100"
-                    width="96"
-                    height="96"
-                  >
-                    <circle
-                      cx="50"
-                      cy="50"
-                      r="46"
-                      fill="none"
-                      stroke="#16204f"
-                      strokeWidth="2.5"
-                    />
-                    <circle
-                      cx="50"
-                      cy="50"
-                      r="38"
-                      fill="none"
-                      stroke="#16204f"
-                      strokeWidth="1.5"
-                    />
-                    <text
-                      x="50"
-                      y="46"
-                      textAnchor="middle"
-                      fontSize="11"
-                      fontWeight="700"
-                      fill="#16204f"
-                    >
-                      BENGALURU
-                    </text>
-                    <text
-                      x="50"
-                      y="60"
-                      textAnchor="middle"
-                      fontSize="9"
-                      fill="#16204f"
-                    >
-                      STAMPED
-                    </text>
-                  </svg>
-                </div>
-              </div>
-            </article>
-
-            <article className="kpl-card kpl-card--progress">
-              <header className="kpl-cardhead">
-                <span>02</span>
-                <span>Progress</span>
-              </header>
-              <p className="kpl-kicker">
-                <span>
-                  {firstName ? `Namaskara, ${firstName}` : "Your passport"}
-                </span>{" "}
-                · {stateName_}
-              </p>
-              <p className="kpl-big">
-                <b>{shownStamped}</b> of {stateTotal} stamped
-              </p>
-              <div
-                className="kpl-bar"
-                role="progressbar"
-                aria-label="Stamps collected"
-                aria-valuenow={shownStamped}
-                aria-valuemin={0}
-                aria-valuemax={stateTotal}
-              >
-                <i
-                  style={{
-                    width: `${Math.round(
-                      (shownStamped / Math.max(stateTotal, 1)) * 100
-                    )}%`,
-                  }}
-                />
-              </div>
-              <p className="kpl-note">
-                {isSample
-                  ? "An example. Your own count appears here once you start collecting."
-                  : `${stateTotal - shownStamped} to go. Keep going.`}
-              </p>
-            </article>
-
-            {STEPS.map((step) => (
-              <article key={step.title} className="kpl-card kpl-card--step">
-                <header className="kpl-cardhead">
-                  <span>{String(step.n + 2).padStart(2, "0")}</span>
-                  <span>Step {step.n} of 3</span>
-                </header>
-                <span className="kpl-bignum" aria-hidden="true">
-                  {step.n}
-                </span>
-                <h2>{step.title}</h2>
-                <p>{step.text}</p>
-              </article>
-            ))}
-
-            <article
-              className="kpl-card kpl-card--map"
-              aria-label="Preview of the map"
-            >
-              <div className="kpl-minimap" aria-hidden="true">
-                {pins.map((pin) => (
-                  <i
-                    key={pin.id}
-                    className={`kpl-pin${visits[pin.id] ? " kpl-pin--v" : ""}`}
-                    style={{ left: `${pin.x}%`, top: `${pin.y}%` }}
-                  />
-                ))}
-              </div>
-              <p className="kpl-note">Every post office, pinned on the map.</p>
-            </article>
-
-            <article className="kpl-card kpl-card--foot">
-              <header className="kpl-cardhead">
-                <span>07</span>
-                <span>Good to know</span>
-              </header>
-              <p className="kpl-fine">{DISCLAIMER}</p>
-              <p className="kpl-links">
-                <Link href="/privacy">Privacy</Link>
-                <Link href="/terms">Terms</Link>
-                <a href={`mailto:${CONTACT_EMAIL}`}>Contact</a>
-              </p>
-            </article>
-          </div>
-
-          <div className="kpl-edge kpl-edge-l">
-            <button
-              type="button"
-              className="kpl-arrow"
-              aria-label="Previous card"
-              disabled={atStart}
-              onClick={() => step(-1)}
-            >
-              <ArrowLeftIcon />
-            </button>
-          </div>
-          <div className="kpl-edge kpl-edge-r">
-            <button
-              type="button"
-              className="kpl-arrow"
-              aria-label="Next card"
-              disabled={atEnd}
-              onClick={() => step(1)}
-            >
-              <ArrowRightIcon />
-            </button>
-          </div>
-
-          <div className="kpl-dock">
-            <div className="kpl-nav2">
-              <div className="kpl-ticks" role="group" aria-label="Cards">
-                {Array.from({ length: cardCount }, (_, i) => (
-                  <button
-                    key={i}
-                    type="button"
-                    aria-label={`Go to card ${i + 1} of ${cardCount}`}
-                    aria-current={i === cardIndex ? "true" : undefined}
-                    className={i === cardIndex ? "on" : ""}
-                    onClick={() => goToCard(i)}
-                  />
-                ))}
-              </div>
+      <main className="kpl-main">
+        <section className="kpl-hero">
+          <div className="kpl-hero-copy">
+            <h1>
+              Collect the postmark from every post office in{" "}
+              {liveCount > 1
+                ? "each state's Philately Passport"
+                : `${stateName_}'s Philately Passport`}
+              , <span>one post office</span> at a time.
+            </h1>
+            <p>
+              Find post offices on the map, visit them and keep every
+              postmark in one place.{" "}
+              {liveCount > 1
+                ? `${liveCount} states are live.`
+                : `${stateName_} is live; more states are on the way.`}
+            </p>
+            <div className="kpl-btns">
+              <Link href="/learn" className="kpl-btn kpl-btn--red">
+                See how it works
+              </Link>
+              <Link href="/passport" className="kpl-btn kpl-btn--line">
+                My passport
+              </Link>
             </div>
-            <Link href="/explore" className="kpl-open-map">
-              Open the map
-              <ArrowRightIcon />
+          </div>
+
+          <div className="kpl-coral" aria-hidden="true">
+            <div className="kp-perforated kpl-stampart">
+              <svg viewBox="0 0 120 150" width="100%" height="100%">
+                <rect
+                  x="10"
+                  y="10"
+                  width="100"
+                  height="100"
+                  fill="#f1e8d3"
+                  stroke="#16204f"
+                  strokeWidth="2"
+                />
+                <path d="M25 90 L45 55 L62 78 L75 62 L95 90 Z" fill="#16204f" />
+                <circle cx="80" cy="34" r="9" fill="#cf1830" />
+                <text
+                  x="60"
+                  y="132"
+                  textAnchor="middle"
+                  fontSize="13"
+                  fontWeight="700"
+                  fill="#16204f"
+                >
+                  {stateName_.toUpperCase()}
+                </text>
+                <text
+                  x="60"
+                  y="145"
+                  textAnchor="middle"
+                  fontSize="9"
+                  fill="#16204f"
+                >
+                  INDIA · POST
+                </text>
+              </svg>
+            </div>
+            <svg
+              className="kpl-postmark"
+              viewBox="0 0 100 100"
+              width="96"
+              height="96"
+            >
+              <circle
+                cx="50"
+                cy="50"
+                r="46"
+                fill="none"
+                stroke="#16204f"
+                strokeWidth="2.5"
+              />
+              <circle
+                cx="50"
+                cy="50"
+                r="38"
+                fill="none"
+                stroke="#16204f"
+                strokeWidth="1.5"
+              />
+              <text
+                x="50"
+                y="46"
+                textAnchor="middle"
+                fontSize="11"
+                fontWeight="700"
+                fill="#16204f"
+              >
+                BENGALURU
+              </text>
+              <text
+                x="50"
+                y="60"
+                textAnchor="middle"
+                fontSize="9"
+                fill="#16204f"
+              >
+                STAMPED
+              </text>
+            </svg>
+          </div>
+        </section>
+
+        <section className="kpl-highlight">
+          <div className="kpl-highlight-copy">
+            <p className="kpl-kicker">
+              <span>{firstName ? `Namaskara, ${firstName}` : "Your passport"}</span>{" "}
+              · {stateName_}
+            </p>
+            <p className="kpl-big">
+              <b>{shownStamped}</b> <span>of {stateTotal} stamped</span>
+            </p>
+            <div
+              className="kpl-bar"
+              role="progressbar"
+              aria-label="Stamps collected"
+              aria-valuenow={shownStamped}
+              aria-valuemin={0}
+              aria-valuemax={stateTotal}
+            >
+              <i
+                style={{
+                  width: `${Math.round(
+                    (shownStamped / Math.max(stateTotal, 1)) * 100
+                  )}%`,
+                }}
+              />
+            </div>
+            <p className="kpl-note">
+              {isSample
+                ? "An example. Your own count appears here once you start collecting."
+                : `${stateTotal - shownStamped} to go. Keep going.`}
+            </p>
+          </div>
+
+          <Link href="/explore" className="kpl-open-map">
+            Open the map
+            <ArrowRightIcon />
+          </Link>
+        </section>
+
+        <section className="kpl-steps">
+          <div className="kpl-steps-head">
+            <h2>How it works</h2>
+            <Link href="/learn" className="kpl-step-link">
+              See how it works on Learn &rarr;
             </Link>
           </div>
-        </div>
-      </div>
+          <div className="kpl-step-grid">
+            {STEPS.map((step) => (
+              <div key={step.title}>
+                <span className="kpl-step-badge" aria-hidden="true">
+                  {step.n}
+                </span>
+                <h3>{step.title}</h3>
+                <p>{step.text}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <footer className="kpl-foot">
+          <p className="kpl-fine">{DISCLAIMER}</p>
+          <p className="kpl-links">
+            <Link href="/privacy">Privacy</Link>
+            <Link href="/terms">Terms</Link>
+            <a href={`mailto:${CONTACT_EMAIL}`}>Contact</a>
+          </p>
+        </footer>
+      </main>
 
       <div
-        ref={introRef}
         className="kpl-intro"
         data-state={introState}
         aria-hidden={introState === "done"}

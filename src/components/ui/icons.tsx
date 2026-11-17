@@ -179,3 +179,10 @@ export const NoteIcon = (props: IconProps) => (
     <path d="M6 3v18M10 8h5" />
   </Icon>
 );
+
+export const LearnIcon = (props: IconProps) => (
+  <Icon {...props}>
+    <path d="M12 6.5C10.5 5 8 4.5 4 4.5v13c4 0 6.5.5 8 2 1.5-1.5 4-2 8-2v-13c-4 0-6.5.5-8 2z" />
+    <path d="M12 6.5v13" />
+  </Icon>
+);

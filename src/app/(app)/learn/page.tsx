@@ -1,17 +1,17 @@
 import type { Metadata } from "next";
-import { LearnGuide } from "@/components/learn/LearnGuide";
-import { OG_IMAGE } from "@/lib/constants";
+import { LEARN_OG_IMAGE as OG_IMAGE } from "@/lib/learn-articles";
+import { LearnHub } from "@/components/learn/LearnHub";
 
-const TITLE = "Philately in Karnataka: a beginner's guide";
+const TITLE = "Learn about philately";
 const DESCRIPTION =
-  "What philately is, how Karnataka's Philately Passport works, where to get the booklet and who to ask.";
+  "Short reads on philately, pictorial postmarks and Karnataka's Philately Passport, and how to get the booklet.";
 
 export const metadata: Metadata = {
   title: TITLE,
   description: DESCRIPTION,
   alternates: { canonical: "/learn" },
   openGraph: {
-    type: "article",
+    type: "website",
     title: TITLE,
     description: DESCRIPTION,
     url: "/learn",
@@ -27,5 +27,5 @@ export const metadata: Metadata = {
 };
 
 export default function LearnPage() {
-  return <LearnGuide />;
+  return <LearnHub />;
 }

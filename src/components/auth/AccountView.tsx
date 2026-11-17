@@ -196,8 +196,8 @@ export function AccountView() {
             </button>
           </li>
           <li>
-            <Link href="/booklet" className={ROW}>
-              <Row>Get the Philately Passport booklet</Row>
+            <Link href="/learn" className={ROW}>
+              <Row>Learn about philately</Row>
             </Link>
           </li>
           <li>

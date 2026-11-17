@@ -1,13 +1,17 @@
 import { cleanup, render, screen } from "@testing-library/react";
-import { afterEach, describe, expect, it } from "vitest";
-import { BookletGuide } from "@/components/booklet/BookletGuide";
+import { afterEach, describe, expect, it, vi } from "vitest";
+import { LearnGuide } from "@/components/learn/LearnGuide";
 import { BOOKLET_OUTLETS, BUREAU_EMAIL } from "@/lib/booklet";
 
 afterEach(cleanup);
 
-describe("BookletGuide", () => {
+vi.mock("@/components/providers/ToastProvider", () => ({
+  useToast: () => ({ showToast: vi.fn() }),
+}));
+
+describe("LearnGuide", () => {
   it("lists every outlet with a directions link", () => {
-    render(<BookletGuide />);
+    render(<LearnGuide />);
     for (const outlet of BOOKLET_OUTLETS) {
       const link = screen.getByRole("link", {
         name: `Directions to ${outlet.name}`,
@@ -17,7 +21,7 @@ describe("BookletGuide", () => {
   });
 
   it("offers an email to the bureau and a way back to the map", () => {
-    render(<BookletGuide />);
+    render(<LearnGuide />);
     const mail = screen.getByRole("link", { name: "Email the bureau" });
     expect(mail.getAttribute("href")).toContain(`mailto:${BUREAU_EMAIL}`);
     expect(
@@ -25,8 +29,15 @@ describe("BookletGuide", () => {
     ).toBe("/explore");
   });
 
+  it("can be shared from the top and the bottom", () => {
+    render(<LearnGuide />);
+    expect(
+      screen.getAllByRole("button", { name: "Share this guide" })
+    ).toHaveLength(2);
+  });
+
   it("says it is independent of India Post", () => {
-    render(<BookletGuide />);
+    render(<LearnGuide />);
     expect(screen.getByText(/independent project/i)).toBeTruthy();
   });
 });

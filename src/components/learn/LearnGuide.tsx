@@ -3,8 +3,9 @@ import { DISCLAIMER } from "@/lib/constants";
 import {
   BOOKLET_OUTLETS,
   BOOKLET_PRICE_NOTE,
-  BUREAU_EMAIL,
+  BUREAU,
   mapsUrl,
+  telUrl,
 } from "@/lib/booklet";
 import { ShareLearnButton } from "@/components/learn/ShareLearnButton";
 
@@ -116,27 +117,41 @@ export function LearnGuide() {
           </h2>
           <p className="mt-2 text-base leading-7 text-muted">
             Reported on sale at these four post offices. Copies come in batches,
-            so ask before you travel.
+            so call or write before you travel.
           </p>
           <ul className="mt-4 space-y-3">
             {BOOKLET_OUTLETS.map((outlet) => (
-              <li
-                key={outlet.name}
-                className={`${CARD} flex items-center justify-between gap-3 p-4`}
-              >
-                <div className="min-w-0">
-                  <p className="font-bold">{outlet.name}</p>
-                  <p className="text-sm text-muted">{outlet.note}</p>
+              <li key={outlet.name} className={`${CARD} p-4`}>
+                <p className="font-bold">{outlet.name}</p>
+                <p className="text-sm text-muted">{outlet.note}</p>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  <a
+                    href={telUrl(outlet.phone)}
+                    aria-label={`Call ${outlet.name}, ${outlet.phone}`}
+                    className={`${BUTTON} border-[1.5px] border-ink/25 text-ink`}
+                  >
+                    Call
+                  </a>
+                  <a
+                    href={`mailto:${outlet.email}`}
+                    aria-label={`Email ${outlet.name}`}
+                    className={`${BUTTON} border-[1.5px] border-ink/25 text-ink`}
+                  >
+                    Email
+                  </a>
+                  <a
+                    href={mapsUrl(outlet.mapQuery)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={`Directions to ${outlet.name}`}
+                    className={`${BUTTON} border-[1.5px] border-ink/25 text-ink`}
+                  >
+                    Directions
+                  </a>
                 </div>
-                <a
-                  href={mapsUrl(outlet.mapQuery)}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label={`Directions to ${outlet.name}`}
-                  className={`${BUTTON} shrink-0 border-[1.5px] border-ink/25 text-ink`}
-                >
-                  Directions
-                </a>
+                <p className="mt-2 break-all text-xs text-muted">
+                  {outlet.phone} · {outlet.email}
+                </p>
               </li>
             ))}
           </ul>
@@ -150,15 +165,22 @@ export function LearnGuide() {
             For stock, price or opening hours, write to the Philatelic Bureau at
             Bengaluru GPO. It is where the booklet first went on sale.
           </p>
-          <a
-            href={`mailto:${BUREAU_EMAIL}?subject=${encodeURIComponent(
-              "Philately Passport booklet"
-            )}`}
-            className={`${BUTTON} mt-3 bg-postal text-white`}
-          >
-            Email the bureau
-          </a>
-          <p className="mt-2 break-all text-sm text-muted">{BUREAU_EMAIL}</p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            <a
+              href={`mailto:${BUREAU.email}?subject=${encodeURIComponent(
+                "Philately Passport booklet"
+              )}`}
+              className={`${BUTTON} bg-postal text-white`}
+            >
+              Email the bureau
+            </a>
+            <a
+              href={telUrl(BUREAU.phone)}
+              className={`${BUTTON} border-[1.5px] border-ink/25 text-ink`}
+            >
+              Call {BUREAU.phone}
+            </a>
+          </div>
         </section>
 
         <section className="mt-8" aria-labelledby="words-heading">

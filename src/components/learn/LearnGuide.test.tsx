@@ -1,7 +1,7 @@
 import { cleanup, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { LearnGuide } from "@/components/learn/LearnGuide";
-import { BOOKLET_OUTLETS, BUREAU_EMAIL } from "@/lib/booklet";
+import { BOOKLET_OUTLETS, BUREAU } from "@/lib/booklet";
 
 afterEach(cleanup);
 
@@ -20,10 +20,26 @@ describe("LearnGuide", () => {
     }
   });
 
+  it("gives every outlet a phone and email", () => {
+    render(<LearnGuide />);
+    for (const outlet of BOOKLET_OUTLETS) {
+      expect(
+        screen
+          .getByRole("link", { name: new RegExp(`Call ${outlet.name}`) })
+          .getAttribute("href")
+      ).toMatch(/^tel:\+91\d{10}$/);
+      expect(
+        screen
+          .getByRole("link", { name: `Email ${outlet.name}` })
+          .getAttribute("href")
+      ).toBe(`mailto:${outlet.email}`);
+    }
+  });
+
   it("offers an email to the bureau and a way back to the map", () => {
     render(<LearnGuide />);
     const mail = screen.getByRole("link", { name: "Email the bureau" });
-    expect(mail.getAttribute("href")).toContain(`mailto:${BUREAU_EMAIL}`);
+    expect(mail.getAttribute("href")).toContain(`mailto:${BUREAU.email}`);
     expect(
       screen.getByRole("link", { name: "Open the map" }).getAttribute("href")
     ).toBe("/explore");

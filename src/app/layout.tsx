@@ -7,15 +7,30 @@ import "@fontsource-variable/noto-sans-kannada";
 import "@fontsource/courier-prime/400.css";
 import "./globals.css";
 import { Providers } from "@/components/providers/Providers";
+import { SITE_URL } from "@/lib/constants";
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://philatrail.com"),
+  metadataBase: new URL(SITE_URL),
   title: {
     default: "Philatrail: the map and tracker for Karnataka's Philately Passport",
     template: "%s · Philatrail",
   },
   description:
     "Find the 100 post offices of Karnataka's Philately Passport on a map, plan your next visit, and keep track of every postmark you collect.",
+  applicationName: "Philatrail",
+  openGraph: {
+    type: "website",
+    siteName: "Philatrail",
+    locale: "en_IN",
+    title: "Philatrail: the map and tracker for Karnataka's Philately Passport",
+    description:
+      "Find the 100 post offices of Karnataka's Philately Passport on a map, plan your next visit, and keep track of every postmark you collect.",
+    images: [{ url: "/og-image.png", width: 1024, height: 500, alt: "Philatrail" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    images: ["/og-image.png"],
+  },
 };
 
 export const viewport: Viewport = {

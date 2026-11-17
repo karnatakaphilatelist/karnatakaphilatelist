@@ -14,6 +14,9 @@ export const GUEST_SIGN_IN_THRESHOLD = 3;
 export const MAP_START_CENTER: Coordinates = { lat: 22.5, lng: 79 };
 export const MAP_START_ZOOM = 5;
 
+/** The public address of the site. Used for canonical links and social previews. */
+export const SITE_URL = "https://philatrail.com";
+
 /** Where people write to ask about their data or report a problem. Shown on the legal pages. */
 export const CONTACT_EMAIL = "karnatakaphilatelist@gmail.com";
 export const LEGAL_LAST_UPDATED = "27 October 2026";

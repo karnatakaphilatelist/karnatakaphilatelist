@@ -17,11 +17,24 @@ export default async function HomePage() {
           "@context": "https://schema.org",
           "@graph": [
             {
+              "@type": "Organization",
+              "@id": `${SITE_URL}/#organization`,
+              name: "Philatrail",
+              url: SITE_URL,
+              logo: {
+                "@type": "ImageObject",
+                url: `${SITE_URL}/icon-512.png`,
+                width: 512,
+                height: 512,
+              },
+            },
+            {
               "@type": "WebSite",
               "@id": `${SITE_URL}/#website`,
               url: SITE_URL,
               name: "Philatrail",
               inLanguage: "en-IN",
+              publisher: { "@id": `${SITE_URL}/#organization` },
             },
             {
               "@type": "WebApplication",
@@ -33,6 +46,7 @@ export default async function HomePage() {
               applicationCategory: "TravelApplication",
               operatingSystem: "Web, Android",
               offers: { "@type": "Offer", price: "0", priceCurrency: "INR" },
+              publisher: { "@id": `${SITE_URL}/#organization` },
             },
           ],
         }}

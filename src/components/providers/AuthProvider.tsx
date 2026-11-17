@@ -27,6 +27,7 @@ import {
   isNativeApp,
   NATIVE_AUTH_REDIRECT,
   parseNativeAuthCode,
+  pathFromSiteLink,
 } from "@/lib/native";
 import { hasStoredSession, loadSupabase } from "@/lib/supabase/lazy";
 
@@ -137,7 +138,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       ]);
       const handle = await App.addListener("appUrlOpen", async ({ url }) => {
         const code = parseNativeAuthCode(url);
-        if (!code) return;
+        if (!code) {
+          // A philatrail.com link opened the app: show that page.
+          const path = pathFromSiteLink(url);
+          if (path) window.location.assign(path);
+          return;
+        }
         await (await getClient()).auth.exchangeCodeForSession(code);
         await Browser.close().catch(() => undefined);
         // A password-reset link leads on to the new-password page.

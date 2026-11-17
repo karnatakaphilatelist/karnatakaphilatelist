@@ -1,0 +1,12 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "app.vinvi.philatrail",
+      "sha256_cert_fingerprints": [
+        "50:36:EE:74:5F:31:33:45:DE:B3:E2:B8:35:60:5E:C0:6F:A3:74:AE:3D:C9:ED:29:9F:7A:EA:17:2B:EA:CD:39"
+      ]
+    }
+  }
+]

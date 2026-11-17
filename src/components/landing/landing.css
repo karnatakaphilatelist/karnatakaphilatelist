@@ -1,26 +1,38 @@
 /*
- * Landing page: the postcard intro, the hero and the map card that opens on scroll.
+ * Landing page: a red postcard intro, then a normal marketing page — masthead, hero, a
+ * highlighted progress/CTA module, a 4-step teaser linking to /learn, and a footer.
  * Colours and fonts come from the theme in globals.css (see DESIGN.md).
- * --p (0 to 1) is how far the person has scrolled; it is set from script.
  */
 
 .kpl {
-  --p: 0;
   --wm-w: min(calc(100vw - 48px), calc(26dvh * 1181 / 161));
-  background: #fff;
-  color: var(--color-postal);
+  background: #fffffe;
+  background-image: radial-gradient(
+      ellipse 900px 520px at 8% -8%,
+      rgb(252 236 195 / 0.55) 0%,
+      transparent 60%
+    ),
+    radial-gradient(
+      ellipse 700px 500px at 100% 18%,
+      rgb(207 24 48 / 0.035) 0%,
+      transparent 55%
+    ),
+    radial-gradient(
+      ellipse 800px 600px at 15% 115%,
+      rgb(31 138 77 / 0.03) 0%,
+      transparent 55%
+    );
+  color: var(--color-ink);
 }
-
-.kpl-scroller {
-  height: 520vh;
-}
-.kpl-stage {
-  position: sticky;
-  top: 0;
-  height: 100vh;
-  height: 100dvh;
-  overflow: hidden;
-  background: #fff;
+.kpl-grain {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0.035;
+  mix-blend-mode: multiply;
+  pointer-events: none;
+  z-index: 0;
 }
 
 .kpl-mono {
@@ -29,44 +41,30 @@
   text-transform: uppercase;
 }
 
-/* The wordmark is the project's own lettering used as a mask, so it can take any colour. */
+/* The wordmark is the project's own lettering used as a mask, so it can take any colour.
+   Its size (--wm-w) is shared with the intro overlay so the hand-off from the intro's
+   white wordmark to this red one doesn't jump in size. */
 .kpl-wm {
-  position: absolute;
-  left: 24px;
-  top: 24px;
-  /* Full width, but never taller than a quarter of the screen, so short windows keep room for the cards. */
   width: var(--wm-w);
   aspect-ratio: 1181 / 161;
   background: var(--color-postal);
   -webkit-mask: url(/brand/wordmark.svg) center / 100% 100% no-repeat;
   mask: url(/brand/wordmark.svg) center / 100% 100% no-repeat;
-  transform-origin: 0 0;
-  transform: translateY(calc(var(--p) * -26px)) scale(calc(1 - var(--p) * 0.86));
-  will-change: transform;
 }
 .kpl-wm--white {
   background: #fff;
-  transform: none;
 }
 .kpl-wm-stack {
   display: none;
 }
 
-/* Small screens: stack the wordmark as PHILA over TELIST so it fills the width. */
 @media (max-width: 640px) {
   .kpl-wm {
     display: none;
   }
   .kpl-wm-stack {
-    position: absolute;
-    left: 16px;
-    right: 16px;
-    top: 20px;
     display: block;
-    transform-origin: 0 0;
-    transform: translateY(calc(var(--p) * -20px))
-      scale(calc(1 - var(--p) * 0.8));
-    will-change: transform;
+    width: 100%;
   }
   .kpl-wm-stack i {
     display: block;
@@ -86,44 +84,39 @@
   .kpl-wm-stack--white i {
     background: #fff;
   }
-  .kpl-wm-stack--white {
-    transform: none;
-  }
 }
 
-/* ---------------------------------------------------------------- page details */
-.kpl-meta {
-  position: absolute;
-  opacity: calc(1 - var(--p) * 4);
-}
-/* One row under the wordmark: tagline left, links centre, e-mail right. */
-.kpl-stage {
-  --pad: 24px;
-  --wm-h: calc(var(--wm-w) * 161 / 1181);
-  --row-top: calc(var(--pad) + var(--wm-h) + clamp(24px, 3.2vw, 44px));
+/* ---------------------------------------------------------------- masthead */
+/* padding here (24px) matches where the intro's wordmark sits (.kpl-top .kpl-wm, below),
+   so the real masthead's wordmark lands in exactly the same spot when the curtain opens. */
+.kpl-head {
+  position: relative;
+  z-index: 1;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 24px 24px 0;
 }
 .kpl-row {
-  position: absolute;
-  left: var(--pad);
-  right: var(--pad);
-  top: var(--row-top);
-  display: grid;
-  grid-template-columns: 1fr auto 1fr;
+  display: flex;
   align-items: center;
-  gap: 16px;
-}
-.kpl-row .kpl-meta {
-  position: static;
+  justify-content: space-between;
+  gap: 24px;
+  flex-wrap: wrap;
+  margin-top: 18px;
+  padding-top: 14px;
+  border-top: 2px solid var(--color-postal);
 }
 .kpl-sub {
+  margin: 0;
+  font-style: italic;
   font-size: 15px;
-  font-weight: 500;
+  color: var(--color-muted);
 }
 .kpl-nav {
   display: flex;
   gap: 4px;
   font-size: 15px;
-  font-weight: 500;
+  font-weight: 600;
 }
 .kpl-nav a,
 .kpl-nav button {
@@ -137,572 +130,233 @@
   font: inherit;
   cursor: pointer;
 }
+.kpl-nav a:hover,
+.kpl-nav button:hover {
+  color: var(--color-postal);
+}
 .kpl-mail {
-  justify-self: end;
-  font-family: var(--font-display);
   font-style: italic;
+  font-size: 14px;
   font-weight: 500;
-  font-size: 18px;
 }
-.kpl-time {
-  left: 24px;
-  bottom: 20px;
-}
-.kpl-open {
-  right: 24px;
-  bottom: 20px;
+.kpl-stats {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 16px;
+  color: var(--color-muted);
 }
 .kpl-dot {
   display: inline-block;
-  width: 8px;
-  height: 8px;
-  margin-right: 6px;
+  width: 7px;
+  height: 7px;
+  margin-right: 7px;
   vertical-align: 1px;
   border-radius: 50%;
   background: var(--color-postal);
 }
 
 @media (max-width: 640px) {
-  .kpl-stage {
-    --pad: 16px;
-    /* stacked wordmark: two lines of lettering plus the gap between them */
-    --wm-h: calc((100vw - 32px) * (161 / 553 + 161 / 628) + 8px);
-    --row-top: calc(20px + var(--wm-h) + 20px);
+  .kpl-head {
+    padding: 16px 16px 0;
   }
   .kpl-row {
-    grid-template-columns: 1fr;
-    gap: 2px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
   }
   .kpl-nav {
     margin-left: -10px;
   }
-  .kpl-mail {
-    justify-self: start;
-    font-size: 16px;
-  }
-  .kpl-time,
-  .kpl-open {
-    display: none;
+  .kpl-stats {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
   }
 }
 
-/* ---------------------------------------------------------------- the postcards */
-/* A row of postcards that slides across the screen, one direction, as the page scrolls. */
-.kpl-track {
-  --gap: 20px;
-  --top0: calc(var(--row-top) + 84px);
-  position: absolute;
-  left: 0;
-  top: calc(var(--top0) + (96px - var(--top0)) * var(--p));
-  bottom: 84px;
-  width: max-content;
-  display: flex;
-  gap: var(--gap);
-  padding: 0 var(--pad);
-  align-items: stretch;
-  min-height: 230px;
-  transform: translateX(calc(-1 * var(--p) * (100% - 100vw)));
-}
-.kpl-card {
+/* ---------------------------------------------------------------- hero */
+.kpl-main {
   position: relative;
-  flex: none;
-  width: clamp(250px, 26vw, 360px);
-  padding: 22px;
+  z-index: 1;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 24px 64px;
+}
+.kpl-hero {
   display: flex;
-  flex-direction: column;
-  gap: 8px;
-  overflow: hidden;
-  border: 1px solid var(--color-line-strong);
-  border-radius: 14px;
-  background: var(--color-paper);
-  color: var(--color-ink);
-  box-shadow: 0 14px 32px -20px rgb(22 32 79 / 0.45);
-}
-.kpl-card h2 {
-  font-family: var(--font-display);
-  font-style: italic;
-  font-weight: 600;
-  font-size: clamp(34px, 4vw, 52px);
-  line-height: 1;
-}
-.kpl-card p {
-  font-size: 15px;
-  line-height: 22px;
-  color: var(--color-muted);
-}
-.kpl-kicker {
-  font: 500 12px/1.4 ui-monospace, SFMono-Regular, Menlo, monospace !important;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--color-postal) !important;
-}
-.kpl-card--hero {
-  width: clamp(560px, 58vw, 860px);
-  flex-direction: row;
-  gap: 20px;
-  padding: 0;
+  align-items: center;
+  gap: 48px;
+  flex-wrap: wrap;
+  padding-top: 48px;
 }
 .kpl-hero-copy {
-  flex: 1 1 55%;
-  padding: 26px 0 26px 26px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 14px;
+  flex: 1 1 440px;
+  min-width: 280px;
 }
-.kpl-card--hero h1 {
-  font-size: clamp(24px, 2.7vw, 40px);
-  line-height: 1.1;
+.kpl-hero-copy h1 {
+  margin: 0 0 18px;
+  font-family: var(--font-display);
   font-weight: 500;
-  letter-spacing: -0.02em;
+  font-size: clamp(26px, 3.6vw, 37px);
+  line-height: 1.22;
+  letter-spacing: -0.01em;
   color: var(--color-ink);
 }
-.kpl-card--hero h1 span {
-  font-family: var(--font-display);
+.kpl-hero-copy h1 span {
   font-style: italic;
-  font-weight: 600;
   color: var(--color-postal);
+}
+.kpl-hero-copy p {
+  margin: 0 0 28px;
+  max-width: 46ch;
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--color-muted);
 }
 .kpl-btns {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: 14px;
 }
 .kpl-btn {
   display: inline-flex;
   min-height: 48px;
-  padding: 0 22px;
+  padding: 0 26px;
   align-items: center;
+  gap: 8px;
   border-radius: 9999px;
   font-weight: 600;
   font-size: 15px;
+  white-space: nowrap;
+  transition: transform 0.15s, background 0.15s;
 }
 .kpl-btn--red {
   background: var(--color-postal);
-  color: #fff;
+  color: #fcf6e8;
+  font-weight: 700;
+}
+.kpl-btn--red:hover {
+  background: var(--color-postal-dark);
 }
 .kpl-btn--line {
-  border: 1.5px solid var(--color-line-strong);
-  background: #fff;
+  border: 1.5px solid var(--color-ink);
   color: var(--color-ink);
 }
+.kpl-btn:active {
+  transform: scale(0.97);
+}
+
 .kpl-coral {
   position: relative;
-  flex: 1 1 45%;
-  margin: 12px 12px 12px 0;
+  flex: 0 0 220px;
   display: grid;
   place-items: center;
-  border-radius: 10px;
-  background: var(--color-coral);
-  overflow: hidden;
 }
 .kpl-stampart {
   --stamp: #f1e8d3;
-  width: min(62%, 190px);
+  width: min(100%, 220px);
   aspect-ratio: 120 / 150;
-  padding: 6px;
   transform: rotate(-6deg);
   filter: drop-shadow(0 8px 10px rgb(22 32 79 / 0.3));
 }
 .kpl-postmark {
   position: absolute;
-  right: 8%;
-  bottom: 8%;
-  opacity: 0.75;
-  transform: rotate(-10deg);
+  right: -6px;
+  bottom: 4px;
+  opacity: 0.9;
 }
-.kpl-card--progress {
-  justify-content: flex-start;
+
+@media (max-width: 640px) {
+  .kpl-hero {
+    padding-top: 32px;
+    gap: 24px;
+  }
+  .kpl-coral {
+    flex: 0 0 auto;
+    width: 160px;
+    margin: 0 auto;
+  }
+}
+
+/* ---------------------------------------------------------------- the highlighted module */
+/* The one darker, gold-gradient block on an otherwise light page: progress plus the main CTA. */
+.kpl-highlight {
+  margin-top: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 32px;
+  flex-wrap: wrap;
+  padding: 32px 40px;
+  border-radius: 24px;
+  border: 1px solid rgb(143 100 15 / 0.22);
+  background: linear-gradient(135deg, #fbecc6 0%, #f3d99a 55%, #eccb84 100%);
+  box-shadow: 0 10px 32px rgb(143 100 15 / 0.16),
+    inset 0 1px 0 rgb(255 255 255 / 0.5);
+}
+.kpl-highlight-copy {
+  flex: 1 1 320px;
+  min-width: 240px;
+}
+.kpl-kicker {
+  margin: 0 0 6px;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: #8f640f;
 }
 .kpl-big {
-  font-size: clamp(22px, 2.4vw, 30px) !important;
-  line-height: 1.15 !important;
-  color: var(--color-ink) !important;
-}
-.kpl-big b {
+  margin: 0 0 14px;
   font-family: var(--font-display);
-  font-style: italic;
-  font-size: 1.9em;
-  color: var(--color-postal);
+  font-weight: 600;
+  font-size: 40px;
+  letter-spacing: -0.01em;
+  color: var(--color-ink);
+}
+.kpl-big span {
+  font-size: 20px;
+  font-weight: 500;
+  color: var(--color-muted);
 }
 .kpl-bar {
-  height: 12px;
+  width: 100%;
+  max-width: 360px;
+  height: 8px;
   border-radius: 9999px;
-  background: var(--color-sand);
+  background: rgb(22 32 79 / 0.1);
   overflow: hidden;
-  border: 1px solid var(--color-line);
 }
 .kpl-bar i {
   display: block;
   height: 100%;
-  background: var(--color-postal);
-}
-.kpl-card--step {
-  justify-content: space-between;
-}
-.kpl-card--map {
-  width: clamp(280px, 30vw, 420px);
-  padding: 12px;
-}
-.kpl-minimap {
-  position: relative;
-  flex: 1;
-  min-height: 0;
-  border-radius: 8px;
-  background: var(--color-sand);
-  background-image: repeating-linear-gradient(
-      0deg,
-      #0000 0 31px,
-      var(--color-line) 31px 32px
-    ),
-    repeating-linear-gradient(90deg, #0000 0 31px, var(--color-line) 31px 32px);
-}
-.kpl-card--map .kpl-kicker,
-.kpl-card--map .kpl-note {
-  padding: 0 4px;
-}
-.kpl-pin {
-  position: absolute;
-  width: 11px;
-  height: 11px;
-  margin: -5px 0 0 -5px;
-  background: #fff;
-  border: 2px solid var(--color-postal);
-  border-radius: 3px;
-  outline: 2px dotted rgb(207 24 48 / 0.5);
-  outline-offset: 1px;
-}
-.kpl-pin--v {
-  background: var(--color-visited);
-  border-color: var(--color-visited);
-  outline-color: rgb(23 121 75 / 0.5);
-}
-.kpl-card--foot {
-  justify-content: center;
-}
-.kpl-card--foot .kpl-fine {
-  font-size: 13px;
-  line-height: 19px;
-}
-.kpl-links {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px 16px;
-}
-.kpl-links a {
-  min-height: 28px;
-  display: inline-flex;
-  align-items: center;
-  color: var(--color-ink);
-  text-decoration: underline;
-  font-size: 14px;
-}
-
-/* The one button that stays put while the cards slide past. */
-.kpl-open-map {
-  position: absolute;
-  left: 50%;
-  bottom: 18px;
-  z-index: 5;
-  transform: translateX(-50%);
-  display: inline-flex;
-  min-height: 52px;
-  padding: 0 28px;
-  align-items: center;
   border-radius: 9999px;
-  background: var(--color-postal);
-  color: #fff;
-  font-weight: 700;
-  letter-spacing: 0.02em;
-  box-shadow: 0 10px 24px -8px rgb(207 24 48 / 0.6);
+  background: var(--color-visited);
 }
-
-/* ---- editorial finish: hairlines, square corners, mono labels, no shadows ---- */
-.kpl-card {
-  padding: 0 0 18px;
-  gap: 12px;
-  border: 1px solid var(--color-ink);
-  border-radius: 2px;
-  box-shadow: none;
-  background: var(--color-paper);
-}
-.kpl-card > :not(.kpl-cardhead):not(.kpl-herobody):not(.kpl-minimap) {
-  margin-inline: 18px;
-}
-.kpl-cardhead {
-  display: flex;
-  justify-content: space-between;
-  padding: 11px 18px;
-  border-bottom: 1px dashed var(--color-ink);
-  font: 500 11px/1 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--color-ink);
-}
-.kpl-cardhead span:first-child {
-  color: var(--color-postal);
-}
-.kpl-card--hero {
-  flex-direction: column;
-  gap: 0;
-  padding: 0;
-}
-.kpl-herobody {
-  flex: 1;
-  display: flex;
-  gap: 20px;
-  min-height: 0;
-}
-.kpl-hero-copy {
-  padding: 22px 0 22px 22px;
-}
-.kpl-coral {
-  margin: 12px 12px 12px 0;
-  border-radius: 2px;
-}
-.kpl-btn {
-  border-radius: 2px;
-  min-height: 46px;
+.kpl-note {
+  margin: 12px 0 0;
   font-size: 13px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-weight: 600;
-}
-.kpl-btn--line {
-  border: 1px solid var(--color-ink);
-}
-.kpl-open-map {
-  border-radius: 2px;
-  font-size: 13px;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  box-shadow: none;
-}
-.kpl-card h2 {
-  margin-top: auto;
-  letter-spacing: -0.02em;
-}
-.kpl-card--step p {
-  max-width: 24ch;
-}
-.kpl-card--map {
-  padding: 0 0 14px;
-}
-.kpl-minimap {
-  margin: 12px 12px 0;
-  border-radius: 2px;
-  border: 1px solid var(--color-line-strong);
-}
-.kpl-bar {
-  border-radius: 0;
-  height: 10px;
-  border: 1px solid var(--color-ink);
-  background: transparent;
-}
-.kpl-card--map .kpl-kicker,
-.kpl-card--map .kpl-note {
-  padding: 0;
-}
-
-/* Rules above and below the information row, like a printed masthead. */
-.kpl-row {
-  padding: 10px 0;
-  border-top: 1px solid var(--color-postal);
-  border-bottom: 1px solid var(--color-postal);
-}
-.kpl-sub {
-  font: 500 11px/1.3 ui-monospace, SFMono-Regular, Menlo, monospace;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-}
-.kpl-nav {
-  font: 500 11px/1.3 ui-monospace, SFMono-Regular, Menlo, monospace;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-}
-.kpl-nav a,
-.kpl-nav button {
-  min-height: 32px;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-}
-.kpl-row {
-  opacity: calc(1 - var(--p) * 4);
-}
-.kpl-mail {
-  font-size: 16px;
-}
-
-/* ---- friendly finish: soft corners, sentence case, a clear primary action ---- */
-.kpl-track {
-  bottom: 124px;
-}
-.kpl-card {
-  border: 1px solid var(--color-line-strong);
-  border-radius: 18px;
-  box-shadow: 0 14px 30px -22px rgb(22 32 79 / 0.5);
-}
-.kpl-cardhead {
-  border-bottom: 1px solid var(--color-line);
-  font-family: inherit;
-  font-size: 13px;
-  font-weight: 600;
-  letter-spacing: 0;
-  text-transform: none;
   color: var(--color-muted);
 }
-.kpl-cardhead span:first-child {
-  color: var(--color-postal);
-  font-family: var(--font-display);
-  font-style: italic;
-  font-size: 15px;
-}
-.kpl-kicker {
-  font-family: inherit !important;
-  font-size: 13px !important;
-  font-weight: 600 !important;
-  letter-spacing: 0 !important;
-  text-transform: none !important;
-}
-.kpl-coral {
-  border-radius: 12px;
-}
-.kpl-minimap {
-  border-radius: 12px;
-}
-.kpl-bar {
-  height: 10px;
-  border: 0;
-  border-radius: 9999px;
-  background: var(--color-sand);
-}
-.kpl-bar i {
-  border-radius: 9999px;
-}
-.kpl-btn {
-  border-radius: 9999px;
-  min-height: 48px;
-  padding: 0 22px;
-  font-family: inherit;
-  font-size: 15px;
-  letter-spacing: 0;
-  text-transform: none;
-  font-weight: 600;
-}
-.kpl-btn--line {
-  border: 1.5px solid var(--color-line-strong);
-}
-.kpl-sub,
-.kpl-nav {
-  font-family: inherit;
-  font-size: 15px;
-  font-weight: 500;
-  letter-spacing: 0;
-  text-transform: none;
-}
-
-/* The dock: tick marks, previous / next arrows and one unmistakable main button. */
-.kpl-dock {
-  position: absolute;
-  left: 50%;
-  bottom: 14px;
-  z-index: 5;
-  transform: translateX(-50%);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
-}
-.kpl-ticks {
-  display: flex;
-  gap: 6px;
-}
-.kpl-ticks button {
-  position: relative;
-  width: 22px;
-  height: 20px;
-  padding: 0;
-  border: 0;
-  background: none;
-  cursor: pointer;
-}
-.kpl-ticks button::after {
-  content: "";
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 8px;
-  height: 4px;
-  border-radius: 9999px;
-  background: var(--color-line-strong);
-  transition: background 0.2s, transform 0.2s;
-}
-.kpl-ticks button.on::after {
-  background: var(--color-postal);
-  transform: scaleY(1.4);
-}
-.kpl-dockrow {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 8px;
-  border-radius: 9999px;
-  background: #fff;
-  border: 1px solid var(--color-line-strong);
-  box-shadow: 0 16px 36px -14px rgb(22 32 79 / 0.55);
-}
-.kpl-arrow {
-  display: grid;
-  width: 48px;
-  height: 48px;
-  place-items: center;
-  border: 1.5px solid var(--color-line-strong);
-  border-radius: 9999px;
-  background: #fff;
-  color: var(--color-ink);
-  cursor: pointer;
-  transition: background 0.15s, transform 0.15s;
-}
-.kpl-arrow svg {
-  width: 20px;
-  height: 20px;
-}
-.kpl-arrow:hover:not(:disabled) {
-  background: var(--color-sand);
-}
-.kpl-arrow:active:not(:disabled) {
-  transform: scale(0.94);
-}
-.kpl-arrow:disabled {
-  opacity: 0.35;
-  cursor: default;
-}
 .kpl-open-map {
-  position: static;
-  transform: none;
+  flex: 0 0 auto;
   display: inline-flex;
-  min-height: 56px;
-  padding: 0 30px 0 32px;
   align-items: center;
   gap: 10px;
+  min-height: 56px;
+  padding: 0 34px;
   border-radius: 9999px;
   background: var(--color-postal);
-  color: #fff;
-  font-family: inherit;
-  font-size: 17px;
+  color: #fcf6e8;
   font-weight: 700;
-  letter-spacing: 0;
-  text-transform: none;
-  box-shadow: 0 8px 20px -6px rgb(207 24 48 / 0.65),
-    inset 0 1px 0 rgb(255 255 255 / 0.25);
-  opacity: 1;
+  font-size: 16px;
+  white-space: nowrap;
+  box-shadow: 0 6px 18px rgb(207 24 48 / 0.28);
   transition: transform 0.15s, background 0.15s;
 }
 .kpl-open-map svg {
-  width: 20px;
-  height: 20px;
+  width: 18px;
+  height: 18px;
   transition: transform 0.2s;
 }
 .kpl-open-map:hover {
@@ -716,47 +370,122 @@
 }
 
 @media (max-width: 640px) {
-  .kpl-track {
-    --top0: calc(var(--row-top) + 108px);
-    bottom: 124px;
+  .kpl-highlight {
+    margin-top: 40px;
+    padding: 26px 24px;
   }
-  .kpl-card--hero {
-    width: min(86vw, 340px);
+  .kpl-open-map {
+    width: 100%;
+    justify-content: center;
   }
-  .kpl-herobody {
-    flex-direction: column;
-    gap: 0;
+}
+
+/* ---------------------------------------------------------------- how it works teaser */
+/* The numbering is earned here — it's an actual 4-step sequence, nowhere else on the page. */
+.kpl-steps {
+  margin-top: 64px;
+}
+.kpl-steps-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 28px;
+}
+.kpl-steps-head h2 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: 25px;
+  letter-spacing: -0.005em;
+  color: var(--color-ink);
+}
+.kpl-step-link {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-postal);
+}
+.kpl-step-link:hover {
+  text-decoration: underline;
+}
+.kpl-step-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+}
+.kpl-step-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  margin-bottom: 14px;
+  border-radius: 50%;
+  background: var(--color-ink);
+  color: #fcf6e8;
+  font-size: 13px;
+  font-weight: 700;
+}
+.kpl-step-grid h3 {
+  margin: 0 0 6px;
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--color-ink);
+}
+.kpl-step-grid p {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--color-muted);
+}
+
+@media (max-width: 640px) {
+  .kpl-step-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
   }
-  .kpl-hero-copy {
-    padding: 18px 18px 12px;
-    gap: 10px;
+}
+@media (max-width: 420px) {
+  .kpl-step-grid {
+    grid-template-columns: 1fr;
   }
-  .kpl-hero-copy p {
-    display: none;
-  }
-  .kpl-btns {
-    flex-wrap: nowrap;
-    gap: 8px;
-  }
-  .kpl-btn {
-    padding: 0 16px;
-    min-height: 44px;
-    font-size: 14px;
-  }
-  .kpl-coral {
-    margin: 0 12px 12px;
-    min-height: 90px;
-  }
-  .kpl-stampart {
-    width: 64px;
-  }
-  .kpl-postmark {
-    width: 64px;
-    height: 64px;
-  }
-  .kpl-card {
-    width: min(70vw, 280px);
-  }
+}
+
+/* ---------------------------------------------------------------- footer */
+.kpl-foot {
+  margin-top: 64px;
+  padding-top: 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 24px;
+  flex-wrap: wrap;
+  border-top: 1px solid rgb(22 32 79 / 0.12);
+}
+.kpl-fine {
+  margin: 0;
+  max-width: 48ch;
+  font-style: italic;
+  font-size: 12.5px;
+  color: #8a8fa8;
+}
+.kpl-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  margin: 0;
+}
+.kpl-links a {
+  min-height: 28px;
+  display: inline-flex;
+  align-items: center;
+  color: var(--color-ink);
+}
+.kpl-links a:hover {
+  color: var(--color-postal);
 }
 
 /* ---------------------------------------------------------------- the intro */
@@ -912,14 +641,21 @@ html[data-intro-go] .kpl-intro .kpl-postbox {
 html[data-intro-go] .kpl-intro .kpl-flycard {
   animation: kpl-fly 2.5s cubic-bezier(0.45, 0, 0.55, 1) 0.5s both;
 }
+/* The card must land on the postbox (right: 28px, width: 44px), not fly past it: its
+   resting transform lines the card's center up with the postbox's center, then it holds
+   and fades for the last stretch, reading as "goes inside" rather than stopping short. */
 @keyframes kpl-fly {
   from {
     opacity: 1;
     transform: translateX(0) rotate(-6deg);
   }
-  to {
+  92% {
     opacity: 1;
-    transform: translateX(calc(100vw + 64px)) rotate(0deg);
+    transform: translateX(calc(100vw - 18px)) rotate(0deg);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(calc(100vw - 18px)) rotate(0deg);
   }
 }
 html[data-intro-go] .kpl-intro .kpl-solid {
@@ -930,7 +666,8 @@ html[data-intro-go] .kpl-intro .kpl-solid {
     width: 0;
   }
   to {
-    width: 100%;
+    /* Ends at the postbox's left edge, matching where the card stops above. */
+    width: calc(100vw - 72px);
   }
 }
 html[data-intro-go] .kpl-intro .kpl-top {
@@ -1089,183 +826,6 @@ html[data-intro-playing] {
   }
 }
 
-/* ---- last touches ---- */
-.kpl-nav a,
-.kpl-nav button {
-  text-transform: none;
-  letter-spacing: 0;
-  font-size: 15px;
-  font-weight: 500;
-}
-.kpl-btn,
-.kpl-open-map {
-  white-space: nowrap;
-}
-.kpl-bignum {
-  position: absolute;
-  right: 18px;
-  top: 44px;
-  font-family: var(--font-display);
-  font-style: italic;
-  font-weight: 700;
-  font-size: clamp(140px, 17vw, 220px);
-  line-height: 1;
-  color: var(--color-coral);
-  opacity: 0.22;
-  pointer-events: none;
-}
-.kpl-pin {
-  width: 12px;
-  height: 12px;
-  margin: -6px 0 0 -6px;
-  border: 2px solid #fff;
-  border-radius: 9999px;
-  background: var(--color-postal);
-  outline: 0;
-  box-shadow: 0 1px 3px rgb(22 32 79 / 0.4);
-}
-.kpl-pin--v {
-  background: var(--color-visited);
-  border-color: #fff;
-}
-@media (max-width: 640px) {
-  .kpl-dockrow {
-    gap: 8px;
-    padding: 6px;
-  }
-  .kpl-arrow {
-    width: 44px;
-    height: 44px;
-  }
-  .kpl-open-map {
-    min-height: 52px;
-    padding: 0 22px;
-    font-size: 16px;
-  }
-  .kpl-btn {
-    padding: 0 14px;
-    font-size: 14px;
-  }
-}
-
-/* ---- dock v2: arrows beside the ticks, the main button on its own ---- */
-.kpl-dock {
-  gap: 12px;
-  bottom: max(14px, env(safe-area-inset-bottom));
-}
-.kpl-nav2 {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-}
-.kpl-nav2 .kpl-arrow {
-  width: 38px;
-  height: 38px;
-  box-shadow: none;
-}
-.kpl-nav2 .kpl-arrow svg {
-  width: 17px;
-  height: 17px;
-}
-.kpl-dockrow {
-  display: none;
-}
-.kpl-open-map {
-  min-height: 58px;
-  padding: 0 34px 0 36px;
-  font-size: 18px;
-  box-shadow: 0 12px 26px -8px rgb(207 24 48 / 0.6),
-    inset 0 1px 0 rgb(255 255 255 / 0.25);
-}
-@media (max-width: 640px) {
-  .kpl-open-map {
-    min-height: 54px;
-    padding: 0 28px;
-    font-size: 17px;
-  }
-  .kpl-nav2 {
-    gap: 10px;
-  }
-}
-
-/* ---- dock v3: arrows live on the screen edges and appear on hover ---- */
-.kpl-edge {
-  position: absolute;
-  top: 96px;
-  bottom: 150px;
-  width: clamp(72px, 9vw, 140px);
-  z-index: 6;
-  display: flex;
-  align-items: center;
-  pointer-events: auto;
-}
-.kpl-edge-l {
-  left: 0;
-  justify-content: flex-start;
-  padding-left: 18px;
-}
-.kpl-edge-r {
-  right: 0;
-  justify-content: flex-end;
-  padding-right: 18px;
-}
-.kpl-edge .kpl-arrow {
-  width: 56px;
-  height: 56px;
-  opacity: 0;
-  transform: scale(0.85);
-  transition: opacity 0.22s ease, transform 0.22s ease,
-    background-color 0.2s ease;
-  box-shadow: 0 10px 28px -10px rgb(22 32 79 / 0.45);
-}
-.kpl-edge .kpl-arrow svg {
-  width: 22px;
-  height: 22px;
-}
-.kpl-edge:hover .kpl-arrow:not(:disabled),
-.kpl-edge .kpl-arrow:focus-visible {
-  opacity: 1;
-  transform: scale(1);
-}
-.kpl-edge .kpl-arrow:disabled {
-  opacity: 0 !important;
-}
-@media (hover: none), (max-width: 640px) {
-  .kpl-edge {
-    display: none;
-  }
-}
-/* bigger ticks, 44px touch targets */
-.kpl-ticks button {
-  width: 44px;
-  height: 44px;
-}
-.kpl-ticks button::after {
-  top: 19px;
-  height: 6px;
-  left: 6px;
-  right: 6px;
-}
-@media (max-width: 640px) {
-  .kpl-ticks button {
-    width: 30px;
-  }
-}
-
-/* ---- phone polish: a quieter top strip so the cards get the room ---- */
-@media (max-width: 640px) {
-  .kpl-sub,
-  .kpl-mail {
-    display: none;
-  }
-  .kpl-row {
-    padding: 2px 0;
-  }
-  .kpl-track {
-    --top0: calc(var(--row-top) + 56px);
-  }
-}
-
 /*
  * The page is already laid out and painted behind the red intro, so the reveal needs no script: it is timed
  * from the intro's own clock (data-intro-go, set in <head>) and starts as the screen splits open. Without an
@@ -1273,8 +833,8 @@ html[data-intro-playing] {
  */
 html[data-intro-go] .kpl-meta,
 html[data-intro-go] .kpl-row,
-html[data-intro-go] .kpl-track,
-html[data-intro-go] .kpl-dock {
+html[data-intro-go] .kpl-stats,
+html[data-intro-go] .kpl-main {
   animation: kpl-reveal 0.7s ease 3.6s backwards;
 }
 @keyframes kpl-reveal {

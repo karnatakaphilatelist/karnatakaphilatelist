@@ -368,6 +368,12 @@ export function PassportView({
               >
                 Open the map
               </Link>
+              <Link
+                href="/booklet"
+                className="mt-1 flex min-h-12 items-center justify-center text-sm font-semibold text-ink underline underline-offset-4"
+              >
+                No booklet yet? See where to get it
+              </Link>
             </div>
           ) : (
             <ul className="mt-4 grid grid-cols-3 gap-2">

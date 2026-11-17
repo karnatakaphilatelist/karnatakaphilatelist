@@ -535,13 +535,28 @@ export function AuthDialog({
       ) : null}
 
       {step === "choose" && !notice ? (
-        <button
-          type="button"
-          onClick={onClose}
-          className="mt-1 min-h-12 w-full text-[15px] font-semibold text-muted"
-        >
-          Maybe later
-        </button>
+        reason === "welcome" ? (
+          <div className="mt-3 flex flex-col items-center gap-1">
+            <button
+              type="button"
+              onClick={onClose}
+              className="flex h-12 w-full items-center justify-center rounded-[24px] border-[1.5px] border-ink/25 text-[15px] font-bold text-ink"
+            >
+              Explore as a guest
+            </button>
+            <p className="text-center text-xs leading-[18px] text-muted">
+              No account needed. Sign in any time from the Account tab.
+            </p>
+          </div>
+        ) : (
+          <button
+            type="button"
+            onClick={onClose}
+            className="mt-1 min-h-12 w-full text-[15px] font-semibold text-muted"
+          >
+            Maybe later
+          </button>
+        )
       ) : null}
 
       <p className="mt-3 text-center text-xs leading-[18px] text-muted">

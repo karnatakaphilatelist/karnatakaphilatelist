@@ -6,6 +6,7 @@ import { useAuth } from "@/components/providers/AuthProvider";
 import { useVisits } from "@/components/providers/VisitsProvider";
 import {
   COACH_KEY,
+  COACH_RUNNING_ATTR,
   GUEST_SIGN_IN_THRESHOLD,
   SIGN_IN_PROMPTED_KEY,
   WELCOME_PROMPTED_KEY,
@@ -46,6 +47,7 @@ export function GuestSignInPrompt() {
       // Wait for the tour to finish and never interrupt another dialog.
       if (
         !readJson(COACH_KEY, false) ||
+        document.documentElement.hasAttribute(COACH_RUNNING_ATTR) ||
         document.querySelector("dialog[open]")
       ) {
         timer = setTimeout(attempt, PROMPT_RETRY_MS);

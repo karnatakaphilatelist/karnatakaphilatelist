@@ -2,7 +2,7 @@
 
 import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { COACH_EVENT, COACH_KEY } from "@/lib/constants";
+import { COACH_EVENT, COACH_KEY, COACH_RUNNING_ATTR } from "@/lib/constants";
 import { readJson, writeJson } from "@/lib/local-storage";
 
 interface Stop {
@@ -117,6 +117,13 @@ export function CoachTour() {
   }, [running]);
 
   const close = useCallback(() => setRunning(false), []);
+
+  // Tells the sign-in invitation to hold off while the walkthrough is on screen.
+  useEffect(() => {
+    if (!running) return;
+    document.documentElement.setAttribute(COACH_RUNNING_ATTR, "");
+    return () => document.documentElement.removeAttribute(COACH_RUNNING_ATTR);
+  }, [running]);
 
   useEffect(() => {
     if (!running) return;

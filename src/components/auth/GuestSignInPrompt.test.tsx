@@ -8,6 +8,7 @@ import {
 } from "@/components/auth/GuestSignInPrompt";
 import {
   COACH_KEY,
+  COACH_RUNNING_ATTR,
   SIGN_IN_PROMPTED_KEY,
   WELCOME_PROMPTED_KEY,
 } from "@/lib/constants";
@@ -139,6 +140,18 @@ describe("GuestSignInPrompt", () => {
       wait(WELCOME_DELAY_MS + PROMPT_RETRY_MS * 3);
       expect(state.openSignIn).not.toHaveBeenCalled();
       window.localStorage.setItem(COACH_KEY, "true");
+      wait(PROMPT_RETRY_MS);
+      expect(state.openSignIn).toHaveBeenCalledWith("welcome");
+    });
+
+    it("holds off while the walkthrough is on screen", () => {
+      state.path = "/explore";
+      window.localStorage.setItem(COACH_KEY, "true");
+      document.documentElement.setAttribute(COACH_RUNNING_ATTR, "");
+      render(<GuestSignInPrompt />);
+      wait(WELCOME_DELAY_MS + PROMPT_RETRY_MS * 3);
+      expect(state.openSignIn).not.toHaveBeenCalled();
+      document.documentElement.removeAttribute(COACH_RUNNING_ATTR);
       wait(PROMPT_RETRY_MS);
       expect(state.openSignIn).toHaveBeenCalledWith("welcome");
     });

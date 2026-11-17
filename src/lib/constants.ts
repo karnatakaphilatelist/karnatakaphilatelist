@@ -27,6 +27,8 @@ export const ONBOARDED_KEY = "kp:onboarded:v1";
 /** Set once we have explained why we ask for location, before the first system prompt. */
 export const LOCATION_PRIMED_KEY = "kp:location-primed:v1";
 /** Remembers that the pointing-out walkthrough on the map has been shown. */
+/** Set on <html> while the map walkthrough is on screen. */
+export const COACH_RUNNING_ATTR = "data-coach-running";
 export const COACH_KEY = "kp:coach:v1";
 /** Fired to start the walkthrough again, for example from Settings. */
 export const COACH_EVENT = "kp:start-coach";

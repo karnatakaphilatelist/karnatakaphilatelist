@@ -43,9 +43,13 @@
 
 /* The wordmark is the project's own lettering used as a mask, so it can take any colour.
    Its size (--wm-w) is shared with the intro overlay so the hand-off from the intro's
-   white wordmark to this red one doesn't jump in size. */
+   white wordmark to this red one doesn't jump in size — but --wm-w is sized off the
+   viewport (for the intro's full-bleed stage) with no idea that the real masthead sits
+   inside a 1280px-max-width column, so on a wide-but-short window it can come out wider
+   than that column and run off the page. max-width:100% keeps it inside its container. */
 .kpl-wm {
   width: var(--wm-w);
+  max-width: 100%;
   aspect-ratio: 1181 / 161;
   background: var(--color-postal);
   -webkit-mask: url(/brand/wordmark.svg) center / 100% 100% no-repeat;
@@ -187,12 +191,15 @@
   display: flex;
   align-items: center;
   gap: 48px;
-  flex-wrap: wrap;
+  /* nowrap below ~900px too: the stamp stays pinned top-right and the copy
+     shrinks (down to min-width) instead of the stamp dropping onto its own
+     line. Only the mobile breakpoint below switches to a stacked layout. */
+  flex-wrap: nowrap;
   padding-top: 48px;
 }
 .kpl-hero-copy {
   flex: 1 1 440px;
-  min-width: 280px;
+  min-width: 0;
 }
 .kpl-hero-copy h1 {
   margin: 0 0 18px;
@@ -269,6 +276,7 @@
 
 @media (max-width: 640px) {
   .kpl-hero {
+    flex-wrap: wrap;
     padding-top: 32px;
     gap: 24px;
   }

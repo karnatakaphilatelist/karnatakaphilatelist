@@ -10,7 +10,13 @@ import { readJson } from "@/lib/local-storage";
 import { useStateOffices } from "@/components/providers/StateProvider";
 import { stateName } from "@/lib/states";
 import { useVisits } from "@/components/providers/VisitsProvider";
-import { CONTACT_EMAIL, DISCLAIMER, ONBOARDED_KEY } from "@/lib/constants";
+import {
+  CONTACT_EMAIL,
+  DISCLAIMER,
+  ONBOARDED_KEY,
+  PLAY_STORE_LIVE,
+  PLAY_STORE_URL,
+} from "@/lib/constants";
 import {
   cardProgress,
   formatCounter,
@@ -616,6 +622,11 @@ export function Landing({ offices }: { offices: PostOffice[] }) {
               </header>
               <p className="kpl-fine">{DISCLAIMER}</p>
               <p className="kpl-links">
+                {PLAY_STORE_LIVE && (
+                  <a href={PLAY_STORE_URL} rel="noopener">
+                    Get it on Google Play
+                  </a>
+                )}
                 <Link href="/offices">Post offices</Link>
                 <Link href="/learn">Guide</Link>
                 <Link href="/privacy">Privacy</Link>

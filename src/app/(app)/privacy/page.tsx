@@ -7,7 +7,10 @@ import {
 } from "@/components/legal/LegalPage";
 import { CONTACT_EMAIL, LEGAL_LAST_UPDATED } from "@/lib/constants";
 
-export const metadata: Metadata = { title: "Privacy Policy" };
+export const metadata: Metadata = {
+  title: "Privacy Policy",
+  alternates: { canonical: "/privacy" },
+};
 
 export default function PrivacyPage() {
   return (

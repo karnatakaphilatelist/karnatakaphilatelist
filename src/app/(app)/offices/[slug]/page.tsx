@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { JsonLd } from "@/components/seo/JsonLd";
-import { DISCLAIMER, SITE_URL } from "@/lib/constants";
+import { DISCLAIMER, OG_IMAGE, SITE_URL } from "@/lib/constants";
 import { directionsUrl, formatDistance } from "@/lib/geo";
 import { getPostOffices } from "@/lib/offices";
 import {
@@ -43,7 +43,9 @@ export async function generateMetadata(
       description,
       url: officePath(office),
       siteName: "Philatrail",
+      images: [OG_IMAGE],
     },
+    twitter: { card: "summary_large_image", images: [OG_IMAGE.url] },
   };
 }
 

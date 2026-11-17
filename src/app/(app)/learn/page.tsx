@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { LearnGuide } from "@/components/learn/LearnGuide";
+import { OG_IMAGE } from "@/lib/constants";
 
 const TITLE = "Philately in Karnataka: a beginner's guide";
 const DESCRIPTION =
@@ -15,11 +16,13 @@ export const metadata: Metadata = {
     description: DESCRIPTION,
     url: "/learn",
     siteName: "Philatrail",
+    images: [OG_IMAGE],
   },
   twitter: {
     card: "summary_large_image",
     title: TITLE,
     description: DESCRIPTION,
+    images: [OG_IMAGE.url],
   },
 };
 

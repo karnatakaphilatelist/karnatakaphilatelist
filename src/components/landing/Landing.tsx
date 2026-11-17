@@ -627,6 +627,7 @@ export function Landing({ offices }: { offices: PostOffice[] }) {
                     Get it on Google Play
                   </a>
                 )}
+                <Link href="/karnataka-philately-passport">The Passport</Link>
                 <Link href="/offices">Post offices</Link>
                 <Link href="/learn">Guide</Link>
                 <Link href="/privacy">Privacy</Link>

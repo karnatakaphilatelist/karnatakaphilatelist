@@ -5,7 +5,7 @@ import { getPostOffices } from "@/lib/offices";
 import { officePath } from "@/lib/seo";
 import type { PostOffice } from "@/types";
 
-const TITLE = "Post offices in Karnataka's Philately Passport";
+const TITLE = "Karnataka Philately Passport: all post offices by district";
 
 export async function generateMetadata(): Promise<Metadata> {
   const offices = await getPostOffices();
@@ -29,7 +29,10 @@ export async function generateMetadata(): Promise<Metadata> {
 function byDistrict(offices: PostOffice[]): [string, PostOffice[]][] {
   const groups = new Map<string, PostOffice[]>();
   for (const office of offices) {
-    groups.set(office.district, [...(groups.get(office.district) ?? []), office]);
+    groups.set(office.district, [
+      ...(groups.get(office.district) ?? []),
+      office,
+    ]);
   }
   return [...groups.entries()].sort(([a], [b]) => a.localeCompare(b, "en"));
 }
@@ -46,10 +49,17 @@ export default async function OfficesPage() {
           {TITLE}
         </h1>
         <p className="mt-3 text-base leading-7">
-          Karnataka Postal Circle&apos;s Philately Passport lists {offices.length}{" "}
-          post offices at historical and tourist places. Here they are by
-          district. Open one for its pincode, its neighbours and a link to the
-          map. New to this?{" "}
+          Karnataka Postal Circle&apos;s Philately Passport lists{" "}
+          {offices.length} post offices at historical and tourist places. Here
+          they are by district. Open one for its pincode, its neighbours and a
+          link to the map. Want the overview first? Read about{" "}
+          <Link
+            href="/karnataka-philately-passport"
+            className="font-bold underline"
+          >
+            the Karnataka Philately Passport
+          </Link>
+          . New to this?{" "}
           <Link href="/learn" className="font-bold underline">
             Read the beginner&apos;s guide
           </Link>
@@ -57,7 +67,11 @@ export default async function OfficesPage() {
         </p>
 
         {byDistrict(offices).map(([district, list]) => (
-          <section key={district} className="mt-8" aria-labelledby={`d-${district}`}>
+          <section
+            key={district}
+            className="mt-8"
+            aria-labelledby={`d-${district}`}
+          >
             <h2 id={`d-${district}`} className="font-display text-xl font-bold">
               {district}
             </h2>

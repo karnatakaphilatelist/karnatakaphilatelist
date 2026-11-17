@@ -22,7 +22,7 @@ export const OG_IMAGE = { url: "/og-image.png", width: 1024, height: 500, alt: "
 
 /** Where people write to ask about their data or report a problem. Shown on the legal pages. */
 export const CONTACT_EMAIL = "karnatakaphilatelist@gmail.com";
-export const LEGAL_LAST_UPDATED = "27 October 2026";
+export const LEGAL_LAST_UPDATED = "17 November 2026";
 
 /** Shown in the footer of the passport and legal pages. */
 export const DISCLAIMER =

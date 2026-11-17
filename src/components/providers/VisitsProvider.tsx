@@ -13,6 +13,7 @@ import {
 } from "react";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { useToast } from "@/components/providers/ToastProvider";
+import { stampEvents, trackEvent } from "@/lib/analytics";
 import { GUEST_VISITS_KEY, PLANNED_KEY } from "@/lib/constants";
 import { todayIso } from "@/lib/date";
 import { compressImage } from "@/lib/image";
@@ -188,9 +189,20 @@ export function VisitsProvider({ children }: { children: ReactNode }) {
         isPublic: false,
       };
       commit({ ...previous, [officeId]: visit });
-      if (!userId) return true;
+      // Counted once the stamp is safely kept, so a failed save is never reported.
+      const trackStamp = () => {
+        const stampNumber = Object.keys(visitsRef.current).length;
+        for (const name of stampEvents(stampNumber)) {
+          trackEvent(name, { stamp_number: stampNumber });
+        }
+      };
+      if (!userId) {
+        trackStamp();
+        return true;
+      }
       try {
         await insertVisitIfMissing(await loadSupabase(), userId, visit);
+        trackStamp();
         return true;
       } catch (error) {
         commit(withoutOffice(visitsRef.current, officeId));

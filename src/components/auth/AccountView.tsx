@@ -196,6 +196,11 @@ export function AccountView() {
             </button>
           </li>
           <li>
+            <Link href="/learn" className={ROW}>
+              <Row>Learn about philately</Row>
+            </Link>
+          </li>
+          <li>
             <Link href="/privacy" className={ROW}>
               <Row>Privacy policy</Row>
             </Link>

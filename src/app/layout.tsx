@@ -9,6 +9,7 @@ import "./globals.css";
 import { Providers } from "@/components/providers/Providers";
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://philatrail.com"),
   title: {
     default: "Philatrail: the map and tracker for Karnataka's Philately Passport",
     template: "%s · Philatrail",

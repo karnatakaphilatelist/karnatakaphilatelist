@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { BookIcon, CheckIcon, FlagIcon } from "@/components/ui/icons";
@@ -170,6 +171,19 @@ export function WelcomeTour() {
                 Visited
               </span>
             </div>
+          ) : null}
+          {last ? (
+            <Link
+              href="/learn"
+              className="kp-glass mt-6 block rounded-2xl p-4 text-sm leading-5"
+            >
+              <span className="font-bold">No booklet yet?</span> Philatrail
+              goes with Karnataka&apos;s Philately Passport, sold by Karnataka
+              Postal Circle.{" "}
+              <span className="font-bold text-postal underline underline-offset-4">
+                See where to get it
+              </span>
+            </Link>
           ) : null}
         </div>
 

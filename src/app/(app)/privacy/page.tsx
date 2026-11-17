@@ -7,7 +7,10 @@ import {
 } from "@/components/legal/LegalPage";
 import { CONTACT_EMAIL, LEGAL_LAST_UPDATED } from "@/lib/constants";
 
-export const metadata: Metadata = { title: "Privacy Policy" };
+export const metadata: Metadata = {
+  title: "Privacy Policy",
+  alternates: { canonical: "/privacy" },
+};
 
 export default function PrivacyPage() {
   return (
@@ -28,6 +31,14 @@ export default function PrivacyPage() {
             <>
               <strong>Your passport.</strong> The post offices you mark as
               visited, the date, and any note or stamp photo you choose to add.
+            </>,
+            <>
+              <strong>How the site and app are used.</strong> We use Google
+              Analytics to count visits and see which parts are used: the pages
+              you open, your device and browser type, roughly where you are
+              (city level), and a few actions such as finishing the tour or
+              collecting a stamp. We do not send your name, email address,
+              notes or photos to Google Analytics.
             </>,
             <>
               <strong>On your own device.</strong> Stamps you collect before
@@ -68,6 +79,7 @@ export default function PrivacyPage() {
             "Supabase stores accounts, visits, notes and photos.",
             "Vercel hosts the website.",
             "Google handles sign-in when you choose Continue with Google.",
+            "Google Analytics measures how the website and app are used, so we can improve them.",
             "OpenStreetMap supplies the map pictures, so it sees that your browser asked for a map area.",
             "Google Maps opens only if you tap Directions.",
           ]}
@@ -77,8 +89,10 @@ export default function PrivacyPage() {
       <LegalSection heading="Cookies and browser storage">
         <p>
           We use cookies to keep you signed in, and browser storage for your
-          guest stamps and planned list. We do not use advertising or tracking
-          cookies.
+          guest stamps and planned list. Google Analytics sets cookies so it can
+          tell visits apart and count them. We do not use advertising cookies.
+          You can block analytics cookies in your browser settings or with a
+          content blocker, and Philatrail will still work.
         </p>
       </LegalSection>
 

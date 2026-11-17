@@ -6,7 +6,10 @@ import {
 } from "@/components/legal/LegalPage";
 import { CONTACT_EMAIL, LEGAL_LAST_UPDATED } from "@/lib/constants";
 
-export const metadata: Metadata = { title: "Terms of Use" };
+export const metadata: Metadata = {
+  title: "Terms of Use",
+  alternates: { canonical: "/terms" },
+};
 
 export default function TermsPage() {
   return (

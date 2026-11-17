@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import Script from "next/script";
 import { INTRO_BOOT_SCRIPT } from "@/lib/intro-boot";
 import "@fontsource-variable/figtree";
 import "@fontsource-variable/fraunces";
@@ -7,15 +8,31 @@ import "@fontsource-variable/noto-sans-kannada";
 import "@fontsource/courier-prime/400.css";
 import "./globals.css";
 import { Providers } from "@/components/providers/Providers";
+import { GOOGLE_TAG_ID } from "@/lib/analytics";
+import { SITE_URL } from "@/lib/constants";
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://philatrail.com"),
+  metadataBase: new URL(SITE_URL),
   title: {
     default: "Philatrail: the map and tracker for Karnataka's Philately Passport",
     template: "%s · Philatrail",
   },
   description:
     "Find the 100 post offices of Karnataka's Philately Passport on a map, plan your next visit, and keep track of every postmark you collect.",
+  applicationName: "Philatrail",
+  openGraph: {
+    type: "website",
+    siteName: "Philatrail",
+    locale: "en_IN",
+    title: "Philatrail: the map and tracker for Karnataka's Philately Passport",
+    description:
+      "Find the 100 post offices of Karnataka's Philately Passport on a map, plan your next visit, and keep track of every postmark you collect.",
+    images: [{ url: "/og-image.png", width: 1024, height: 500, alt: "Philatrail" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    images: ["/og-image.png"],
+  },
 };
 
 export const viewport: Viewport = {
@@ -36,6 +53,17 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         />
       </head>
       <body className="min-h-dvh">
+        {/* Google Analytics. No Content-Security-Policy anywhere, so the app's web view can run it. */}
+        <Script
+          src={`https://www.googletagmanager.com/gtm.js?id=${GOOGLE_TAG_ID}`}
+          strategy="afterInteractive"
+        />
+        <Script id="google-tag-init" strategy="afterInteractive">
+          {`window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+window.gtag = gtag;
+gtag('js', new Date());`}
+        </Script>
         <Providers>
           {children}
         </Providers>

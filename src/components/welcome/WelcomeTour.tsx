@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { BookIcon, CheckIcon, FlagIcon } from "@/components/ui/icons";
+import { trackEvent } from "@/lib/analytics";
 import { ONBOARDED_KEY } from "@/lib/constants";
 import { writeJson } from "@/lib/local-storage";
 import { isNativeApp } from "@/lib/native";
@@ -87,6 +88,7 @@ export function WelcomeTour() {
   }, [router]);
 
   function finish() {
+    trackEvent("tour_complete");
     // Inside the apps a plain page load has been far quicker and more dependable than the client router.
     if (isNativeApp()) window.location.replace("/explore");
     else router.replace("/explore");

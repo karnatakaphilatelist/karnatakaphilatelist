@@ -14,9 +14,15 @@ export const GUEST_SIGN_IN_THRESHOLD = 3;
 export const MAP_START_CENTER: Coordinates = { lat: 22.5, lng: 79 };
 export const MAP_START_ZOOM = 5;
 
+/** The public address of the site. Used for canonical links and social previews. */
+export const SITE_URL = "https://philatrail.com";
+
+/** The share image. A page that sets its own openGraph replaces the site-wide one, so each such page repeats this. */
+export const OG_IMAGE = { url: "/og-image.png", width: 1024, height: 500, alt: "Philatrail" };
+
 /** Where people write to ask about their data or report a problem. Shown on the legal pages. */
 export const CONTACT_EMAIL = "karnatakaphilatelist@gmail.com";
-export const LEGAL_LAST_UPDATED = "27 October 2026";
+export const LEGAL_LAST_UPDATED = "17 November 2026";
 
 /** Shown in the footer of the passport and legal pages. */
 export const DISCLAIMER =
@@ -35,3 +41,8 @@ export const COACH_EVENT = "kp:start-coach";
 /** Lite mode: no textures or motion, for older phones and battery saving. */
 export const LITE_MODE_KEY = "kp:lite:v1";
 export const AFTER_AUTH_KEY = "kp:after-auth:v1";
+
+export const PLAY_STORE_URL =
+  "https://play.google.com/store/apps/details?id=app.vinvi.philatrail";
+/** Flip to true once the app is public on Google Play (closed testing links don't work for everyone). */
+export const PLAY_STORE_LIVE = false;

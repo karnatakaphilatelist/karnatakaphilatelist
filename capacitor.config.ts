@@ -10,13 +10,14 @@ const config: CapacitorConfig = {
   webDir: "native-www",
   server: {
     // CI can point a test build at a preview deployment with CAP_SERVER_URL.
-    url: process.env.CAP_SERVER_URL || "https://karnatakaphilatelist.vercel.app",
+    url: process.env.CAP_SERVER_URL || "https://philatrail.com",
     cleartext: false,
     // If the site cannot be reached (for example no connection at launch), show native-www/index.html
     // instead of the browser's raw error page.
     errorPath: "index.html",
     // Sign-in with Google happens in the system browser and returns through this scheme.
-    allowNavigation: ["karnatakaphilatelist.vercel.app", "*.supabase.co"],
+    // The old vercel.app address stays allowed so redirects from it still open inside the app.
+    allowNavigation: ["philatrail.com", "www.philatrail.com", "karnatakaphilatelist.vercel.app", "*.supabase.co"],
   },
   // Keep the page clear of the notch and home bar; Android pads the web view itself.
   ios: {

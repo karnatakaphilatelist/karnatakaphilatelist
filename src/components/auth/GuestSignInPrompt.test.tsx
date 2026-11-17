@@ -7,7 +7,6 @@ import {
   WELCOME_DELAY_MS,
 } from "@/components/auth/GuestSignInPrompt";
 import {
-  COACH_KEY,
   COACH_RUNNING_ATTR,
   SIGN_IN_PROMPTED_KEY,
   WELCOME_PROMPTED_KEY,
@@ -120,9 +119,8 @@ describe("GuestSignInPrompt", () => {
   });
 
   describe("first invitation", () => {
-    it("opens once on the map after the tour, then never again", () => {
+    it("opens once as soon as the map loads, then never again", () => {
       state.path = "/explore";
-      window.localStorage.setItem(COACH_KEY, "true");
       const { unmount } = render(<GuestSignInPrompt />);
       wait(WELCOME_DELAY_MS);
       expect(state.openSignIn).toHaveBeenCalledWith("welcome");
@@ -134,19 +132,8 @@ describe("GuestSignInPrompt", () => {
       expect(state.openSignIn).not.toHaveBeenCalled();
     });
 
-    it("waits for the tour to finish", () => {
-      state.path = "/explore";
-      render(<GuestSignInPrompt />);
-      wait(WELCOME_DELAY_MS + PROMPT_RETRY_MS * 3);
-      expect(state.openSignIn).not.toHaveBeenCalled();
-      window.localStorage.setItem(COACH_KEY, "true");
-      wait(PROMPT_RETRY_MS);
-      expect(state.openSignIn).toHaveBeenCalledWith("welcome");
-    });
-
     it("holds off while the walkthrough is on screen", () => {
       state.path = "/explore";
-      window.localStorage.setItem(COACH_KEY, "true");
       document.documentElement.setAttribute(COACH_RUNNING_ATTR, "");
       render(<GuestSignInPrompt />);
       wait(WELCOME_DELAY_MS + PROMPT_RETRY_MS * 3);
@@ -157,7 +144,6 @@ describe("GuestSignInPrompt", () => {
     });
 
     it("stays away from other pages and signed-in people", () => {
-      window.localStorage.setItem(COACH_KEY, "true");
       render(<GuestSignInPrompt />);
       wait(WELCOME_DELAY_MS * 3);
       expect(state.openSignIn).not.toHaveBeenCalled();

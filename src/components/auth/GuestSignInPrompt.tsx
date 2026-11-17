@@ -5,7 +5,6 @@ import { usePathname } from "next/navigation";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { useVisits } from "@/components/providers/VisitsProvider";
 import {
-  COACH_KEY,
   COACH_RUNNING_ATTR,
   GUEST_SIGN_IN_THRESHOLD,
   SIGN_IN_PROMPTED_KEY,
@@ -22,8 +21,8 @@ export const PROMPT_DELAY_MS = 7000;
 /** If another dialog is open when the time comes, look again after this long. */
 export const PROMPT_RETRY_MS = 2000;
 
-/** How long after the map opens (and the quick tour has finished) the first invitation appears. */
-export const WELCOME_DELAY_MS = 2500;
+/** How long after the map opens the first invitation appears. The walkthrough waits for it. */
+export const WELCOME_DELAY_MS = 1000;
 
 /**
  * Invites a guest to sign in once they have stamped a few offices, so progress
@@ -36,7 +35,7 @@ export function GuestSignInPrompt() {
   const visitCount = Object.keys(visits).length;
   const pathname = usePathname();
 
-  // The first invitation: once per device, on the map, after the quick tour is over. "Maybe later" closes it
+  // The first invitation: once per device, as soon as the map has loaded and before the walkthrough. "Explore as a guest" closes it
   // and the app works fully without signing in.
   useEffect(() => {
     if (isLoading || user || pathname !== "/explore") return;
@@ -44,9 +43,8 @@ export function GuestSignInPrompt() {
 
     let timer: ReturnType<typeof setTimeout>;
     const attempt = () => {
-      // Wait for the tour to finish and never interrupt another dialog.
+      // Never interrupt the walkthrough (when replayed) or another dialog.
       if (
-        !readJson(COACH_KEY, false) ||
         document.documentElement.hasAttribute(COACH_RUNNING_ATTR) ||
         document.querySelector("dialog[open]")
       ) {

@@ -174,7 +174,7 @@ export function WelcomeTour() {
           ) : null}
           {last ? (
             <Link
-              href="/learn"
+              href="/learn/get-the-booklet"
               className="kp-glass mt-6 block rounded-2xl p-4 text-sm leading-5"
             >
               <span className="font-bold">No booklet yet?</span> Philatrail

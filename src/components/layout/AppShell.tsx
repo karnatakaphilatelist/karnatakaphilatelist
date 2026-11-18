@@ -38,9 +38,20 @@ export function AppShell({
   if (onExplore && !exploreOpened) setExploreOpened(true);
 
   // Add `native-app` to <body> so the CSS disables text-selection and long-press menus inside the app.
+  // Also dismiss the splash screen once the shell is mounted and the first paint is done —
+  // launchAutoHide is false so we control exactly when it goes away, preventing the flash
+  // of the web homepage before the app intro screen appears.
   useEffect(() => {
     if (!isNativeApp()) return;
     document.body.classList.add("native-app");
+
+    // rAF ensures the browser has actually painted before we hide the splash.
+    requestAnimationFrame(() => {
+      import("@capacitor/splash-screen")
+        .then(({ SplashScreen }) => SplashScreen.hide({ fadeOutDuration: 200 }))
+        .catch(() => undefined);
+    });
+
     return () => document.body.classList.remove("native-app");
   }, []);
 

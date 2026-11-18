@@ -30,7 +30,7 @@ const config: CapacitorConfig = {
   android: { allowMixedContent: false, backgroundColor: "#fcf6e8", appendUserAgent: "PhilatrailApp" },
   plugins: {
     SystemBars: { insetsHandling: "native" },
-    SplashScreen: { launchShowDuration: 800, backgroundColor: "#fcf6e8" },
+    SplashScreen: { launchShowDuration: 0, launchAutoHide: false, backgroundColor: "#fcf6e8" },
   },
 };
 

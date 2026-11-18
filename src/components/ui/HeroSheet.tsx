@@ -80,7 +80,7 @@ export function HeroSheet({
         >
           {hero}
         </div>
-        <div className="[background:linear-gradient(180deg,#fffaf0,#f8eed8)] max-h-[60dvh] overflow-y-auto rounded-b-none px-4 pb-[calc(1.5rem+env(safe-area-inset-bottom))] pt-6 md:rounded-b-3xl">
+        <div className="[background:linear-gradient(180deg,#fffaf0,#f8eed8)] max-h-[60dvh] overflow-y-auto rounded-b-none px-4 pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))] pt-6 md:rounded-b-3xl">
           {children}
         </div>
       </div>

@@ -179,7 +179,7 @@ export function OfficeDetail({
       />
 
       {/* Scrollable content */}
-      <div className="relative min-h-0 flex-1 overflow-y-auto px-4 pb-6 pt-3">
+      <div className="relative min-h-0 flex-1 overflow-y-auto px-4 pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))] pt-3">
         {/* ── Name row + verified badge + close ── */}
         <div className="flex items-start justify-between gap-3 pt-2">
           <div className="flex min-w-0 items-center gap-2">

@@ -105,7 +105,7 @@ export function Sheet({
           <CloseIcon className="size-5" />
         </button>
       </div>
-      <div className="px-5 pb-6 pt-4">{children}</div>
+      <div className="px-5 pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))] pt-4">{children}</div>
     </dialog>
   );
 }

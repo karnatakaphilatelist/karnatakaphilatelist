@@ -18,7 +18,7 @@ export function TabBar() {
   return (
     <nav
       aria-label="Primary"
-      className="kp-tabbar shrink-0 px-4 pb-2 pt-1 md:hidden"
+      className="kp-tabbar shrink-0 px-4 pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-1 md:hidden"
     >
       <div className="flex h-16 items-center gap-1">
         {NAV_ITEMS.map(({ href, label, Icon }) => {

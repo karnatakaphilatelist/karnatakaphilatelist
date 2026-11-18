@@ -22,7 +22,7 @@ import { useStateOffices } from "@/components/providers/StateProvider";
 import { useVisits } from "@/components/providers/VisitsProvider";
 import { StateSwitcher } from "@/components/ui/StateSwitcher";
 import { LocateIcon } from "@/components/ui/icons";
-import { LOCATION_PRIMED_KEY } from "@/lib/constants";
+import { CONTACT_EMAIL, LOCATION_PRIMED_KEY } from "@/lib/constants";
 import { isNativeApp } from "@/lib/native";
 import { readJson, writeJson } from "@/lib/local-storage";
 import { sortByDistance, withStatus } from "@/lib/office-status";
@@ -433,7 +433,7 @@ export function ExploreView({
         aria-label="Map"
         className="absolute inset-0 isolate md:relative md:inset-auto md:min-h-0 md:flex-1"
       >
-        <div className="pointer-events-none absolute inset-x-0 top-0 z-[1100] px-4 pt-4 md:hidden">
+        <div className="pointer-events-none absolute inset-x-0 top-0 z-[1100] px-4 pt-[calc(1rem+env(safe-area-inset-top,0px))] md:hidden">
           <div className="pointer-events-auto space-y-3">
             <ExploreControls
               idSuffix="mobile"
@@ -477,6 +477,16 @@ export function ExploreView({
             onMarkVisited={handleMarkVisited}
             onEditVisit={setEditingId}
             onCheckDistance={handleFindNearMe}
+            onReport={(id) => {
+              const office = allOffices.find((o) => o.id === id);
+              const subject = encodeURIComponent(
+                `Problem report: ${office?.name ?? `Office #${id}`}`
+              );
+              const body = encodeURIComponent(
+                `Office: ${office?.name ?? ""}\nPincode: ${office?.pincode ?? ""}\nID: ${id}\n\nDescribe the problem:\n`
+              );
+              window.open(`mailto:${CONTACT_EMAIL}?subject=${subject}&body=${body}`);
+            }}
             collected={
               allOffices.filter((office) => office.status === "visited").length
             }

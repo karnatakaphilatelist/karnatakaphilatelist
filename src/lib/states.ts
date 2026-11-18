@@ -45,7 +45,7 @@ export const DEFAULT_STATE = "KA";
  * being assembled — its offices may already be in the database without coordinates, which
  * would otherwise show an empty map. Remove a state from this list to switch it on.
  */
-export const COMING_SOON_STATES = ["TN"] as const;
+export const COMING_SOON_STATES = [] as const;
 
 export function stateName(code: string): string {
   return STATE_NAMES[code] ?? code;

@@ -25,7 +25,7 @@ import {
 } from "@/lib/password-auth";
 import {
   isNativeApp,
-  NATIVE_AUTH_REDIRECT,
+  nativeAuthRedirect,
   parseNativeAuthCode,
   pathFromSiteLink,
 } from "@/lib/native";
@@ -43,13 +43,12 @@ interface AuthContextValue {
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
-/** Where the OAuth / magic-link flow returns to, preserving the current page. */
 /**
  * Where links in sign-in emails lead. Inside the apps they must open the app itself: a link that opens
  * the website in the phone's browser signs the person in there, and the app never learns about it.
  */
 function emailRedirectUrl(): string {
-  return isNativeApp() ? NATIVE_AUTH_REDIRECT : buildRedirectUrl();
+  return isNativeApp() ? nativeAuthRedirect() : buildRedirectUrl();
 }
 
 function buildRedirectUrl(): string {
@@ -180,7 +179,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
-          redirectTo: NATIVE_AUTH_REDIRECT,
+          redirectTo: nativeAuthRedirect(),
           skipBrowserRedirect: true,
           queryParams: { prompt: "select_account" },
         },
@@ -271,7 +270,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (isNativeApp()) writeJson(AFTER_AUTH_KEY, "/account/password");
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: isNativeApp()
-          ? `${NATIVE_AUTH_REDIRECT}?next=${encodeURIComponent(
+          ? `${nativeAuthRedirect()}?next=${encodeURIComponent(
               "/account/password"
             )}`
           : `${window.location.origin}/auth/callback?next=${encodeURIComponent(

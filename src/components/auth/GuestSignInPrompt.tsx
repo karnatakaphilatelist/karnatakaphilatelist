@@ -22,7 +22,7 @@ export const PROMPT_DELAY_MS = 7000;
 export const PROMPT_RETRY_MS = 2000;
 
 /** How long after the map opens the first invitation appears. The walkthrough waits for it. */
-export const WELCOME_DELAY_MS = 1000;
+export const WELCOME_DELAY_MS = 10_000;
 
 /**
  * Invites a guest to sign in once they have stamped a few offices, so progress

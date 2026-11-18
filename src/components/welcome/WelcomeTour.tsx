@@ -94,31 +94,28 @@ export function WelcomeTour() {
     else router.replace("/explore");
   }
 
-  // Swipe left for the next slide, right for the previous one.
+  // Swipe left → next slide, right → previous. Uses pointer events so it works
+  // in Capacitor WebViews where touch-pan-y can swallow horizontal touches.
   const swipe = useRef<{ x: number; y: number } | null>(null);
-  function onTouchEnd(x: number, y: number) {
+  function onPointerDown(e: React.PointerEvent) {
+    swipe.current = { x: e.clientX, y: e.clientY };
+  }
+  function onPointerUp(e: React.PointerEvent) {
     const start = swipe.current;
     swipe.current = null;
     if (!start) return;
-    const dx = x - start.x;
-    if (Math.abs(dx) < 50 || Math.abs(dx) < Math.abs(y - start.y) * 1.5) return;
-    if (dx < 0) {
-      if (last) finish();
-      else setStep(step + 1);
-    } else if (step > 0) setStep(step - 1);
+    const dx = e.clientX - start.x;
+    const dy = e.clientY - start.y;
+    if (Math.abs(dx) < 40 || Math.abs(dx) < Math.abs(dy) * 1.2) return;
+    if (dx < 0) { if (last) finish(); else setStep(step + 1); }
+    else if (step > 0) setStep(step - 1);
   }
 
   return (
     <main
-      className="fixed inset-0 flex touch-pan-y flex-col md:relative md:inset-auto md:mx-auto md:mt-6 md:h-[calc(100dvh-3rem)] md:max-h-[860px] md:max-w-[430px] md:overflow-hidden md:rounded-[32px] md:shadow-[0_30px_80px_-30px_rgb(22_32_79/0.45)]"
-      onTouchStart={(event) => {
-        const t = event.touches[0];
-        swipe.current = { x: t.clientX, y: t.clientY };
-      }}
-      onTouchEnd={(event) => {
-        const t = event.changedTouches[0];
-        onTouchEnd(t.clientX, t.clientY);
-      }}
+      className="fixed inset-0 flex flex-col md:relative md:inset-auto md:mx-auto md:mt-6 md:h-[calc(100dvh-3rem)] md:max-h-[860px] md:max-w-[430px] md:overflow-hidden md:rounded-[32px] md:shadow-[0_30px_80px_-30px_rgb(22_32_79/0.45)]"
+      onPointerDown={onPointerDown}
+      onPointerUp={onPointerUp}
     >
       <section
         className="kp-red relative flex flex-[1.15] flex-col overflow-hidden px-4 pt-[calc(1.5rem+env(safe-area-inset-top))] text-white"

@@ -15,8 +15,8 @@ interface HeroSheetProps {
 }
 
 /**
- * Full-height dialog of direction D's sign-in: a red hero on top, the map showing through a gap, and a glass
- * panel docked at the bottom. On larger screens it is a centred card. Built on the native <dialog>.
+ * Bottom-sheet sign-in dialog: a red hero card + glass form panel, docked to the bottom of the screen
+ * so the map is visible above it. On larger screens it is a centred card. Built on the native <dialog>.
  */
 export function HeroSheet({
   open,
@@ -67,20 +67,20 @@ export function HeroSheet({
       }}
       aria-labelledby={labelId}
       tabIndex={-1}
-      className="m-0 h-full max-h-none w-full max-w-none [background:linear-gradient(180deg,#fffaf0,#f8eed8)] p-0 text-ink outline-none backdrop:bg-[#16204f]/35 backdrop:backdrop-blur-xl md:m-auto md:h-auto md:max-h-[92dvh] md:max-w-md md:overflow-hidden md:rounded-3xl"
+      className="m-0 mt-auto w-full max-w-none bg-transparent p-0 text-ink outline-none backdrop:bg-[#16204f]/40 backdrop:backdrop-blur-sm md:m-auto md:max-w-md md:overflow-hidden md:rounded-3xl md:[background:linear-gradient(180deg,#fffaf0,#f8eed8)]"
     >
       <h2 id={labelId} className="sr-only">
         {label}
       </h2>
-      <div className="flex h-full flex-col md:h-auto">
+      <div className="flex flex-col md:h-auto">
         <div
-          className={`kp-red relative shrink-0 overflow-hidden rounded-b-[28px] px-4 pt-[calc(2.75rem+env(safe-area-inset-top))] text-white transition-[height] duration-300 md:pt-8 ${
-            compact ? "h-[232px]" : "h-[min(56dvh,470px)] md:h-[340px]"
+          className={`kp-red relative shrink-0 overflow-hidden rounded-t-[28px] px-4 pt-6 text-white transition-[height] duration-300 md:rounded-t-3xl md:pt-8 ${
+            compact ? "h-[200px]" : "h-[min(44dvh,360px)] md:h-[300px]"
           }`}
         >
           {hero}
         </div>
-        <div className="kp-glass-panel [background:linear-gradient(180deg,#fffaf0,#f8eed8)] mt-auto max-h-[80dvh] overflow-y-auto rounded-t-[28px] px-4 pb-[calc(1.5rem+env(safe-area-inset-bottom))] pt-6 md:mt-0 md:rounded-t-none md:rounded-b-3xl">
+        <div className="[background:linear-gradient(180deg,#fffaf0,#f8eed8)] max-h-[60dvh] overflow-y-auto rounded-b-none px-4 pb-[calc(1.5rem+env(safe-area-inset-bottom))] pt-6 md:rounded-b-3xl">
           {children}
         </div>
       </div>

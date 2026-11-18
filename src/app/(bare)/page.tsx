@@ -21,6 +21,8 @@ export default async function HomePage() {
               "@id": `${SITE_URL}/#organization`,
               name: "Philatrail",
               url: SITE_URL,
+              description:
+                "Philatrail is an independent app that helps collectors use the Philately Passport booklets. It is not affiliated with India Post.",
               logo: {
                 "@type": "ImageObject",
                 url: `${SITE_URL}/icon-512.png`,
@@ -42,7 +44,7 @@ export default async function HomePage() {
               name: "Philatrail",
               url: SITE_URL,
               description:
-                "A map and tracker for Karnataka's Philately Passport. An independent project, not run by India Post.",
+                "A free map and tracker for the Philately Passport booklets sold by postal circles. Live in Karnataka (100 post offices) and Tamil Nadu (58 post offices). You collect each postmark in person at the post office. Philatrail is an independent project, not affiliated with India Post.",
               applicationCategory: "TravelApplication",
               operatingSystem: "Web, Android",
               offers: { "@type": "Offer", price: "0", priceCurrency: "INR" },

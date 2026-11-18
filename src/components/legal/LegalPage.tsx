@@ -13,7 +13,7 @@ export function LegalPage({
 }) {
   return (
     <div className="h-full overflow-y-auto">
-      <article className="mx-auto max-w-2xl px-5 pb-12 pt-6">
+      <article className="mx-auto max-w-2xl px-5 pb-12 pt-[calc(1.5rem+env(safe-area-inset-top,0px))]">
         <h1 className="font-display text-3xl font-bold tracking-tight">
           {title}
         </h1>

@@ -13,7 +13,7 @@ export function SettingsView() {
 
   return (
     <div className="h-full overflow-y-auto">
-      <div className="mx-auto max-w-md px-5 pb-8 pt-6">
+      <div className="mx-auto max-w-md px-5 pb-8 pt-[calc(1.5rem+env(safe-area-inset-top,0px))]">
         <Link
           href="/account"
           className="flex min-h-11 items-center text-sm font-semibold text-muted"

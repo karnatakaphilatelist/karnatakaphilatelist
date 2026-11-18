@@ -120,7 +120,7 @@ export function PassportView({
             ...offices.filter((office) => !visits[office.id]),
           ];
     return (
-      <div className="h-full overflow-y-auto px-4 pb-10 pt-6">
+      <div className="h-full overflow-y-auto px-4 pb-10 pt-[calc(1.5rem+env(safe-area-inset-top,0px))]">
         <div className="mx-auto max-w-2xl">
           <button
             type="button"

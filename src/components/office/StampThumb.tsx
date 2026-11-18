@@ -9,8 +9,17 @@ interface StampThumbProps {
   /** The post office's `stampImagePath`. */
   path: string | null;
   status: OfficeStatus;
-  /** Tailwind size classes, e.g. "size-[52px]". */
+  /**
+   * Tailwind size classes for the container, e.g. "size-[52px]".
+   * Defaults to a fixed square for use in list cards.
+   */
   className?: string;
+  /**
+   * When true the container shrinks to the image's natural dimensions
+   * instead of being a fixed square. Use this in contexts where each stamp
+   * should show at its own aspect ratio (e.g. the OfficeDetail hero).
+   */
+  natural?: boolean;
 }
 
 /**
@@ -23,9 +32,36 @@ export function StampThumb({
   path,
   status,
   className = "size-[52px]",
+  natural = false,
 }: StampThumbProps) {
   const [failed, setFailed] = useState(false);
   const url = failed ? null : stampImageUrl(path);
+
+  if (natural) {
+    // Natural-size mode: let the image drive the dimensions.
+    // The container only provides the rounded corners, background and border styling.
+    return (
+      <span
+        aria-hidden="true"
+        className={`block shrink-0 overflow-hidden rounded-xl bg-sand text-muted ${className}`}
+      >
+        {url ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={url}
+            alt=""
+            loading="lazy"
+            onError={() => setFailed(true)}
+            className="block max-h-[180px] max-w-[160px] p-1"
+          />
+        ) : (
+          <span className="flex size-[52px] items-center justify-center">
+            <MailIcon className="size-1/2" />
+          </span>
+        )}
+      </span>
+    );
+  }
 
   return (
     <span

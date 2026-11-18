@@ -1,3 +1,5 @@
+import { greetingWord } from "@/lib/states";
+
 interface ProgressStripProps {
   /** Null while the session is loading, so nothing flashes. */
   signedIn: boolean | null;
@@ -6,6 +8,8 @@ interface ProgressStripProps {
   total: number;
   onFindNext: () => void;
   onSignIn: () => void;
+  /** The currently selected state code, used to pick the right greeting word. */
+  stateCode?: string;
 }
 
 /**
@@ -19,7 +23,9 @@ export function ProgressStrip({
   total,
   onFindNext,
   onSignIn,
+  stateCode = "KA",
 }: ProgressStripProps) {
+  const greeting = greetingWord(stateCode);
   if (signedIn === null) return null;
 
   if (!signedIn) {
@@ -50,7 +56,7 @@ export function ProgressStrip({
       <div className="flex items-center justify-between gap-3">
         <div>
           <p className="text-sm font-semibold">
-            {firstName ? `Namaskara, ${firstName}` : "Namaskara"}
+            {firstName ? `${greeting}, ${firstName}` : greeting}
           </p>
           <p className="text-sm text-muted">
             <span className="font-display text-lg font-bold text-ink">

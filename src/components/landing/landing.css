@@ -24,6 +24,17 @@
     );
   color: var(--color-ink);
 }
+/* Bleed the page background behind the status bar on edge-to-edge phones.
+   Without this the native shell's background (usually white) shows through
+   in the env(safe-area-inset-top) gap above .kpl-head. */
+.kpl::before {
+  content: "";
+  position: fixed;
+  inset: 0 0 auto;
+  height: env(safe-area-inset-top, 0px);
+  background: #fffffe;
+  z-index: 2;
+}
 .kpl-grain {
   position: fixed;
   inset: 0;
@@ -92,13 +103,15 @@
 
 /* ---------------------------------------------------------------- masthead */
 /* padding here (24px) matches where the intro's wordmark sits (.kpl-top .kpl-wm, below),
-   so the real masthead's wordmark lands in exactly the same spot when the curtain opens. */
+   so the real masthead's wordmark lands in exactly the same spot when the curtain opens.
+   The safe-area-inset-top keeps content below the notch / status bar on edge-to-edge
+   phones (requires viewportFit: "cover" in layout.tsx, which is already set). */
 .kpl-head {
   position: relative;
   z-index: 1;
   max-width: 1280px;
   margin: 0 auto;
-  padding: 24px 24px 0;
+  padding: calc(24px + env(safe-area-inset-top, 0px)) 24px 0;
 }
 .kpl-row {
   display: flex;
@@ -162,7 +175,7 @@
 
 @media (max-width: 640px) {
   .kpl-head {
-    padding: 16px 16px 0;
+    padding: calc(16px + env(safe-area-inset-top, 0px)) 16px 0;
   }
   .kpl-row {
     flex-direction: column;
@@ -185,7 +198,7 @@
   z-index: 1;
   max-width: 1280px;
   margin: 0 auto;
-  padding: 0 24px 64px;
+  padding: 0 24px calc(64px + env(safe-area-inset-bottom, 0px));
 }
 .kpl-hero {
   display: flex;

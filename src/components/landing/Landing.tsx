@@ -26,6 +26,7 @@ import {
   SPLIT_DURATION_MS,
 } from "@/lib/landing";
 import { getFirstName } from "@/lib/user-display";
+import { greetingWord } from "@/lib/states";
 import type { PostOffice } from "@/types";
 
 const SKIP_COOKIE = new RegExp(`(?:^|; )${SKIP_INTRO_COOKIE}=1`);
@@ -94,6 +95,7 @@ export function Landing({ offices }: { offices: PostOffice[] }) {
   const isSample = stamped === 0;
   const shownStamped = isSample ? Math.min(12, stateTotal) : stamped;
   const firstName = user ? getFirstName(user) : null;
+  const greeting = greetingWord(stateCode);
 
   const STEPS = [
     {
@@ -428,7 +430,7 @@ export function Landing({ offices }: { offices: PostOffice[] }) {
         <section className="kpl-highlight">
           <div className="kpl-highlight-copy">
             <p className="kpl-kicker">
-              <span>{firstName ? `Namaskara, ${firstName}` : "Your passport"}</span>{" "}
+              <span>{firstName ? `${greeting}, ${firstName}` : "Your passport"}</span>{" "}
               · {stateName_}
             </p>
             <p className="kpl-big">

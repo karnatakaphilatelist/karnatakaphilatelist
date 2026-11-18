@@ -252,7 +252,8 @@ export function OfficeDetail({
           <StampThumb
             path={office.stampImagePath}
             status="visited"
-            className="-mt-1 size-[140px] shrink-0 rounded-2xl border border-[#16204f]/10 shadow-[0_2px_8px_rgba(22,32,79,0.06)]"
+            natural
+            className="-mt-1 shrink-0 rounded-2xl border border-[#16204f]/10 shadow-[0_2px_8px_rgba(22,32,79,0.06)]"
           />
         </div>
 

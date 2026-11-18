@@ -51,6 +51,20 @@ export function stateName(code: string): string {
   return STATE_NAMES[code] ?? code;
 }
 
+/** Regional greeting word for the selected state. */
+const STATE_GREETINGS: Partial<Record<string, string>> = {
+  KA: "Namaskara",
+  TN: "Vanakkam",
+};
+
+/**
+ * Returns the greeting word for the current state, e.g. "Namaskara" for Karnataka
+ * and "Vanakkam" for Tamil Nadu. Falls back to "Namaskara" for all other states.
+ */
+export function greetingWord(stateCode: string): string {
+  return STATE_GREETINGS[stateCode] ?? "Namaskara";
+}
+
 export interface StateOption {
   code: string;
   name: string;

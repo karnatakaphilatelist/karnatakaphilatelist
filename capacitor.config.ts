@@ -27,10 +27,10 @@ const config: CapacitorConfig = {
     backgroundColor: "#fcf6e8",
   },
   // The user-agent tag lets the site recognise the app before any script runs.
-  android: { allowMixedContent: false, backgroundColor: "#cf1830", appendUserAgent: "PhilatrailApp" },
+  android: { allowMixedContent: false, backgroundColor: "#fcf6e8", appendUserAgent: "PhilatrailApp" },
   plugins: {
     SystemBars: { insetsHandling: "native" },
-    SplashScreen: { launchShowDuration: 800, backgroundColor: "#cf1830" },
+    SplashScreen: { launchShowDuration: 800, backgroundColor: "#fcf6e8" },
   },
 };
 

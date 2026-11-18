@@ -287,6 +287,20 @@ export function ExploreView({
       >
         <div className="shrink-0 touch-none md:touch-auto" {...dragProps}>
           <SheetHandle open={sheetOpen} onChange={setSheetOpen} />
+          {/* Phone, list open: search bar lives inside the panel so it has the right background. */}
+          {sheetOpen ? (
+            <div className="px-4 pb-2 md:hidden">
+              <ExploreControls
+                idSuffix="mobile-panel"
+                withAvatar
+                hideFilters
+                query={query}
+                onQueryChange={setQuery}
+                filter={filter}
+                onFilterChange={setFilter}
+              />
+            </div>
+          ) : null}
           <div className="space-y-1 px-4 md:pt-4">
             {/* On phones the controls live over the map instead, so the detail sheet never covers them. */}
             <div className="hidden md:block">
@@ -433,19 +447,23 @@ export function ExploreView({
         aria-label="Map"
         className="absolute inset-0 isolate md:relative md:inset-auto md:min-h-0 md:flex-1"
       >
-        <div className="pointer-events-none absolute inset-x-0 top-0 z-[1100] px-4 pt-[calc(1rem+env(safe-area-inset-top,0px))] md:hidden">
-          <div className="pointer-events-auto space-y-3">
-            <ExploreControls
-              idSuffix="mobile"
-              withAvatar
-              hideFilters={sheetOpen}
-              query={query}
-              onQueryChange={setQuery}
-              filter={filter}
-              onFilterChange={setFilter}
-            />
+        {/* Floating search bar: only shown when the list is collapsed (map view). When the list is
+            open the search bar moves into the panel header so it has a solid background behind it. */}
+        {!sheetOpen ? (
+          <div className="pointer-events-none absolute inset-x-0 top-0 z-[1100] px-4 pt-[calc(1rem+env(safe-area-inset-top,0px))] md:hidden">
+            <div className="pointer-events-auto space-y-3">
+              <ExploreControls
+                idSuffix="mobile"
+                withAvatar
+                hideFilters={false}
+                query={query}
+                onQueryChange={setQuery}
+                filter={filter}
+                onFilterChange={setFilter}
+              />
+            </div>
           </div>
-        </div>
+        ) : null}
         <LazyOfficeMap
           key={stateCode}
           offices={visibleOffices}

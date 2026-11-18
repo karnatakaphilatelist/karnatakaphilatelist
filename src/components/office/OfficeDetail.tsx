@@ -4,6 +4,7 @@ import { useState, type ReactNode } from "react";
 import Link from "next/link";
 import { StampThumb } from "@/components/office/StampThumb";
 import { StatusBadge } from "@/components/office/StatusBadge";
+import { ContributeSheet } from "@/components/contribute/ContributeSheet";
 import { useToast } from "@/components/providers/ToastProvider";
 import { useVisits } from "@/components/providers/VisitsProvider";
 import {
@@ -40,8 +41,6 @@ interface OfficeDetailProps {
   collected?: number;
   total?: number;
   stateName?: string;
-  /** Called when the user wants to report a problem with this office. */
-  onReport?: (officeId: number) => void;
 }
 
 function ordinal(n: number): string {
@@ -143,7 +142,6 @@ export function OfficeDetail({
   collected,
   total,
   stateName,
-  onReport,
 }: OfficeDetailProps) {
   const { visits, togglePlanned } = useVisits();
   const { showToast } = useToast();
@@ -151,6 +149,7 @@ export function OfficeDetail({
   const isPlanned = office.status === "planned";
   const [aboutExpanded, setAboutExpanded] = useState(false);
   const [activeTab, setActiveTab] = useState<DetailTab>("about");
+  const [showContribute, setShowContribute] = useState(false);
 
   async function handleShare() {
     const result = await shareContent({
@@ -432,16 +431,32 @@ export function OfficeDetail({
           </div>
         )}
 
-        {/* ── Report a problem ── */}
+        {/* ── Help improve / contribute ── */}
         <button
           type="button"
-          onClick={() => onReport?.(office.id)}
+          onClick={() => setShowContribute(true)}
           className="mt-2 flex w-full items-center justify-center gap-1.5 py-3 text-[13px] text-muted"
         >
           <AlertIcon className="size-3.5" />
-          Report a problem
+          Something wrong? Help improve this
         </button>
       </div>
+
+      {/* ── Contribute sheet (overlay) ── */}
+      {showContribute ? (
+        <>
+          {/* Scrim — tapping outside closes the sheet */}
+          <div
+            aria-hidden="true"
+            className="fixed inset-0 z-[1150] bg-black/20"
+            onClick={() => setShowContribute(false)}
+          />
+          <ContributeSheet
+            office={office}
+            onClose={() => setShowContribute(false)}
+          />
+        </>
+      ) : null}
     </div>
   );
 }

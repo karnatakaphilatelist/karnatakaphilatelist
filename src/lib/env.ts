@@ -17,4 +17,11 @@ export const env = {
     "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY",
     process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
   ),
+  /**
+   * MapTiler API key — used for the map tile layer.
+   * Get one free at https://cloud.maptiler.com/account/keys/
+   * Set NEXT_PUBLIC_MAPTILER_KEY in Vercel environment variables.
+   * Optional: falls back to OpenStreetMap tile server if not set (not recommended for production).
+   */
+  maptilerKey: process.env.NEXT_PUBLIC_MAPTILER_KEY ?? "",
 } as const;

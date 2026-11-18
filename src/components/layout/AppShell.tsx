@@ -6,6 +6,7 @@ import { CoachTour } from "@/components/layout/CoachTour";
 import { AppHeader } from "@/components/layout/AppHeader";
 import { OfflineBanner } from "@/components/layout/OfflineBanner";
 import { TabBar } from "@/components/layout/TabBar";
+import { isNativeApp } from "@/lib/native";
 
 function ExploreSkeleton() {
   return (
@@ -35,6 +36,24 @@ export function AppShell({
   const [exploreOpened, setExploreOpened] = useState(onExplore);
   // Adjusting state while rendering is React's supported way to react to a route change.
   if (onExplore && !exploreOpened) setExploreOpened(true);
+
+  // Add `native-app` to <body> so the CSS disables text-selection and long-press menus inside the app.
+  useEffect(() => {
+    if (!isNativeApp()) return;
+    document.body.classList.add("native-app");
+    return () => document.body.classList.remove("native-app");
+  }, []);
+
+  // Register the service worker for offline support in the native app.
+  // We only do this in the app (not on the public web) so the SW does not
+  // interfere with normal browser caching and ISR on the Next.js side.
+  useEffect(() => {
+    if (!isNativeApp()) return;
+    if (!("serviceWorker" in navigator)) return;
+    navigator.serviceWorker
+      .register("/sw.js", { scope: "/" })
+      .catch(() => undefined); // Best-effort — the app works without it.
+  }, []);
 
   // People often land on another tab first (the passport, say) and tap through to the map.
   // Download the map code quietly while they look around, so it is ready the moment they arrive.

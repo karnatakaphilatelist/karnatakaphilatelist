@@ -14,6 +14,8 @@ import { OfficeDetail } from "@/components/office/OfficeDetail";
 import { StampedSheet } from "@/components/office/StampedSheet";
 import { VisitDialog } from "@/components/office/VisitDialog";
 import { useAuth } from "@/components/providers/AuthProvider";
+import { hapticCollect, hapticSelect } from "@/lib/haptics";
+import { updateWidget } from "@/lib/widget";
 import { useOverlay } from "@/components/providers/OverlayProvider";
 import { useToast } from "@/components/providers/ToastProvider";
 import { useStateOffices } from "@/components/providers/StateProvider";
@@ -137,10 +139,31 @@ export function ExploreView({
     return () => setTabBarHidden(false);
   }, [selectedOffice, setTabBarHidden]);
 
+  function handleSelectOffice(officeId: number) {
+    void hapticSelect();
+    setSelectedId(officeId);
+  }
+
   async function handleMarkVisited(officeId: number) {
     const saved = await markVisited(officeId);
     if (!saved) return;
+    void hapticCollect();
     setStampedId(officeId);
+    // Push updated stamp counts to the iOS home-screen widget.
+    const allVisits = { ...visits, [officeId]: { officeId } };
+    const visitedIds = new Set(Object.keys(allVisits).map(Number));
+    const stampsKA = indiaOffices.filter(
+      (o) => o.state === "KA" && visitedIds.has(o.id)
+    ).length;
+    const stampsTN = indiaOffices.filter(
+      (o) => o.state === "TN" && visitedIds.has(o.id)
+    ).length;
+    void updateWidget({
+      stampsKA,
+      stampsKATotal: indiaOffices.filter((o) => o.state === "KA").length,
+      stampsTN,
+      stampsTNTotal: indiaOffices.filter((o) => o.state === "TN").length,
+    });
   }
 
   function handleFindNearMe() {
@@ -401,7 +424,7 @@ export function ExploreView({
           <OfficeList
             offices={visibleOffices}
             selectedId={selectedId}
-            onSelect={setSelectedId}
+            onSelect={handleSelectOffice}
           />
         </div>
       </aside>
@@ -428,7 +451,7 @@ export function ExploreView({
           offices={visibleOffices}
           selectedId={selectedId}
           userLocation={userLocation}
-          onSelect={setSelectedId}
+          onSelect={handleSelectOffice}
           onReady={() => setMapReady(true)}
         />
         {!selectedOffice && !sheetOpen && dragHeight === null ? (

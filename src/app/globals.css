@@ -69,6 +69,8 @@
 
 html {
   color-scheme: light;
+  /* Prevent iOS elastic overscroll from showing a white flash behind the app. */
+  overscroll-behavior: none;
 }
 
 body {
@@ -76,6 +78,33 @@ body {
   background-color: var(--color-paper);
   color: var(--color-ink);
   font-family: var(--font-sans);
+  /* Suppress browser text selection and long-press context menus in the native apps.
+     Only applied inside the app shell (PhilatrailApp UA) via the .native-app class
+     added by AppShell.tsx, so the web experience is unchanged. */
+}
+
+/* Applied to <body> by AppShell when running inside the native app. */
+.native-app,
+.native-app * {
+  /* No text selection — prevents the iOS "Copy / Look Up" callout on tap-and-hold. */
+  -webkit-user-select: none;
+  user-select: none;
+  /* No long-press link/image preview in WebKit. */
+  -webkit-touch-callout: none;
+  /* Remove the grey tap highlight flash on iOS. */
+  -webkit-tap-highlight-color: transparent;
+  /* Eliminate the 300ms click delay on iOS without breaking double-tap-to-zoom
+     (which is disabled in our viewport anyway). */
+  touch-action: manipulation;
+}
+
+/* Re-allow selection inside text inputs and textareas. */
+.native-app input,
+.native-app textarea,
+.native-app [contenteditable] {
+  -webkit-user-select: text;
+  user-select: text;
+  -webkit-touch-callout: default;
 }
 
 :focus-visible {
@@ -437,4 +466,39 @@ label {
 }
 .leaflet-control-attribution .leaflet-attribution-flag {
   display: none !important;
+}
+
+/* ── Page transitions ───────────────────────────────────────────────────────── */
+/*
+ * Smooth cross-fade when navigating between pages in the native app.
+ * Next.js View Transitions API (available in Next 14+ with experimental flag)
+ * or the standard CSS View Transition API if the browser supports it.
+ */
+@keyframes page-enter {
+  from {
+    opacity: 0;
+    transform: translateX(16px);
+  }
+}
+
+@keyframes page-exit {
+  to {
+    opacity: 0;
+    transform: translateX(-16px);
+  }
+}
+
+/* Applied during view transitions (web) or programmatically in the native app. */
+::view-transition-old(root) {
+  animation: 200ms ease-in page-exit;
+}
+
+::view-transition-new(root) {
+  animation: 240ms ease-out page-enter;
+}
+
+/* Disable transitions for components that have their own motion. */
+::view-transition-old(.kp-map),
+::view-transition-new(.kp-map) {
+  animation: none;
 }

@@ -19,6 +19,7 @@ import {
 import { clusterPoints } from "@/lib/cluster";
 import { MAP_START_CENTER, MAP_START_ZOOM } from "@/lib/constants";
 import { hasCoordinates } from "@/lib/office-status";
+import { getTileConfig } from "@/lib/map-tiles";
 import type { Coordinates, OfficeWithStatus } from "@/types";
 
 interface OfficeMapProps {
@@ -217,8 +218,9 @@ export function OfficeMap({
       whenReady={onReady}
     >
       <TileLayer
-        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        attribution={getTileConfig().attribution}
+        url={getTileConfig().url}
+        maxZoom={getTileConfig().maxZoom}
       />
       <ZoomControl position="topleft" />
       <KeepSized />

@@ -23,6 +23,7 @@ import {
   formatShortDistance,
   proximity,
 } from "@/lib/geo";
+import { hapticTap, hapticSelectionChanged } from "@/lib/haptics";
 import { formatVisitDate } from "@/lib/date";
 import { hasCoordinates } from "@/lib/office-status";
 import { shareContent } from "@/lib/share";
@@ -413,7 +414,7 @@ export function OfficeDetail({
             <div className="flex w-14 flex-none flex-col items-center gap-2">
               <button
                 type="button"
-                onClick={() => togglePlanned(office.id)}
+                onClick={() => { void hapticSelectionChanged(); togglePlanned(office.id); }}
                 aria-pressed={isPlanned}
                 aria-label={isPlanned ? "Remove from planned" : "Plan a visit"}
                 className={`${ROUND_BTN} ${

@@ -3,13 +3,14 @@ import Link from "next/link";
 import { OG_IMAGE } from "@/lib/constants";
 import { getPostOffices } from "@/lib/offices";
 import { officePath } from "@/lib/seo";
+import { stateName } from "@/lib/states";
 import type { PostOffice } from "@/types";
 
-const TITLE = "Karnataka Philately Passport: all post offices by district";
+const TITLE = "All Philately Passport post offices: Karnataka and Tamil Nadu";
 
 export async function generateMetadata(): Promise<Metadata> {
   const offices = await getPostOffices();
-  const description = `All ${offices.length} post offices in Karnataka's Philately Passport, by district, with pincodes. Pick one, visit it and collect its postmark.`;
+  const description = `All ${offices.length} post offices of the Philately Passport in Karnataka and Tamil Nadu, by state and district, with pincodes. Pick one, visit it and collect its postmark.`;
   return {
     title: TITLE,
     description,
@@ -37,57 +38,88 @@ function byDistrict(offices: PostOffice[]): [string, PostOffice[]][] {
   return [...groups.entries()].sort(([a], [b]) => a.localeCompare(b, "en"));
 }
 
+/** States in a fixed display order (Karnataka first, the original state), each with its districts. */
+function byState(offices: PostOffice[]): [string, PostOffice[]][] {
+  const groups = new Map<string, PostOffice[]>();
+  for (const office of offices) {
+    groups.set(office.state, [...(groups.get(office.state) ?? []), office]);
+  }
+  const order = ["KA", "TN"];
+  return [...groups.entries()].sort(
+    ([a], [b]) => order.indexOf(a) - order.indexOf(b)
+  );
+}
+
+const PILLAR_PATH: Record<string, string> = {
+  KA: "/karnataka-philately-passport",
+  TN: "/tamil-nadu-philately-passport",
+};
+
 export default async function OfficesPage() {
   const offices = await getPostOffices();
   return (
     <div className="h-full overflow-y-auto">
       <div className="mx-auto max-w-2xl px-5 pb-[calc(3rem+env(safe-area-inset-bottom))] pt-6">
         <p className="text-xs font-bold uppercase tracking-[0.18em] text-muted">
-          Karnataka
+          Karnataka &amp; Tamil Nadu
         </p>
         <h1 className="mt-2 font-display text-3xl font-bold leading-tight tracking-tight">
           {TITLE}
         </h1>
         <p className="mt-3 text-base leading-7">
-          Karnataka Postal Circle&apos;s Philately Passport lists{" "}
-          {offices.length} post offices at historical and tourist places. Here
-          they are by district. Open one for its pincode, its neighbours and a
-          link to the map. Want the overview first? Read about{" "}
-          <Link
-            href="/karnataka-philately-passport"
-            className="font-bold underline"
-          >
-            the Karnataka Philately Passport
-          </Link>
-          . New to this?{" "}
+          {offices.length} post offices across both states&apos; Philately
+          Passports, grouped by state and district. Open one for its
+          pincode, its neighbours and a link to the map. New to this?{" "}
           <Link href="/learn" className="font-bold underline">
             Read the beginner&apos;s guide
           </Link>
           .
         </p>
 
-        {byDistrict(offices).map(([district, list]) => (
-          <section
-            key={district}
-            className="mt-8"
-            aria-labelledby={`d-${district}`}
-          >
-            <h2 id={`d-${district}`} className="font-display text-xl font-bold">
-              {district}
+        {byState(offices).map(([state, stateOffices]) => (
+          <section key={state} className="mt-10" aria-labelledby={`s-${state}`}>
+            <h2
+              id={`s-${state}`}
+              className="font-display text-2xl font-bold"
+            >
+              {stateName(state)}
             </h2>
-            <ul className="mt-2 divide-y divide-ink/10">
-              {list.map((office) => (
-                <li key={office.id}>
-                  <Link
-                    href={officePath(office)}
-                    className="flex min-h-11 items-center justify-between gap-3 py-2 text-base"
-                  >
-                    <span className="font-semibold">{office.name}</span>
-                    <span className="text-sm text-muted">{office.pincode}</span>
-                  </Link>
-                </li>
-              ))}
-            </ul>
+            {PILLAR_PATH[state] && (
+              <p className="mt-1 text-sm">
+                <Link href={PILLAR_PATH[state]} className="font-bold underline">
+                  About the {stateName(state)} Philately Passport
+                </Link>
+              </p>
+            )}
+            {byDistrict(stateOffices).map(([district, list]) => (
+              <section
+                key={district}
+                className="mt-6"
+                aria-labelledby={`d-${state}-${district}`}
+              >
+                <h3
+                  id={`d-${state}-${district}`}
+                  className="font-display text-xl font-bold"
+                >
+                  {district}
+                </h3>
+                <ul className="mt-2 divide-y divide-ink/10">
+                  {list.map((office) => (
+                    <li key={office.id}>
+                      <Link
+                        href={officePath(office)}
+                        className="flex min-h-11 items-center justify-between gap-3 py-2 text-base"
+                      >
+                        <span className="font-semibold">{office.name}</span>
+                        <span className="text-sm text-muted">
+                          {office.pincode}
+                        </span>
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            ))}
           </section>
         ))}
       </div>

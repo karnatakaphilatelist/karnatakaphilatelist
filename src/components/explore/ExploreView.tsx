@@ -25,6 +25,11 @@ import { LocateIcon } from "@/components/ui/icons";
 import { LOCATION_PRIMED_KEY } from "@/lib/constants";
 import { isNativeApp } from "@/lib/native";
 import { readJson, writeJson } from "@/lib/local-storage";
+import {
+  initNearbyNotifications,
+  setNearbyNotificationHandler,
+  setWatchedOffices,
+} from "@/lib/nearby-notifications";
 import { sortByDistance, withStatus } from "@/lib/office-status";
 import { stateName } from "@/lib/states";
 import { getFirstName } from "@/lib/user-display";
@@ -170,6 +175,39 @@ export function ExploreView({
       stampsTNTotal: indiaOffices.filter((o) => o.state === "TN").length,
     });
   }
+
+  // ── Geofencing ──────────────────────────────────────────────────────────────
+  // Initialise the background notification service once when the app boots.
+  // The tap handler opens the relevant office's detail card.
+  useEffect(() => {
+    if (!isNativeApp()) return;
+    void initNearbyNotifications((officeId) => {
+      setSelectedId(officeId);
+    });
+    // Only run once on mount.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Keep the tap handler current whenever the component re-renders
+  // (the closure captures the latest setSelectedId without re-initing the whole service).
+  useEffect(() => {
+    if (!isNativeApp()) return;
+    setNearbyNotificationHandler((officeId) => {
+      setSelectedId(officeId);
+    });
+  });
+
+  // Keep the background watcher's office list in sync whenever the office list
+  // or visit state changes so already-stamped offices are excluded.
+  const visitedIds = useMemo(
+    () => new Set(Object.keys(visits).map(Number)),
+    [visits],
+  );
+  useEffect(() => {
+    if (!isNativeApp()) return;
+    setWatchedOffices(offices, visitedIds);
+  }, [offices, visitedIds]);
+  // ────────────────────────────────────────────────────────────────────────────
 
   function handleFindNearMe() {
     // Explain first, once, so the system prompt is never a surprise.

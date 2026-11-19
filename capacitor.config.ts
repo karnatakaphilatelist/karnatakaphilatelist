@@ -27,10 +27,17 @@ const config: CapacitorConfig = {
     backgroundColor: "#fcf6e8",
   },
   // The user-agent tag lets the site recognise the app before any script runs.
-  android: { allowMixedContent: false, backgroundColor: "#fcf6e8", appendUserAgent: "PhilatrailApp" },
+  // useLegacyBridge prevents background location updates from halting after 5 min on Android
+  // (required by @capacitor-community/background-geolocation).
+  android: { allowMixedContent: false, backgroundColor: "#fcf6e8", appendUserAgent: "PhilatrailApp", useLegacyBridge: true },
   plugins: {
     SystemBars: { insetsHandling: "native" },
     SplashScreen: { launchShowDuration: 0, launchAutoHide: false, backgroundColor: "#fcf6e8" },
+    LocalNotifications: {
+      smallIcon: "ic_stat_stamp",
+      iconColor: "#CF1830",
+      sound: "default",
+    },
   },
 };
 

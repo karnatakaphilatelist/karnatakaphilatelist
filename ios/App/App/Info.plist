@@ -68,6 +68,16 @@
 	<true/>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>Find post offices near you.</string>
+	<!-- Always-on location: needed to send stamp alerts when the app is in the background. -->
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>Philatrail uses your location in the background to alert you when you are near a stamp post office, even when the app is closed.</string>
+	<key>NSLocationAlwaysUsageDescription</key>
+	<string>Philatrail uses your location in the background to alert you when you are near a stamp post office, even when the app is closed.</string>
+	<!-- Background execution modes: location for geofencing. -->
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>location</string>
+	</array>
 	<key>NSCameraUsageDescription</key>
 	<string>Take a photo of your stamp.</string>
 	<key>NSPhotoLibraryUsageDescription</key>

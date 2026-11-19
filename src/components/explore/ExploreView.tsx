@@ -30,6 +30,7 @@ import {
   setNearbyNotificationHandler,
   setWatchedOffices,
 } from "@/lib/nearby-notifications";
+import { maybeRequestReview } from "@/lib/in-app-review";
 import { sortByDistance, withStatus } from "@/lib/office-status";
 import { stateName } from "@/lib/states";
 import { getFirstName } from "@/lib/user-display";
@@ -174,6 +175,8 @@ export function ExploreView({
       stampsTN,
       stampsTNTotal: indiaOffices.filter((o) => o.state === "TN").length,
     });
+    // Ask for a review after the 3rd stamp — only once, only in the native app.
+    void maybeRequestReview(visitedIds.size);
   }
 
   // ── Geofencing ──────────────────────────────────────────────────────────────

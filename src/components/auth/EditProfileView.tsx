@@ -42,7 +42,7 @@ export function EditProfileView() {
 
   return (
     <div className="h-full overflow-y-auto">
-      <div className="mx-auto max-w-md px-4 pb-10 pt-6">
+      <div className="mx-auto max-w-md px-4 pb-[calc(2.5rem+env(safe-area-inset-bottom,0px))] pt-[calc(1.5rem+env(safe-area-inset-top,0px))]">
         <Link
           href="/account"
           className="flex min-h-11 items-center text-sm font-semibold text-muted"

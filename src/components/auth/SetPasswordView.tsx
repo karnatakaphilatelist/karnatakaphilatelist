@@ -46,7 +46,7 @@ export function SetPasswordView() {
 
   return (
     <div className="h-full overflow-y-auto">
-      <div className="mx-auto max-w-md px-5 pb-10 pt-8">
+      <div className="mx-auto max-w-md px-5 pb-[calc(2.5rem+env(safe-area-inset-bottom,0px))] pt-[calc(2rem+env(safe-area-inset-top,0px))]">
         <h1 className="font-display text-3xl font-bold tracking-tight">
           Set a password
         </h1>

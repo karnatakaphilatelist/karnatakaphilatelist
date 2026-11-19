@@ -170,6 +170,13 @@ export default async function PassportPillarPage() {
           <Link href="/learn" className="font-bold underline">
             the beginner&apos;s guide
           </Link>
+          . Looking for Tamil Nadu instead? See{" "}
+          <Link
+            href="/tamil-nadu-philately-passport"
+            className="font-bold underline"
+          >
+            the Tamil Nadu Philately Passport
+          </Link>
           .
         </p>
 

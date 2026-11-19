@@ -128,6 +128,14 @@ function renderBlock(block: Block, index: number) {
       return <Outlets key={index} />;
     case "bureau":
       return <Bureau key={index} />;
+    case "link":
+      return (
+        <p key={index} className="mt-3 text-base leading-7">
+          <Link href={block.href} className="font-bold underline">
+            {block.text}
+          </Link>
+        </p>
+      );
   }
 }
 

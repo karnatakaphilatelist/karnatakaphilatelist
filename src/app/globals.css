@@ -52,6 +52,17 @@
     }
   }
 
+  @keyframes nudge-rise {
+    from {
+      transform: translateY(16px);
+      opacity: 0;
+    }
+    to {
+      transform: none;
+      opacity: 1;
+    }
+  }
+
   @keyframes thump {
     0% {
       transform: scale(1.7) rotate(-14deg);

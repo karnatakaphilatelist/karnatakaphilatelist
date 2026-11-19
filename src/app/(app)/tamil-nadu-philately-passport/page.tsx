@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { JsonLd } from "@/components/seo/JsonLd";
+import { WebSignInNudge } from "@/components/web/WebSignInNudge";
 import { DISCLAIMER, OG_IMAGE, SITE_URL } from "@/lib/constants";
 import { getPostOffices } from "@/lib/offices";
 
@@ -178,6 +179,7 @@ export default async function TamilNaduPassportPillarPage() {
 
         <p className="mt-10 text-sm leading-6 text-muted">{DISCLAIMER}</p>
       </article>
+      <WebSignInNudge />
     </div>
   );
 }

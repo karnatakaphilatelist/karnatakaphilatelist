@@ -83,6 +83,7 @@ export function Landing({ offices }: { offices: PostOffice[] }) {
   const skipRef = useRef<() => void>(() => undefined);
   const [introState, setIntroState] = useState<IntroState>("playing");
   const [revealed, setRevealed] = useState(false);
+  const [clock, setClock] = useState("--:--:--");
 
   const total = offices.length;
   const { stateCode, stateOffices } = useStateOffices(offices);
@@ -252,6 +253,20 @@ export function Landing({ offices }: { offices: PostOffice[] }) {
     return () => clearTimeout(timer);
   }, []);
 
+  // India time, ticking, as a small touch in the corner.
+  useEffect(() => {
+    const format = new Intl.DateTimeFormat("en-GB", {
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hour12: false,
+      timeZone: "Asia/Kolkata",
+    });
+    const update = () => setClock(format.format(new Date()));
+    update();
+    const id = setInterval(update, 1000);
+    return () => clearInterval(id);
+  }, []);
 
   return (
     <div className={`kpl${revealed ? " in" : ""}`}>
@@ -290,11 +305,17 @@ export function Landing({ offices }: { offices: PostOffice[] }) {
               </button>
             )}
           </nav>
+          <a className="kpl-meta kpl-mail" href={`mailto:${CONTACT_EMAIL}`}>
+            {CONTACT_EMAIL}
+          </a>
         </div>
         <div className="kpl-stats">
+          <p className="kpl-meta kpl-mono kpl-time">
+            Local time {clock} (IST)
+          </p>
           <p className="kpl-meta kpl-mono kpl-open">
             <span className="kpl-dot" />
-            {stateTotal} offices · {stateName_}
+            {total} post offices
           </p>
         </div>
       </header>
@@ -304,23 +325,24 @@ export function Landing({ offices }: { offices: PostOffice[] }) {
           <div className="kpl-hero-copy">
             <h1>
               Collect the postmark from every post office in{" "}
-              {stateName_}&apos;s Philately Passport,{" "}
-              <span>one post office</span> at a time.
+              {liveCount > 1
+                ? "each state's Philately Passport"
+                : `${stateName_}'s Philately Passport`}
+              , <span>one post office</span> at a time.
             </h1>
             <p>
-              Visit post offices from the official {stateName_} Philately
-              Passport booklet, get the counter staff to stamp it, and track
-              every postmark in one place.
+              Find post offices on the map, visit them and keep every
+              postmark in one place.{" "}
               {liveCount > 1
-                ? ` Karnataka and Tamil Nadu are live.`
-                : ``}
+                ? `${liveCount} states are live.`
+                : `${stateName_} is live; more states are on the way.`}
             </p>
             <div className="kpl-btns">
-              <Link href="/explore" className="kpl-btn kpl-btn--red">
-                Open the map
+              <Link href="/learn" className="kpl-btn kpl-btn--red">
+                See how it works
               </Link>
-              <Link href="/learn" className="kpl-btn kpl-btn--line">
-                How it works
+              <Link href="/passport" className="kpl-btn kpl-btn--line">
+                My passport
               </Link>
             </div>
           </div>
@@ -408,13 +430,11 @@ export function Landing({ offices }: { offices: PostOffice[] }) {
         <section className="kpl-highlight">
           <div className="kpl-highlight-copy">
             <p className="kpl-kicker">
-              {isSample
-                ? <span className="kpl-kicker-demo">Example · not your real progress</span>
-                : <><span>{firstName ? `${greeting}, ${firstName}` : "Your passport"}</span>{" "}· {stateName_}</>
-              }
+              <span>{firstName ? `${greeting}, ${firstName}` : "Your passport"}</span>{" "}
+              · {stateName_}
             </p>
             <p className="kpl-big">
-              <b>{shownStamped}</b> <span>of {stateTotal} offices stamped</span>
+              <b>{shownStamped}</b> <span>of {stateTotal} stamped</span>
             </p>
             <div
               className="kpl-bar"
@@ -445,32 +465,11 @@ export function Landing({ offices }: { offices: PostOffice[] }) {
           </Link>
         </section>
 
-        <section className="kpl-facts" aria-label="Quick facts">
-          <dl className="kpl-facts-grid">
-            <div>
-              <dt>Physical booklet</dt>
-              <dd>Buy it at the Philatelic Bureau — ₹50 approx. Bring it to each office.</dd>
-            </div>
-            <div>
-              <dt>Counter visit</dt>
-              <dd>You must visit the post office in person. The app confirms your location before you log it.</dd>
-            </div>
-            <div>
-              <dt>Timings</dt>
-              <dd>Most offices open Mon–Sat, 9 am – 5 pm. Check the office page before you travel.</dd>
-            </div>
-            <div>
-              <dt>Cost</dt>
-              <dd>One stamp per office (₹5–₹25). The app is free, no account needed to explore.</dd>
-            </div>
-          </dl>
-        </section>
-
         <section className="kpl-steps">
           <div className="kpl-steps-head">
             <h2>How it works</h2>
             <Link href="/learn" className="kpl-step-link">
-              Full guide on Learn &rarr;
+              See how it works on Learn &rarr;
             </Link>
           </div>
           <div className="kpl-step-grid">

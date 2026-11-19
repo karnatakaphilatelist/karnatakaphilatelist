@@ -12,7 +12,9 @@ export type Block =
   | { type: "ol" | "ul"; items: string[] }
   | { type: "terms"; items: { term: string; meaning: string }[] }
   | { type: "outlets" }
-  | { type: "bureau" };
+  | { type: "bureau" }
+  /** A contextual link to another page on the site, inline with the reading, not just the "next" card. */
+  | { type: "link"; text: string; href: string };
 
 export interface Source {
   label: string;
@@ -97,6 +99,11 @@ export const ARTICLES: Article[] = [
         type: "p",
         text: "You do not need to buy anything rare. Used stamps arrive on the letters you receive, and local philatelists and pen-friends can help you find more. In Karnataka there is now an even simpler way to begin: a booklet that sends you to 100 post offices.",
       },
+      {
+        type: "link",
+        text: "More: how the Karnataka Philately Passport turns this into a 100-office trail",
+        href: "/karnataka-philately-passport",
+      },
     ],
     sources: [INDIA_POST_PHILATELY, INDIA_POST_HISTORY],
     next: {
@@ -161,6 +168,11 @@ export const ARTICLES: Article[] = [
           },
         ],
       },
+      {
+        type: "link",
+        text: "More: see the Karnataka Philately Passport, the booklet behind the trail",
+        href: "/karnataka-philately-passport",
+      },
     ],
     sources: [INDIA_POST_PHILATELY, INDIA_POST_HISTORY],
     next: {
@@ -199,6 +211,11 @@ export const ARTICLES: Article[] = [
       {
         type: "p",
         text: "Not every Philately Passport location has been confirmed as a PPC site, so we call the postmarks you collect postmarks, and use PPC only where it is known.",
+      },
+      {
+        type: "link",
+        text: "More: how the Karnataka Philately Passport puts these postmarks on a route",
+        href: "/karnataka-philately-passport",
       },
     ],
     sources: [FORUM_PPC, FORUM_PPC_KARNATAKA, DECCAN_HERALD_PPC],
@@ -241,6 +258,11 @@ export const ARTICLES: Article[] = [
         type: "p",
         text: "Philatrail is an independent app that goes with the booklet. It shows the 100 post offices on a map, helps you plan trips and keeps count of the postmarks you have collected. It does not replace the booklet, and a tap in the app is not an official stamp.",
       },
+      {
+        type: "link",
+        text: "Browse all 100 post offices by district",
+        href: "/offices",
+      },
     ],
     sources: [NEWS_KARNATAKA, THE_WEEK, HANS_INDIA],
     next: {
@@ -261,6 +283,11 @@ export const ARTICLES: Article[] = [
       { type: "outlets" },
       { type: "h2", text: "Who to ask" },
       { type: "bureau" },
+      {
+        type: "link",
+        text: "See the district-by-district list of all 100 offices",
+        href: "/offices",
+      },
     ],
     sources: [NEWS_KARNATAKA, THE_WEEK],
     next: {
@@ -300,6 +327,11 @@ export const ARTICLES: Article[] = [
       {
         type: "p",
         text: "Open the office in Philatrail and tap Stamp it, so your passport on the phone matches the one in your bag.",
+      },
+      {
+        type: "link",
+        text: "Full overview: the Karnataka Philately Passport",
+        href: "/karnataka-philately-passport",
       },
     ],
     sources: [DECCAN_HERALD_PPC, NEWS_KARNATAKA],

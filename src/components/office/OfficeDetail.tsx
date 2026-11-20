@@ -240,10 +240,13 @@ export function OfficeDetail({
         </p>
 
         {/* ── Status row: left (badge + proximity/progress) | right (PPC image) ──
-            flex-wrap + a floor on the left column's width means a wide stamp image
-            pushes the badge to its own line below instead of squeezing or clipping it. */}
-        <div className="mt-3 flex flex-wrap items-start justify-between gap-x-4 gap-y-2">
-          <div className="flex min-w-[180px] flex-1 flex-col items-start gap-2">
+            Always side by side — the image never pushes the badge to its own line.
+            The left column has a floor just wide enough for the status badge, so on
+            a narrow phone it's the "Check if you're here" button (the widest thing
+            in this column) that wraps to a second line and the pill grows taller to
+            fit it (see ProximityButton's min-h), never the row as a whole. */}
+        <div className="mt-3 flex items-start justify-between gap-3">
+          <div className="flex min-w-[150px] flex-1 flex-col items-start gap-2">
             <StatusBadge
               status={office.status}
               stampedOn={visit ? formatVisitDate(visit.visitedAt) : undefined}
@@ -533,9 +536,9 @@ function ProximityButton({
       <button
         type="button"
         onClick={onCheckDistance}
-        className="kp-glass flex h-11 w-fit items-center gap-2 rounded-full pl-2.5 pr-4 text-sm font-semibold text-ink"
+        className="kp-glass flex min-h-11 w-fit items-center gap-2 rounded-full py-2.5 pl-2.5 pr-4 text-sm font-semibold text-ink"
       >
-        <TargetIcon className="size-4 text-postal" />
+        <TargetIcon className="size-4 shrink-0 text-postal" />
         Check if you&apos;re here
       </button>
     ) : null;

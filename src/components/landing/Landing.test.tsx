@@ -22,8 +22,11 @@ vi.mock("@/components/providers/AuthProvider", () => ({
   useAuth: () => ({ ...auth, isLoading: false }),
 }));
 vi.mock("next/navigation", () => ({ useRouter: () => ({ replace: vi.fn() }) }));
+const visitsState = vi.hoisted(() => ({
+  visits: {} as Record<number, unknown>,
+}));
 vi.mock("@/components/providers/VisitsProvider", () => ({
-  useVisits: () => ({ visits: {} }),
+  useVisits: () => ({ visits: visitsState.visits }),
 }));
 
 const offices: PostOffice[] = [
@@ -63,6 +66,7 @@ beforeEach(() => {
   delete (window as unknown as Record<string, unknown>)[INTRO_PLAYED_FLAG];
   document.cookie = `${SKIP_INTRO_COOKIE}=; Max-Age=0; path=/`;
   auth.user = null;
+  visitsState.visits = {};
   mockMotion(false);
 });
 afterEach(() => {
@@ -146,28 +150,80 @@ describe("Landing", () => {
     expect(auth.openSignIn).toHaveBeenCalled();
   });
 
-  it("greets a signed-in person by first name", () => {
+  it("shows nothing in place of progress until there is real progress", () => {
     auth.user = { email: "a@b.c", user_metadata: { full_name: "Asha Rao" } };
     render(<Landing offices={offices} />);
-    expect(screen.getByText("Namaskara, Asha")).toBeDefined();
+    // No sample count, no example bar, no greeting: a visitor with no stamps is told nothing.
+    expect(document.body.textContent).not.toContain("Namaskara, Asha");
+    expect(screen.queryByRole("link", { name: /open my passport/i })).toBeNull();
   });
 
-  it("offers one Open the map button, and the hero button links to Learn", () => {
+  it("greets a signed-in person and shows their real count once they have one", () => {
+    auth.user = { email: "a@b.c", user_metadata: { full_name: "Asha Rao" } };
+    visitsState.visits = { 1: { officeId: 1 } };
+    render(<Landing offices={offices} />);
+    expect(document.body.textContent).toContain("Namaskara, Asha");
+    expect(screen.getByText("1 of 2")).toBeDefined();
+    expect(
+      screen.getByRole("link", { name: /open my passport/i }).getAttribute("href")
+    ).toBe("/passport");
+  });
+
+  it("offers one Open the map button, and a secondary link to Learn", () => {
     render(<Landing offices={offices} />);
     expect(
       screen.getAllByRole("link", { name: /open the map/i })
     ).toHaveLength(1);
     expect(
-      screen.getByRole("link", { name: "See how it works" }).getAttribute("href")
+      screen.getByRole("link", { name: "How it works" }).getAttribute("href")
     ).toBe("/learn");
   });
 
   it("links the how-it-works teaser to Learn and lists four steps", () => {
     render(<Landing offices={offices} />);
     expect(
-      screen.getByRole("link", { name: /see how it works on learn/i })
+      screen.getByRole("link", { name: /full guide on learn/i })
         .getAttribute("href")
     ).toBe("/learn");
     expect(screen.getByText("Get stamped")).toBeDefined();
+  });
+
+  it("names every live state with its office count, and marks the current one", () => {
+    const multi: PostOffice[] = [
+      ...offices,
+      {
+        id: 3,
+        name: "Chennai GPO",
+        pincode: "600001",
+        district: "Chennai",
+        state: "TN",
+        lat: 13.08,
+        lng: 80.27,
+        stampImagePath: null,
+      },
+    ];
+    render(<Landing offices={multi} />);
+    const ka = screen.getByRole("button", { name: /karnataka/i });
+    const tn = screen.getByRole("button", { name: /tamil nadu/i });
+    // Both states are readable without opening anything, so "2 states live" can never
+    // appear next to a page that shows one.
+    expect(ka.textContent).toContain("2 offices");
+    expect(tn.textContent).toContain("1 offices");
+    expect(ka.getAttribute("aria-pressed")).toBe("true");
+    expect(tn.getAttribute("aria-pressed")).toBe("false");
+  });
+
+  it("hides the state pills when only one state is live", () => {
+    render(<Landing offices={offices} />);
+    expect(screen.queryByRole("button", { name: /karnataka/i })).toBeNull();
+  });
+
+  it("answers the collector's questions before the trip", () => {
+    render(<Landing offices={offices} />);
+    expect(screen.getByText("Before you set out")).toBeDefined();
+    // The real booklet price, named circle, and no invented counter hours.
+    expect(document.body.textContent).toContain("₹600");
+    expect(document.body.textContent).toContain("Karnataka Postal Circle");
+    expect(document.body.textContent).toContain("Counter hours vary by office");
   });
 });

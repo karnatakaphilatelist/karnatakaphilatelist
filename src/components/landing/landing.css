@@ -5,7 +5,11 @@
  */
 
 .kpl {
-  --wm-w: min(calc(100vw - 48px), calc(26dvh * 1181 / 161));
+  /* Shared with the intro overlay so the wordmark does not jump size when the curtain
+     opens. The absolute cap is what keeps it a masthead: the viewport-height term alone
+     balloons it to most of the page width on a landscape desktop, which is what made the
+     logo the loudest thing on the page. */
+  --wm-w: min(calc(100vw - 48px), calc(15dvh * 1181 / 161), 260px);
   background: #fffffe;
   background-image: radial-gradient(
       ellipse 900px 520px at 8% -8%,
@@ -79,7 +83,7 @@
   }
   .kpl-wm-stack {
     display: block;
-    width: 100%;
+    width: min(100%, 210px);
   }
   .kpl-wm-stack i {
     display: block;
@@ -151,26 +155,16 @@
 .kpl-nav button:hover {
   color: var(--color-postal);
 }
-.kpl-mail {
-  font-style: italic;
-  font-size: 14px;
-  font-weight: 500;
+.kpl-signin {
+  margin-left: 6px;
+  padding: 0 18px !important;
+  border-radius: 9999px;
+  background: #fbecc6 !important;
+  color: #8f640f !important;
+  font-weight: 700;
 }
-.kpl-stats {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-top: 16px;
-  color: var(--color-muted);
-}
-.kpl-dot {
-  display: inline-block;
-  width: 7px;
-  height: 7px;
-  margin-right: 7px;
-  vertical-align: 1px;
-  border-radius: 50%;
-  background: var(--color-postal);
+.kpl-signin:hover {
+  background: #f3d99a !important;
 }
 
 @media (max-width: 640px) {
@@ -184,11 +178,6 @@
   }
   .kpl-nav {
     margin-left: -10px;
-  }
-  .kpl-stats {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 6px;
   }
 }
 
@@ -218,7 +207,7 @@
   margin: 0 0 18px;
   font-family: var(--font-display);
   font-weight: 500;
-  font-size: clamp(26px, 3.6vw, 37px);
+  font-size: clamp(30px, 4.4vw, 48px);
   line-height: 1.22;
   letter-spacing: -0.01em;
   color: var(--color-ink);
@@ -228,12 +217,77 @@
   color: var(--color-postal);
 }
 .kpl-hero-copy p {
-  margin: 0 0 28px;
-  max-width: 46ch;
-  font-size: 16px;
+  margin: 0 0 26px;
+  max-width: 52ch;
+  font-size: 17px;
   line-height: 1.6;
   color: var(--color-muted);
 }
+
+/* Every live state, named and counted, without opening anything. Without this the page
+   announces "2 states" and shows one, and the office counts never line up. */
+.kpl-states {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+.kpl-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 46px;
+  padding: 0 18px;
+  border-radius: 9999px;
+  border: 1px solid var(--color-line-strong);
+  background: #fffffe;
+  color: var(--color-ink);
+  font: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+.kpl-pill .kpl-mono {
+  font-weight: 400;
+  color: var(--color-muted);
+  text-transform: none;
+}
+.kpl-pill:hover {
+  border-color: var(--color-ink);
+}
+.kpl-pill--on {
+  border: 1.5px solid var(--color-ink);
+  background: #fbecc6;
+  font-weight: 700;
+}
+.kpl-pill--on .kpl-mono {
+  color: #8f640f;
+}
+
+.kpl-free {
+  margin: 14px 0 0;
+  color: var(--color-muted);
+  text-transform: none;
+}
+/* Only ever the real count: nothing stands in for progress that does not exist yet. */
+.kpl-yours {
+  margin: 14px 0 0 !important;
+  max-width: 52ch;
+  font-size: 15px !important;
+  line-height: 1.55;
+}
+.kpl-yours strong {
+  color: var(--color-ink);
+  font-weight: 700;
+}
+.kpl-yours a {
+  font-weight: 700;
+  color: var(--color-postal-dark);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
 .kpl-btns {
   display: flex;
   flex-wrap: wrap;
@@ -280,10 +334,12 @@
   transform: rotate(-6deg);
   filter: drop-shadow(0 8px 10px rgb(22 32 79 / 0.3));
 }
+/* Over the stamp's picture, not its caption: at `bottom` it landed straight on the
+   KARNATAKA / INDIA · POST lettering and the two became unreadable. */
 .kpl-postmark {
   position: absolute;
-  right: -6px;
-  bottom: 4px;
+  right: -18px;
+  top: 30%;
   opacity: 0.9;
 }
 
@@ -300,14 +356,15 @@
   }
 }
 
-/* ---------------------------------------------------------------- the highlighted module */
-/* The one darker, gold-gradient block on an otherwise light page: progress plus the main CTA. */
-.kpl-highlight {
+/* ---------------------------------------------------------------- before you set out */
+/* The one darker, gold-gradient block on an otherwise light page. It answers the three
+   questions a collector asks before a trip: what the booklet is, whether they have to go
+   in person, and what happens at the counter. */
+.kpl-facts {
   margin-top: 64px;
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 32px;
+  align-items: flex-start;
+  gap: 40px;
   flex-wrap: wrap;
   padding: 32px 40px;
   border-radius: 24px;
@@ -316,88 +373,50 @@
   box-shadow: 0 10px 32px rgb(143 100 15 / 0.16),
     inset 0 1px 0 rgb(255 255 255 / 0.5);
 }
-.kpl-highlight-copy {
-  flex: 1 1 320px;
-  min-width: 240px;
-}
-.kpl-kicker {
-  margin: 0 0 6px;
-  font-size: 14px;
-  font-weight: 600;
-  letter-spacing: 0.01em;
-  color: #8f640f;
-}
-.kpl-big {
-  margin: 0 0 14px;
+.kpl-facts h2 {
+  flex: 1 1 260px;
+  min-width: 0;
+  margin: 0;
+  text-wrap: balance;
   font-family: var(--font-display);
   font-weight: 600;
-  font-size: 40px;
+  font-size: 27px;
   letter-spacing: -0.01em;
   color: var(--color-ink);
 }
-.kpl-big span {
-  font-size: 20px;
-  font-weight: 500;
-  color: var(--color-muted);
+.kpl-facts-grid {
+  flex: 999 1 540px;
+  min-width: 0;
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 32px;
 }
-.kpl-bar {
-  width: 100%;
-  max-width: 360px;
-  height: 8px;
-  border-radius: 9999px;
-  background: rgb(22 32 79 / 0.1);
-  overflow: hidden;
+.kpl-facts-grid dt {
+  margin-bottom: 6px;
+  color: #785a1e;
 }
-.kpl-bar i {
-  display: block;
-  height: 100%;
-  border-radius: 9999px;
-  background: var(--color-visited);
-}
-.kpl-note {
-  margin: 12px 0 0;
-  font-size: 13px;
-  color: var(--color-muted);
-}
-.kpl-open-map {
-  flex: 0 0 auto;
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  min-height: 56px;
-  padding: 0 34px;
-  border-radius: 9999px;
-  background: var(--color-postal);
-  color: #fcf6e8;
-  font-weight: 700;
-  font-size: 16px;
-  white-space: nowrap;
-  box-shadow: 0 6px 18px rgb(207 24 48 / 0.28);
-  transition: transform 0.15s, background 0.15s;
-}
-.kpl-open-map svg {
-  width: 18px;
-  height: 18px;
-  transition: transform 0.2s;
-}
-.kpl-open-map:hover {
-  background: var(--color-postal-dark);
-}
-.kpl-open-map:hover svg {
-  transform: translateX(4px);
-}
-.kpl-open-map:active {
-  transform: scale(0.97);
+.kpl-facts-grid dd {
+  margin: 0;
+  font-size: 14.5px;
+  line-height: 1.55;
+  color: var(--color-ink);
 }
 
+@media (max-width: 900px) {
+  .kpl-facts-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
 @media (max-width: 640px) {
-  .kpl-highlight {
+  .kpl-facts {
     margin-top: 40px;
     padding: 26px 24px;
+    gap: 22px;
   }
-  .kpl-open-map {
-    width: 100%;
-    justify-content: center;
+  .kpl-facts-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
   }
 }
 
@@ -705,6 +724,24 @@ html[data-intro-go] .kpl-intro .kpl-fx {
     opacity: 0;
   }
 }
+
+/* The curtain must leave nothing behind.
+   `.kpl-skip` is a direct child of `.kpl-intro`, not of `.kpl-top` or `.kpl-bot`, so the
+   clip-path animations that retract the two red panels never touch it: it stayed sitting over
+   the uncovered page until the whole overlay was removed. It now goes as the split starts. */
+.kpl-intro[data-state="open"] .kpl-skip {
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.15s;
+}
+html[data-intro-go] .kpl-intro .kpl-skip {
+  animation: kpl-failsafe 0.15s linear 3.5s forwards;
+}
+/* And the overlay itself goes on the intro's own clock, the moment the split finishes
+   (3.5s + 1.3s), rather than waiting for the page's code or the 6s last resort. */
+html[data-intro-go] .kpl-intro {
+  animation: kpl-failsafe 0.2s linear 4.75s forwards;
+}
 @keyframes kpl-fade {
   to {
     opacity: 1;
@@ -854,7 +891,6 @@ html[data-intro-playing] {
  */
 html[data-intro-go] .kpl-meta,
 html[data-intro-go] .kpl-row,
-html[data-intro-go] .kpl-stats,
 html[data-intro-go] .kpl-main {
   animation: kpl-reveal 0.7s ease 3.6s backwards;
 }

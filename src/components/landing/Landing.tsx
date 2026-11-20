@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import "./landing.css";
-import { ArrowRightIcon } from "@/components/ui/icons";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { isNativeApp } from "@/lib/native";
 import { readJson } from "@/lib/local-storage";
@@ -33,22 +32,20 @@ const SKIP_COOKIE = new RegExp(`(?:^|; )${SKIP_INTRO_COOKIE}=1`);
 
 type IntroState = "playing" | "open" | "done";
 
-/** The intro plays on every fresh load, but not twice in one load or straight after signing in. */
-function hasSeenIntro(): boolean {
-  const flagged = (window as unknown as Record<string, unknown>)[
-    INTRO_PLAYED_FLAG
-  ];
-  return (
-    flagged === true ||
-    SKIP_COOKIE.test(document.cookie) ||
-    // Lite mode (chosen, or switched on for older phones) plays no intro.
-    document.documentElement.hasAttribute("data-lite")
-  );
-}
+/** The postal circle that issues each state's Passport, named on first mention. */
+const CIRCLE: Record<string, string> = {
+  KA: "Karnataka Postal Circle",
+  TN: "Tamil Nadu Postal Circle",
+};
 
-function rememberIntro(): void {
-  (window as unknown as Record<string, unknown>)[INTRO_PLAYED_FLAG] = true;
-}
+/**
+ * Where each state's booklet is sold and what it costs. Facts only — from news reports and
+ * the booklets themselves. Never add a price, a counter time or a stock claim we cannot source.
+ */
+const BOOKLET: Record<string, string> = {
+  KA: "A paper booklet, about ₹600, sold by Karnataka Postal Circle at the Bengaluru GPO philatelic bureau and the Mysuru, Mangaluru and Belagavi head post offices. Call ahead — it has sold out before.",
+  TN: "A paper booklet, about ₹650, sold by Tamil Nadu Postal Circle. It launched at Chennai GPO and has been on sale since 28 October 2026. Call ahead to check stock.",
+};
 
 /** The wordmark in white (on the red intro) or red (on the page), as one line or stacked on phones. */
 function Wordmark({ white = false }: { white?: boolean }) {
@@ -69,6 +66,23 @@ function Wordmark({ white = false }: { white?: boolean }) {
   );
 }
 
+/** The intro plays on every fresh load, but not twice in one load or straight after signing in. */
+function hasSeenIntro(): boolean {
+  const flagged = (window as unknown as Record<string, unknown>)[
+    INTRO_PLAYED_FLAG
+  ];
+  return (
+    flagged === true ||
+    SKIP_COOKIE.test(document.cookie) ||
+    // Lite mode (chosen, or switched on for older phones) plays no intro.
+    document.documentElement.hasAttribute("data-lite")
+  );
+}
+
+function rememberIntro(): void {
+  (window as unknown as Record<string, unknown>)[INTRO_PLAYED_FLAG] = true;
+}
+
 /**
  * The front door: a postcard posts itself into a post box, the page splits open, and the
  * real masthead is revealed in exactly the spot the intro's wordmark was. Plays once per
@@ -83,17 +97,13 @@ export function Landing({ offices }: { offices: PostOffice[] }) {
   const skipRef = useRef<() => void>(() => undefined);
   const [introState, setIntroState] = useState<IntroState>("playing");
   const [revealed, setRevealed] = useState(false);
-  const [clock, setClock] = useState("--:--:--");
 
   const total = offices.length;
-  const { stateCode, stateOffices } = useStateOffices(offices);
+  const { states, stateCode, stateOffices, choose } = useStateOffices(offices);
   const stateTotal = stateOffices.length;
   const stateName_ = stateName(stateCode);
-  const liveCount = new Set(offices.map((office) => office.state)).size;
+  const circle = CIRCLE[stateCode] ?? `${stateName_} Postal Circle`;
   const stamped = stateOffices.filter((office) => visits[office.id]).length;
-  // Until someone has a postmark of their own, show an example so the card still makes sense.
-  const isSample = stamped === 0;
-  const shownStamped = isSample ? Math.min(12, stateTotal) : stamped;
   const firstName = user ? getFirstName(user) : null;
   const greeting = greetingWord(stateCode);
 
@@ -253,21 +263,6 @@ export function Landing({ offices }: { offices: PostOffice[] }) {
     return () => clearTimeout(timer);
   }, []);
 
-  // India time, ticking, as a small touch in the corner.
-  useEffect(() => {
-    const format = new Intl.DateTimeFormat("en-GB", {
-      hour: "2-digit",
-      minute: "2-digit",
-      second: "2-digit",
-      hour12: false,
-      timeZone: "Asia/Kolkata",
-    });
-    const update = () => setClock(format.format(new Date()));
-    update();
-    const id = setInterval(update, 1000);
-    return () => clearInterval(id);
-  }, []);
-
   return (
     <div className={`kpl${revealed ? " in" : ""}`}>
       <noscript>
@@ -291,60 +286,89 @@ export function Landing({ offices }: { offices: PostOffice[] }) {
       <header className="kpl-head">
         <Wordmark />
         <div className="kpl-row">
-          <p className="kpl-meta kpl-sub">The philately passport for India</p>
+          <p className="kpl-meta kpl-sub">
+            The map and tracker for the Philately Passport
+          </p>
           <nav className="kpl-meta kpl-nav" aria-label="Main">
             <Link href="/explore">Explore</Link>
-            <Link href="/passport">Passport</Link>
+            <Link href="/passport">My passport</Link>
+            <Link href="/learn">Guide</Link>
             {isLoading ? null : user ? (
               <button type="button" onClick={() => void signOut()}>
                 Sign out
               </button>
             ) : (
-              <button type="button" onClick={() => openSignIn("manual")}>
+              <button
+                type="button"
+                className="kpl-signin"
+                onClick={() => openSignIn("manual")}
+              >
                 Sign in
               </button>
             )}
           </nav>
-          <a className="kpl-meta kpl-mail" href={`mailto:${CONTACT_EMAIL}`}>
-            {CONTACT_EMAIL}
-          </a>
-        </div>
-        <div className="kpl-stats">
-          <p className="kpl-meta kpl-mono kpl-time">
-            Local time {clock} (IST)
-          </p>
-          <p className="kpl-meta kpl-mono kpl-open">
-            <span className="kpl-dot" />
-            {total} post offices
-          </p>
         </div>
       </header>
 
       <main className="kpl-main">
         <section className="kpl-hero">
           <div className="kpl-hero-copy">
+            {/* Both live states, visible without opening anything. */}
+            {states.length > 1 && (
+              <div className="kpl-states" role="group" aria-label="Choose a state">
+                {states.map((option) => {
+                  const on = option.code === stateCode;
+                  return (
+                    <button
+                      key={option.code}
+                      type="button"
+                      aria-pressed={on}
+                      className={`kpl-pill${on ? " kpl-pill--on" : ""}`}
+                      onClick={() => choose(option.code)}
+                    >
+                      {option.name}
+                      <span className="kpl-mono">{option.count} offices</span>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+
             <h1>
-              Collect the postmark from every post office in{" "}
-              {liveCount > 1
-                ? "each state's Philately Passport"
-                : `${stateName_}'s Philately Passport`}
-              , <span>one post office</span> at a time.
+              Collect all {stateTotal} postmarks in {stateName_}&apos;s Philately
+              Passport.
             </h1>
             <p>
-              Find post offices on the map, visit them and keep every
-              postmark in one place.{" "}
-              {liveCount > 1
-                ? `${liveCount} states are live.`
-                : `${stateName_} is live; more states are on the way.`}
+              You buy the paper booklet from {circle}, then travel to each post
+              office and have the counter strike its postmark. Philatrail is the
+              free map and tracker that goes with it — so the booklet stays a
+              collection, not a notepad.
             </p>
+
             <div className="kpl-btns">
-              <Link href="/learn" className="kpl-btn kpl-btn--red">
-                See how it works
+              <Link href="/explore" className="kpl-btn kpl-btn--red">
+                Open the map
               </Link>
-              <Link href="/passport" className="kpl-btn kpl-btn--line">
-                My passport
+              <Link href="/learn" className="kpl-btn kpl-btn--line">
+                How it works
               </Link>
             </div>
+
+            <p className="kpl-meta kpl-mono kpl-free">
+              free · no account needed
+            </p>
+
+            {/* Only ever the real count. Nothing is shown before there is something to show. */}
+            {stamped > 0 && (
+              <p className="kpl-yours">
+                {firstName ? `${greeting}, ${firstName} — you` : "You"} have{" "}
+                <strong>
+                  {stamped} of {stateTotal}
+                </strong>{" "}
+                in {stateName_}.{" "}
+                <Link href="/passport">Open my passport</Link>
+              </p>
+            )}
           </div>
 
           <div className="kpl-coral" aria-hidden="true">
@@ -427,49 +451,38 @@ export function Landing({ offices }: { offices: PostOffice[] }) {
           </div>
         </section>
 
-        <section className="kpl-highlight">
-          <div className="kpl-highlight-copy">
-            <p className="kpl-kicker">
-              <span>{firstName ? `${greeting}, ${firstName}` : "Your passport"}</span>{" "}
-              · {stateName_}
-            </p>
-            <p className="kpl-big">
-              <b>{shownStamped}</b> <span>of {stateTotal} stamped</span>
-            </p>
-            <div
-              className="kpl-bar"
-              role="progressbar"
-              aria-label="Stamps collected"
-              aria-valuenow={shownStamped}
-              aria-valuemin={0}
-              aria-valuemax={stateTotal}
-            >
-              <i
-                style={{
-                  width: `${Math.round(
-                    (shownStamped / Math.max(stateTotal, 1)) * 100
-                  )}%`,
-                }}
-              />
+        {/* The questions a collector asks before setting out. */}
+        <section className="kpl-facts" aria-labelledby="kpl-facts-h">
+          <h2 id="kpl-facts-h">Before you set out</h2>
+          <dl className="kpl-facts-grid">
+            <div>
+              <dt className="kpl-mono">the booklet</dt>
+              <dd>{BOOKLET[stateCode] ?? BOOKLET.KA}</dd>
             </div>
-            <p className="kpl-note">
-              {isSample
-                ? "An example. Your own count appears here once you start collecting."
-                : `${stateTotal - shownStamped} to go. Keep going.`}
-            </p>
-          </div>
-
-          <Link href="/explore" className="kpl-open-map">
-            Open the map
-            <ArrowRightIcon />
-          </Link>
+            <div>
+              <dt className="kpl-mono">in person</dt>
+              <dd>
+                Each postmark exists only at its own counter, so you have to
+                travel there. Philatrail checks you are near the office before
+                it records the visit.
+              </dd>
+            </div>
+            <div>
+              <dt className="kpl-mono">at the counter</dt>
+              <dd>
+                Buy a postage stamp, stick it on that place&apos;s page, and ask
+                the staff for the pictorial postmark. Counter hours vary by
+                office, so check before a long trip.
+              </dd>
+            </div>
+          </dl>
         </section>
 
         <section className="kpl-steps">
           <div className="kpl-steps-head">
             <h2>How it works</h2>
             <Link href="/learn" className="kpl-step-link">
-              See how it works on Learn &rarr;
+              Full guide on Learn &rarr;
             </Link>
           </div>
           <div className="kpl-step-grid">

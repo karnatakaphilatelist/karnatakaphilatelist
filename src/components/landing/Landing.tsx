@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type PointerEvent } from "react";
 import "./landing.css";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { isNativeApp } from "@/lib/native";
@@ -99,6 +99,7 @@ export function Landing({ offices }: { offices: PostOffice[] }) {
 
   const countRef = useRef<HTMLDivElement>(null);
   const skipRef = useRef<() => void>(() => undefined);
+  const swipeStart = useRef<{ x: number; y: number } | null>(null);
   const [introState, setIntroState] = useState<IntroState>("playing");
   const [revealed, setRevealed] = useState(false);
 
@@ -110,6 +111,28 @@ export function Landing({ offices }: { offices: PostOffice[] }) {
   const stamped = stateOffices.filter((office) => visits[office.id]).length;
   const firstName = user ? getFirstName(user) : null;
   const greeting = greetingWord(stateCode);
+
+  // Two states live means two states to browse, so the hero also answers a swipe — the pills
+  // are the discoverable control, this is the gesture people reach for anyway.
+  function handleHeroPointerDown(event: PointerEvent) {
+    if (states.length < 2) return;
+    swipeStart.current = { x: event.clientX, y: event.clientY };
+  }
+  function handleHeroPointerUp(event: PointerEvent) {
+    const start = swipeStart.current;
+    swipeStart.current = null;
+    if (!start || states.length < 2) return;
+    const dx = event.clientX - start.x;
+    const dy = event.clientY - start.y;
+    if (Math.abs(dx) < 56 || Math.abs(dx) < Math.abs(dy) * 1.5) return;
+    const i = states.findIndex((option) => option.code === stateCode);
+    if (i === -1) return;
+    const next =
+      dx < 0
+        ? states[(i + 1) % states.length]
+        : states[(i - 1 + states.length) % states.length];
+    choose(next.code);
+  }
 
   const STEPS = [
     {
@@ -288,11 +311,8 @@ export function Landing({ offices }: { offices: PostOffice[] }) {
       </svg>
 
       <header className="kpl-head">
-        <Wordmark />
-        <div className="kpl-row">
-          <p className="kpl-meta kpl-sub">
-            The map and tracker for the Philately Passport
-          </p>
+        <div className="kpl-bar">
+          <Wordmark />
           <nav className="kpl-meta kpl-nav" aria-label="Main">
             <Link href="/explore">Explore</Link>
             <Link href="/passport">My passport</Link>
@@ -312,10 +332,17 @@ export function Landing({ offices }: { offices: PostOffice[] }) {
             )}
           </nav>
         </div>
+        <p className="kpl-meta kpl-sub">
+          The map and tracker for the Philately Passport
+        </p>
       </header>
 
       <main className="kpl-main">
-        <section className="kpl-hero">
+        <section
+          className="kpl-hero"
+          onPointerDown={handleHeroPointerDown}
+          onPointerUp={handleHeroPointerUp}
+        >
           <div className="kpl-hero-copy">
             {/* Both live states, visible without opening anything. */}
             {states.length > 1 && (
@@ -327,7 +354,7 @@ export function Landing({ offices }: { offices: PostOffice[] }) {
                       key={option.code}
                       type="button"
                       aria-pressed={on}
-                      className={`kpl-pill${on ? " kpl-pill--on" : ""}`}
+                      className={`kpl-pill kp-glass${on ? " kpl-pill--on" : ""}`}
                       onClick={() => choose(option.code)}
                     >
                       {option.name}
@@ -338,18 +365,20 @@ export function Landing({ offices }: { offices: PostOffice[] }) {
               </div>
             )}
 
-            <h1>
-              Collect all {stateTotal} postmarks in{" "}
-              <span>
-                <em>{stateName_}&apos;s</em> Philately Passport.
-              </span>
-            </h1>
-            <p>
-              You buy the paper booklet from {circle}, then travel to each post
-              office and have the counter strike its postmark. Philatrail is the
-              free map and tracker that goes with it — so the booklet stays a
-              collection, not a notepad.
-            </p>
+            <div key={stateCode} className="kpl-state-fade">
+              <h1>
+                Collect all {stateTotal} postmarks in{" "}
+                <span>
+                  <em>{stateName_}&apos;s</em> Philately Passport.
+                </span>
+              </h1>
+              <p>
+                You buy the paper booklet from {circle}, then travel to each
+                post office and have the counter strike its postmark.
+                Philatrail is the free map and tracker that goes with it — so
+                the booklet stays a collection, not a notepad.
+              </p>
+            </div>
 
             <div className="kpl-btns">
               <Link href="/explore" className="kpl-btn kpl-btn--red">
@@ -360,8 +389,9 @@ export function Landing({ offices }: { offices: PostOffice[] }) {
               </Link>
             </div>
 
-            <p className="kpl-meta kpl-mono kpl-free">
-              free · no account needed
+            <p className="kpl-free">
+              <span className="kpl-free-dot" aria-hidden="true" />
+              Free · no account needed
             </p>
 
             {/* Only ever the real count. Nothing is shown before there is something to show. */}

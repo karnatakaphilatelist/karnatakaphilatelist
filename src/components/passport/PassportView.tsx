@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { Appear } from "@/components/motion/Appear";
 import { VisitDialog } from "@/components/office/VisitDialog";
 import { DistrictProgress } from "@/components/passport/DistrictProgress";
 import { ShareProgressSheet } from "@/components/passport/ShareProgressSheet";
@@ -328,85 +329,91 @@ export function PassportView({
         ) : null}
 
         {upNext.length > 0 ? (
-          <section aria-labelledby="up-next-heading">
-            <h2 id="up-next-heading" className={KICKER}>
-              Up next
-            </h2>
-            <div className="mt-4 flex flex-wrap gap-2">
-              {upNext.map((office) => (
-                <Link
-                  key={office.id}
-                  href={`/explore?office=${office.id}`}
-                  className="kp-glass flex h-10 items-center rounded-full px-3.5 text-sm font-semibold text-ink"
-                >
-                  {office.name}
-                </Link>
-              ))}
-            </div>
-          </section>
+          <Appear index={0}>
+            <section aria-labelledby="up-next-heading">
+              <h2 id="up-next-heading" className={KICKER}>
+                Up next
+              </h2>
+              <div className="mt-4 flex flex-wrap gap-2">
+                {upNext.map((office) => (
+                  <Link
+                    key={office.id}
+                    href={`/explore?office=${office.id}`}
+                    className="kp-glass flex h-10 items-center rounded-full px-3.5 text-sm font-semibold text-ink"
+                  >
+                    {office.name}
+                  </Link>
+                ))}
+              </div>
+            </section>
+          </Appear>
         ) : null}
 
-        <section aria-labelledby="visited-heading" className="mt-10">
-          <div className="flex items-center justify-between">
-            <h2 id="visited-heading" className={KICKER}>
-              Your stamps
-            </h2>
-            <button
-              type="button"
-              onClick={() => setShowAll(true)}
-              className="-my-3 py-3 text-xs font-semibold uppercase tracking-[0.14em] text-muted"
-            >
-              See all
-            </button>
-          </div>
-          {visitedOffices.length === 0 ? (
-            <div className={`${GLASS_TILE} mt-4 p-6 text-center text-muted`}>
-              <p>No stamps yet. Find a post office and tap Stamp it.</p>
-              <Link
-                href="/explore"
-                className="mt-3.5 inline-flex min-h-12 items-center rounded-full bg-postal px-6 text-base font-bold text-white"
+        <Appear index={1}>
+          <section aria-labelledby="visited-heading" className="mt-10">
+            <div className="flex items-center justify-between">
+              <h2 id="visited-heading" className={KICKER}>
+                Your stamps
+              </h2>
+              <button
+                type="button"
+                onClick={() => setShowAll(true)}
+                className="-my-3 py-3 text-xs font-semibold uppercase tracking-[0.14em] text-muted"
               >
-                Open the map
-              </Link>
-              <Link
-                href="/learn/get-the-booklet"
-                className="mt-1 flex min-h-12 items-center justify-center text-sm font-semibold text-ink underline underline-offset-4"
-              >
-                No booklet yet? See where to get it
-              </Link>
+                See all
+              </button>
             </div>
-          ) : (
-            <ul className="mt-4 grid grid-cols-3 gap-2">
-              {visitedOffices.slice(0, 6).map((office) => (
-                <li key={office.id}>
-                  <button
-                    type="button"
-                    onClick={() => setStampId(office.id)}
-                    className="w-full text-left"
-                  >
-                    <span className={`${GLASS_TILE} relative block h-20`}>
-                      <span className="absolute left-3 top-3 grid size-7 place-items-center rounded-full bg-[#1f8a4d] text-white">
-                        <CheckIcon className="size-4" strokeWidth={3.4} />
+            {visitedOffices.length === 0 ? (
+              <div className={`${GLASS_TILE} mt-4 p-6 text-center text-muted`}>
+                <p>No stamps yet. Find a post office and tap Stamp it.</p>
+                <Link
+                  href="/explore"
+                  className="mt-3.5 inline-flex min-h-12 items-center rounded-full bg-postal px-6 text-base font-bold text-white"
+                >
+                  Open the map
+                </Link>
+                <Link
+                  href="/learn/get-the-booklet"
+                  className="mt-1 flex min-h-12 items-center justify-center text-sm font-semibold text-ink underline underline-offset-4"
+                >
+                  No booklet yet? See where to get it
+                </Link>
+              </div>
+            ) : (
+              <ul className="mt-4 grid grid-cols-3 gap-2">
+                {visitedOffices.slice(0, 6).map((office) => (
+                  <li key={office.id}>
+                    <button
+                      type="button"
+                      onClick={() => setStampId(office.id)}
+                      className="w-full text-left"
+                    >
+                      <span className={`${GLASS_TILE} relative block h-20`}>
+                        <span className="absolute left-3 top-3 grid size-7 place-items-center rounded-full bg-[#1f8a4d] text-white">
+                          <CheckIcon className="size-4" strokeWidth={3.4} />
+                        </span>
                       </span>
-                    </span>
-                    <span className="mt-2 block text-sm font-semibold leading-5">
-                      {office.name}
-                    </span>
-                  </button>
-                </li>
-              ))}
-            </ul>
-          )}
-        </section>
+                      <span className="mt-2 block text-sm font-semibold leading-5">
+                        {office.name}
+                      </span>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
+        </Appear>
 
-        <section aria-labelledby="districts-heading" className="mt-10">
-          <h2 id="districts-heading" className={KICKER}>
-            By district
-          </h2>
-          <div className="kp-glass mt-4 rounded-[18px] p-4">
-            <DistrictProgress offices={offices} visits={visits} />
-          </div>
-        </section>
+        <Appear index={2}>
+          <section aria-labelledby="districts-heading" className="mt-10">
+            <h2 id="districts-heading" className={KICKER}>
+              By district
+            </h2>
+            <div className="kp-glass mt-4 rounded-[18px] p-4">
+              <DistrictProgress offices={offices} visits={visits} />
+            </div>
+          </section>
+        </Appear>
 
         <footer className="mt-8 text-center text-sm text-muted">
           <div className="flex justify-center gap-5">

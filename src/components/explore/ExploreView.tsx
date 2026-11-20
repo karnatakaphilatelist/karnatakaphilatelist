@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ExploreControls } from "@/components/explore/ExploreControls";
+import { Appear } from "@/components/motion/Appear";
 import {
   FilterChips,
   type StatusFilter,
@@ -204,7 +205,7 @@ export function ExploreView({
   // or visit state changes so already-stamped offices are excluded.
   const visitedIds = useMemo(
     () => new Set(Object.keys(visits).map(Number)),
-    [visits],
+    [visits]
   );
   useEffect(() => {
     if (!isNativeApp()) return;
@@ -349,7 +350,7 @@ export function ExploreView({
           ) : null}
           <div className="space-y-1 px-4 md:pt-4">
             {/* On phones the controls live over the map instead, so the detail sheet never covers them. */}
-            <div className="hidden md:block">
+            <Appear index={0} className="hidden md:block">
               <div className="flex items-center justify-between pb-3">
                 <div className="flex items-baseline gap-2 min-w-0">
                   <StateSwitcher
@@ -359,7 +360,10 @@ export function ExploreView({
                     idSuffix="desktop"
                     title
                   />
-                  <span className="shrink-0 text-sm text-muted" aria-live="polite">
+                  <span
+                    className="shrink-0 text-sm text-muted"
+                    aria-live="polite"
+                  >
                     ·{" "}
                     {visibleOffices.length === offices.length
                       ? `${offices.length} offices`
@@ -379,7 +383,7 @@ export function ExploreView({
                 filter={filter}
                 onFilterChange={setFilter}
               />
-            </div>
+            </Appear>
             {isReady ? (
               <div className={sheetOpen ? "" : "max-md:hidden"}>
                 <ProgressStrip

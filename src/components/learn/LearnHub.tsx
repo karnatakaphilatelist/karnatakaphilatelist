@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Appear } from "@/components/motion/Appear";
 import { ChevronRightIcon } from "@/components/ui/icons";
 import { ShareLearnButton } from "@/components/learn/ShareLearnButton";
 import { ARTICLES } from "@/lib/learn-articles";
@@ -20,37 +21,41 @@ export function LearnHub() {
           hobby, the Philately Passport and how to get your first postmark.
         </p>
 
-        <Link
-          href={`/learn/${first.slug}`}
-          className="mt-6 block rounded-3xl bg-postal p-5 text-white active:opacity-90"
-        >
-          <p className="text-xs font-bold uppercase tracking-[0.18em] text-white/80">
-            Start here · {first.minutes} min
-          </p>
-          <p className="mt-1.5 font-display text-2xl font-bold leading-tight">
-            {first.title}
-          </p>
-          <p className="mt-1 text-base text-white/90">{first.summary}</p>
-        </Link>
+        <Appear index={0}>
+          <Link
+            href={`/learn/${first.slug}`}
+            className="mt-6 block rounded-3xl bg-postal p-5 text-white active:opacity-90"
+          >
+            <p className="text-xs font-bold uppercase tracking-[0.18em] text-white/80">
+              Start here · {first.minutes} min
+            </p>
+            <p className="mt-1.5 font-display text-2xl font-bold leading-tight">
+              {first.title}
+            </p>
+            <p className="mt-1 text-base text-white/90">{first.summary}</p>
+          </Link>
+        </Appear>
 
         <ul className="mt-4 divide-y divide-line rounded-2xl bg-white/70 shadow-[inset_0_0_0_1.5px_rgb(140_100_40/0.18)]">
-          {rest.map((article) => (
+          {rest.map((article, index) => (
             <li key={article.slug}>
-              <Link
-                href={`/learn/${article.slug}`}
-                className="flex min-h-14 items-center gap-3 px-4 py-3"
-              >
-                <span className="min-w-0 flex-1">
-                  <span className="block font-bold">{article.title}</span>
-                  <span className="block text-sm text-muted">
-                    {article.summary}
+              <Appear index={index + 1}>
+                <Link
+                  href={`/learn/${article.slug}`}
+                  className="flex min-h-14 items-center gap-3 px-4 py-3"
+                >
+                  <span className="min-w-0 flex-1">
+                    <span className="block font-bold">{article.title}</span>
+                    <span className="block text-sm text-muted">
+                      {article.summary}
+                    </span>
                   </span>
-                </span>
-                <span className="shrink-0 text-xs text-muted">
-                  {article.minutes} min
-                </span>
-                <ChevronRightIcon className="size-4 shrink-0 text-muted" />
-              </Link>
+                  <span className="shrink-0 text-xs text-muted">
+                    {article.minutes} min
+                  </span>
+                  <ChevronRightIcon className="size-4 shrink-0 text-muted" />
+                </Link>
+              </Appear>
             </li>
           ))}
         </ul>

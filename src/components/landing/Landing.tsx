@@ -3,6 +3,10 @@
 import Link from "next/link";
 import { useEffect, useRef, useState, type PointerEvent } from "react";
 import "./landing.css";
+import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { useGSAP } from "@gsap/react";
+import { SmoothScroll } from "@/components/motion/SmoothScroll";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { isNativeApp } from "@/lib/native";
 import { readJson } from "@/lib/local-storage";
@@ -27,6 +31,8 @@ import {
 import { getFirstName } from "@/lib/user-display";
 import { greetingWord } from "@/lib/states";
 import type { PostOffice } from "@/types";
+
+gsap.registerPlugin(useGSAP);
 
 const SKIP_COOKIE = new RegExp(`(?:^|; )${SKIP_INTRO_COOKIE}=1`);
 
@@ -290,8 +296,43 @@ export function Landing({ offices }: { offices: PostOffice[] }) {
     return () => clearTimeout(timer);
   }, []);
 
+  // Below the hero (which has its own choreographed intro/reveal), fade each section's
+  // cards in as they scroll into view. The hero itself is left alone — its reveal timing
+  // is already tuned to the intro sequence above and isn't scroll-linked.
+  const mainRef = useRef<HTMLElement>(null);
+  useGSAP(
+    () => {
+      // Registering ScrollTrigger touches matchMedia, which jsdom (tests) and
+      // a few very old WebViews don't have — never register it without this.
+      if (typeof window.matchMedia !== "function") return;
+      gsap.registerPlugin(ScrollTrigger);
+      const mm = gsap.matchMedia();
+      mm.add("(prefers-reduced-motion: no-preference)", () => {
+        gsap.from(".kpl-facts-grid > div", {
+          y: 24,
+          opacity: 0,
+          duration: 0.6,
+          ease: "power2.out",
+          stagger: 0.1,
+          scrollTrigger: { trigger: ".kpl-facts", start: "top 85%" },
+        });
+        gsap.from(".kpl-step-grid > div", {
+          y: 24,
+          opacity: 0,
+          duration: 0.6,
+          ease: "power2.out",
+          stagger: 0.1,
+          scrollTrigger: { trigger: ".kpl-steps", start: "top 85%" },
+        });
+      });
+      return () => mm.revert();
+    },
+    { scope: mainRef, dependencies: [stateCode] }
+  );
+
   return (
     <div className={`kpl${revealed ? " in" : ""}`}>
+      <SmoothScroll />
       <noscript>
         <style>{".kpl-intro{display:none}"}</style>
       </noscript>
@@ -337,7 +378,7 @@ export function Landing({ offices }: { offices: PostOffice[] }) {
         </p>
       </header>
 
-      <main className="kpl-main">
+      <main className="kpl-main" ref={mainRef}>
         <section
           className="kpl-hero"
           onPointerDown={handleHeroPointerDown}
@@ -346,7 +387,11 @@ export function Landing({ offices }: { offices: PostOffice[] }) {
           <div className="kpl-hero-copy">
             {/* Both live states, visible without opening anything. */}
             {states.length > 1 && (
-              <div className="kpl-states" role="group" aria-label="Choose a state">
+              <div
+                className="kpl-states"
+                role="group"
+                aria-label="Choose a state"
+              >
                 {states.map((option) => {
                   const on = option.code === stateCode;
                   return (
@@ -354,7 +399,9 @@ export function Landing({ offices }: { offices: PostOffice[] }) {
                       key={option.code}
                       type="button"
                       aria-pressed={on}
-                      className={`kpl-pill kp-glass${on ? " kpl-pill--on" : ""}`}
+                      className={`kpl-pill kp-glass${
+                        on ? " kpl-pill--on" : ""
+                      }`}
                       onClick={() => choose(option.code)}
                     >
                       {option.name}
@@ -374,9 +421,9 @@ export function Landing({ offices }: { offices: PostOffice[] }) {
               </h1>
               <p>
                 You buy the paper booklet from {circle}, then travel to each
-                post office and have the counter strike its postmark.
-                Philatrail is the free map and tracker that goes with it — so
-                the booklet stays a collection, not a notepad.
+                post office and have the counter strike its postmark. Philatrail
+                is the free map and tracker that goes with it — so the booklet
+                stays a collection, not a notepad.
               </p>
             </div>
 
@@ -401,8 +448,7 @@ export function Landing({ offices }: { offices: PostOffice[] }) {
                 <strong>
                   {stamped} of {stateTotal}
                 </strong>{" "}
-                in {stateName_}.{" "}
-                <Link href="/passport">Open my passport</Link>
+                in {stateName_}. <Link href="/passport">Open my passport</Link>
               </p>
             )}
           </div>

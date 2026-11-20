@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { Appear } from "@/components/motion/Appear";
 import { DISCLAIMER } from "@/lib/constants";
 
 /** Shared frame for the privacy policy and terms: a readable column that scrolls on its own. */
@@ -18,7 +19,9 @@ export function LegalPage({
           {title}
         </h1>
         <p className="mt-1 text-sm text-muted">Last updated {updated}</p>
-        <div className="mt-6 space-y-7 text-base leading-7">{children}</div>
+        <Appear index={0} className="mt-6 space-y-7 text-base leading-7">
+          {children}
+        </Appear>
         <p className="mt-10 border-t border-line pt-4 text-sm text-muted">
           {DISCLAIMER}
         </p>

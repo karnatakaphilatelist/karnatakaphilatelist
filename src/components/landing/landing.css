@@ -82,15 +82,11 @@
   -webkit-mask: url(/brand/wordmark.svg) center / 100% 100% no-repeat;
   mask: url(/brand/wordmark.svg) center / 100% 100% no-repeat;
 }
-/* In the banner the mark is the hero, so it keeps its full size — but it is cut as an
-   outline rather than a solid, which is the only way to lighten a single filled path
-   without shrinking it. */
+/* In the banner the mark is the hero: solid white, at full size. */
 .kpl-wm--white {
   position: static;
   width: var(--wm-hero);
   background: #fff;
-  -webkit-mask-image: url(/brand/wordmark-outline.svg);
-  mask-image: url(/brand/wordmark-outline.svg);
 }
 .kpl-wm-stack {
   display: none;
@@ -133,14 +129,6 @@
   }
   .kpl-wm-stack--white i {
     background: #fff;
-  }
-  .kpl-wm-stack--white i:nth-child(1) {
-    -webkit-mask-image: url(/brand/wordmark-1-outline.svg);
-    mask-image: url(/brand/wordmark-1-outline.svg);
-  }
-  .kpl-wm-stack--white i:nth-child(2) {
-    -webkit-mask-image: url(/brand/wordmark-2-outline.svg);
-    mask-image: url(/brand/wordmark-2-outline.svg);
   }
 }
 

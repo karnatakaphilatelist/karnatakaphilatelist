@@ -497,7 +497,7 @@ export function ExploreView({
         {/* Floating search bar: only shown when the list is collapsed (map view). When the list is
             open the search bar moves into the panel header so it has a solid background behind it. */}
         {!sheetOpen ? (
-          <div className="pointer-events-none absolute inset-x-0 top-0 z-[1100] px-4 pt-[calc(1rem+env(safe-area-inset-top,0px))] md:hidden">
+          <div className="pointer-events-none absolute inset-x-0 top-0 z-[1100] px-4 pt-[calc(1.5rem+env(safe-area-inset-top,0px))] md:hidden">
             <div className="pointer-events-auto space-y-3">
               <ExploreControls
                 idSuffix="mobile"

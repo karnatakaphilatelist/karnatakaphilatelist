@@ -8,7 +8,7 @@ export function LearnHub() {
   const [first, ...rest] = ARTICLES;
   return (
     <div className="h-full overflow-y-auto">
-      <div className="mx-auto max-w-2xl px-5 pb-[calc(3rem+env(safe-area-inset-bottom))] pt-6">
+      <div className="mx-auto max-w-2xl px-5 pb-[calc(3rem+env(safe-area-inset-bottom))] pt-[calc(1.5rem+env(safe-area-inset-top,0px))]">
         <p className="text-xs font-bold uppercase tracking-[0.18em] text-muted">
           Learn
         </p>

@@ -143,7 +143,7 @@ function renderBlock(block: Block, index: number) {
 export function ArticleView({ article }: { article: Article }) {
   return (
     <div className="h-full overflow-y-auto">
-      <article className="mx-auto max-w-2xl px-5 pb-[calc(3rem+env(safe-area-inset-bottom))] pt-4">
+      <article className="mx-auto max-w-2xl px-5 pb-[calc(3rem+env(safe-area-inset-bottom))] pt-[calc(1.5rem+env(safe-area-inset-top,0px))]">
         <Link
           href="/learn"
           className="kp-hit -ml-2 inline-flex min-h-11 items-center gap-1.5 px-2 text-sm font-semibold text-muted"

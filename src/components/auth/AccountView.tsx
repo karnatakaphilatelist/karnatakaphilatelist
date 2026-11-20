@@ -9,7 +9,7 @@ import { useToast } from "@/components/providers/ToastProvider";
 import { ChevronRightIcon } from "@/components/ui/icons";
 import { Sheet } from "@/components/ui/Sheet";
 import { readLiteMode, saveLiteMode } from "@/components/settings/lite-mode";
-import { COACH_EVENT, CONTACT_EMAIL, DISCLAIMER } from "@/lib/constants";
+import { COACH_EVENT, DISCLAIMER } from "@/lib/constants";
 import { shareContent } from "@/lib/share";
 import { getAvatarUrl, getDisplayName, getInitial } from "@/lib/user-display";
 
@@ -211,9 +211,9 @@ export function AccountView() {
             </Link>
           </li>
           <li>
-            <a href={`mailto:${CONTACT_EMAIL}`} className={ROW}>
+            <Link href="/contact" className={ROW}>
               <Row>Contact us</Row>
-            </a>
+            </Link>
           </li>
           {user ? (
             <li>

@@ -6,6 +6,7 @@ import { CoachTour } from "@/components/layout/CoachTour";
 import { AppHeader } from "@/components/layout/AppHeader";
 import { OfflineBanner } from "@/components/layout/OfflineBanner";
 import { TabBar } from "@/components/layout/TabBar";
+import { SwipeBackLayer } from "@/components/layout/SwipeBackLayer";
 import { isNativeApp } from "@/lib/native";
 
 function ExploreSkeleton() {
@@ -92,7 +93,7 @@ export function AppShell({
             <Suspense fallback={<ExploreSkeleton />}>{explore}</Suspense>
           </div>
         ) : null}
-        {children}
+        <SwipeBackLayer>{children}</SwipeBackLayer>
       </main>
       <TabBar />
       <CoachTour />

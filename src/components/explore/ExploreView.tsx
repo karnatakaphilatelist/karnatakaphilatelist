@@ -523,6 +523,7 @@ export function ExploreView({
           onSelect={handleSelectOffice}
           onReady={() => setMapReady(true)}
           active={active}
+          detailOpen={selectedOffice !== null}
         />
         {!selectedOffice && !sheetOpen && dragHeight === null ? (
           <button

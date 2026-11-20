@@ -47,11 +47,20 @@ export function toPostOffice(row: PostOfficeRow): PostOffice {
   };
 }
 
+/**
+ * A slow or cold database (the cross-region hop to Supabase, a sleeping free-tier
+ * project, a dropped connection) should fail fast and fall back to the bundled
+ * snapshot rather than stall the page — a user would rather see slightly stale
+ * data in half a second than a blank screen for ten.
+ */
+const DB_TIMEOUT_MS = 4000;
+
 async function selectPostOffices(columns: string) {
   return createSupabasePublicClient()
     .from("post_offices")
     .select(columns)
     .order("name")
+    .abortSignal(AbortSignal.timeout(DB_TIMEOUT_MS))
     .overrideTypes<PostOfficeRow[], { merge: false }>();
 }
 

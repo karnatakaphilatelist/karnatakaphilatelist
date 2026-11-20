@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import type { ReactNode } from "react";
+import { Appear } from "@/components/motion/Appear";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { useToast } from "@/components/providers/ToastProvider";
 import { ChevronRightIcon } from "@/components/ui/icons";
@@ -130,106 +131,110 @@ export function AccountView() {
           )}
         </section>
 
-        <ul className="kp-glass mt-4 divide-y divide-[#785a1e]/12 overflow-hidden rounded-3xl">
-          {user ? (
-            <li>
-              <Link href="/account/profile" className={ROW}>
-                <Row>Edit profile</Row>
-              </Link>
-            </li>
-          ) : null}
-          {user ? (
-            <li>
-              <Link href="/account/password" className={ROW}>
-                <Row>Set or change password</Row>
-              </Link>
-            </li>
-          ) : null}
-          <li>
-            <button
-              type="button"
-              onClick={() => {
-                router.push("/explore");
-                window.dispatchEvent(new Event(COACH_EVENT));
-              }}
-              className={ROW}
-            >
-              <Row>Replay the walkthrough</Row>
-            </button>
-          </li>
-          <li className="flex min-h-14 items-center justify-between gap-3 px-4">
-            <div>
-              <p id="lite-label" className="text-base font-medium">
-                Lite mode
-              </p>
-              <p className="font-mono text-xs text-muted">
-                Lighter map, less data
-              </p>
-            </div>
-            <button
-              type="button"
-              role="switch"
-              aria-checked={lite}
-              aria-labelledby="lite-label"
-              onClick={() => {
-                setLite(!lite);
-                saveLiteMode(!lite);
-              }}
-              className={`relative h-8 w-14 shrink-0 rounded-full transition-colors ${
-                lite ? "bg-[#1f8a4d]" : "bg-[#785a1e]/25"
-              }`}
-            >
-              <span
-                className={`absolute top-1 size-6 rounded-full bg-white shadow transition-all ${
-                  lite ? "left-7" : "left-1"
-                }`}
-              />
-              <span className="sr-only">{lite ? "On" : "Off"}</span>
-            </button>
-          </li>
-        </ul>
-
-        <ul className="kp-glass mt-4 divide-y divide-[#785a1e]/12 overflow-hidden rounded-3xl">
-          <li>
-            <button type="button" onClick={handleShare} className={ROW}>
-              <Row>Share Philatrail</Row>
-            </button>
-          </li>
-          <li>
-            <Link href="/learn" className={ROW}>
-              <Row>Learn about philately</Row>
-            </Link>
-          </li>
-          <li>
-            <Link href="/privacy" className={ROW}>
-              <Row>Privacy policy</Row>
-            </Link>
-          </li>
-          <li>
-            <Link href="/terms" className={ROW}>
-              <Row>Terms of use</Row>
-            </Link>
-          </li>
-          <li>
-            <Link href="/contact" className={ROW}>
-              <Row>Contact us</Row>
-            </Link>
-          </li>
-          {user ? (
+        <Appear index={0}>
+          <ul className="kp-glass mt-4 divide-y divide-[#785a1e]/12 overflow-hidden rounded-3xl">
+            {user ? (
+              <li>
+                <Link href="/account/profile" className={ROW}>
+                  <Row>Edit profile</Row>
+                </Link>
+              </li>
+            ) : null}
+            {user ? (
+              <li>
+                <Link href="/account/password" className={ROW}>
+                  <Row>Set or change password</Row>
+                </Link>
+              </li>
+            ) : null}
             <li>
               <button
                 type="button"
                 onClick={() => {
-                  setDeleteError(null);
-                  setConfirming(true);
+                  router.push("/explore");
+                  window.dispatchEvent(new Event(COACH_EVENT));
                 }}
-                className={`${ROW} text-postal`}
+                className={ROW}
               >
-                <Row>Delete account</Row>
+                <Row>Replay the walkthrough</Row>
               </button>
             </li>
-          ) : null}
-        </ul>
+            <li className="flex min-h-14 items-center justify-between gap-3 px-4">
+              <div>
+                <p id="lite-label" className="text-base font-medium">
+                  Lite mode
+                </p>
+                <p className="font-mono text-xs text-muted">
+                  Lighter map, less data
+                </p>
+              </div>
+              <button
+                type="button"
+                role="switch"
+                aria-checked={lite}
+                aria-labelledby="lite-label"
+                onClick={() => {
+                  setLite(!lite);
+                  saveLiteMode(!lite);
+                }}
+                className={`relative h-8 w-14 shrink-0 rounded-full transition-colors ${
+                  lite ? "bg-[#1f8a4d]" : "bg-[#785a1e]/25"
+                }`}
+              >
+                <span
+                  className={`absolute top-1 size-6 rounded-full bg-white shadow transition-all ${
+                    lite ? "left-7" : "left-1"
+                  }`}
+                />
+                <span className="sr-only">{lite ? "On" : "Off"}</span>
+              </button>
+            </li>
+          </ul>
+        </Appear>
+
+        <Appear index={1}>
+          <ul className="kp-glass mt-4 divide-y divide-[#785a1e]/12 overflow-hidden rounded-3xl">
+            <li>
+              <button type="button" onClick={handleShare} className={ROW}>
+                <Row>Share Philatrail</Row>
+              </button>
+            </li>
+            <li>
+              <Link href="/learn" className={ROW}>
+                <Row>Learn about philately</Row>
+              </Link>
+            </li>
+            <li>
+              <Link href="/privacy" className={ROW}>
+                <Row>Privacy policy</Row>
+              </Link>
+            </li>
+            <li>
+              <Link href="/terms" className={ROW}>
+                <Row>Terms of use</Row>
+              </Link>
+            </li>
+            <li>
+              <Link href="/contact" className={ROW}>
+                <Row>Contact us</Row>
+              </Link>
+            </li>
+            {user ? (
+              <li>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setDeleteError(null);
+                    setConfirming(true);
+                  }}
+                  className={`${ROW} text-postal`}
+                >
+                  <Row>Delete account</Row>
+                </button>
+              </li>
+            ) : null}
+          </ul>
+        </Appear>
 
         {user ? (
           <button

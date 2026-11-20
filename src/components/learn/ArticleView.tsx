@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Appear } from "@/components/motion/Appear";
 import { ArrowLeftIcon } from "@/components/ui/icons";
 import { ShareLearnButton } from "@/components/learn/ShareLearnButton";
 import { DISCLAIMER } from "@/lib/constants";
@@ -151,21 +152,25 @@ export function ArticleView({ article }: { article: Article }) {
           <ArrowLeftIcon className="size-4" />
           Learn
         </Link>
-        <p className="mt-2 text-xs font-bold uppercase tracking-[0.18em] text-muted">
-          {article.minutes} min read
-        </p>
-        <h1 className="mt-2 font-display text-3xl font-bold leading-tight tracking-tight">
-          {article.title}
-        </h1>
-        <ShareLearnButton
-          className="mt-4"
-          path={`/learn/${article.slug}`}
-          title={article.title}
-          text={`${article.title}: ${article.summary}`}
-          label="Share this article"
-        />
+        <Appear index={0}>
+          <p className="mt-2 text-xs font-bold uppercase tracking-[0.18em] text-muted">
+            {article.minutes} min read
+          </p>
+          <h1 className="mt-2 font-display text-3xl font-bold leading-tight tracking-tight">
+            {article.title}
+          </h1>
+          <ShareLearnButton
+            className="mt-4"
+            path={`/learn/${article.slug}`}
+            title={article.title}
+            text={`${article.title}: ${article.summary}`}
+            label="Share this article"
+          />
+        </Appear>
 
-        <div>{article.blocks.map(renderBlock)}</div>
+        <Appear index={1}>
+          <div>{article.blocks.map(renderBlock)}</div>
+        </Appear>
 
         <section
           className={`${CARD} mt-10 rounded-3xl p-5 text-center`}

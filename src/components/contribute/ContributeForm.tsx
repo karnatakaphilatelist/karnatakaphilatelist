@@ -203,7 +203,7 @@ export function ContributeForm({ office, onClose, onSuccess }: ContributeFormPro
 
       {/* Error */}
       {submitState === "error" && (
-        <p className="flex items-start gap-2 rounded-xl bg-warn-soft p-3 text-sm text-warn">
+        <p className="animate-fade-in flex items-start gap-2 rounded-xl bg-warn-soft p-3 text-sm text-warn">
           <AlertIcon className="mt-0.5 size-4 shrink-0" />
           {errorMsg}
         </p>

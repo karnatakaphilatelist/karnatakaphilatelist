@@ -314,7 +314,13 @@ export function Landing({ offices }: { offices: PostOffice[] }) {
           duration: 0.6,
           ease: "power2.out",
           stagger: 0.1,
-          scrollTrigger: { trigger: ".kpl-facts", start: "top 85%" },
+          scrollTrigger: {
+            trigger: ".kpl-facts",
+            start: "top 85%",
+            // Replay every time the section is scrolled past, both ways —
+            // not just once the first time it's seen.
+            toggleActions: "play reverse play reverse",
+          },
         });
         gsap.from(".kpl-step-grid > div", {
           y: 24,
@@ -322,7 +328,11 @@ export function Landing({ offices }: { offices: PostOffice[] }) {
           duration: 0.6,
           ease: "power2.out",
           stagger: 0.1,
-          scrollTrigger: { trigger: ".kpl-steps", start: "top 85%" },
+          scrollTrigger: {
+            trigger: ".kpl-steps",
+            start: "top 85%",
+            toggleActions: "play reverse play reverse",
+          },
         });
       });
       return () => mm.revert();

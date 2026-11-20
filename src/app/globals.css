@@ -495,6 +495,12 @@ label {
   -webkit-backdrop-filter: blur(28px) saturate(180%);
   backdrop-filter: blur(28px) saturate(180%);
   box-shadow: inset 0 1.5px 0 #fff, 0 -10px 30px -12px rgb(22 32 79 / 0.3);
+  /* Keep this panel's own compositing layer so content changing size inside it
+     (an error banner appearing, say) doesn't force the browser to re-rasterize
+     the blur itself — that re-rasterization is what reads as a "lightning"
+     flash when a sheet sits on top of another blurred panel. */
+  isolation: isolate;
+  will-change: transform;
 }
 
 /* Map credit: required, but quiet. Muted text, no default link blue, small glass pill. */

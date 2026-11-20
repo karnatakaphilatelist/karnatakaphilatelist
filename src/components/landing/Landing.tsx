@@ -47,10 +47,14 @@ const BOOKLET: Record<string, string> = {
   TN: "A paper booklet, about ₹650, sold by Tamil Nadu Postal Circle. It launched at Chennai GPO and has been on sale since 28 October 2026. Call ahead to check stock.",
 };
 
-/** The wordmark in white (on the red intro) or red (on the page), as one line or stacked on phones. */
+/**
+ * The wordmark, as one line or stacked on phones. On the red banner it is the hero: full
+ * size, cut as an outline. On the page it is the masthead title, and `.kpl-mark` holds that
+ * title's exact box so the banner's mark can minimise into it without shifting the layout.
+ */
 function Wordmark({ white = false }: { white?: boolean }) {
   return (
-    <>
+    <div className={`kpl-mark${white ? " kpl-mark--hero" : ""}`}>
       <div
         className={`kpl-wm${white ? " kpl-wm--white" : ""}`}
         aria-hidden="true"
@@ -62,7 +66,7 @@ function Wordmark({ white = false }: { white?: boolean }) {
         <i />
         <i />
       </div>
-    </>
+    </div>
   );
 }
 
@@ -335,8 +339,10 @@ export function Landing({ offices }: { offices: PostOffice[] }) {
             )}
 
             <h1>
-              Collect all {stateTotal} postmarks in {stateName_}&apos;s Philately
-              Passport.
+              Collect all {stateTotal} postmarks in{" "}
+              <span>
+                <em>{stateName_}&apos;s</em> Philately Passport.
+              </span>
             </h1>
             <p>
               You buy the paper booklet from {circle}, then travel to each post

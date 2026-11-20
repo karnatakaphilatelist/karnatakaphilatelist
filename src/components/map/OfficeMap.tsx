@@ -31,13 +31,21 @@ interface OfficeMapProps {
   onReady?: () => void;
   /** False while another tab is showing; the map is hidden (display:none), not unmounted. */
   active?: boolean;
+  /** True while the office detail sheet is covering most of the map. */
+  detailOpen?: boolean;
 }
 
 const FOCUS_ZOOM = 12;
 const NEAR_ME_ZOOM = 11;
 
 /** The map screen is hidden, not destroyed, between visits; tell Leaflet when it gets its size back. */
-function KeepSized({ active }: { active: boolean }) {
+function KeepSized({
+  active,
+  detailOpen,
+}: {
+  active: boolean;
+  detailOpen: boolean;
+}) {
   const map = useMap();
   useEffect(() => {
     const container = map.getContainer();
@@ -52,6 +60,13 @@ function KeepSized({ active }: { active: boolean }) {
   useEffect(() => {
     if (active) map.invalidateSize();
   }, [active, map]);
+  // Same belt-and-braces, for closing the office detail sheet instead of a tab
+  // switch: some WebViews leave the tile grid stale after the sheet (which
+  // covers most of the map) closes, even though the map's own container never
+  // actually changes size. Re-measuring is a cheap no-op when it wasn't needed.
+  useEffect(() => {
+    if (!detailOpen) map.invalidateSize();
+  }, [detailOpen, map]);
   return null;
 }
 
@@ -212,6 +227,7 @@ export function OfficeMap({
   onSelect,
   onReady,
   active = true,
+  detailOpen = false,
 }: OfficeMapProps) {
   return (
     <MapContainer
@@ -233,7 +249,7 @@ export function OfficeMap({
         maxZoom={getTileConfig().maxZoom}
       />
       <ZoomControl position="topleft" />
-      <KeepSized active={active} />
+      <KeepSized active={active} detailOpen={detailOpen} />
       <MapViewport
         offices={offices}
         selectedId={selectedId}

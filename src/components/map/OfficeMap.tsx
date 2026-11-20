@@ -29,13 +29,15 @@ interface OfficeMapProps {
   onSelect: (officeId: number) => void;
   /** Called once the map has been built and is on screen. */
   onReady?: () => void;
+  /** False while another tab is showing; the map is hidden (display:none), not unmounted. */
+  active?: boolean;
 }
 
 const FOCUS_ZOOM = 12;
 const NEAR_ME_ZOOM = 11;
 
 /** The map screen is hidden, not destroyed, between visits; tell Leaflet when it gets its size back. */
-function KeepSized() {
+function KeepSized({ active }: { active: boolean }) {
   const map = useMap();
   useEffect(() => {
     const container = map.getContainer();
@@ -43,6 +45,13 @@ function KeepSized() {
     observer.observe(container);
     return () => observer.disconnect();
   }, [map]);
+  // Belt-and-braces: some WebViews don't reliably fire ResizeObserver when an
+  // ancestor's `hidden` (display:none) is removed, which left the map blank
+  // (stale 0x0 size, tiles pruned for an empty viewport) after switching tabs
+  // and back. Re-measure explicitly whenever this screen becomes active again.
+  useEffect(() => {
+    if (active) map.invalidateSize();
+  }, [active, map]);
   return null;
 }
 
@@ -202,6 +211,7 @@ export function OfficeMap({
   userLocation,
   onSelect,
   onReady,
+  active = true,
 }: OfficeMapProps) {
   return (
     <MapContainer
@@ -223,7 +233,7 @@ export function OfficeMap({
         maxZoom={getTileConfig().maxZoom}
       />
       <ZoomControl position="topleft" />
-      <KeepSized />
+      <KeepSized active={active} />
       <MapViewport
         offices={offices}
         selectedId={selectedId}

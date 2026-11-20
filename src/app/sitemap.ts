@@ -21,6 +21,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     page("/explore", 0.6),
     page("/privacy", 0.2),
     page("/terms", 0.2),
+    page("/contact", 0.2),
     ...offices.map((office) => page(officePath(office), 0.7)),
   ];
 }

@@ -23,7 +23,7 @@ export function StatusBadge({
 }) {
   return (
     <span
-      className={`inline-flex h-6 shrink-0 items-center gap-1.5 rounded-xl px-2.5 text-[11px] font-bold uppercase tracking-[0.14em] ${STYLES[status]}`}
+      className={`inline-flex min-h-6 shrink-0 items-center gap-1.5 rounded-xl px-2.5 py-1 text-[11px] font-bold uppercase leading-[14px] tracking-[0.14em] ${STYLES[status]}`}
     >
       {status === "visited" ? (
         <CheckIcon className="size-3.5" strokeWidth={3.2} />

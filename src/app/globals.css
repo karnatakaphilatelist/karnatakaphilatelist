@@ -39,6 +39,9 @@
     serif;
 
   --animate-rise: rise 0.25s ease-out;
+  --animate-fall: fall 0.2s ease-in;
+  --animate-fade-in: fade-in 0.2s ease-out;
+  --animate-fade-out: fade-out 0.15s ease-in;
   --animate-thump: thump 0.4s cubic-bezier(0.2, 1.2, 0.4, 1);
 
   @keyframes rise {
@@ -49,6 +52,36 @@
     to {
       transform: none;
       opacity: 1;
+    }
+  }
+
+  /* The reverse of rise, for a sheet or panel leaving the screen instead of arriving. */
+  @keyframes fall {
+    from {
+      transform: none;
+      opacity: 1;
+    }
+    to {
+      transform: translateY(24px);
+      opacity: 0;
+    }
+  }
+
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes fade-out {
+    from {
+      opacity: 1;
+    }
+    to {
+      opacity: 0;
     }
   }
 

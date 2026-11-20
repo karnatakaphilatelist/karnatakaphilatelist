@@ -150,6 +150,25 @@ export function OfficeDetail({
   const [aboutExpanded, setAboutExpanded] = useState(false);
   const [activeTab, setActiveTab] = useState<DetailTab>("about");
   const [showContribute, setShowContribute] = useState(false);
+  const [contributeClosing, setContributeClosing] = useState(false);
+  // The panel plays its fall animation before the parent actually unmounts it,
+  // so closing is as fluid as the rise it opened with instead of a hard cut.
+  const [closing, setClosing] = useState(false);
+
+  function handleClose() {
+    if (closing) return;
+    setClosing(true);
+    setTimeout(onClose, 200);
+  }
+
+  function closeContribute() {
+    if (contributeClosing) return;
+    setContributeClosing(true);
+    setTimeout(() => {
+      setShowContribute(false);
+      setContributeClosing(false);
+    }, 200);
+  }
 
   async function handleShare() {
     const result = await shareContent({
@@ -169,7 +188,9 @@ export function OfficeDetail({
     <div
       role="region"
       aria-label={`${office.name} details`}
-      className="kp-glass-panel absolute inset-x-0 bottom-0 z-[1100] flex max-h-[85%] animate-rise flex-col rounded-t-[24px] md:inset-x-auto md:bottom-auto md:left-14 md:top-4 md:max-h-[calc(100%-2rem)] md:w-96 md:rounded-2xl md:bg-white md:shadow-xl"
+      className={`kp-glass-panel absolute inset-x-0 bottom-0 z-[1100] flex max-h-[85%] flex-col rounded-t-[24px] md:inset-x-auto md:bottom-auto md:left-14 md:top-4 md:max-h-[calc(100%-2rem)] md:w-96 md:rounded-2xl md:bg-white md:shadow-xl ${
+        closing ? "animate-fall" : "animate-rise"
+      }`}
     >
       {/* Grab handle (mobile only) */}
       <div
@@ -193,7 +214,7 @@ export function OfficeDetail({
           </div>
           <button
             type="button"
-            onClick={onClose}
+            onClick={handleClose}
             aria-label="Close post office details"
             className="kp-glass grid size-8 shrink-0 place-items-center rounded-full text-ink"
           >
@@ -218,9 +239,11 @@ export function OfficeDetail({
           ) : null}
         </p>
 
-        {/* ── Status row: left (badge + proximity/progress) | right (PPC image) ── */}
-        <div className="mt-3 flex items-start justify-between gap-4">
-          <div className="flex min-w-0 flex-1 flex-col items-start gap-2">
+        {/* ── Status row: left (badge + proximity/progress) | right (PPC image) ──
+            flex-wrap + a floor on the left column's width means a wide stamp image
+            pushes the badge to its own line below instead of squeezing or clipping it. */}
+        <div className="mt-3 flex flex-wrap items-start justify-between gap-x-4 gap-y-2">
+          <div className="flex min-w-[180px] flex-1 flex-col items-start gap-2">
             <StatusBadge
               status={office.status}
               stampedOn={visit ? formatVisitDate(visit.visitedAt) : undefined}
@@ -448,12 +471,15 @@ export function OfficeDetail({
           {/* Scrim — tapping outside closes the sheet */}
           <div
             aria-hidden="true"
-            className="fixed inset-0 z-[1150] bg-black/20"
-            onClick={() => setShowContribute(false)}
+            className={`fixed inset-0 z-[1150] bg-black/20 ${
+              contributeClosing ? "animate-fade-out" : "animate-fade-in"
+            }`}
+            onClick={closeContribute}
           />
           <ContributeSheet
             office={office}
-            onClose={() => setShowContribute(false)}
+            onClose={closeContribute}
+            closing={contributeClosing}
           />
         </>
       ) : null}

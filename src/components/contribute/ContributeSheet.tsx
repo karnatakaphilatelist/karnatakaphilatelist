@@ -8,9 +8,15 @@ import type { PostOffice } from "@/types";
 interface ContributeSheetProps {
   office: PostOffice;
   onClose: () => void;
+  /** True while the sheet is playing its exit animation, just before it unmounts. */
+  closing?: boolean;
 }
 
-export function ContributeSheet({ office, onClose }: ContributeSheetProps) {
+export function ContributeSheet({
+  office,
+  onClose,
+  closing = false,
+}: ContributeSheetProps) {
   const { user, openSignIn } = useAuth();
 
   return (
@@ -18,7 +24,9 @@ export function ContributeSheet({ office, onClose }: ContributeSheetProps) {
       role="dialog"
       aria-modal="true"
       aria-label="Contribute to Philatrail"
-      className="kp-glass-panel absolute inset-x-0 bottom-0 z-[1200] flex max-h-[90%] animate-rise flex-col rounded-t-[24px]"
+      className={`kp-glass-panel absolute inset-x-0 bottom-0 z-[1200] flex max-h-[90%] flex-col rounded-t-[24px] ${
+        closing ? "pointer-events-none animate-fall" : "animate-rise"
+      }`}
     >
       {/* Grab handle */}
       <div

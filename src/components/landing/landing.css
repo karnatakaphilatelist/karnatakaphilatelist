@@ -65,10 +65,14 @@
    animated from banner size down to title size without moving anything else on the page. */
 .kpl-mark {
   position: relative;
+  width: var(--wm-w);
+  max-width: 100%;
   height: calc(var(--wm-w) * 161 / 1181);
+  flex: 0 0 auto;
 }
 /* On the banner the mark is full size and in normal flow, so the box grows with it. */
 .kpl-mark--hero {
+  width: 100%;
   height: auto;
 }
 .kpl-wm {
@@ -82,10 +86,12 @@
   -webkit-mask: url(/brand/wordmark.svg) center / 100% 100% no-repeat;
   mask: url(/brand/wordmark.svg) center / 100% 100% no-repeat;
 }
-/* In the banner the mark is the hero: solid white, at full size. */
+/* In the banner the mark is the hero: solid white, at full size, centred in the curtain so the
+   margin reads the same on both sides of the word instead of all landing after the last letter. */
 .kpl-wm--white {
   position: static;
   width: var(--wm-hero);
+  margin-inline: auto;
   background: #fff;
 }
 .kpl-wm-stack {
@@ -111,6 +117,7 @@
   .kpl-wm-stack--white {
     position: static;
     width: var(--wm-shero);
+    margin-inline: auto;
   }
   .kpl-wm-stack i {
     display: block;
@@ -144,24 +151,27 @@
   margin: 0 auto;
   padding: calc(24px + env(safe-area-inset-top, 0px)) 24px 0;
 }
-.kpl-row {
+/* Logo and nav share one bar — the nav reads as part of the masthead, not a second header
+   stacked under it. The signature red rule moves to below this whole bar, ahead of the
+   tagline, so it still separates the header from the hero that follows. */
+.kpl-bar {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 24px;
   flex-wrap: wrap;
-  margin-top: 26px;
-  padding-top: 14px;
-  border-top: 2px solid var(--color-postal);
 }
 .kpl-sub {
-  margin: 0;
+  margin: 14px 0 0;
+  padding-top: 14px;
+  border-top: 2px solid var(--color-postal);
   font-style: italic;
   font-size: 15px;
   color: var(--color-muted);
 }
 .kpl-nav {
   display: flex;
+  align-items: center;
   gap: 4px;
   font-size: 15px;
   font-weight: 600;
@@ -198,10 +208,8 @@
   .kpl-head {
     padding: calc(16px + env(safe-area-inset-top, 0px)) 16px 0;
   }
-  .kpl-row {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 10px;
+  .kpl-bar {
+    gap: 12px;
   }
   .kpl-nav {
     margin-left: -10px;
@@ -231,6 +239,25 @@
      line. Only the mobile breakpoint below switches to a stacked layout. */
   flex-wrap: nowrap;
   padding-top: 72px;
+  /* Two live states means the hero also answers a horizontal swipe, not only the
+     pills — pan-y keeps the page's own vertical scroll working under the gesture. */
+  touch-action: pan-y;
+}
+/* The headline and intro line settle in fresh each time the state changes, whether that
+   came from a pill tap or a swipe, so switching reads as a response, not a jump cut. */
+.kpl-state-fade {
+  animation: kpl-state-in 0.3s ease both;
+}
+@keyframes kpl-state-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .kpl-state-fade {
+    animation: none;
+  }
 }
 .kpl-hero-copy {
   flex: 1 1 440px;
@@ -293,36 +320,51 @@
   min-height: 46px;
   padding: 0 18px;
   border-radius: 9999px;
-  border: 1px solid var(--color-line-strong);
-  background: #fffffe;
+  border: 0;
   color: var(--color-ink);
   font: inherit;
   font-size: 15px;
   font-weight: 600;
   cursor: pointer;
-  transition: border-color 0.15s, background 0.15s;
+  transition: box-shadow 0.2s ease, background 0.2s ease, transform 0.15s ease;
+}
+.kpl-pill:active {
+  transform: scale(0.97);
 }
 .kpl-pill .kpl-mono {
   font-weight: 400;
   color: var(--color-muted);
   text-transform: none;
 }
-.kpl-pill:hover {
-  border-color: var(--color-ink);
-}
+/* The chosen state swaps the frosted glass for a solid gold fill — the same material the
+   rest of the app uses for an active/selected control — rather than a thicker outline. */
 .kpl-pill--on {
-  border: 1.5px solid var(--color-ink);
-  background: #fbecc6;
+  background: linear-gradient(180deg, #fff3d6, #fbecc6);
+  box-shadow: inset 0 1.5px 0 #fff, inset 0 -1px 0 rgb(143 100 15 / 0.12),
+    0 6px 16px -8px rgb(143 100 15 / 0.45);
   font-weight: 700;
 }
 .kpl-pill--on .kpl-mono {
   color: #8f640f;
 }
 
-.kpl-free {
-  margin: 14px 0 0;
+/* Specificity note: plain `.kpl-free` loses to `.kpl-hero-copy p`'s margin below (one class +
+   one tag beats one class), so this is scoped the same way to actually win. */
+.kpl-hero-copy .kpl-free {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin: 20px 0 0;
+  font-size: 13.5px;
+  font-weight: 600;
   color: var(--color-muted);
-  text-transform: none;
+}
+.kpl-free-dot {
+  width: 6px;
+  height: 6px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: var(--color-visited);
 }
 /* Only ever the real count: nothing stands in for progress that does not exist yet. */
 .kpl-yours {
@@ -977,7 +1019,7 @@ html[data-intro-playing] {
  * intro (seen, Lite mode, reduced motion) there is no animation and everything shows at once.
  */
 html[data-intro-go] .kpl-meta,
-html[data-intro-go] .kpl-row,
+html[data-intro-go] .kpl-bar,
 html[data-intro-go] .kpl-main {
   animation: kpl-reveal 0.7s ease 3.6s backwards;
 }

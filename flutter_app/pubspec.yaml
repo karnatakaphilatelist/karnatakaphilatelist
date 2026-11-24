@@ -1,7 +1,12 @@
 name: philatrail
 description: Philatrail mobile app — the field companion for the Philately Passport.
 publish_to: "none"
-version: 1.0.0+1
+# Build number (+8) is set strictly higher than the highest versionCode seen
+# on the Play Console closed-testing track as of 24 Nov 2026 — release 7
+# (v1.0.4) was drafted but not yet sent for review, release 5 (v1.0.2) is the
+# one currently live to testers. Using 8 (not 6) keeps this safe even if 7
+# ships first. Confirm/bump this again before the first real Flutter build.
+version: 1.1.0+8
 
 environment:
   sdk: ">=3.4.0 <4.0.0"

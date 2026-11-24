@@ -26,12 +26,12 @@ websites" list (personal-plan equivalent of the org-level network allowlist).
   both set), matching the live Capacitor app
   (`android/app/src/main/java/app/vinvi/philatrail/MainActivity.java` and
   `android/app/build.gradle` at the repo root) character-for-character.
-- **`versionCode`** — ⚠️ **not yet set**. The live Capacitor build reads this
-  from a `VERSION_CODE` env var at build/CI time — it isn't hardcoded
-  anywhere in this repo, so it can't be read from here. Need the actual
-  currently-live value from the Play Console before `pubspec.yaml`'s
-  `version: 1.0.0+1` (build number `1`) can be set correctly; it must be
-  strictly higher than whatever's live.
+- **`versionCode`** — ✅ done. Per the Play Console closed-testing track
+  (checked 24 Nov 2026): release 5 (v1.0.2) is live to testers, release 7
+  (v1.0.4) is drafted but not yet sent for review. `pubspec.yaml`'s build
+  number is set to `8` — strictly higher than both, so it's safe even if
+  release 7 ships before the Flutter app does. Re-check this value again
+  right before the actual first build, since the track may have moved on.
 - **Signing** — ⚠️ **not yet set**. `android/app/build.gradle.kts` currently
   signs release builds with the Flutter-scaffold default (the **debug**
   key) — `signingConfig = signingConfigs.getByName("debug")`. This must be

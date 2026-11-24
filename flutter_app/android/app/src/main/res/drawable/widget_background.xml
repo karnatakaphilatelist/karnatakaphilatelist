@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The widget's own card background — AppColors.paper with rounded corners,
+     since Android widget hosts don't apply the system's own card shape. -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="rectangle">
+    <solid android:color="@color/widget_paper" />
+    <corners android:radius="20dp" />
+</shape>

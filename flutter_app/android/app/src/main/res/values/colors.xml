@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Mirrors lib/theme/app_theme.dart's AppColors — kept in sync by hand,
+     same reasoning as that file's own doc comment about globals.css. Only
+     the subset the home-screen widget actually uses. -->
+<resources>
+    <color name="widget_paper">#FBF3E2</color>
+    <color name="widget_sand">#F1E8D3</color>
+    <color name="widget_ink">#16204F</color>
+    <color name="widget_muted">#5D6283</color>
+    <color name="widget_postal">#CF1830</color>
+    <color name="widget_visited">#17794B</color>
+</resources>

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Standard Android progress-drawable shape: @android:id/background is the
+     track, @android:id/progress is clipped to the current level by
+     ProgressBar/RemoteViews.setProgressBar itself — no custom view logic
+     needed. Simplification vs. the iOS widget: this stays postal red at
+     100% rather than switching to visited-green, since RemoteViews can't
+     swap a plain int-drawable's tint color at update time without a higher
+     minSdk (setColorStateList needs API 31) — not worth the complexity for
+     a home-screen widget's progress bar. -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@android:id/background">
+        <shape android:shape="rectangle">
+            <solid android:color="@color/widget_sand" />
+            <corners android:radius="3dp" />
+        </shape>
+    </item>
+    <item android:id="@android:id/progress">
+        <clip>
+            <shape android:shape="rectangle">
+                <solid android:color="@color/widget_postal" />
+                <corners android:radius="3dp" />
+            </shape>
+        </clip>
+    </item>
+</layer-list>

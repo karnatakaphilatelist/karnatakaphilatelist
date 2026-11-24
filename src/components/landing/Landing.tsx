@@ -317,9 +317,13 @@ export function Landing({ offices }: { offices: PostOffice[] }) {
           scrollTrigger: {
             trigger: ".kpl-facts",
             start: "top 85%",
-            // Replay every time the section is scrolled past, both ways —
-            // not just once the first time it's seen.
-            toggleActions: "play reverse play reverse",
+            // Replay from scratch ("restart", not "play" — a finished tween
+            // ignores "play") every time the section is scrolled into view
+            // again. Leaving does nothing in either direction, so the cards
+            // stay visible once shown instead of hiding themselves again the
+            // moment you scroll past — that "reverse on leave" is what made
+            // them disappear right after passing through them.
+            toggleActions: "restart none restart none",
           },
         });
         gsap.from(".kpl-step-grid > div", {
@@ -331,7 +335,7 @@ export function Landing({ offices }: { offices: PostOffice[] }) {
           scrollTrigger: {
             trigger: ".kpl-steps",
             start: "top 85%",
-            toggleActions: "play reverse play reverse",
+            toggleActions: "restart none restart none",
           },
         });
       });

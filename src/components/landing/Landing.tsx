@@ -225,6 +225,14 @@ export function Landing({ offices }: { offices: PostOffice[] }) {
         return;
       }
       html.removeAttribute("data-intro-playing");
+      // The reveal of .kpl-main/.kpl-bar/.kpl-meta is pure CSS, keyed off data-intro-go and
+      // timed from when the browser first sees it (the inline <head> script sets it before
+      // paint) — not from whenever this finish() runs. Left in place, skipping the intro early
+      // hid the red overlay immediately but left the real page invisible for the rest of that
+      // fixed delay, i.e. a blank/white screen after hitting Skip. Dropping it here lets the
+      // reveal rule stop matching, so the content shows right away; on the normal (non-skip)
+      // path this fires after the CSS reveal has already finished, so it's a no-op there.
+      html.removeAttribute("data-intro-go");
       setIntroState("done");
       setRevealed(true);
     };

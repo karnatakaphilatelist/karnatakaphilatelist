@@ -22,6 +22,11 @@ dependencies:
   # Navigation
   go_router: ^14.6.0
 
+  # Map (web app uses react-leaflet + OSM/MapTiler tiles — flutter_map is the
+  # same OSM-tile-based model, no Google Maps API key/billing needed)
+  flutter_map: ^7.0.2
+  latlong2: ^0.9.1
+
   # Device & field capabilities (mirrors src/lib/geofence.ts, geo.ts, haptics.ts,
   # nearby-notifications.ts, native-photo.ts, in-app-review.ts)
   geolocator: ^13.0.0

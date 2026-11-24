@@ -7,10 +7,12 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:philatrail/main.dart';
 
 void main() {
-  testWidgets('PhilatrailApp builds and shows the scaffold placeholder',
+  testWidgets(
+      'PhilatrailApp builds and shows the missing-config screen '
+      'when SUPABASE_URL/SUPABASE_ANON_KEY are not provided',
       (WidgetTester tester) async {
     await tester.pumpWidget(const PhilatrailApp());
 
-    expect(find.text('Philatrail — Flutter scaffold stage'), findsOneWidget);
+    expect(find.textContaining('Missing SUPABASE_URL'), findsOneWidget);
   });
 }

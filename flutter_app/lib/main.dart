@@ -1,11 +1,23 @@
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+
+import 'features/explore/explore_screen.dart';
 import 'theme/app_theme.dart';
 
-/// Entry point placeholder. Nothing here talks to Supabase or any native
-/// plugin yet — this exists only so the project has a buildable shape once
-/// `flutter create`'s real android/ and ios/ scaffolding is generated (see
-/// flutter_app/README.md for the one thing still blocking that).
-void main() {
+/// Same Supabase project the web app uses (src/lib/supabase/public.ts) —
+/// read via --dart-define so the anon key isn't hardcoded into source,
+/// matching the MAPTILER_KEY pattern in core/map_tiles.dart. Get the actual
+/// values from `mcp__Supabase__get_project_url` / `get_publishable_keys`, or
+/// from the same place the web app's NEXT_PUBLIC_SUPABASE_URL/ANON_KEY come
+/// from (these are the public/anon values, not service-role secrets).
+const _supabaseUrl = String.fromEnvironment('SUPABASE_URL');
+const _supabaseAnonKey = String.fromEnvironment('SUPABASE_ANON_KEY');
+
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  if (_supabaseUrl.isNotEmpty && _supabaseAnonKey.isNotEmpty) {
+    await Supabase.initialize(url: _supabaseUrl, publishableKey: _supabaseAnonKey);
+  }
   runApp(const PhilatrailApp());
 }
 
@@ -17,19 +29,31 @@ class PhilatrailApp extends StatelessWidget {
     return MaterialApp(
       title: 'Philatrail',
       theme: buildAppTheme(),
-      home: const _ScaffoldPlaceholder(),
+      home: _supabaseUrl.isNotEmpty && _supabaseAnonKey.isNotEmpty
+          ? const ExploreScreen()
+          : const _MissingConfigScreen(),
     );
   }
 }
 
-class _ScaffoldPlaceholder extends StatelessWidget {
-  const _ScaffoldPlaceholder();
+/// Shown when SUPABASE_URL/SUPABASE_ANON_KEY weren't passed via --dart-define
+/// — keeps `flutter run` from crashing opaquely for anyone who hasn't set
+/// those up yet.
+class _MissingConfigScreen extends StatelessWidget {
+  const _MissingConfigScreen();
 
   @override
   Widget build(BuildContext context) {
     return const Scaffold(
       body: Center(
-        child: Text('Philatrail — Flutter scaffold stage'),
+        child: Padding(
+          padding: EdgeInsets.all(24),
+          child: Text(
+            'Missing SUPABASE_URL / SUPABASE_ANON_KEY.\n'
+            'Run with --dart-define=SUPABASE_URL=... --dart-define=SUPABASE_ANON_KEY=...',
+            textAlign: TextAlign.center,
+          ),
+        ),
       ),
     );
   }

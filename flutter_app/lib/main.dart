@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import 'data/visits_repository.dart';
 import 'features/explore/explore_screen.dart';
+import 'features/office/visit_dialog.dart';
 import 'theme/app_theme.dart';
 
 /// Same Supabase project the web app uses (src/lib/supabase/public.ts) —
@@ -21,16 +23,38 @@ Future<void> main() async {
   runApp(const PhilatrailApp());
 }
 
-class PhilatrailApp extends StatelessWidget {
+class PhilatrailApp extends StatefulWidget {
   const PhilatrailApp({super.key});
 
   @override
+  State<PhilatrailApp> createState() => _PhilatrailAppState();
+}
+
+class _PhilatrailAppState extends State<PhilatrailApp> {
+  VisitsController? _visitsController;
+
+  @override
+  void initState() {
+    super.initState();
+    if (_supabaseUrl.isNotEmpty && _supabaseAnonKey.isNotEmpty) {
+      _visitsController = VisitsController(Supabase.instance.client);
+    }
+  }
+
+  @override
+  void dispose() {
+    _visitsController?.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final controller = _visitsController;
     return MaterialApp(
       title: 'Philatrail',
       theme: buildAppTheme(),
-      home: _supabaseUrl.isNotEmpty && _supabaseAnonKey.isNotEmpty
-          ? const ExploreScreen()
+      home: controller != null
+          ? VisitsScope(controller: controller, child: const ExploreScreen())
           : const _MissingConfigScreen(),
     );
   }

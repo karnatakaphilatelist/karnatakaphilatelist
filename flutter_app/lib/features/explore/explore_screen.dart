@@ -7,6 +7,7 @@ import '../../data/office_repository.dart';
 import '../../models/post_office.dart';
 import '../../models/visit.dart';
 import '../../theme/app_theme.dart';
+import '../office/office_detail_screen.dart';
 import 'filter_chips.dart';
 import 'office_list.dart';
 import 'office_map.dart';
@@ -62,6 +63,18 @@ class _ExploreScreenState extends State<ExploreScreen> {
         _loading = false;
       });
     }
+  }
+
+  /// List rows carry a chevron (see office_list.dart) — tapping one opens the
+  /// full detail/stamping screen, not just a map highlight. Tapping a map pin
+  /// (OfficeMap's onSelect) only selects/centers, matching the web app's
+  /// lighter-weight map-tap behavior; opening OfficeDetail from the map is a
+  /// later pass if wanted.
+  void _openDetail(OfficeWithStatus office) {
+    setState(() => _selectedId = office.id);
+    Navigator.of(context).push(
+      MaterialPageRoute(builder: (_) => OfficeDetailScreen(office: office)),
+    );
   }
 
   Future<void> _locate() async {
@@ -203,7 +216,9 @@ class _ExploreScreenState extends State<ExploreScreen> {
                             child: OfficeListView(
                               offices: listOffices,
                               selectedId: _selectedId,
-                              onSelect: (id) => setState(() => _selectedId = id),
+                              onSelect: (id) => _openDetail(
+                                listOffices.firstWhere((o) => o.id == id),
+                              ),
                             ),
                           ),
                         ],

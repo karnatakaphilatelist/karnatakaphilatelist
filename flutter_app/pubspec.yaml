@@ -36,6 +36,8 @@ dependencies:
   url_launcher: ^6.3.1
   vibration: ^2.0.0
   in_app_review: ^2.0.9
+  # Share sheet for progress sharing (mirrors src/lib/share.ts's @capacitor/share).
+  share_plus: ^10.1.4
 
   # Local persistence (mirrors src/lib/local-storage.ts's guest-visits/planned-ids storage)
   shared_preferences: ^2.3.0

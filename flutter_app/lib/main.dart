@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import 'app_shell.dart';
+import 'data/offices_controller.dart';
+import 'data/state_controller.dart';
 import 'data/visits_repository.dart';
-import 'features/explore/explore_screen.dart';
 import 'features/office/visit_dialog.dart';
 import 'theme/app_theme.dart';
 
@@ -32,29 +34,43 @@ class PhilatrailApp extends StatefulWidget {
 
 class _PhilatrailAppState extends State<PhilatrailApp> {
   VisitsController? _visitsController;
+  StateController? _stateController;
+  OfficesController? _officesController;
 
   @override
   void initState() {
     super.initState();
     if (_supabaseUrl.isNotEmpty && _supabaseAnonKey.isNotEmpty) {
-      _visitsController = VisitsController(Supabase.instance.client);
+      final client = Supabase.instance.client;
+      _visitsController = VisitsController(client);
+      _stateController = StateController();
+      _officesController = OfficesController(client);
     }
   }
 
   @override
   void dispose() {
     _visitsController?.dispose();
+    _stateController?.dispose();
+    _officesController?.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     final controller = _visitsController;
+    final stateController = _stateController;
+    final officesController = _officesController;
     return MaterialApp(
       title: 'Philatrail',
       theme: buildAppTheme(),
-      home: controller != null
-          ? VisitsScope(controller: controller, child: const ExploreScreen())
+      home: controller != null && stateController != null && officesController != null
+          ? VisitsScope(
+              controller: controller,
+              stateController: stateController,
+              officesController: officesController,
+              child: const AppShell(),
+            )
           : const _MissingConfigScreen(),
     );
   }

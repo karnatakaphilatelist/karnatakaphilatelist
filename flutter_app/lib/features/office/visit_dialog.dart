@@ -5,6 +5,8 @@ import 'package:image_picker/image_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../data/guest_visits.dart';
+import '../../data/offices_controller.dart';
+import '../../data/state_controller.dart';
 import '../../data/visits_repository.dart';
 import '../../models/visit.dart';
 import '../../theme/app_theme.dart';
@@ -60,12 +62,35 @@ VisitsController visitsControllerOf(BuildContext context) {
   return scope!.controller;
 }
 
+/// Same static-lookup reasoning as [visitsControllerOf] — see its doc comment.
+StateController stateControllerOf(BuildContext context) {
+  final scope = context.findAncestorWidgetOfExactType<VisitsScope>();
+  assert(scope != null, 'No VisitsScope found in context — wrap the app with one in main.dart.');
+  return scope!.stateController;
+}
+
+OfficesController officesControllerOf(BuildContext context) {
+  final scope = context.findAncestorWidgetOfExactType<VisitsScope>();
+  assert(scope != null, 'No VisitsScope found in context — wrap the app with one in main.dart.');
+  return scope!.officesController;
+}
+
 /// Minimal InheritedWidget so this screen doesn't need a full app-wide
 /// provider package yet — Stage 4 (account/auth) is the natural point to
 /// decide on a real state-management dependency if one is wanted app-wide.
+/// Holds all three app-level controllers now that Explore and Passport both
+/// need the shared office list + selected-state preference (not just visits).
 class VisitsScope extends InheritedWidget {
   final VisitsController controller;
-  const VisitsScope({super.key, required this.controller, required super.child});
+  final StateController stateController;
+  final OfficesController officesController;
+  const VisitsScope({
+    super.key,
+    required this.controller,
+    required this.stateController,
+    required this.officesController,
+    required super.child,
+  });
 
   @override
   bool updateShouldNotify(VisitsScope oldWidget) => oldWidget.controller != controller;

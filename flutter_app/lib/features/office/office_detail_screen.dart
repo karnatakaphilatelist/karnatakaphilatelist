@@ -3,6 +3,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../core/date.dart';
 import '../../core/geo.dart';
+import '../../core/haptics.dart';
 import '../../models/post_office.dart';
 import '../../theme/app_theme.dart';
 import 'visit_dialog.dart';
@@ -82,19 +83,47 @@ class OfficeDetailScreen extends StatelessWidget {
                     label: const Text('Directions'),
                   ),
                 const SizedBox(height: 12),
-                SizedBox(
-                  width: double.infinity,
-                  height: 52,
-                  child: FilledButton(
-                    style: FilledButton.styleFrom(
-                      backgroundColor: AppColors.postal,
-                      shape: const StadiumBorder(),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: SizedBox(
+                        height: 52,
+                        child: FilledButton(
+                          style: FilledButton.styleFrom(
+                            backgroundColor: AppColors.postal,
+                            shape: const StadiumBorder(),
+                          ),
+                          onPressed: visit != null
+                              ? () => showVisitDialog(context, officeId: office.id, officeName: office.name)
+                              : () async {
+                                  final saved = await controller.markVisited(office.id);
+                                  if (saved) hapticCollect();
+                                },
+                          child: Text(visit != null ? 'Edit your visit' : 'Stamp this office'),
+                        ),
+                      ),
                     ),
-                    onPressed: visit != null
-                        ? () => showVisitDialog(context, officeId: office.id, officeName: office.name)
-                        : () => controller.markVisited(office.id),
-                    child: Text(visit != null ? 'Edit your visit' : 'Stamp this office'),
-                  ),
+                    if (visit == null) ...[
+                      const SizedBox(width: 12),
+                      SizedBox(
+                        width: 52,
+                        height: 52,
+                        child: IconButton.outlined(
+                          isSelected: controller.plannedIds.contains(office.id),
+                          onPressed: () {
+                            hapticSelectionChanged();
+                            controller.togglePlanned(office.id);
+                          },
+                          icon: const Icon(Icons.flag_outlined),
+                          selectedIcon: const Icon(Icons.flag, color: AppColors.plannedInk),
+                          tooltip: controller.plannedIds.contains(office.id)
+                              ? 'Remove from planned'
+                              : 'Plan a visit',
+                        ),
+                      ),
+                    ],
+                  ],
                 ),
                 if (controller.lastError != null) ...[
                   const SizedBox(height: 12),

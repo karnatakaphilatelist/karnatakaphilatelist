@@ -41,7 +41,6 @@ dependencies:
   flutter_local_notifications: ^18.0.0
   image_picker: ^1.1.0
   url_launcher: ^6.3.1
-  vibration: ^2.0.0
   in_app_review: ^2.0.9
   # Native Google sign-in (idToken handed to Supabase's signInWithIdToken) —
   # chosen over porting the web app's browser-redirect OAuth flow, which

@@ -3,8 +3,14 @@ import 'package:flutter/services.dart';
 /// Port of src/lib/haptics.ts. The web app wraps @capacitor/haptics; Flutter
 /// already ships the same impact/selection vocabulary natively via
 /// HapticFeedback (services.dart), so no extra plugin is needed here — a
-/// substitution, not a gap (the `vibration` package in pubspec.yaml is
-/// unused by this file; kept in case a custom buzz pattern is wanted later).
+/// substitution, not a gap. The `vibration` package was tried and then
+/// removed (24 Nov 2026): it was never actually used by this file, and its
+/// 2.1.0 Android library is compiled against an SDK too old for its own
+/// transitive androidx dependencies, which broke every debug build in CI
+/// ("Dependency ... requires libraries and applications that depend on it
+/// to compile against version 34 or later ... :vibration is currently
+/// compiled against android-33"). If a custom buzz pattern is wanted later,
+/// re-add a current version of the package then, not this stale pin.
 ///
 /// Only the three helpers actually called in the web app today are wired up
 /// at their call sites (see explore_screen.dart's office selection and

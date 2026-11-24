@@ -1021,7 +1021,7 @@ html[data-intro-playing] {
 html[data-intro-go] .kpl-meta,
 html[data-intro-go] .kpl-bar,
 html[data-intro-go] .kpl-main {
-  animation: kpl-reveal 0.7s ease 3.6s backwards;
+  animation: kpl-reveal 0.25s ease 3.6s backwards;
 }
 @keyframes kpl-reveal {
   from {

@@ -608,6 +608,7 @@ export function Landing({ offices }: { offices: PostOffice[] }) {
             <Link href="/privacy">Privacy</Link>
             <Link href="/terms">Terms</Link>
             <a href={`mailto:${CONTACT_EMAIL}`}>Contact</a>
+            <Link href="/account#support">Support Philatrail</Link>
           </p>
         </footer>
       </main>

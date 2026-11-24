@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import type { ReactNode } from "react";
 import { Appear } from "@/components/motion/Appear";
+import { SupportProjectSection } from "@/components/account/SupportProjectSection";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { useToast } from "@/components/providers/ToastProvider";
 import { ChevronRightIcon } from "@/components/ui/icons";
@@ -234,6 +235,10 @@ export function AccountView() {
               </li>
             ) : null}
           </ul>
+        </Appear>
+
+        <Appear index={2}>
+          <SupportProjectSection />
         </Appear>
 
         {user ? (

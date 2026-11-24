@@ -47,10 +47,12 @@ dependencies:
   # chosen over porting the web app's browser-redirect OAuth flow, which
   # would need a custom URL scheme on both platforms plus a new Supabase
   # redirect-URL allowlist entry (a dashboard change this assistant can't
-  # make). This needs its own Android/iOS OAuth client IDs from Google Cloud
-  # (separate from the web client already in use) — still to be created and
-  # wired into android/app/build.gradle + GoogleService config before this
-  # actually works on a device; see data/auth_controller.dart's doc comment.
+  # make). Needs its own Android/iOS OAuth client IDs from Google Cloud,
+  # keyed to this app's package name/bundle ID and (for Android) the debug
+  # keystore's SHA-1 committed at android/app/debug.keystore — and the
+  # existing *Web* client ID passed at build time as
+  # --dart-define=GOOGLE_WEB_CLIENT_ID; see data/auth_controller.dart's doc
+  # comment for exactly which client ID goes where.
   google_sign_in: ^6.2.1
   # Share sheet for progress sharing (mirrors src/lib/share.ts's @capacitor/share).
   share_plus: ^10.1.4

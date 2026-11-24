@@ -50,6 +50,22 @@ android {
                 keyPassword = System.getenv("KEY_PASSWORD")
             }
         }
+        // Gradle's own default debug signingConfig auto-generates a RANDOM
+        // per-machine key at ~/.android/debug.keystore — fine normally, but
+        // it means every machine (your laptop, this CI runner, anyone
+        // else's machine) signs debug builds with a DIFFERENT SHA-1, which
+        // breaks Google Sign-In: the Android OAuth client registered in
+        // Google Cloud Console is keyed to one fixed SHA-1. Pointing
+        // "debug" at this checked-in keystore instead (debug.keystore,
+        // alias androiddebugkey, both passwords "android" — the same
+        // non-secret defaults Android tooling has always used for debug
+        // builds) makes every debug build's SHA-1 identical everywhere.
+        getByName("debug") {
+            storeFile = file("debug.keystore")
+            storePassword = "android"
+            keyAlias = "androiddebugkey"
+            keyPassword = "android"
+        }
     }
 
     buildTypes {

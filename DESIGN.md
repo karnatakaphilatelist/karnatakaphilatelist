@@ -170,8 +170,10 @@ Phones get their own patterns rather than a squeezed desktop layout:
   scrolling status chips on top. The list is a bottom sheet with a grab bar: a peek state (state
   switcher, count, Near me) and an open state (64% of the height); tap or drag the bar. Selecting
   an office swaps the list for the office sheet. No +/- zoom buttons (pinch instead).
-- **Bottom tab bar** with Explore, Passport and Account (thumb reach). The header is slim (56px);
-  desktop keeps the full header and puts Password and Sign out there.
+- **Bottom tab bar** with Explore, Passport and Account (thumb reach). `AppHeader` is `hidden` below
+  the `md:` breakpoint — phones get no header at all, only the tab bar; desktop keeps the full
+  64px header and puts Password and Sign out there. (An earlier version of this note claimed phones
+  get their own slim 56px header; that never shipped — corrected per the "code wins" rule above.)
 - **Account tab** holds sign-in, password, share, welcome tour, privacy, terms, contact and the disclaimer.
 - **Mobile apps open on the map.** First launch shows the 3-step welcome tour (`/welcome`); later
   launches go straight to Explore. Account > Welcome tour replays it.
@@ -185,3 +187,60 @@ Phones get their own patterns rather than a squeezed desktop layout:
   explains how to re-enable it.
 - Touch: 44px targets, 16px inputs, no tap flash or double-tap delay, no rubber-banding, safe-area
   insets for the notch and home bar (see docs/MOBILE.md).
+
+## Standing conventions (enforced in the Nov 2026 sanity sweep)
+
+These are the concrete rules the codebase already follows; new components should match them
+rather than inventing a new pattern. Found violations were fixed in place rather than listed here
+as outstanding — this section documents the convention itself.
+
+1. **Safe-area insets.** Any `fixed`/`sticky` element docked to a screen edge (toasts, floating
+   nudges, bottom sheets, the tab bar, floating controls/FABs) pads that edge with
+   `env(safe-area-inset-*)`, typically as `calc(<base> + env(safe-area-inset-bottom,0px))` in an
+   arbitrary Tailwind value. This applies everywhere, not just inside the native app: `viewportFit:
+   "cover"` is set globally in `src/app/layout.tsx`, so the insets are live on mobile web too,
+   including components explicitly gated to web-only via `isNativeApp()`.
+2. **Floating-UI z-index scale.** Ascending, and every new floating element should land on an
+   existing step rather than inventing a number: `1050` (Explore's list sheet) < `1100` (floating
+   controls, search bar, locate-me FAB, the OfficeDetail panel) < `1150` (a sheet's own nested
+   scrim) < `1200` (a sheet opened on top of another, e.g. ContributeSheet over OfficeDetail) <
+   `2000` (WebSignInNudge) < `3000` (ToastProvider, CoachTour — always topmost). Toasts specifically
+   use the Popover API (`popover="manual"`) to escape the native `<dialog>`'s top-layer stacking,
+   since no z-index climbs above it.
+3. **Every declared optional prop must be read somewhere in the component body.** An optional prop
+   that's accepted but never consulted is dead API surface; delete it or wire it up.
+4. **Touch handling.** Global baseline in `globals.css`: `.native-app` (set on `<body>` by
+   `AppShell` only inside the Capacitor wrapper) suppresses text selection, long-press callouts and
+   the tap-highlight flash, re-enabled for `input`/`textarea`/`[contenteditable]`. Separately, and
+   on both web and native, interactive elements (`button`, `a`, `select`, `summary`, `label`) get
+   `touch-action: manipulation` and a transparent tap-highlight, `html` disables overscroll
+   rubber-banding, and Leaflet's own elements get the same tap-highlight treatment. A custom
+   drag gesture (e.g. the Explore list sheet's drag handle) must set `touch-none` on the draggable
+   element so the browser doesn't fight the pointer events with its own scroll/pan gesture.
+5. **Dialogs are bottom sheets on phones, centred cards on desktop**, built on the native
+   `<dialog>` (`Sheet`/`HeroSheet` in `src/components/ui/`) or a custom `role="dialog"` panel
+   docked with `absolute inset-x-0 bottom-0` (OfficeDetail, ContributeSheet). A plain centred
+   full-screen `fixed inset-0` overlay is reserved for standalone flows that aren't "a dialog over
+   the current screen" — the first-launch welcome tour and the coach-mark tour — not for anything
+   that could instead be a sheet.
+6. **Dialog open/close transitions.** Entrance is `animate-[rise_.25s_ease-out]` (or the `rise`
+   keyframe/`--animate-rise` token); exit is the `fall` keyframe/`--animate-fall` token (`0.2s
+   ease-in`). For a component driving its own open/closed div (OfficeDetail, ContributeSheet) this
+   means a `closing` state that swaps the class and defers the actual unmount/`onClose` by the fall
+   duration. For `Sheet`/`HeroSheet`, built on the native `<dialog>`, the same `closing` flag swaps
+   the class and defers the imperative `dialog.close()` call by `200ms` (`FALL_DURATION_MS`) so the
+   fall transition is visible before the browser removes the dialog from the top layer; both derive
+   `closing` from a render-time comparison of `open` against its previous value (not inside a
+   `useEffect`) to avoid a `setState`-in-effect lint error, and reserve the actual `useEffect` for
+   the imperative `showModal()`/`close()` calls only.
+7. **Design tokens.** Use the `--color-*` tokens in `globals.css` (exposed as Tailwind utilities —
+   `text-ink`, `bg-ink/10`, `text-visited-ink`, etc., including with opacity modifiers) instead of
+   a literal hex value wherever the color you want is one of them. This does not yet cover every
+   color actually in use: a broader palette of accent colors (blues like `#2f4aa8`/`#243a8a`,
+   `#1f8a4d` green, `#785a1e`/`#b8861b`/`#f7c96b` golds, `#e0334a` red, `#9a9fb5`/`#c7c7cc` grays,
+   `#8f640f`) recurs consistently across many components but isn't captured as a token yet — those
+   were left as-is rather than inventing new token names unilaterally. Worth noting for a future
+   pass: `#1f8a4d` (not `--color-visited`'s `#17794b`) is the shade actually used for "visited"
+   green in several places (e.g. `StatusBadge`), suggesting the token's value itself may be the
+   stale one. Third-party brand/map colors (Google's G logo in `icons.tsx`, the Leaflet marker
+   color in `OfficeMap.tsx`) are correctly left hardcoded and should stay that way.

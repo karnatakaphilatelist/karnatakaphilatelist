@@ -48,6 +48,11 @@ const CIRCLE: Record<string, string> = {
  * Where each state's booklet is sold and what it costs. Facts only — from news reports and
  * the booklets themselves. Never add a price, a counter time or a stock claim we cannot source.
  */
+const PASSPORT_PATH: Record<string, string> = {
+  KA: "/karnataka-philately-passport",
+  TN: "/tamil-nadu-philately-passport",
+};
+
 const BOOKLET: Record<string, string> = {
   KA: "A paper booklet, about ₹600, sold by Karnataka Postal Circle at the Bengaluru GPO philatelic bureau and the Mysuru, Mangaluru and Belagavi head post offices. Call ahead — it has sold out before.",
   TN: "A paper booklet, about ₹650, sold by Tamil Nadu Postal Circle. It launched at Chennai GPO and has been on sale since 28 October 2026. Call ahead to check stock.",
@@ -610,7 +615,9 @@ export function Landing({ offices }: { offices: PostOffice[] }) {
                 Get it on Google Play
               </a>
             )}
-            <Link href="/karnataka-philately-passport">The Passport</Link>
+            <Link href={PASSPORT_PATH[stateCode] ?? PASSPORT_PATH.KA}>
+              The Passport
+            </Link>
             <Link href="/offices">Post offices</Link>
             <Link href="/learn">Guide</Link>
             <Link href="/privacy">Privacy</Link>

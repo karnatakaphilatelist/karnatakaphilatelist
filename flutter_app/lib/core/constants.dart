@@ -7,7 +7,14 @@ class StorageKeys {
   static const guestVisits = 'kp:guest-visits:v1';
   static const planned = 'kp:planned:v1';
   static const state = 'kp:state:v1';
+  static const locationPrimed = 'kp:location-primed:v1';
+  static const welcomePrompted = 'kp:welcome-prompted:v1';
+  static const signInPrompted = 'kp:sign-in-prompted:v1';
 }
+
+/// A guest is invited to sign in once they have stamped this many offices.
+/// Matches GUEST_SIGN_IN_THRESHOLD in src/lib/constants.ts.
+const int guestSignInThreshold = 3;
 
 /// Port of src/lib/constants.ts's DISCLAIMER — shown in the passport footer.
 const String disclaimer =

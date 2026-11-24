@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../core/constants.dart';
 import '../../core/haptics.dart';
 import '../../core/office_status.dart';
 import '../../data/nearby_notifications.dart';
@@ -9,17 +11,18 @@ import '../../theme/app_theme.dart';
 import '../office/office_detail_screen.dart';
 import '../office/visit_dialog.dart';
 import 'filter_chips.dart';
+import 'location_sheet.dart';
 import 'office_list.dart';
 import 'office_map.dart';
 
 /// Port of src/components/explore/ExploreView.tsx, scoped to this stage's
-/// plan: map + filter + list + "locate me" + selection, now state-filtered
-/// (via the shared StateController — see offices_controller.dart/
-/// state_controller.dart), visit-aware (via VisitsController, wired in
-/// Stage 2), and geofence-aware (NearbyNotificationService). Deliberately
-/// NOT yet ported from the web version (tracked for a later pass, not
-/// forgotten): the search box, draggable sheet snap points (this uses a
-/// fixed DraggableScrollableSheet instead), and the location-priming sheet.
+/// plan: map + search + filter + list + "locate me" (now with the
+/// location-priming/denied sheets) + selection, state-filtered (via the
+/// shared StateController — see offices_controller.dart/state_controller.dart),
+/// visit-aware (via VisitsController, wired in Stage 2), and geofence-aware
+/// (NearbyNotificationService). Deliberately NOT yet ported from the web
+/// version: the draggable sheet's 3-way snap points (this uses a fixed
+/// DraggableScrollableSheet instead) — a later pass if wanted.
 class ExploreScreen extends StatefulWidget {
   const ExploreScreen({super.key});
 
@@ -33,6 +36,8 @@ class _ExploreScreenState extends State<ExploreScreen> {
   Coordinates? _userLocation;
   bool _locating = false;
   String? _watchedSignature;
+  String _query = '';
+  final _searchController = TextEditingController();
 
   _ExploreScreenState() : _filter = null;
 
@@ -50,6 +55,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
   @override
   void dispose() {
     NearbyNotificationService.stop();
+    _searchController.dispose();
     super.dispose();
   }
 
@@ -77,7 +83,26 @@ class _ExploreScreenState extends State<ExploreScreen> {
     );
   }
 
-  Future<void> _locate() async {
+  /// Port of handleFindNearMe(): explain why we ask, once per device,
+  /// before the system prompt ever shows.
+  Future<void> _findNearMe() async {
+    final prefs = await SharedPreferences.getInstance();
+    if (!mounted) return;
+    if (prefs.getBool(StorageKeys.locationPrimed) ?? false) {
+      await _requestLocation();
+      return;
+    }
+    await showLocationSheet(
+      context,
+      mode: LocationSheetMode.prime,
+      onContinue: () async {
+        await prefs.setBool(StorageKeys.locationPrimed, true);
+        await _requestLocation();
+      },
+    );
+  }
+
+  Future<void> _requestLocation() async {
     if (_locating) return;
     setState(() => _locating = true);
     try {
@@ -89,16 +114,17 @@ class _ExploreScreenState extends State<ExploreScreen> {
         granted = requested == LocationPermission.always ||
             requested == LocationPermission.whileInUse;
       }
-      if (!granted) return;
+      if (!granted) {
+        if (mounted) await showLocationSheet(context, mode: LocationSheetMode.denied, onContinue: null);
+        return;
+      }
       final position = await Geolocator.getCurrentPosition();
       if (!mounted) return;
       setState(() {
         _userLocation = Coordinates(lat: position.latitude, lng: position.longitude);
       });
     } catch (_) {
-      // Deliberately quiet for this stage — the web app's LocationSheet
-      // (denied/primed messaging) is still to be ported alongside the
-      // background geolocation watcher.
+      if (mounted) await showLocationSheet(context, mode: LocationSheetMode.denied, onContinue: null);
     } finally {
       if (mounted) setState(() => _locating = false);
     }
@@ -147,9 +173,14 @@ class _ExploreScreenState extends State<ExploreScreen> {
           visitsController.plannedIds,
           _userLocation,
         );
-        final visibleOffices = _filter == null
-            ? allOffices
-            : allOffices.where((o) => o.status == _filter).toList();
+        final needle = _query.trim().toLowerCase();
+        final visibleOffices = allOffices.where((o) {
+          if (_filter != null && o.status != _filter) return false;
+          if (needle.isEmpty) return true;
+          return o.name.toLowerCase().contains(needle) ||
+              o.district.toLowerCase().contains(needle) ||
+              o.pincode.contains(needle);
+        }).toList();
         final listOffices = _userLocation != null ? sortByDistance(visibleOffices) : visibleOffices;
 
         return Scaffold(
@@ -170,9 +201,41 @@ class _ExploreScreenState extends State<ExploreScreen> {
                 top: MediaQuery.of(context).padding.top + 12,
                 left: 16,
                 right: 16,
-                child: StatusFilterChips(
-                  value: _filter,
-                  onChanged: (v) => setState(() => _filter = v),
+                child: Column(
+                  children: [
+                    Container(
+                      height: 48,
+                      decoration: BoxDecoration(
+                        color: AppColors.card,
+                        borderRadius: BorderRadius.circular(16),
+                        boxShadow: const [BoxShadow(color: Color(0x1A000000), blurRadius: 10, offset: Offset(0, 2))],
+                      ),
+                      child: TextField(
+                        controller: _searchController,
+                        onChanged: (v) => setState(() => _query = v),
+                        decoration: InputDecoration(
+                          hintText: 'Search name, district or pincode',
+                          prefixIcon: const Icon(Icons.search, color: AppColors.muted, size: 20),
+                          suffixIcon: _query.isEmpty
+                              ? null
+                              : IconButton(
+                                  icon: const Icon(Icons.close, size: 18),
+                                  onPressed: () {
+                                    _searchController.clear();
+                                    setState(() => _query = '');
+                                  },
+                                ),
+                          border: InputBorder.none,
+                          contentPadding: const EdgeInsets.symmetric(vertical: 14),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    StatusFilterChips(
+                      value: _filter,
+                      onChanged: (v) => setState(() => _filter = v),
+                    ),
+                  ],
                 ),
               ),
               Positioned(
@@ -182,7 +245,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
                   heroTag: 'locate',
                   backgroundColor: AppColors.card,
                   foregroundColor: AppColors.ink,
-                  onPressed: _locate,
+                  onPressed: _findNearMe,
                   child: _locating
                       ? const SizedBox(
                           width: 20,

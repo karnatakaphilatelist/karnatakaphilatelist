@@ -14,11 +14,14 @@ String progressShareText(int stamped, int total, String state) {
 }
 
 Future<ShareOutcome> shareProgress({required String text, required String subject}) async {
+  return shareText(text: text, subject: subject);
+}
+
+/// General-purpose share, used for anything that isn't the passport-progress
+/// sentence above (e.g. a single stamped office). Same AbortError-is-not-an-
+/// error reasoning as [shareProgress].
+Future<ShareOutcome> shareText({required String text, String? subject}) async {
   try {
-    // Share.share()'s result only distinguishes "an action was picked" from
-    // "the sheet was dismissed" (ShareResultStatus.unavailable covers both a
-    // declined share and a platform that can't report back) — neither counts
-    // as a failure, matching the web app's AbortError-is-not-an-error rule.
     await Share.share(text, subject: subject);
     return ShareOutcome.shared;
   } catch (_) {

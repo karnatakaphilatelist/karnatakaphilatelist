@@ -30,7 +30,14 @@ dependencies:
   # Device & field capabilities (mirrors src/lib/geofence.ts, geo.ts, haptics.ts,
   # nearby-notifications.ts, native-photo.ts, in-app-review.ts)
   geolocator: ^13.0.0
-  flutter_background_geolocation: ^4.16.0
+  # Free alternative to flutter_background_geolocation (Transistor Software,
+  # $399+ one-time commercial license) — the user explicitly declined that
+  # cost on 24 Nov 2026. This keeps a persistent Android foreground service
+  # alive to poll location while the app is backgrounded; it does not match
+  # iOS's true closed-app background tracking the paid SDK provides (iOS
+  # background execution is far more restricted without it) — see the doc
+  # comment on NearbyNotificationService for the honest limitation.
+  flutter_foreground_task: ^8.17.0
   flutter_local_notifications: ^18.0.0
   image_picker: ^1.1.0
   url_launcher: ^6.3.1

@@ -26,6 +26,30 @@
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<!-- Required by geolocator (the "locate me" button, Stage 1) — missing
+	     since that stage; geolocator silently fails to get a position
+	     without it. Added now while touching this file for the nearby-alert
+	     feature below. -->
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Philatrail uses your location to show nearby post offices and your distance to them.</string>
+	<!-- "Always" is additionally needed for the nearby-office background alert
+	     (data/nearby_notifications.dart) to keep working while the app isn't
+	     open. -->
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>Philatrail can alert you when you're near a stamp post office, even while the app is in the background.</string>
+	<!-- flutter_foreground_task — iOS can only run the watcher in short bursts
+	     (~30s every ~15min) via background fetch; true always-on background
+	     tracking like the paid flutter_background_geolocation SDK isn't
+	     available here. See the doc comment on NearbyNotificationService. -->
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>fetch</string>
+		<string>location</string>
+	</array>
+	<key>BGTaskSchedulerPermittedIdentifiers</key>
+	<array>
+		<string>com.pravera.flutter_foreground_task.refresh</string>
+	</array>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

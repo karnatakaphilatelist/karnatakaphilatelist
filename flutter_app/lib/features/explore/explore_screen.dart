@@ -3,6 +3,7 @@ import 'package:geolocator/geolocator.dart';
 
 import '../../core/haptics.dart';
 import '../../core/office_status.dart';
+import '../../data/nearby_notifications.dart';
 import '../../models/post_office.dart';
 import '../../theme/app_theme.dart';
 import '../office/office_detail_screen.dart';
@@ -14,12 +15,11 @@ import 'office_map.dart';
 /// Port of src/components/explore/ExploreView.tsx, scoped to this stage's
 /// plan: map + filter + list + "locate me" + selection, now state-filtered
 /// (via the shared StateController — see offices_controller.dart/
-/// state_controller.dart) and visit-aware (via VisitsController, wired in
-/// Stage 2). Deliberately NOT yet ported from the web version (tracked for
-/// a later pass, not forgotten): the search box, draggable sheet snap
-/// points (this uses a fixed DraggableScrollableSheet instead), the
-/// location-priming sheet, and nearby-notification tap handling (added
-/// alongside the background watcher itself).
+/// state_controller.dart), visit-aware (via VisitsController, wired in
+/// Stage 2), and geofence-aware (NearbyNotificationService). Deliberately
+/// NOT yet ported from the web version (tracked for a later pass, not
+/// forgotten): the search box, draggable sheet snap points (this uses a
+/// fixed DraggableScrollableSheet instead), and the location-priming sheet.
 class ExploreScreen extends StatefulWidget {
   const ExploreScreen({super.key});
 
@@ -32,8 +32,37 @@ class _ExploreScreenState extends State<ExploreScreen> {
   int? _selectedId;
   Coordinates? _userLocation;
   bool _locating = false;
+  String? _watchedSignature;
 
   _ExploreScreenState() : _filter = null;
+
+  @override
+  void initState() {
+    super.initState();
+    // Mirrors ExploreView.tsx's mount-time effect: start the watcher once;
+    // a tap on its notification just highlights the office, same as the web
+    // app (it doesn't jump straight into the detail screen).
+    NearbyNotificationService.init(onOfficeTap: (id) {
+      if (mounted) setState(() => _selectedId = id);
+    });
+  }
+
+  @override
+  void dispose() {
+    NearbyNotificationService.stop();
+    super.dispose();
+  }
+
+  /// Keeps the background watcher's office list in sync, same reasoning as
+  /// ExploreView.tsx's setWatchedOffices effect — called from build() since
+  /// that's where the current state-filtered office list and visited set
+  /// are computed, but only actually sent when something changed.
+  void _syncWatchedOffices(List<PostOffice> stateOffices, Set<int> visitedIds) {
+    final signature = '${stateOffices.length}:${(visitedIds.toList()..sort()).join(",")}';
+    if (signature == _watchedSignature) return;
+    _watchedSignature = signature;
+    Future.microtask(() => NearbyNotificationService.setWatchedOffices(stateOffices, visitedIds));
+  }
 
   /// List rows carry a chevron (see office_list.dart) — tapping one opens the
   /// full detail/stamping screen, not just a map highlight. Tapping a map pin
@@ -111,6 +140,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
         }
 
         final stateOffices = stateController.officesFor(officesController.offices);
+        _syncWatchedOffices(stateOffices, visitsController.visits.keys.toSet());
         final allOffices = withStatus(
           stateOffices,
           visitsController.visits,

@@ -30,7 +30,6 @@ interface StampThumbProps {
  */
 export function StampThumb({
   path,
-  status,
   className = "size-[52px]",
   natural = false,
 }: StampThumbProps) {

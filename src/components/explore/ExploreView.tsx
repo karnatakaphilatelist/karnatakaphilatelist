@@ -64,20 +64,20 @@ export function ExploreView({
   const [snap, setSnap] = useState<0 | 1 | 2>(0);
   const [dragHeight, setDragHeight] = useState<number | null>(null);
   const sheetOpen = snap > 0;
+  const [filter, setFilter] = useState<StatusFilter>("all");
+  const [query, setQuery] = useState("");
   // Each time the map tab is opened, start with the map in view and the list tucked away.
   // Also clear the search query when leaving the tab so it starts fresh next time.
   useEffect(() => {
     // Arriving on / leaving the tab are events from outside this screen, so resetting here is the point of the effect.
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (active) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setSnap(0);
     } else {
       setQuery("");
     }
   }, [active]);
   const setSheetOpen = (open: boolean) => setSnap(open ? 1 : 0);
-  const [filter, setFilter] = useState<StatusFilter>("all");
-  const [query, setQuery] = useState("");
   const [selectedId, setSelectedId] = useState<number | null>(
     initialSelectedId
   );
@@ -189,7 +189,6 @@ export function ExploreView({
       setSelectedId(officeId);
     });
     // Only run once on mount.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Keep the tap handler current whenever the component re-renders

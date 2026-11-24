@@ -17,11 +17,13 @@ vi.mock("@/lib/supabase/public", () => ({
         db.queries.push(columns);
         return {
           order: () => ({
-            overrideTypes: async () =>
-              db.responses.shift() ?? {
-                data: null,
-                error: { message: "no response queued" },
-              },
+            abortSignal: () => ({
+              overrideTypes: async () =>
+                db.responses.shift() ?? {
+                  data: null,
+                  error: { message: "no response queued" },
+                },
+            }),
           }),
         };
       },

@@ -18,7 +18,6 @@ import { GUEST_VISITS_KEY, PLANNED_KEY } from "@/lib/constants";
 import { todayIso } from "@/lib/date";
 import { compressImage } from "@/lib/image";
 import { readJson, removeKey, writeJson } from "@/lib/local-storage";
-import { updateWidget } from "@/lib/widget";
 import { loadSupabase } from "@/lib/supabase/lazy";
 import { parseGuestVisits, parsePlannedIds } from "@/lib/visits/guest-visits";
 import {

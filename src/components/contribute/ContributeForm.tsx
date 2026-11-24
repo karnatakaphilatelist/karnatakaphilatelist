@@ -44,7 +44,7 @@ const CONTRIBUTION_OPTIONS: {
 
 type SubmitState = "idle" | "loading" | "success" | "error";
 
-export function ContributeForm({ office, onClose, onSuccess }: ContributeFormProps) {
+export function ContributeForm({ office, onSuccess }: ContributeFormProps) {
   const { user } = useAuth();
   const [selectedType, setSelectedType] = useState<ContributionType | null>(null);
   const [note, setNote] = useState("");

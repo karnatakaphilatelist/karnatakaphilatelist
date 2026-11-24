@@ -24,7 +24,7 @@ import {
   formatShortDistance,
   proximity,
 } from "@/lib/geo";
-import { hapticTap, hapticSelectionChanged } from "@/lib/haptics";
+import { hapticSelectionChanged } from "@/lib/haptics";
 import { formatVisitDate } from "@/lib/date";
 import { hasCoordinates } from "@/lib/office-status";
 import { shareContent } from "@/lib/share";

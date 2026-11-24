@@ -1,8 +1,16 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- geolocator doesn't declare these itself (confirmed against its own
+         plugin manifest) — without them Geolocator.checkPermission() /
+         requestPermission() are silently denied, so "find near me",
+         "you're here" banners and geofencing all quietly do nothing. Needed
+         before FOREGROUND_SERVICE_LOCATION below means anything. -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <!-- flutter_foreground_task (nearby-office alerts) — free alternative to the
          paid flutter_background_geolocation SDK, see data/nearby_notifications.dart. -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
     <application
         android:label="philatrail"
         android:name="${applicationName}"

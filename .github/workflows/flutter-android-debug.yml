@@ -1,0 +1,54 @@
+name: Flutter Android debug APK
+
+# Builds an unsigned debug APK from the flutter_app/ project so it can be
+# adb-installed on a real device without needing Android Studio or the
+# release-signing secrets. Mirrors android-apk.yml's role for the Capacitor
+# app, but for the Flutter rewrite.
+#
+# Needs three repository secrets (same "safe to expose to the browser"
+# values the web app reads as NEXT_PUBLIC_* in .env.local/.env.example —
+# Supabase's own docs call the anon/publishable key and project URL
+# client-safe since RLS protects the data):
+#   SUPABASE_URL, SUPABASE_ANON_KEY, MAPTILER_KEY (optional — maps fall back
+#   to free OSM tiles without it, so leave it unset if you don't have one)
+#
+# Deliberately workflow_dispatch + push-on-flutter-scaffold only (not main)
+# — the Flutter app isn't merged to main yet per the standing approval rule;
+# this gives you a fresh APK on every push to the working branch instead.
+
+on:
+  workflow_dispatch: {}
+  push:
+    branches: [flutter-scaffold]
+    paths: ["flutter_app/**"]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: flutter_app
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+
+      - run: flutter pub get
+
+      - name: Build debug APK
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+          MAPTILER_KEY: ${{ secrets.MAPTILER_KEY }}
+        run: |
+          flutter build apk --debug \
+            --dart-define=SUPABASE_URL="$SUPABASE_URL" \
+            --dart-define=SUPABASE_ANON_KEY="$SUPABASE_ANON_KEY" \
+            --dart-define=MAPTILER_KEY="$MAPTILER_KEY"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: philatrail-flutter-debug-apk
+          path: flutter_app/build/app/outputs/flutter-apk/app-debug.apk

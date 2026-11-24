@@ -1,12 +1,18 @@
 # Design system: Karnataka Philatelic Passport
 
-> **Update (Nov 2026): direction D is now the live look.** Cream and white frosted glass (blur 28px) with a bright top edge,
-> Figtree only (headlines weight 500, uppercase, tracked), Courier Prime for postal details (pincode, distance, dates),
-> tracked-caps kickers with a thin gold rule, one 16px left edge, no top bar on phones (the account button sits in the
-> search bar and the Passport masthead). Red `#cf1830` is for the main button, avatar, locate icon and active tab only;
-> green `#1f8a4d` always means stamped; cobalt `#2f4aa8` means pins and planned; tan `#8f640f` is "not yet stamped".
-> Where the sections below disagree (Fraunces, red hero cards, perforated edges), this note wins. Source boards: the
-> "Design" canvas artifact, boards prefixed `D-`.
+> **Rule: the shipped code is the source of truth.** When this document and `globals.css` / `landing.css` / component
+> classNames disagree, the code wins — fix this document to match the code, never the other way round. The two
+> blocks below were reconciled against the live code in Nov 2026 after drifting out of sync.
+
+> **Live in code (Nov 2026).** Cream and white frosted glass (`blur(28px) saturate(180%)`, see `.kp-glass-panel` in
+> `globals.css`) with a bright top edge. Headlines are set in `--font-display` (**Fraunces Variable**, weight 500) —
+> this is the actual shipped font on legal pages, settings, contact, Learn, the offices directory and both state
+> passport pages, and even inside `landing.css` itself; there is no Figtree-only headline treatment live anywhere
+> today, despite an earlier version of this note claiming one. Postal details (pincode, distance, dates) use
+> `--font-mono` (Courier Prime). Red `#cf1830` (`--color-postal`) is the main button/avatar/locate-icon/active-tab
+> accent; green `#17794b` (`--color-visited`) always means stamped; `#ffc94d` (`--color-planned`) means planned.
+> Source boards: the "Design" canvas artifact, boards prefixed `D-` — treat those as historical direction, not as
+> the current token values; the table below is what's actually shipped.
 
 
 Direction: **classic printed stamp**. Cream paper, deep indigo ink, one postal-red accent.
@@ -23,21 +29,26 @@ Light theme only. The site has no dark mode.
 
 ## Colour
 
-| Token | Value | Role |
-|---|---|---|
-| `paper` | `#fbf5e9` | Page background |
-| `sand` | `#f3ead8` | Raised or quiet surfaces, list thumbnails |
-| `card` | `#ffffff` | Cards and dialogs that sit on paper |
-| `ink` | `#1c2b6b` | **All body text and headings** (indigo). 12.0:1 on paper |
-| `ink-soft` | `#4b5380` | Secondary text. 6.8:1 on paper, 6.2:1 on sand |
-| `line` | `#e6d9bf` | Hairlines |
-| `line-strong` | `#d2c3a3` | Input borders |
-| `postal` | `#cf1830` | Primary button fill, unvisited pins, accents, the landing page. White text on it is 5.9:1 |
-| `postal-dark` | `#a8122a` | Red text and links. Never use `postal` for small text |
-| `postal-soft` | `#f9e6e6` | Tinted badge background |
-| `coral` | `#e8583a` | Large decorative blocks only (behind stamp artwork). Never carries text |
-| `visited` | `#17794b` | Visited status. Text version `visited-ink` `#14653f` |
-| `planned` | `#ffc94d` | Planned status. Text version `planned-ink` `#6b4b00` |
+Corrected to match `--color-*` in `src/app/globals.css` exactly (this table previously drifted from the shipped
+values — see the rule above).
+
+| Token | CSS variable | Value | Role |
+|---|---|---|---|
+| `paper` | `--color-paper` | `#fbf3e2` | Page background |
+| `sand` | `--color-sand` | `#f1e8d3` | Raised or quiet surfaces, list thumbnails |
+| `card` | `--color-card` | `#ffffff` | Cards and dialogs that sit on paper |
+| `ink` | `--color-ink` | `#16204f` | **All body text and headings** (indigo) |
+| `muted` | `--color-muted` | `#5d6283` | Secondary text |
+| `line` | `--color-line` | `#e6dcc3` | Hairlines |
+| `line-strong` | `--color-line-strong` | `#d9cfb6` | Input borders |
+| `postal` | `--color-postal` | `#cf1830` | Primary button fill, unvisited pins, accents, the landing page |
+| `postal-dark` | `--color-postal-dark` | `#a8122a` | Red text and links. About 4.9:1 on paper — never use `postal` for small text |
+| `postal-soft` | `--color-postal-soft` | `#fbe7ea` | Tinted badge background |
+| `coral` | `--color-coral` | `#e8583a` | Large decorative blocks only (behind stamp artwork). Never carries text |
+| `visited` | `--color-visited` | `#17794b` | Visited status. Soft bg `visited-soft` `#ddf3e7`, text `visited-ink` `#14653f` |
+| `planned` | `--color-planned` | `#ffc94d` | Planned status. Soft bg `planned-soft` `#fff1c7`, text `planned-ink` `#6b4b00` |
+| `warn` | `--color-warn` | `#8a4306` | Warning text. Soft bg `warn-soft` `#fdebd3` |
+| `focus` | `--color-focus` | `#16204f` | Focus ring |
 | `focus` | `#1b73b3` | Keyboard focus ring |
 
 Rules: indigo replaces black everywhere. Red is an accent, not a surface (one red button per

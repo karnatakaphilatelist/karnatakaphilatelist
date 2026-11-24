@@ -4,12 +4,14 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../data/auth_controller.dart';
 import '../../data/guest_visits.dart';
 import '../../data/offices_controller.dart';
 import '../../data/state_controller.dart';
 import '../../data/visits_repository.dart';
 import '../../models/visit.dart';
 import '../../theme/app_theme.dart';
+import '../auth/sign_in_sheet.dart';
 
 /// Port of src/components/office/VisitDialog.tsx. Signed-in only (hasPhoto/
 /// sign-in-to-add-photos branch collapses to that, since this build has no
@@ -75,20 +77,31 @@ OfficesController officesControllerOf(BuildContext context) {
   return scope!.officesController;
 }
 
+/// Same static-lookup reasoning as [visitsControllerOf] — see its doc comment.
+AuthController authControllerOf(BuildContext context) {
+  final scope = context.findAncestorWidgetOfExactType<VisitsScope>();
+  assert(scope != null, 'No VisitsScope found in context — wrap the app with one in main.dart.');
+  return scope!.authController;
+}
+
 /// Minimal InheritedWidget so this screen doesn't need a full app-wide
-/// provider package yet — Stage 4 (account/auth) is the natural point to
-/// decide on a real state-management dependency if one is wanted app-wide.
-/// Holds all three app-level controllers now that Explore and Passport both
-/// need the shared office list + selected-state preference (not just visits).
+/// provider package yet — now also holds Stage 4's AuthController, the
+/// natural point this was going to be reconsidered anyway (see the earlier
+/// doc comment on this class).
+/// Holds all four app-level controllers now that Explore, Passport and
+/// Account all need shared state (office list, selected-state preference,
+/// visits, and sign-in).
 class VisitsScope extends InheritedWidget {
   final VisitsController controller;
   final StateController stateController;
   final OfficesController officesController;
+  final AuthController authController;
   const VisitsScope({
     super.key,
     required this.controller,
     required this.stateController,
     required this.officesController,
+    required this.authController,
     required super.child,
   });
 
@@ -202,7 +215,7 @@ class _VisitFormState extends State<_VisitForm> {
             _DashedButton(
               icon: Icons.camera_alt_outlined,
               label: 'Sign in to add photos',
-              onTap: () {}, // Stage 4 wires real sign-in; this is a no-op placeholder for now.
+              onTap: () => showSignInSheet(context, reason: SignInReason.manual),
             )
           else if (_hasPhoto)
             Container(

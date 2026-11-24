@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'app_shell.dart';
+import 'data/auth_controller.dart';
 import 'data/offices_controller.dart';
 import 'data/state_controller.dart';
 import 'data/visits_repository.dart';
@@ -36,6 +37,7 @@ class _PhilatrailAppState extends State<PhilatrailApp> {
   VisitsController? _visitsController;
   StateController? _stateController;
   OfficesController? _officesController;
+  AuthController? _authController;
 
   @override
   void initState() {
@@ -45,6 +47,7 @@ class _PhilatrailAppState extends State<PhilatrailApp> {
       _visitsController = VisitsController(client);
       _stateController = StateController();
       _officesController = OfficesController(client);
+      _authController = AuthController(client);
     }
   }
 
@@ -53,6 +56,7 @@ class _PhilatrailAppState extends State<PhilatrailApp> {
     _visitsController?.dispose();
     _stateController?.dispose();
     _officesController?.dispose();
+    _authController?.dispose();
     super.dispose();
   }
 
@@ -61,14 +65,16 @@ class _PhilatrailAppState extends State<PhilatrailApp> {
     final controller = _visitsController;
     final stateController = _stateController;
     final officesController = _officesController;
+    final authController = _authController;
     return MaterialApp(
       title: 'Philatrail',
       theme: buildAppTheme(),
-      home: controller != null && stateController != null && officesController != null
+      home: controller != null && stateController != null && officesController != null && authController != null
           ? VisitsScope(
               controller: controller,
               stateController: stateController,
               officesController: officesController,
+              authController: authController,
               child: const AppShell(),
             )
           : const _MissingConfigScreen(),

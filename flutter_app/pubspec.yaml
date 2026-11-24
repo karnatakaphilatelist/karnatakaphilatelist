@@ -43,6 +43,15 @@ dependencies:
   url_launcher: ^6.3.1
   vibration: ^2.0.0
   in_app_review: ^2.0.9
+  # Native Google sign-in (idToken handed to Supabase's signInWithIdToken) —
+  # chosen over porting the web app's browser-redirect OAuth flow, which
+  # would need a custom URL scheme on both platforms plus a new Supabase
+  # redirect-URL allowlist entry (a dashboard change this assistant can't
+  # make). This needs its own Android/iOS OAuth client IDs from Google Cloud
+  # (separate from the web client already in use) — still to be created and
+  # wired into android/app/build.gradle + GoogleService config before this
+  # actually works on a device; see data/auth_controller.dart's doc comment.
+  google_sign_in: ^6.2.1
   # Share sheet for progress sharing (mirrors src/lib/share.ts's @capacitor/share).
   share_plus: ^10.1.4
 

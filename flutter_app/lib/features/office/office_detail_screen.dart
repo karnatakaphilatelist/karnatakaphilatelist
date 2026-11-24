@@ -1,11 +1,15 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../core/date.dart';
 import '../../core/geo.dart';
 import '../../core/haptics.dart';
+import '../../core/in_app_review.dart';
 import '../../models/post_office.dart';
 import '../../theme/app_theme.dart';
+import 'contribute_sheet.dart';
 import 'visit_dialog.dart';
 
 /// Scoped first pass of src/components/office/OfficeDetail.tsx (566 lines —
@@ -38,6 +42,13 @@ class OfficeDetailScreen extends StatelessWidget {
             backgroundColor: AppColors.paper,
             foregroundColor: AppColors.ink,
             elevation: 0,
+            actions: [
+              IconButton(
+                onPressed: () => showContributeSheet(context, office: office),
+                icon: const Icon(Icons.flag_circle_outlined),
+                tooltip: 'Contribute',
+              ),
+            ],
           ),
           backgroundColor: AppColors.paper,
           body: SingleChildScrollView(
@@ -98,7 +109,10 @@ class OfficeDetailScreen extends StatelessWidget {
                               ? () => showVisitDialog(context, officeId: office.id, officeName: office.name)
                               : () async {
                                   final saved = await controller.markVisited(office.id);
-                                  if (saved) hapticCollect();
+                                  if (saved) {
+                                    hapticCollect();
+                                    unawaited(maybeRequestReview(controller.visits.length));
+                                  }
                                 },
                           child: Text(visit != null ? 'Edit your visit' : 'Stamp this office'),
                         ),

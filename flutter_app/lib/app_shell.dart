@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 
+import 'features/account/account_screen.dart';
 import 'features/explore/explore_screen.dart';
 import 'features/passport/passport_screen.dart';
 import 'theme/app_theme.dart';
 
-/// Scoped port of TabBar.tsx/nav-items.tsx: just Explore and Passport for
-/// now. Learn (static educational content — a web-only content pass, not a
-/// porting job) and Account (sign-in/profile — Stage 4) are left out rather
-/// than built as empty placeholders; add them here as their screens exist.
+/// Scoped port of TabBar.tsx/nav-items.tsx: Explore, Passport and now
+/// Account (Stage 4). Learn is still left out (static educational content —
+/// a web-only content pass, not a porting job).
 class AppShell extends StatefulWidget {
   const AppShell({super.key});
 
@@ -18,7 +18,7 @@ class AppShell extends StatefulWidget {
 class _AppShellState extends State<AppShell> {
   int _index = 0;
 
-  static const _screens = [ExploreScreen(), PassportScreen()];
+  static const _screens = [ExploreScreen(), PassportScreen(), AccountScreen()];
 
   @override
   Widget build(BuildContext context) {
@@ -32,6 +32,7 @@ class _AppShellState extends State<AppShell> {
         destinations: const [
           NavigationDestination(icon: Icon(Icons.explore_outlined), selectedIcon: Icon(Icons.explore), label: 'Explore'),
           NavigationDestination(icon: Icon(Icons.menu_book_outlined), selectedIcon: Icon(Icons.menu_book), label: 'Passport'),
+          NavigationDestination(icon: Icon(Icons.person_outline), selectedIcon: Icon(Icons.person), label: 'Account'),
         ],
       ),
     );

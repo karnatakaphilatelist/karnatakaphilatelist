@@ -21,7 +21,7 @@ export function Postmark({
     <svg
       aria-hidden="true"
       viewBox="0 0 120 120"
-      className={`${className} -rotate-[8deg] text-[#16204f]/80`}
+      className={`${className} -rotate-[8deg] text-ink/80`}
       fill="none"
       stroke="currentColor"
     >

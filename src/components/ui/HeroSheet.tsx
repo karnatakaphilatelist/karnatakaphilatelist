@@ -1,6 +1,9 @@
 "use client";
 
-import { useEffect, useId, useRef, type ReactNode } from "react";
+import { useEffect, useId, useRef, useState, type ReactNode } from "react";
+
+/** Matches --animate-fall's duration in globals.css. */
+const FALL_DURATION_MS = 200;
 
 interface HeroSheetProps {
   open: boolean;
@@ -29,15 +32,31 @@ export function HeroSheet({
   const dialogRef = useRef<HTMLDialogElement>(null);
   const labelId = useId();
   const pressStartedOnBackdrop = useRef(false);
+  // Plays the "fall" exit transition before the native dialog actually closes,
+  // matching the rise-in/fall-out convention used by OfficeDetail/ContributeSheet.
+  // Derived during render (not an effect) per React's guidance for adjusting
+  // state when a prop changes, so the setState call below isn't in an effect body.
+  const [closing, setClosing] = useState(false);
+  const [prevOpen, setPrevOpen] = useState(open);
+  if (open !== prevOpen) {
+    setPrevOpen(open);
+    setClosing(!open);
+  }
 
   useEffect(() => {
     const dialog = dialogRef.current;
     if (!dialog) return;
-    if (open && !dialog.open) {
-      dialog.showModal();
-      dialog.focus({ preventScroll: true });
+    if (open) {
+      if (!dialog.open) {
+        dialog.showModal();
+        dialog.focus({ preventScroll: true });
+      }
+      return;
     }
-    if (!open && dialog.open) dialog.close();
+    if (dialog.open) {
+      const timer = setTimeout(() => dialog.close(), FALL_DURATION_MS);
+      return () => clearTimeout(timer);
+    }
   }, [open]);
 
   return (
@@ -67,7 +86,9 @@ export function HeroSheet({
       }}
       aria-labelledby={labelId}
       tabIndex={-1}
-      className="m-0 mt-auto w-full max-w-none bg-transparent p-0 text-ink outline-none backdrop:bg-[#16204f]/40 backdrop:backdrop-blur-sm md:m-auto md:max-w-md md:overflow-hidden md:rounded-3xl md:[background:linear-gradient(180deg,#fffaf0,#f8eed8)]"
+      className={`m-0 mt-auto w-full max-w-none bg-transparent p-0 text-ink outline-none backdrop:bg-ink/40 backdrop:backdrop-blur-sm md:m-auto md:max-w-md md:overflow-hidden md:rounded-3xl md:[background:linear-gradient(180deg,#fffaf0,#f8eed8)] ${
+        closing ? "animate-fall" : "animate-[rise_.25s_ease-out]"
+      }`}
     >
       <h2 id={labelId} className="sr-only">
         {label}

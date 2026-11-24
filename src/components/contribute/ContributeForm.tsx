@@ -121,14 +121,14 @@ export function ContributeForm({ office, onSuccess }: ContributeFormProps) {
             className={`flex items-start gap-3 rounded-2xl border p-3.5 text-left transition-colors ${
               selectedType === opt.type
                 ? "border-[#2f4aa8]/40 bg-[#2f4aa8]/[0.06]"
-                : "border-[#16204f]/[0.08] bg-[#16204f]/[0.015] active:bg-[#16204f]/[0.04]"
+                : "border-ink/[0.08] bg-ink/[0.015] active:bg-ink/[0.04]"
             }`}
           >
             <span
               className={`mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full border-2 ${
                 selectedType === opt.type
                   ? "border-[#2f4aa8] bg-[#2f4aa8]"
-                  : "border-[#16204f]/30"
+                  : "border-ink/30"
               }`}
             >
               {selectedType === opt.type && (
@@ -156,7 +156,7 @@ export function ContributeForm({ office, onSuccess }: ContributeFormProps) {
               <img
                 src={photoPreview}
                 alt="Selected"
-                className="max-h-[180px] rounded-2xl border border-[#16204f]/10 object-contain"
+                className="max-h-[180px] rounded-2xl border border-ink/10 object-contain"
               />
               <button
                 type="button"
@@ -171,7 +171,7 @@ export function ContributeForm({ office, onSuccess }: ContributeFormProps) {
             <button
               type="button"
               onClick={() => fileInputRef.current?.click()}
-              className="flex h-[72px] w-full items-center justify-center gap-2 rounded-2xl border border-dashed border-[#16204f]/20 text-[13px] font-semibold text-muted transition-colors active:bg-[#16204f]/[0.03]"
+              className="flex h-[72px] w-full items-center justify-center gap-2 rounded-2xl border border-dashed border-ink/20 text-[13px] font-semibold text-muted transition-colors active:bg-ink/[0.03]"
             >
               <CameraIcon className="size-5" strokeWidth={1.5} />
               Attach a photo
@@ -197,7 +197,7 @@ export function ContributeForm({ office, onSuccess }: ContributeFormProps) {
           onChange={(e) => setNote(e.target.value)}
           placeholder="Any extra detail that helps us review your contribution…"
           rows={3}
-          className="w-full resize-none rounded-2xl border border-[#16204f]/[0.08] bg-[#16204f]/[0.015] p-3.5 text-sm leading-[21px] outline-none placeholder:text-muted/60 focus:border-[#2f4aa8]/40 focus:ring-1 focus:ring-[#2f4aa8]/20"
+          className="w-full resize-none rounded-2xl border border-ink/[0.08] bg-ink/[0.015] p-3.5 text-sm leading-[21px] outline-none placeholder:text-muted/60 focus:border-[#2f4aa8]/40 focus:ring-1 focus:ring-[#2f4aa8]/20"
         />
       </div>
 

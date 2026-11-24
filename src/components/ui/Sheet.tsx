@@ -1,7 +1,10 @@
 "use client";
 
-import { useEffect, useId, useRef, type ReactNode } from "react";
+import { useEffect, useId, useRef, useState, type ReactNode } from "react";
 import { CloseIcon } from "@/components/ui/icons";
+
+/** Matches --animate-fall's duration in globals.css. */
+const FALL_DURATION_MS = 200;
 
 interface SheetProps {
   open: boolean;
@@ -33,16 +36,32 @@ export function Sheet({
   // Closing by tapping the dark backdrop only counts when the press began there too. When the keyboard
   // opens the sheet moves, and a tap on a field can otherwise land on the backdrop and close the sheet.
   const pressStartedOnBackdrop = useRef(false);
+  // Plays the "fall" exit transition before the native dialog actually closes,
+  // matching the rise-in/fall-out convention used by OfficeDetail/ContributeSheet.
+  // Derived during render (not an effect) per React's guidance for adjusting
+  // state when a prop changes, so the setState call below isn't in an effect body.
+  const [closing, setClosing] = useState(false);
+  const [prevOpen, setPrevOpen] = useState(open);
+  if (open !== prevOpen) {
+    setPrevOpen(open);
+    setClosing(!open);
+  }
 
   useEffect(() => {
     const dialog = dialogRef.current;
     if (!dialog) return;
-    if (open && !dialog.open) {
-      dialog.showModal();
-      // Start on the dialog itself, not its close button, so no focus ring flashes on an icon.
-      dialog.focus({ preventScroll: true });
+    if (open) {
+      if (!dialog.open) {
+        dialog.showModal();
+        // Start on the dialog itself, not its close button, so no focus ring flashes on an icon.
+        dialog.focus({ preventScroll: true });
+      }
+      return;
     }
-    if (!open && dialog.open) dialog.close();
+    if (dialog.open) {
+      const timer = setTimeout(() => dialog.close(), FALL_DURATION_MS);
+      return () => clearTimeout(timer);
+    }
   }, [open]);
 
   return (
@@ -72,7 +91,9 @@ export function Sheet({
       }}
       aria-labelledby={titleId}
       tabIndex={-1}
-      className="outline-none mx-auto mb-0 mt-auto max-h-[92dvh] w-full max-w-none animate-[rise_.25s_ease-out] overflow-y-auto kp-glass-panel rounded-t-3xl p-0 text-ink backdrop:bg-[#3a2a0c]/40 md:m-auto md:max-w-md md:rounded-3xl"
+      className={`outline-none mx-auto mb-0 mt-auto max-h-[92dvh] w-full max-w-none overflow-y-auto kp-glass-panel rounded-t-3xl p-0 text-ink backdrop:bg-[#3a2a0c]/40 md:m-auto md:max-w-md md:rounded-3xl ${
+        closing ? "animate-fall" : "animate-[rise_.25s_ease-out]"
+      }`}
     >
       <div
         className={`flex items-start justify-between gap-3 px-5 pt-5 ${

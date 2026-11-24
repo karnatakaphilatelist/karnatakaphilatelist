@@ -27,7 +27,7 @@ function StatusMark({ status }: { status: OfficeStatus }) {
     );
   }
   return (
-    <span className="size-9 shrink-0 rounded-full border-2 border-[#16204f]/25">
+    <span className="size-9 shrink-0 rounded-full border-2 border-ink/25">
       <span className="sr-only">Not visited</span>
     </span>
   );

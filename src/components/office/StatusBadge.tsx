@@ -4,7 +4,7 @@ import type { OfficeStatus } from "@/types";
 const STYLES: Record<OfficeStatus, string> = {
   unvisited: "bg-[#8f640f]/12 text-[#8f640f]",
   planned: "bg-[#2f4aa8]/10 text-[#2f4aa8]",
-  visited: "bg-[#1f8a4d]/12 text-[#14653f]",
+  visited: "bg-[#1f8a4d]/12 text-visited-ink",
 };
 
 const LABEL: Record<OfficeStatus, string> = {

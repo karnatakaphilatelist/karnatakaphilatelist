@@ -88,7 +88,7 @@ function EmptyState({
     <div className="flex flex-col items-center px-4 py-4 text-center">
       <span
         aria-hidden
-        className="mb-3 grid size-14 place-items-center rounded-full bg-[#16204f]/[0.04] text-muted"
+        className="mb-3 grid size-14 place-items-center rounded-full bg-ink/[0.04] text-muted"
       >
         {icon}
       </span>
@@ -115,7 +115,7 @@ function VerifiedBadge() {
       >
         <path
           d="M12 1l2.09 3.07L17.5 3l.41 3.5L21.4 8l-1.6 3.12L21.4 14.2l-3.5 1.52L17.5 19.2l-3.41-1.07L12 21.2l-2.09-3.07L6.5 19.2l-.41-3.48L2.6 14.2l1.6-3.08L2.6 8l3.49-1.5L6.5 3l3.41 1.07L12 1z"
-          fill="#14653f"
+          fill="var(--color-visited-ink)"
         />
         <path
           d="M8.5 12.5l2 2 5-5"
@@ -278,7 +278,7 @@ export function OfficeDetail({
             path={office.stampImagePath}
             status="visited"
             natural
-            className="-mt-1 shrink-0 rounded-2xl border border-[#16204f]/10 shadow-[0_2px_8px_rgba(22,32,79,0.06)]"
+            className="-mt-1 shrink-0 rounded-2xl border border-ink/10 shadow-[0_2px_8px_rgba(22,32,79,0.06)]"
           />
         </div>
 
@@ -288,7 +288,7 @@ export function OfficeDetail({
         ) : null}
 
         {/* ── Tab bar: About · Notes · Public ── */}
-        <div className="mt-3.5 flex border-b border-[#16204f]/[0.06]">
+        <div className="mt-3.5 flex border-b border-ink/[0.06]">
           <button
             type="button"
             onClick={() => setActiveTab("about")}
@@ -311,7 +311,7 @@ export function OfficeDetail({
           >
             Notes
             {visit?.note ? (
-              <span className="ml-1 inline-flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-[#16204f]/10 px-[5px] text-[10px] font-bold align-text-top">
+              <span className="ml-1 inline-flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-ink/10 px-[5px] text-[10px] font-bold align-text-top">
                 1
               </span>
             ) : null}
@@ -334,7 +334,7 @@ export function OfficeDetail({
           {activeTab === "about" ? (
             <>
               {office.district ? (
-                <div className="mb-2 rounded-xl bg-[#16204f]/[0.025] p-3">
+                <div className="mb-2 rounded-xl bg-ink/[0.025] p-3">
                   <SectionLabel>About this place</SectionLabel>
                   <p
                     className={`mt-2 text-sm leading-[21px] ${
@@ -367,7 +367,7 @@ export function OfficeDetail({
                   description="Visit this office and stamp your passport to start adding notes and photos."
                 />
               ) : visit.note ? (
-                <div className="overflow-hidden rounded-2xl border border-[#16204f]/[0.06] bg-[#16204f]/[0.02]">
+                <div className="overflow-hidden rounded-2xl border border-ink/[0.06] bg-ink/[0.02]">
                   <p className="whitespace-pre-line px-4 py-3 text-sm leading-[21px]">
                     {visit.note}
                   </p>

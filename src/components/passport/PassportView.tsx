@@ -171,7 +171,7 @@ export function PassportView({
                 onClick={() => setStampFilter(value)}
                 className={`h-10 rounded-full px-4 text-[15px] ${
                   stampFilter === value
-                    ? "bg-[#f3e2bd] font-bold shadow-[inset_0_0_0_1.5px_#16204f,0_2px_8px_rgb(0_0_0/0.12)]"
+                    ? "bg-[#f3e2bd] font-bold shadow-[inset_0_0_0_1.5px_var(--color-ink),0_2px_8px_rgb(0_0_0/0.12)]"
                     : "kp-glass font-semibold"
                 }`}
               >

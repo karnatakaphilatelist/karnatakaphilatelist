@@ -56,7 +56,7 @@ export function WebSignInNudge() {
     <div
       role="status"
       aria-live="polite"
-      className={`fixed bottom-6 right-4 z-[2000] flex max-w-[280px] items-stretch overflow-hidden rounded-xl shadow-[0_4px_24px_rgba(22,32,79,0.13)] transition-all duration-250 ${
+      className={`fixed bottom-[calc(1.5rem+env(safe-area-inset-bottom,0px))] right-[calc(1rem+env(safe-area-inset-right,0px))] z-[2000] flex max-w-[280px] items-stretch overflow-hidden rounded-xl shadow-[0_4px_24px_rgba(22,32,79,0.13)] transition-all duration-250 ${
         leaving ? "translate-y-2 opacity-0" : "translate-y-0 opacity-100"
       }`}
       style={{ animation: leaving ? undefined : "nudge-rise 0.3s ease-out" }}

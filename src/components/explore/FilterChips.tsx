@@ -39,7 +39,7 @@ export function FilterChips({ value, onChange, tourId }: FilterChipsProps) {
             <span
               className={`flex h-10 items-center gap-1.5 rounded-full px-4 text-[15px] md:px-3 md:text-sm ${
                 active
-                  ? "bg-[#f3e2bd] font-bold text-ink shadow-[inset_0_0_0_1.5px_#16204f,0_2px_8px_rgb(0_0_0/0.12)]"
+                  ? "bg-[#f3e2bd] font-bold text-ink shadow-[inset_0_0_0_1.5px_var(--color-ink),0_2px_8px_rgb(0_0_0/0.12)]"
                   : "kp-glass font-semibold text-ink"
               }`}
             >

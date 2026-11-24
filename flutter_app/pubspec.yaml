@@ -1,0 +1,56 @@
+name: philatrail
+description: Philatrail mobile app — the field companion for the Philately Passport.
+publish_to: "none"
+version: 1.0.0+1
+
+environment:
+  sdk: ">=3.4.0 <4.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # Same backend the web app uses — no custom API layer for plain reads/writes,
+  # per CLAUDE.md section 3 (Supabase + RLS is the shared contract).
+  supabase_flutter: ^2.8.0
+
+  # Navigation
+  go_router: ^14.6.0
+
+  # Device & field capabilities (mirrors src/lib/geofence.ts, geo.ts, haptics.ts,
+  # nearby-notifications.ts, native-photo.ts, in-app-review.ts)
+  geolocator: ^13.0.0
+  flutter_background_geolocation: ^4.16.0
+  flutter_local_notifications: ^18.0.0
+  image_picker: ^1.1.0
+  vibration: ^2.0.0
+  in_app_review: ^2.0.9
+
+  # Local persistence (mirrors src/lib/local-storage.ts's guest-visits/planned-ids storage)
+  shared_preferences: ^2.3.0
+
+  # Home-screen widget data bridge (native glue still required either side —
+  # see DESIGN.md / CLAUDE.md widget note; this only pushes data + triggers reloads)
+  home_widget: ^0.7.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+
+flutter:
+  uses-material-design: true
+  # Same brand fonts as the web app (see lib/theme/app_theme.dart and the
+  # reconciled DESIGN.md): Fraunces for headlines, Figtree for body, Courier
+  # Prime for tabular/postal details. Font files are not yet vendored here —
+  # see flutter_app/README.md.
+  # fonts:
+  #   - family: Fraunces
+  #     fonts:
+  #       - asset: assets/fonts/Fraunces-Variable.ttf
+  #   - family: Figtree
+  #     fonts:
+  #       - asset: assets/fonts/Figtree-Variable.ttf
+  #   - family: CourierPrime
+  #     fonts:
+  #       - asset: assets/fonts/CourierPrime-Regular.ttf

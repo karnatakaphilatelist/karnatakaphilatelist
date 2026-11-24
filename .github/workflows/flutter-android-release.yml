@@ -1,0 +1,62 @@
+name: Flutter Android release bundle (Play)
+
+# Builds a signed .aab from the flutter_app/ project for Google Play.
+# Deliberately manual-only (workflow_dispatch, no push trigger) — the
+# Flutter app is still in early scaffold stage; nothing here should
+# auto-build or auto-release. Reuses the SAME four repository secrets as
+# the Capacitor app's android-release.yml (see docs/RELEASE.md) — the
+# upload keystore never needs to be duplicated or leave GitHub secrets.
+#
+# versionCode/versionName come from flutter_app/pubspec.yaml's own
+# `version: X.Y.Z+N`, NOT from github.run_number — a new workflow file's
+# run_number starts at 1, which would collide with the versionCodes
+# already live/drafted on the Capacitor app's track (5 and 7 as of
+# 24 Nov 2026). Bump pubspec.yaml's build number by hand before each
+# release and keep it strictly higher than whatever's live.
+
+on:
+  workflow_dispatch: {}
+
+jobs:
+  bundle:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: flutter_app
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check signing secrets exist
+        env:
+          K: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          P: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          A: ${{ secrets.ANDROID_KEY_ALIAS }}
+          KP: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          for v in K P A KP; do
+            if [ -z "${!v}" ]; then echo "::error::Missing a signing secret. See docs/RELEASE.md"; exit 1; fi
+          done
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+
+      - run: flutter pub get
+
+      - name: Write keystore
+        env:
+          K: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+        run: echo "$K" | base64 --decode > "$RUNNER_TEMP/upload.jks"
+
+      - name: Build signed app bundle
+        env:
+          KEYSTORE_FILE: ${{ runner.temp }}/upload.jks
+          KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: flutter build appbundle --release
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: philatrail-flutter-release-aab
+          path: flutter_app/build/app/outputs/bundle/release/app-release.aab

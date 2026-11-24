@@ -32,14 +32,20 @@ websites" list (personal-plan equivalent of the org-level network allowlist).
   number is set to `8` — strictly higher than both, so it's safe even if
   release 7 ships before the Flutter app does. Re-check this value again
   right before the actual first build, since the track may have moved on.
-- **Signing** — ⚠️ **not yet set**. `android/app/build.gradle.kts` currently
-  signs release builds with the Flutter-scaffold default (the **debug**
-  key) — `signingConfig = signingConfigs.getByName("debug")`. This must be
-  repointed at the same upload keystore already used for the live Play
-  Console closed-testing track before any `.aab` from this project can be
-  uploaded there. The keystore file/credentials need to come from whoever
-  holds them; this sandbox was never given them and nothing has been
-  fabricated.
+- **Signing** — ✅ wired, pending a CI run. `android/app/build.gradle.kts`
+  now has a real `release` signing config that reads
+  `KEYSTORE_FILE`/`KEYSTORE_PASSWORD`/`KEY_ALIAS`/`KEY_PASSWORD` from the
+  environment, falling back to the debug key only when they're absent (so
+  local `flutter run --release` still works without them). The actual
+  keystore was never available here to begin with — per `docs/RELEASE.md`
+  it only ever exists as a local `.jks` on the maintainer's Mac and as four
+  **write-only** GitHub Actions secrets (`ANDROID_KEYSTORE_BASE64`,
+  `ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS`, `ANDROID_KEY_PASSWORD`)
+  already used by the Capacitor app's `android-release.yml`. Rather than
+  needing a copy of it, `.github/workflows/flutter-android-release.yml`
+  reuses those same four secrets directly in CI, so the keystore never has
+  to leave GitHub or pass through this sandbox. Run that workflow (Actions
+  tab, manual dispatch) to produce a real signed `.aab`.
 
 Any mismatch on any of the three resets the 14-day closed-testing
 requirement to zero — per current Play Console behavior, not assumed.

@@ -29,11 +29,34 @@ android {
         versionName = flutter.versionName
     }
 
+    signingConfigs {
+        // Mirrors the existing Capacitor app's CI signing contract exactly —
+        // see /.github/workflows/android-release.yml and docs/RELEASE.md.
+        // Same four GitHub Actions secrets, same env var names
+        // (KEYSTORE_FILE/KEYSTORE_PASSWORD/KEY_ALIAS/KEY_PASSWORD), so the
+        // keystore itself never needs to leave GitHub secrets. When these
+        // env vars aren't set (a local `flutter run --release`), this falls
+        // back to the debug key so local builds still work.
+        create("release") {
+            val keystoreFile = System.getenv("KEYSTORE_FILE")
+            if (keystoreFile != null) {
+                storeFile = file(keystoreFile)
+                storePassword = System.getenv("KEYSTORE_PASSWORD")
+                keyAlias = System.getenv("KEY_ALIAS")
+                keyPassword = System.getenv("KEY_PASSWORD")
+            }
+        }
+    }
+
     buildTypes {
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig = signingConfigs.getByName("debug")
+            signingConfig =
+                if (System.getenv("KEYSTORE_FILE") != null) {
+                    signingConfigs.getByName("release")
+                } else {
+                    // Local `flutter run --release` with no CI secrets present.
+                    signingConfigs.getByName("debug")
+                }
         }
     }
 }

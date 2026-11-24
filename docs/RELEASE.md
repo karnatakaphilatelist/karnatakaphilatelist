@@ -37,3 +37,17 @@ Repo > Settings > Secrets and variables > Actions > New repository secret:
 - Fill App content: privacy policy URL (`<site>/privacy`), Data safety, content rating, target audience, ads (none).
 - Account deletion: the app has in-app deletion (Account > Delete my account). Add the same web page or steps URL when Play asks.
 - Retake store screenshots: the ones in `store/` show the old design and name.
+
+## The Flutter app reuses these same four secrets
+
+`.github/workflows/flutter-android-release.yml` builds `flutter_app/`'s
+`.aab` with the exact same four secrets above — same `applicationId`
+(`app.vinvi.philatrail`), same upload key, so Play Console still treats it
+as an update to this app rather than a new listing. No new secrets to add.
+
+One difference: its version code comes from `flutter_app/pubspec.yaml`'s
+`version: X.Y.Z+N` (the `+N`), not from the GitHub run number — a new
+workflow file's run-number sequence starts at 1 and would collide with
+versionCodes already used by this track. Before each Flutter release, bump
+that build number by hand to something strictly higher than whatever's
+currently live or drafted in Play Console (check the Releases tab).

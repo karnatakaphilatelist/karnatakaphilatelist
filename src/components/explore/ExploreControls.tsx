@@ -57,11 +57,13 @@ export function ExploreControls({
         ) : null}
       </div>
       {hideFilters ? null : (
-        <FilterChips
-          value={filter}
-          onChange={onFilterChange}
-          tourId={`filters-${idSuffix}`}
-        />
+        <div className="mt-3">
+          <FilterChips
+            value={filter}
+            onChange={onFilterChange}
+            tourId={`filters-${idSuffix}`}
+          />
+        </div>
       )}
     </>
   );

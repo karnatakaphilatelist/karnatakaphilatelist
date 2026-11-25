@@ -41,6 +41,8 @@ interface ExploreViewProps {
   offices: PostOffice[];
   /** Office to open on load, e.g. when linked from the passport page. */
   initialSelectedId: number | null;
+  /** District to pre-filter the list to, e.g. when linked from the passport's "by district" list. */
+  initialDistrict?: string | null;
   /** False while another tab is showing; the screen stays mounted but out of sight. */
   active?: boolean;
 }
@@ -48,6 +50,7 @@ interface ExploreViewProps {
 export function ExploreView({
   offices: indiaOffices,
   initialSelectedId,
+  initialDistrict = null,
   active = true,
 }: ExploreViewProps) {
   const {
@@ -111,6 +114,18 @@ export function ExploreView({
     // Only when the link changes; later choices belong to the person.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialSelectedId]);
+
+  // A link to one district (from the passport's "by district" list) reuses the existing
+  // name/district/pincode search rather than a separate filter mechanism, and opens the
+  // sheet so the filtered list is immediately visible instead of hidden behind the map.
+  useEffect(() => {
+    if (!initialDistrict) return;
+    // A link is an event from outside this screen, so reacting to it here is the point of the effect.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setQuery(initialDistrict);
+    setSnap(1);
+    // Only when the link changes; later edits to the search belong to the person.
+  }, [initialDistrict]);
 
   const allOffices = useMemo(
     () => withStatus(offices, visits, plannedIds, userLocation),
@@ -384,7 +399,9 @@ export function ExploreView({
               />
             </Appear>
             {isReady ? (
-              <div className={sheetOpen ? "" : "max-md:hidden"}>
+              <div
+                className={`md:mt-4 ${sheetOpen ? "" : "max-md:hidden"}`}
+              >
                 <ProgressStrip
                   signedIn={isAuthLoading ? null : user !== null}
                   firstName={user ? getFirstName(user) : null}

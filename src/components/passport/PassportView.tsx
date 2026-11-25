@@ -13,6 +13,7 @@ import { useVisits } from "@/components/providers/VisitsProvider";
 import { AccountAvatar } from "@/components/layout/AccountAvatar";
 import { Postmark } from "@/components/office/Postmark";
 import { CheckIcon } from "@/components/ui/icons";
+import { StateSwitcher } from "@/components/passport/StateSwitcher";
 import { COMING_SOON_STATES } from "@/lib/states";
 import { stateName } from "@/lib/states";
 import { progressShareText, shareContent } from "@/lib/share";
@@ -248,44 +249,12 @@ export function PassportView({
               Share progress
             </button>
           </p>
-          <div className="relative mt-3 flex h-14 items-center">
-            <label htmlFor="state-passport" className="sr-only">
-              State
-            </label>
-            <select
-              id="state-passport"
-              value={stateCode}
-              onChange={(event) => choose(event.target.value)}
-              className="h-14 w-full appearance-none bg-transparent pr-12 text-[clamp(30px,10vw,48px)] font-medium uppercase tracking-[0.01em] text-white [&>option]:text-ink -ml-0.5"
-            >
-              {states.map((state) => (
-                <option key={state.code} value={state.code}>
-                  {state.name}
-                </option>
-              ))}
-              {soonStates.map((code) => (
-                <option key={code} value={code} disabled>
-                  {stateName(code)} · coming soon
-                </option>
-              ))}
-            </select>
-            <span
-              aria-hidden
-              className="pointer-events-none absolute right-0 grid size-9 place-items-center rounded-full bg-white/20 shadow-[inset_0_1px_0_rgb(255_255_255/0.4)]"
-            >
-              <svg
-                viewBox="0 0 20 20"
-                className="size-4 text-[#f7c96b]"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2.8"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="m5 7.5 5 5 5-5" />
-              </svg>
-            </span>
-          </div>
+          <StateSwitcher
+            states={states}
+            soonStates={soonStates}
+            stateCode={stateCode}
+            choose={choose}
+          />
           <p className="mt-3 text-xl font-bold italic uppercase leading-6 tracking-[0.08em] text-[#f7c96b]">
             {visitedOffices.length} of {total}{" "}
             <span className="ml-1 text-xs font-normal tracking-[0.1em]">
@@ -381,24 +350,37 @@ export function PassportView({
               </div>
             ) : (
               <ul className="mt-4 grid grid-cols-3 gap-2">
-                {visitedOffices.slice(0, 6).map((office) => (
-                  <li key={office.id}>
-                    <button
-                      type="button"
-                      onClick={() => setStampId(office.id)}
-                      className="w-full text-left"
-                    >
-                      <span className={`${GLASS_TILE} relative block h-20`}>
-                        <span className="absolute left-3 top-3 grid size-7 place-items-center rounded-full bg-[#1f8a4d] text-white">
-                          <CheckIcon className="size-4" strokeWidth={3.4} />
+                {visitedOffices.slice(0, 6).map((office) => {
+                  const visit = visits[office.id];
+                  return (
+                    <li key={office.id}>
+                      <button
+                        type="button"
+                        onClick={() => setStampId(office.id)}
+                        className="w-full text-left"
+                      >
+                        <span
+                          className={`${GLASS_TILE} relative flex aspect-square items-center justify-center p-2`}
+                        >
+                          {visit ? (
+                            <Postmark
+                              name={office.name}
+                              date={formatVisitDate(visit.visitedAt)}
+                              pincode={office.pincode}
+                              className="size-full"
+                            />
+                          ) : null}
+                          <span className="absolute left-2 top-2 grid size-6 place-items-center rounded-full bg-[#1f8a4d] text-white">
+                            <CheckIcon className="size-3.5" strokeWidth={3.4} />
+                          </span>
                         </span>
-                      </span>
-                      <span className="mt-2 block text-sm font-semibold leading-5">
-                        {office.name}
-                      </span>
-                    </button>
-                  </li>
-                ))}
+                        <span className="mt-2 block text-sm font-semibold leading-5">
+                          {office.name}
+                        </span>
+                      </button>
+                    </li>
+                  );
+                })}
               </ul>
             )}
           </section>

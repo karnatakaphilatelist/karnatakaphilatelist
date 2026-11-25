@@ -1,3 +1,6 @@
+"use client";
+
+import { useRouter } from "next/navigation";
 import type { PostOffice, Visit } from "@/types";
 
 interface DistrictRow {
@@ -35,6 +38,7 @@ interface DistrictProgressProps {
 }
 
 export function DistrictProgress({ offices, visits }: DistrictProgressProps) {
+  const router = useRouter();
   const rows = summariseDistricts(offices, visits);
 
   return (
@@ -43,30 +47,41 @@ export function DistrictProgress({ offices, visits }: DistrictProgressProps) {
         const complete = visited === total;
         return (
           <li key={district}>
-            <div className="flex items-baseline justify-between text-sm">
-              <span className="font-semibold">{district}</span>
-              <span
-                className={
-                  complete ? "font-bold text-visited-ink" : "text-muted"
-                }
-              >
-                {visited} of {total}
-                {complete ? " · complete" : ""}
-              </span>
-            </div>
-            <div
-              role="progressbar"
-              aria-label={`${district} progress`}
-              aria-valuemin={0}
-              aria-valuemax={total}
-              aria-valuenow={visited}
-              className="mt-1.5 h-2 overflow-hidden rounded-full bg-sand"
+            <button
+              type="button"
+              onClick={() =>
+                router.push(
+                  `/explore?district=${encodeURIComponent(district)}`
+                )
+              }
+              aria-label={`See ${district} on the map`}
+              className="kp-hit -mx-2 w-[calc(100%+16px)] min-h-11 rounded-xl px-2 py-1.5 text-left transition-opacity active:opacity-70"
             >
+              <div className="flex items-baseline justify-between text-sm">
+                <span className="font-semibold">{district}</span>
+                <span
+                  className={
+                    complete ? "font-bold text-visited-ink" : "text-muted"
+                  }
+                >
+                  {visited} of {total}
+                  {complete ? " · complete" : ""}
+                </span>
+              </div>
               <div
-                className="h-full rounded-full bg-visited"
-                style={{ width: `${(visited / total) * 100}%` }}
-              />
-            </div>
+                role="progressbar"
+                aria-label={`${district} progress`}
+                aria-valuemin={0}
+                aria-valuemax={total}
+                aria-valuenow={visited}
+                className="mt-1.5 h-2 overflow-hidden rounded-full bg-sand"
+              >
+                <div
+                  className="h-full rounded-full bg-visited"
+                  style={{ width: `${(visited / total) * 100}%` }}
+                />
+              </div>
+            </button>
           </li>
         );
       })}

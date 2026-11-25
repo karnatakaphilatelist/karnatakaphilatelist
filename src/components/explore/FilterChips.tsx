@@ -23,7 +23,7 @@ export function FilterChips({ value, onChange, tourId }: FilterChipsProps) {
       role="group"
       data-tour={tourId}
       aria-label="Filter by status"
-      className="-mx-4 px-3 flex flex-nowrap overflow-x-auto md:flex-wrap md:overflow-visible [scrollbar-width:none]"
+      className="-mx-4 px-3 flex flex-nowrap overflow-x-auto md:flex-wrap md:overflow-visible [scrollbar-width:none] [mask-image:linear-gradient(to_right,black_calc(100%-28px),transparent)] md:[mask-image:none]"
     >
       {FILTERS.map((filter) => {
         const active = filter.value === value;

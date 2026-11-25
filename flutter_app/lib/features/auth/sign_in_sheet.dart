@@ -183,7 +183,7 @@ class _SignInSheetBodyState extends State<_SignInSheetBody> {
         const SizedBox(height: 20),
         OutlinedButton.icon(
           onPressed: _openingGoogle ? null : _handleGoogle,
-          icon: const Icon(Icons.g_mobiledata, size: 28),
+          icon: Image.asset('assets/icons/google_logo.png', width: 20, height: 20),
           label: Text(_openingGoogle ? 'Opening Google…' : 'Continue with Google'),
           style: OutlinedButton.styleFrom(minimumSize: const Size.fromHeight(56)),
         ),

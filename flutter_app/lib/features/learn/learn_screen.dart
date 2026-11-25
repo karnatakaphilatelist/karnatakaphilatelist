@@ -1,8 +1,13 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
+import '../../core/share.dart';
 import '../../data/learn_articles.dart';
 import '../../theme/app_theme.dart';
 import 'article_screen.dart';
+
+const _webBase = 'https://philatrail.com';
 
 /// Port of src/components/learn/LearnHub.tsx: a short reading list from
 /// "what is this?" to "I have my booklet", native instead of a web view.
@@ -79,6 +84,17 @@ class LearnScreen extends StatelessWidget {
                       ),
                     ),
                 ],
+              ),
+            ),
+            const SizedBox(height: 24),
+            Center(
+              child: OutlinedButton.icon(
+                onPressed: () => unawaited(shareText(
+                  text: 'New to philately? Short reads on the hobby and Karnataka\'s Philately Passport. $_webBase/learn',
+                  subject: 'Learn about philately',
+                )),
+                icon: const Icon(Icons.share_outlined, size: 16),
+                label: const Text('Share Learn with a friend'),
               ),
             ),
           ],

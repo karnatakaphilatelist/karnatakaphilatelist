@@ -39,8 +39,9 @@ class AppColors {
 /// Font families match `--font-display` (Fraunces, headlines), `--font-sans`
 /// (Figtree, body) and `--font-mono` (Courier Prime, tabular/postal details —
 /// pincodes, distances, dates, stamp counts) exactly as shipped in
-/// `globals.css`. The actual font assets are not yet vendored into this
-/// project — see flutter_app/README.md before this theme is used for real.
+/// `globals.css`. The font files are vendored at assets/fonts/ (same
+/// @fontsource-variable builds the web app loads) and declared in
+/// pubspec.yaml.
 class AppFonts {
   AppFonts._();
 
@@ -93,6 +94,15 @@ ThemeData buildAppTheme() {
       style: ElevatedButton.styleFrom(
         backgroundColor: AppColors.postal,
         foregroundColor: Colors.white,
+        shape: const StadiumBorder(),
+      ),
+    ),
+    // DESIGN.md's "Secondary button" is pill-shaped like the primary one, just
+    // outlined instead of filled — matches the web app's secondary buttons.
+    outlinedButtonTheme: OutlinedButtonThemeData(
+      style: OutlinedButton.styleFrom(
+        foregroundColor: AppColors.ink,
+        side: const BorderSide(color: AppColors.lineStrong, width: 1.5),
         shape: const StadiumBorder(),
       ),
     ),

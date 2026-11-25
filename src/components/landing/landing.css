@@ -366,12 +366,15 @@
   border-radius: 50%;
   background: var(--color-visited);
 }
-/* Only ever the real count: nothing stands in for progress that does not exist yet. */
+/* The welcome-back line, now shown above the headline rather than after
+   everything else — a small eyebrow greeting, not another body paragraph. */
 .kpl-yours {
-  margin: 14px 0 0 !important;
+  margin: 0 0 10px !important;
   max-width: 52ch;
-  font-size: 15px !important;
-  line-height: 1.55;
+  font-size: 14px !important;
+  font-weight: 600;
+  line-height: 1.5;
+  color: var(--color-postal-dark);
 }
 .kpl-yours strong {
   color: var(--color-ink);

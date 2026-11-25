@@ -7,6 +7,7 @@ import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
 import { SmoothScroll } from "@/components/motion/SmoothScroll";
+import { AccountAvatar } from "@/components/layout/AccountAvatar";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { isNativeApp } from "@/lib/native";
 import { readJson } from "@/lib/local-storage";
@@ -105,7 +106,7 @@ function rememberIntro(): void {
  */
 
 export function Landing({ offices }: { offices: PostOffice[] }) {
-  const { user, isLoading, openSignIn, signOut } = useAuth();
+  const { user, isLoading, openSignIn } = useAuth();
   const { visits } = useVisits();
 
   const countRef = useRef<HTMLDivElement>(null);
@@ -313,6 +314,7 @@ export function Landing({ offices }: { offices: PostOffice[] }) {
   // cards in as they scroll into view. The hero itself is left alone — its reveal timing
   // is already tuned to the intro sequence above and isn't scroll-linked.
   const mainRef = useRef<HTMLElement>(null);
+  const heroExpanded = stamped > 0;
   useGSAP(
     () => {
       // Registering ScrollTrigger touches matchMedia, which jsdom (tests) and
@@ -321,40 +323,51 @@ export function Landing({ offices }: { offices: PostOffice[] }) {
       gsap.registerPlugin(ScrollTrigger);
       const mm = gsap.matchMedia();
       mm.add("(prefers-reduced-motion: no-preference)", () => {
+        // Deliberately NOT animating opacity: some real sessions (seen in
+        // production — a GSAP/ScrollTrigger tween that starts but never
+        // finishes, independent of Lenis, toggleActions config, or hero
+        // height) leave this tween stalled partway, and an opacity-0 "from"
+        // state then means the content never becomes readable at all. A
+        // slide-only reveal has the same failure mode but it's harmless: a
+        // stalled tween just leaves the content sitting up to 24px off its
+        // final position — fully visible and readable either way. once:
+        // true because this is a one-time "welcome" reveal, not something
+        // that should replay every time you scroll back past it.
         gsap.from(".kpl-facts-grid > div", {
           y: 24,
-          opacity: 0,
           duration: 0.6,
           ease: "power2.out",
           stagger: 0.1,
           scrollTrigger: {
             trigger: ".kpl-facts",
             start: "top 85%",
-            // Replay from scratch ("restart", not "play" — a finished tween
-            // ignores "play") every time the section is scrolled into view
-            // again. Leaving does nothing in either direction, so the cards
-            // stay visible once shown instead of hiding themselves again the
-            // moment you scroll past — that "reverse on leave" is what made
-            // them disappear right after passing through them.
-            toggleActions: "restart none restart none",
+            once: true,
           },
         });
         gsap.from(".kpl-step-grid > div", {
           y: 24,
-          opacity: 0,
           duration: 0.6,
           ease: "power2.out",
           stagger: 0.1,
           scrollTrigger: {
             trigger: ".kpl-steps",
             start: "top 85%",
-            toggleActions: "restart none restart none",
+            once: true,
           },
         });
       });
       return () => mm.revert();
     },
-    { scope: mainRef, dependencies: [stateCode] }
+    // isLoading/heroExpanded: the hero grows by one line once a signed-in
+    // visitor's stamped count loads (their "Namaskara, X — you have N of M"
+    // greeting appears async, after mount). ScrollTrigger measures these
+    // sections' positions once at creation time, so without re-running here
+    // once that settles, its cached start points stay keyed to the shorter
+    // pre-auth layout — too high up the page — and the sections below can be
+    // scrolled straight past before the real trigger point is ever reached,
+    // leaving them permanently at their pre-reveal opacity: 0. Re-running on
+    // every relevant change keeps the measurements honest.
+    { scope: mainRef, dependencies: [stateCode, isLoading, heroExpanded] }
   );
 
   return (
@@ -386,9 +399,11 @@ export function Landing({ offices }: { offices: PostOffice[] }) {
             <Link href="/passport">My passport</Link>
             <Link href="/learn">Guide</Link>
             {isLoading ? null : user ? (
-              <button type="button" onClick={() => void signOut()}>
-                Sign out
-              </button>
+              // A raw "Sign out" button here is a dead end with no way back
+              // to the rest of the account options — this is just an entry
+              // point to /account (where sign-out already lives), same as
+              // every other screen's nav.
+              <AccountAvatar className="size-8" />
             ) : (
               <button
                 type="button"
@@ -440,6 +455,19 @@ export function Landing({ offices }: { offices: PostOffice[] }) {
             )}
 
             <div key={stateCode} className="kpl-state-fade">
+              {/* The welcome back: shown before the headline, not after everything
+                  else, so a returning signed-in visitor is greeted first. Only ever
+                  the real count — nothing stands in for progress that does not
+                  exist yet. */}
+              {stamped > 0 && (
+                <p className="kpl-yours">
+                  {firstName ? `${greeting}, ${firstName} — you` : "You"} have{" "}
+                  <strong>
+                    {stamped} of {stateTotal}
+                  </strong>{" "}
+                  in {stateName_}. <Link href="/passport">Open my passport</Link>
+                </p>
+              )}
               <h1>
                 Collect all {stateTotal} postmarks in{" "}
                 <span>
@@ -467,17 +495,6 @@ export function Landing({ offices }: { offices: PostOffice[] }) {
               <span className="kpl-free-dot" aria-hidden="true" />
               Free · no account needed
             </p>
-
-            {/* Only ever the real count. Nothing is shown before there is something to show. */}
-            {stamped > 0 && (
-              <p className="kpl-yours">
-                {firstName ? `${greeting}, ${firstName} — you` : "You"} have{" "}
-                <strong>
-                  {stamped} of {stateTotal}
-                </strong>{" "}
-                in {stateName_}. <Link href="/passport">Open my passport</Link>
-              </p>
-            )}
           </div>
 
           <div className="kpl-coral" aria-hidden="true">

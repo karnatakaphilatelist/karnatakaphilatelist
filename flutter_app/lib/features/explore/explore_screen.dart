@@ -280,19 +280,13 @@ class _ExploreScreenState extends State<ExploreScreen> {
                           ),
                         ),
                         Expanded(
-                          child: CustomScrollView(
+                          child: OfficeListView(
                             controller: scrollController,
-                            slivers: [
-                              SliverToBoxAdapter(
-                                child: OfficeListView(
-                                  offices: listOffices,
-                                  selectedId: _selectedId,
-                                  onSelect: (id) => _openDetail(
-                                    listOffices.firstWhere((o) => o.id == id),
-                                  ),
-                                ),
-                              ),
-                            ],
+                            offices: listOffices,
+                            selectedId: _selectedId,
+                            onSelect: (id) => _openDetail(
+                              listOffices.firstWhere((o) => o.id == id),
+                            ),
                           ),
                         ),
                       ],

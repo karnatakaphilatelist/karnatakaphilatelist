@@ -9,27 +9,39 @@ class OfficeListView extends StatelessWidget {
   final List<OfficeWithStatus> offices;
   final int? selectedId;
   final ValueChanged<int> onSelect;
+  // The sheet's own DraggableScrollableSheet controller — passed straight to
+  // this list's ListView so there's exactly one scrollable in the sheet.
+  // (This used to be wrapped in an outer CustomScrollView/SliverToBoxAdapter
+  // in explore_screen.dart, which gave this inner ListView an unbounded
+  // height and crashed the sheet's layout — rendering as the blank white
+  // area below the drag handle. Single ListView, no wrapping sliver.)
+  final ScrollController? controller;
   const OfficeListView({
     super.key,
     required this.offices,
     required this.selectedId,
     required this.onSelect,
+    this.controller,
   });
 
   @override
   Widget build(BuildContext context) {
     if (offices.isEmpty) {
-      return const Padding(
-        padding: EdgeInsets.symmetric(horizontal: 24, vertical: 40),
-        child: Text(
-          'No post offices match. Try a different search or filter.',
-          textAlign: TextAlign.center,
-          style: TextStyle(color: AppColors.muted),
-        ),
+      return ListView(
+        controller: controller,
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 40),
+        children: const [
+          Text(
+            'No post offices match. Try a different search or filter.',
+            textAlign: TextAlign.center,
+            style: TextStyle(color: AppColors.muted),
+          ),
+        ],
       );
     }
 
     return ListView.separated(
+      controller: controller,
       padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
       itemCount: offices.length,
       separatorBuilder: (_, __) => const Divider(height: 1, color: AppColors.line),

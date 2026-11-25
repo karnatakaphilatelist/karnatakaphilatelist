@@ -1,7 +1,10 @@
 import { cleanup, render, screen } from "@testing-library/react";
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import DeleteAccountPage from "@/app/(app)/delete-account/page";
 import { CONTACT_EMAIL } from "@/lib/constants";
+
+// LegalPage (the page's shared wrapper) uses useRouter for its back button.
+vi.mock("next/navigation", () => ({ useRouter: () => ({ back: vi.fn() }) }));
 
 describe("delete-account page", () => {
   afterEach(cleanup);

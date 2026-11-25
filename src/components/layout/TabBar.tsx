@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { isActivePath, NAV_ITEMS } from "@/components/layout/nav-items";
 import { useOverlay } from "@/components/providers/OverlayProvider";
+import { EXPLORE_RESET_EVENT } from "@/lib/constants";
 
 /** Bottom navigation for phones: a floating pill with the active tab filled in postal red. */
 export function TabBar() {
@@ -29,6 +30,15 @@ export function TabBar() {
               href={href}
               data-tour={`tab-${label.toLowerCase()}`}
               aria-current={active ? "page" : undefined}
+              // Tapping the tab you're already on doesn't navigate (same URL), so for
+              // Explore — the one screen that stays mounted with its own filters,
+              // search and open cards — fire a reset instead of doing nothing.
+              onClick={(event) => {
+                if (active && href === "/explore") {
+                  event.preventDefault();
+                  window.dispatchEvent(new Event(EXPLORE_RESET_EVENT));
+                }
+              }}
               className={`flex h-[52px] flex-1 flex-col items-center justify-center gap-0.5 rounded-full text-xs font-semibold ${
                 active ? "bg-postal/10 font-bold text-postal" : "text-muted"
               }`}

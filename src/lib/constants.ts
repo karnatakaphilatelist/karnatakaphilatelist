@@ -38,6 +38,14 @@ export const COACH_RUNNING_ATTR = "data-coach-running";
 export const COACH_KEY = "kp:coach:v1";
 /** Fired to start the walkthrough again, for example from Settings. */
 export const COACH_EVENT = "kp:start-coach";
+/**
+ * Fired when the Explore tab is tapped while already on /explore. Same-URL
+ * taps don't trigger Next.js navigation (and the screen stays mounted across
+ * tabs anyway), so without this a search, filter, or open detail card from
+ * before would just sit there looking stuck instead of the tab acting like a
+ * fresh "go to Explore".
+ */
+export const EXPLORE_RESET_EVENT = "kp:explore-reset";
 /** Lite mode: no textures or motion, for older phones and battery saving. */
 export const LITE_MODE_KEY = "kp:lite:v1";
 export const AFTER_AUTH_KEY = "kp:after-auth:v1";

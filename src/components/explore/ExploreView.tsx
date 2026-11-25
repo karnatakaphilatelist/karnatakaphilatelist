@@ -23,7 +23,7 @@ import { useStateOffices } from "@/components/providers/StateProvider";
 import { useVisits } from "@/components/providers/VisitsProvider";
 import { StateSwitcher } from "@/components/ui/StateSwitcher";
 import { LocateIcon } from "@/components/ui/icons";
-import { LOCATION_PRIMED_KEY } from "@/lib/constants";
+import { EXPLORE_RESET_EVENT, LOCATION_PRIMED_KEY } from "@/lib/constants";
 import { isNativeApp } from "@/lib/native";
 import { readJson, writeJson } from "@/lib/local-storage";
 import {
@@ -98,6 +98,23 @@ export function ExploreView({
   useEffect(() => {
     const timer = window.setTimeout(() => setMapReady(true), 1000);
     return () => window.clearTimeout(timer);
+  }, []);
+
+  // Tapping "Explore" in the nav while already on this screen doesn't navigate (same URL,
+  // and the screen stays mounted across tabs anyway), so the tab bar fires this instead —
+  // it should feel like going to a fresh Explore, not land on whatever was left open.
+  useEffect(() => {
+    function reset() {
+      setQuery("");
+      setFilter("all");
+      setSelectedId(null);
+      setEditingId(null);
+      setSnap(0);
+      setStampedId(null);
+      setLocationSheet(null);
+    }
+    window.addEventListener(EXPLORE_RESET_EVENT, reset);
+    return () => window.removeEventListener(EXPLORE_RESET_EVENT, reset);
   }, []);
 
   // A link to one office (for example from the passport) opens that office's state.

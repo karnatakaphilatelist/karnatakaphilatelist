@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { AuthButton } from "@/components/auth/AuthButton";
 import { isActivePath, NAV_ITEMS } from "@/components/layout/nav-items";
+import { EXPLORE_RESET_EVENT } from "@/lib/constants";
 
 export function AppHeader() {
   const pathname = usePathname();
@@ -24,6 +25,15 @@ export function AppHeader() {
                   key={href}
                   href={href}
                   aria-current={active ? "page" : undefined}
+                  // Same URL means no navigation, so the one screen that stays
+                  // mounted with its own filters, search and open cards (Explore)
+                  // gets a reset instead of silently doing nothing.
+                  onClick={(event) => {
+                    if (active && href === "/explore") {
+                      event.preventDefault();
+                      window.dispatchEvent(new Event(EXPLORE_RESET_EVENT));
+                    }
+                  }}
                   className={`flex min-h-11 items-center rounded-full px-4 text-sm font-semibold ${
                     active ? "bg-postal-soft text-postal-dark" : "text-ink"
                   }`}

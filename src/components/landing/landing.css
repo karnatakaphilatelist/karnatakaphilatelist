@@ -182,14 +182,48 @@
   padding: 0 10px;
   display: inline-flex;
   align-items: center;
+  gap: 6px;
   background: none;
   border: 0;
   color: inherit;
   font: inherit;
   cursor: pointer;
 }
+.kpl-nav a svg {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+@media (max-width: 640px) {
+  /* The icon carries the meaning at this width; the label would crowd the bar. */
+  .kpl-nav a span {
+    display: none;
+  }
+  .kpl-nav a {
+    padding: 0 8px;
+  }
+  /* Same rule as the other nav items: the avatar already says "account". */
+  .kpl-account-link a {
+    display: none;
+  }
+}
 .kpl-nav a:hover,
 .kpl-nav button:hover {
+  color: var(--color-postal);
+}
+.kpl-account-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.kpl-account-link a {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  color: inherit;
+  font-weight: 600;
+}
+.kpl-account-link a:hover {
   color: var(--color-postal);
 }
 .kpl-signin {

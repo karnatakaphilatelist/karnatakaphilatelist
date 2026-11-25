@@ -8,6 +8,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
 import { SmoothScroll } from "@/components/motion/SmoothScroll";
 import { AccountAvatar } from "@/components/layout/AccountAvatar";
+import { BookIcon, CompassIcon, LearnIcon } from "@/components/ui/icons";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { isNativeApp } from "@/lib/native";
 import { readJson } from "@/lib/local-storage";
@@ -395,15 +396,25 @@ export function Landing({ offices }: { offices: PostOffice[] }) {
         <div className="kpl-bar">
           <Wordmark />
           <nav className="kpl-meta kpl-nav" aria-label="Main">
-            <Link href="/explore">Explore</Link>
-            <Link href="/passport">My passport</Link>
-            <Link href="/learn">Guide</Link>
+            <Link href="/explore">
+              <CompassIcon /> <span>Explore Map</span>
+            </Link>
+            <Link href="/passport">
+              <BookIcon /> <span>My Passport</span>
+            </Link>
+            <Link href="/learn">
+              <LearnIcon /> <span>Learn</span>
+            </Link>
             {isLoading ? null : user ? (
               // A raw "Sign out" button here is a dead end with no way back
               // to the rest of the account options — this is just an entry
               // point to /account (where sign-out already lives), same as
-              // every other screen's nav.
-              <AccountAvatar className="size-8" />
+              // every other screen's nav. AccountAvatar is its own link, so
+              // the label sits beside it rather than wrapping it in a second one.
+              <span className="kpl-account-link">
+                <AccountAvatar className="size-8" />
+                <Link href="/account">My account</Link>
+              </span>
             ) : (
               <button
                 type="button"

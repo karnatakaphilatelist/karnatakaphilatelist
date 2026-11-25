@@ -16,11 +16,10 @@ enum _StampFilter { all, stamped, togo }
 
 /// Port of src/components/passport/PassportView.tsx: progress header with
 /// state switcher, "up next", "your stamps" (+ full "see all" view), and
-/// district progress. The sign-in nudge banner, auth-aware strings and the
-/// StampImage/postmark photo upload flow all read from VisitsController's
-/// userId/lastError already in place from Stage 2 — no separate auth
-/// screen exists yet (Stage 4), so the "sign in" button is a no-op stub
-/// here, same placeholder choice visit_dialog.dart made for photo upload.
+/// district progress. Stale note from an earlier stage removed: there is no
+/// sign-in stub here, and none is needed — GuestSignInNudge (wrapping the
+/// whole app shell) already prompts guests on a timer, and Account has a
+/// manual "sign in" button, so this screen doesn't need its own.
 class PassportScreen extends StatefulWidget {
   const PassportScreen({super.key});
 

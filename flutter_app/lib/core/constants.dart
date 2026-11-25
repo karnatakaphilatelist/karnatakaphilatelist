@@ -10,6 +10,9 @@ class StorageKeys {
   static const locationPrimed = 'kp:location-primed:v1';
   static const welcomePrompted = 'kp:welcome-prompted:v1';
   static const signInPrompted = 'kp:sign-in-prompted:v1';
+  /// Port of src/lib/constants.ts's ONBOARDED_KEY — set once the first-launch
+  /// welcome tour has been seen (or skipped).
+  static const onboarded = 'kp:onboarded:v1';
 }
 
 /// A guest is invited to sign in once they have stamped this many offices.

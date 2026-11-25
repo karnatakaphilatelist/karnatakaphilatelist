@@ -143,15 +143,42 @@ class _VisitFormState extends State<_VisitForm> {
   Future<void> _pickPhoto() async {
     final signedIn = Supabase.instance.client.auth.currentUser != null;
     if (!signedIn) return; // sign-in prompt is the button itself, below
+    // The label says "take or upload", so offer both instead of only the camera.
+    final source = await showModalBottomSheet<ImageSource>(
+      context: context,
+      backgroundColor: AppColors.card,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (sheetContext) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.camera_alt_outlined),
+              title: const Text('Take a photo'),
+              onTap: () => Navigator.of(sheetContext).pop(ImageSource.camera),
+            ),
+            ListTile(
+              leading: const Icon(Icons.photo_outlined),
+              title: const Text('Choose from gallery'),
+              onTap: () => Navigator.of(sheetContext).pop(ImageSource.gallery),
+            ),
+          ],
+        ),
+      ),
+    );
+    if (source == null || !mounted) return;
     final picker = ImagePicker();
     final file = await picker.pickImage(
-      source: ImageSource.camera,
+      source: source,
       maxWidth: 1600,
       maxHeight: 1600,
       imageQuality: 82,
     );
     if (file == null) return;
     final bytes = await file.readAsBytes();
+    if (!mounted) return;
     setState(() {
       _newPhotoBytes = bytes;
       _removePhoto = false;

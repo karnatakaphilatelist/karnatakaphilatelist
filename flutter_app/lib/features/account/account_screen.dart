@@ -6,6 +6,7 @@ import '../../core/share.dart';
 import '../../data/auth_controller.dart';
 import '../../theme/app_theme.dart';
 import '../auth/sign_in_sheet.dart';
+import '../learn/learn_screen.dart';
 import '../office/visit_dialog.dart';
 import 'edit_profile_screen.dart';
 import 'set_password_screen.dart';
@@ -13,9 +14,9 @@ import 'set_password_screen.dart';
 /// Port of src/components/auth/AccountView.tsx, scoped to this stage. Left
 /// out deliberately (not forgotten): Lite mode (no Flutter equivalent of the
 /// web app's lighter-map setting exists yet) and "Replay the walkthrough"
-/// (there is no onboarding coach in this build). Learn/Privacy/Terms/Contact
-/// open the live website in the external browser rather than porting those
-/// (mostly static) pages a second time.
+/// (there is no onboarding coach in this build). Privacy/Terms/Contact still
+/// open the live website in the external browser; Learn now pushes the
+/// native LearnScreen instead.
 class AccountScreen extends StatelessWidget {
   const AccountScreen({super.key});
 
@@ -107,7 +108,10 @@ class AccountScreen extends StatelessWidget {
               ],
               const SizedBox(height: 16),
               _Row(label: 'Share Philatrail', onTap: _share),
-              _Row(label: 'Learn about philately', onTap: () => _openWeb('/learn')),
+              _Row(
+                label: 'Learn about philately',
+                onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const LearnScreen())),
+              ),
               _Row(label: 'Privacy policy', onTap: () => _openWeb('/privacy')),
               _Row(label: 'Terms of use', onTap: () => _openWeb('/terms')),
               _Row(label: 'Contact us', onTap: () => _openWeb('/contact')),

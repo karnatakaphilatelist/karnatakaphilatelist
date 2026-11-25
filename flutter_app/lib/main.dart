@@ -7,6 +7,7 @@ import 'data/offices_controller.dart';
 import 'data/state_controller.dart';
 import 'data/visits_repository.dart';
 import 'features/office/visit_dialog.dart';
+import 'features/welcome/welcome_tour_screen.dart';
 import 'theme/app_theme.dart';
 
 /// Same Supabase project the web app uses (src/lib/supabase/public.ts) —
@@ -75,7 +76,7 @@ class _PhilatrailAppState extends State<PhilatrailApp> {
               stateController: stateController,
               officesController: officesController,
               authController: authController,
-              child: const AppShell(),
+              child: const WelcomeGate(child: AppShell()),
             )
           : const _MissingConfigScreen(),
     );

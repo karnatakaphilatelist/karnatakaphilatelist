@@ -8,7 +8,8 @@ import '../../theme/app_theme.dart';
 import '../../widgets/glass_card.dart';
 import '../auth/sign_in_sheet.dart';
 import '../learn/learn_screen.dart';
-import '../office/visit_dialog.dart';
+import '../office/visit_dialog.dart' show authControllerOf;
+import '../welcome/welcome_tour_screen.dart';
 import 'edit_profile_screen.dart';
 import 'set_password_screen.dart';
 
@@ -19,12 +20,12 @@ const _kicker = TextStyle(
   letterSpacing: 2.2, // 0.18em of 12px
 );
 
-/// Port of src/components/auth/AccountView.tsx, scoped to this stage. Left
-/// out deliberately (not forgotten): Lite mode (no Flutter equivalent of the
-/// web app's lighter-map setting exists yet) and "Replay the walkthrough"
-/// (there is no onboarding coach in this build). Privacy/Terms/Contact still
-/// open the live website in the external browser; Learn now pushes the
-/// native LearnScreen instead.
+/// Port of src/components/auth/AccountView.tsx, scoped to this stage. Now
+/// that WelcomeTourScreen exists, "Replay the walkthrough" pushes it the
+/// same way Learn pushes its own screen. Still left out deliberately: Lite
+/// mode (no Flutter equivalent of the web app's lighter-map setting exists
+/// yet). Privacy/Terms/Contact still open the live website in the external
+/// browser.
 class AccountScreen extends StatelessWidget {
   const AccountScreen({super.key});
 
@@ -190,6 +191,17 @@ class AccountScreen extends StatelessWidget {
                       _Row(
                         label: 'Learn about philately',
                         onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const LearnScreen())),
+                      ),
+                      const _RowDivider(),
+                      _Row(
+                        label: 'Replay the walkthrough',
+                        onTap: () => Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (routeContext) => WelcomeTourScreen(
+                              onDone: () => Navigator.of(routeContext).pop(),
+                            ),
+                          ),
+                        ),
                       ),
                       const _RowDivider(),
                       _Row(label: 'Privacy policy', onTap: () => _openWeb('/privacy')),

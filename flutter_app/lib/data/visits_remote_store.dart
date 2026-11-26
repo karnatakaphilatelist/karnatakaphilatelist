@@ -123,4 +123,55 @@ class VisitsRemoteStore {
   Future<void> removeStampPhoto(String path) async {
     await _client.storage.from(photoBucket).remove([path]);
   }
+
+  /// Public notes left on one office by any user, newest first. Mirrors
+  /// fetchPublicVisitsForOffice in src/lib/visits/remote-store.ts — relies
+  /// on the "Users read own or public visits" policy on visits and the
+  /// "Anyone can read the profile behind a public visit" policy on profiles
+  /// (both must be applied for other people's notes/names to come back).
+  Future<List<PublicVisitNote>> fetchPublicVisitsForOffice(int officeId) async {
+    final rows = await _client
+        .from('visits')
+        .select('user_id, visited_at, note, photo_path, profile:profiles(full_name, avatar_url)')
+        .eq('post_office_id', officeId)
+        .eq('is_public', true)
+        .not('note', 'is', null)
+        .neq('note', '')
+        .order('visited_at', ascending: false);
+    return (rows as List).map((r) {
+      final row = r as Map<String, dynamic>;
+      // Supabase types the embed as a map for a to-one relation here, but
+      // treat an array the same way the web app does, just in case.
+      final rawProfile = row['profile'];
+      final profile = rawProfile is List
+          ? (rawProfile.isNotEmpty ? rawProfile.first as Map<String, dynamic>? : null)
+          : rawProfile as Map<String, dynamic>?;
+      return PublicVisitNote(
+        userId: row['user_id'] as String,
+        visitedAt: row['visited_at'] as String,
+        note: row['note'] as String? ?? '',
+        photoPath: row['photo_path'] as String?,
+        authorName: profile?['full_name'] as String?,
+        authorAvatarUrl: profile?['avatar_url'] as String?,
+      );
+    }).toList();
+  }
+}
+
+/// A public note on an office, with the author's profile for attribution.
+class PublicVisitNote {
+  final String userId;
+  final String visitedAt;
+  final String note;
+  final String? photoPath;
+  final String? authorName;
+  final String? authorAvatarUrl;
+  const PublicVisitNote({
+    required this.userId,
+    required this.visitedAt,
+    required this.note,
+    required this.photoPath,
+    required this.authorName,
+    required this.authorAvatarUrl,
+  });
 }

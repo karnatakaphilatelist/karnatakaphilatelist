@@ -1,14 +1,13 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 
 import '../../theme/app_theme.dart';
+import '../../widgets/app_icons.dart';
 import '../../widgets/app_sheet.dart';
 
 enum LocationSheetMode { prime, denied }
 
-/// Port of src/components/explore/LocationSheet.tsx: plain-words sheets
-/// around the location permission, so the OS prompt is never a surprise.
+/// Port of src/components/explore/LocationSheet.tsx: plain-words sheets around
+/// the location permission, so the system prompt is never a surprise.
 Future<void> showLocationSheet(
   BuildContext context, {
   required LocationSheetMode mode,
@@ -29,32 +28,30 @@ Future<void> showLocationSheet(
                   width: 44,
                   height: 44,
                   alignment: Alignment.center,
-                  decoration: BoxDecoration(color: AppColors.sand, shape: BoxShape.circle),
-                  child: const Icon(Icons.my_location, size: 22),
+                  decoration: const BoxDecoration(color: AppColors.sand, shape: BoxShape.circle),
+                  child: const AppIconView(AppIcon.target, size: 24, color: AppColors.ink),
                 ),
                 const SizedBox(width: 12),
                 const Expanded(
                   child: Text(
                     'We use your location only to sort post offices by distance and to show how far you are from one. It is not stored or shared.',
-                    style: TextStyle(color: AppColors.muted, height: 1.4),
+                    style: TextStyle(fontSize: 16, height: 24 / 16, color: AppColors.muted),
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 20),
-            FilledButton(
-              style: FilledButton.styleFrom(backgroundColor: AppColors.postal, minimumSize: const Size.fromHeight(52), shape: const StadiumBorder()),
-              onPressed: () {
+            const SizedBox(height: 24),
+            _SheetButton(
+              label: 'Continue',
+              color: AppColors.postal,
+              minHeight: 52,
+              onTap: () {
                 Navigator.of(sheetContext).pop();
                 onContinue?.call();
               },
-              child: const Text('Continue'),
             ),
-            const SizedBox(height: 6),
-            TextButton(
-              onPressed: () => Navigator.of(sheetContext).pop(),
-              child: const Text('Not now', style: TextStyle(color: AppColors.ink, fontWeight: FontWeight.w600)),
-            ),
+            const SizedBox(height: 8),
+            _SheetButton(label: 'Not now', minHeight: 48, onTap: () => Navigator.of(sheetContext).pop()),
           ],
         ),
       LocationSheetMode.denied => Column(
@@ -62,31 +59,57 @@ Future<void> showLocationSheet(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Container(
-              padding: const EdgeInsets.all(14),
+              padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(color: AppColors.warnSoft, borderRadius: BorderRadius.circular(16)),
-              child: Row(
+              child: const Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Icon(Icons.error_outline, color: AppColors.warn, size: 20),
-                  const SizedBox(width: 10),
+                  Padding(padding: EdgeInsets.only(top: 2), child: AppIconView(AppIcon.alert, size: 20, color: AppColors.warn)),
+                  SizedBox(width: 12),
                   Expanded(
                     child: Text(
-                      '${Platform.isIOS || Platform.isAndroid ? "To see what is near you, open your phone's Settings, choose this app, then turn Location on." : "To see what is near you, allow location for this app."} '
+                      "To see what is near you, open your phone's Settings, choose this app, then turn Location on. "
                       'You can still browse and search every post office.',
-                      style: const TextStyle(color: AppColors.warn, height: 1.4),
+                      style: TextStyle(fontSize: 14, height: 20 / 14, color: AppColors.warn),
                     ),
                   ),
                 ],
               ),
             ),
-            const SizedBox(height: 20),
-            FilledButton(
-              style: FilledButton.styleFrom(backgroundColor: AppColors.ink, minimumSize: const Size.fromHeight(52), shape: const StadiumBorder()),
-              onPressed: () => Navigator.of(sheetContext).pop(),
-              child: const Text('OK'),
-            ),
+            const SizedBox(height: 24),
+            _SheetButton(label: 'OK', color: AppColors.ink, minHeight: 52, onTap: () => Navigator.of(sheetContext).pop()),
           ],
         ),
     },
   );
+}
+
+/// A full-width pill button: filled (white bold text) when [color] is set,
+/// otherwise a plain ink semibold text button.
+class _SheetButton extends StatelessWidget {
+  final String label;
+  final Color? color;
+  final double minHeight;
+  final VoidCallback onTap;
+  const _SheetButton({required this.label, this.color, required this.minHeight, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        constraints: BoxConstraints(minHeight: minHeight),
+        alignment: Alignment.center,
+        decoration: color == null ? null : BoxDecoration(color: color, borderRadius: BorderRadius.circular(999)),
+        child: Text(
+          label,
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: color == null ? FontWeight.w600 : FontWeight.w700,
+            color: color == null ? AppColors.ink : Colors.white,
+          ),
+        ),
+      ),
+    );
+  }
 }

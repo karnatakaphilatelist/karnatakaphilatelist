@@ -32,16 +32,15 @@ class PostalTexture extends StatelessWidget {
                 valueListenable: liteMode,
                 builder: (context, lite, _) => lite
                     ? const SizedBox.shrink()
-                    : Align(
-                        alignment: Alignment.topRight,
+                    // Tight constraints (Positioned.fill) so FittedBox really
+                    // covers the box like `background-size: cover`; under an
+                    // Align it only got loose constraints and shrank the art
+                    // into the top-right corner.
+                    : ClipRect(
                         child: FittedBox(
                           fit: BoxFit.cover,
                           alignment: Alignment.topRight,
-                          child: SvgPicture.asset(
-                            'assets/brand/guilloche.svg',
-                            width: 800,
-                            height: 360,
-                          ),
+                          child: SvgPicture.asset('assets/brand/guilloche.svg', width: 800, height: 360),
                         ),
                       ),
               ),

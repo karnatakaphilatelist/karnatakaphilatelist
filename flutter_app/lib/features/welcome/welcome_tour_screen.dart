@@ -2,42 +2,30 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../core/constants.dart';
+import '../../data/learn_articles.dart';
 import '../../theme/app_theme.dart';
+import '../../widgets/app_icons.dart';
+import '../../widgets/glass_card.dart';
 import '../../widgets/postal_texture.dart';
+import '../learn/article_screen.dart';
+import '../office/office_detail_screen.dart' show RedCtaButton;
 
-/// Port of src/components/welcome/WelcomeTour.tsx: a 3-step first-launch
-/// intro, shown once before the main app shell. Reconciled against the live
-/// component on 2026-11-26 after it was flagged as not matching the real
-/// Capacitor-shell app at all — the previous version of this file used a
-/// single flat paper background throughout; the real design is a two-part
-/// screen (a postal-red hero with a huge white headline on top, a paper
-/// body below), which is what this rewrite ports. Simplified from the web
-/// version (acceptable gaps, not silently dropped): no swipe-gesture layer
-/// (PageView already swipes natively) and no map-prefetch warmup (nothing
-/// to prefetch in a native app).
+enum _Mark { pin, check, book }
+
 class _Step {
   final String title;
   final String sub;
   final String body;
-  const _Step({required this.title, required this.sub, required this.body});
+  final _Mark mark;
+  const _Step(this.title, this.sub, this.body, this.mark);
 }
 
 const _steps = [
-  _Step(
-    title: 'Find it.',
-    sub: 'A post office near you',
-    body: 'Open the map and spot a post office close by. Green pins are places you have already stamped.',
-  ),
-  _Step(
-    title: 'Visit it.',
-    sub: 'Go in person',
-    body: 'Visit the post office, ask for the postmark, then tap Stamp it. Add a note or photo if you like.',
-  ),
-  _Step(
-    title: 'Stamp it.',
-    sub: 'Fill your passport',
-    body: 'Each stamp lands in your passport. Watch your count grow, one post office at a time.',
-  ),
+  _Step('Find it.', 'A post office near you',
+      'Open the map and spot a post office close by. Green pins are places you have already stamped.', _Mark.pin),
+  _Step('Visit it.', 'Go in person',
+      'Visit the post office, ask for the postmark, then tap Stamp it. Add a note or photo if you like.', _Mark.check),
+  _Step('Stamp it.', 'Fill your passport', 'Each stamp lands in your passport. Watch your count grow, one post office at a time.', _Mark.book),
 ];
 
 /// Shows the welcome tour if [StorageKeys.onboarded] hasn't been set yet,
@@ -72,6 +60,10 @@ class _WelcomeGateState extends State<WelcomeGate> {
   }
 }
 
+/// Port of src/components/welcome/WelcomeTour.tsx: the three-step first-launch
+/// tour — a `.kp-red` hero (flex 1.15) with the step title and a halo mark,
+/// over a paper body (flex 1) with the step text, legend / booklet card, dots
+/// and the red CTA. Swipe sideways to step.
 class WelcomeTourScreen extends StatefulWidget {
   final VoidCallback onDone;
   const WelcomeTourScreen({super.key, required this.onDone});
@@ -82,39 +74,53 @@ class WelcomeTourScreen extends StatefulWidget {
 
 class _WelcomeTourScreenState extends State<WelcomeTourScreen> {
   int _step = 0;
+  Offset? _swipeStart;
 
   bool get _last => _step == _steps.length - 1;
 
-  Future<void> _finish() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool(StorageKeys.onboarded, true);
-    widget.onDone();
+  @override
+  void initState() {
+    super.initState();
+    // Counts as seen the moment it appears, so closing the app halfway never brings it back.
+    SharedPreferences.getInstance().then((prefs) => prefs.setBool(StorageKeys.onboarded, true));
   }
 
-  void _next() {
-    if (_last) {
-      _finish();
-    } else {
-      setState(() => _step += 1);
-    }
-  }
+  void _finish() => widget.onDone();
+
+  void _next() => _last ? _finish() : setState(() => _step += 1);
 
   @override
   Widget build(BuildContext context) {
     final current = _steps[_step];
+    final safeTop = MediaQuery.of(context).padding.top;
+    final shortScreen = MediaQuery.of(context).size.height <= 720;
     return Scaffold(
       backgroundColor: AppColors.paper,
-      body: Column(
-        children: [
-          // ── Red hero: wordmark/skip row, step eyebrow, huge headline, gold sub, halo mark ──
-          Expanded(
-            flex: 115,
-            child: PostalTexture(
-              child: SafeArea(
-                bottom: false,
+      body: Listener(
+        onPointerDown: (e) => _swipeStart = e.position,
+        onPointerUp: (e) {
+          final start = _swipeStart;
+          _swipeStart = null;
+          if (start == null) return;
+          final dx = e.position.dx - start.dx;
+          final dy = e.position.dy - start.dy;
+          if (dx.abs() < 40 || dx.abs() < dy.abs() * 1.2) return;
+          if (dx < 0) {
+            _next();
+          } else if (_step > 0) {
+            setState(() => _step -= 1);
+          }
+        },
+        child: Column(
+          children: [
+            // ── Red hero ──
+            Expanded(
+              flex: 115,
+              child: PostalTexture(
                 child: Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
+                  padding: EdgeInsets.fromLTRB(16, safeTop + 24, 16, 0),
                   child: Stack(
+                    clipBehavior: Clip.none,
                     children: [
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -124,251 +130,293 @@ class _WelcomeTourScreenState extends State<WelcomeTourScreen> {
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                const Text(
-                                  'PHILATRAIL',
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.w800,
-                                    fontSize: 12,
-                                    letterSpacing: 2.2,
-                                  ),
-                                ),
-                                TextButton(
-                                  onPressed: _finish,
-                                  style: TextButton.styleFrom(foregroundColor: Colors.white, minimumSize: const Size(0, 44)),
-                                  child: const Text(
-                                    'SKIP',
-                                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12, letterSpacing: 1.8),
+                                const Text('PHILATRAIL',
+                                    style: TextStyle(
+                                        fontSize: 12, height: 16 / 12, fontWeight: FontWeight.w800, letterSpacing: 12 * 0.22, color: Colors.white)),
+                                GestureDetector(
+                                  behavior: HitTestBehavior.opaque,
+                                  onTap: _finish,
+                                  child: Container(
+                                    constraints: const BoxConstraints(minHeight: 44),
+                                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                                    transform: Matrix4.translationValues(8, 0, 0),
+                                    alignment: Alignment.center,
+                                    child: const Text('SKIP',
+                                        style: TextStyle(
+                                            fontSize: 12, height: 16 / 12, fontWeight: FontWeight.w700, letterSpacing: 12 * 0.18, color: Colors.white)),
                                   ),
                                 ),
                               ],
                             ),
                           ),
                           const SizedBox(height: 24),
-                          Row(
-                            key: ValueKey(_step),
-                            children: [
-                              const Text(
-                                'HOW IT WORKS',
-                                style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12, letterSpacing: 1.8),
-                              ),
-                              const SizedBox(width: 14),
-                              Container(width: 1, height: 14, color: AppColors.goldOnRed),
-                              const SizedBox(width: 14),
-                              Text(
-                                '${_step + 1} of ${_steps.length}',
-                                style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12, letterSpacing: 1.8),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 14),
-                          FittedBox(
-                            key: ValueKey('headline-$_step'),
-                            fit: BoxFit.scaleDown,
-                            alignment: Alignment.centerLeft,
-                            child: Text(
-                              current.title.toUpperCase(),
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w500,
-                                fontSize: 64,
-                                height: 1.05,
-                                letterSpacing: 0.2,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            current.sub.toUpperCase(),
-                            key: ValueKey('sub-$_step'),
-                            style: const TextStyle(
-                              color: AppColors.goldOnRed,
-                              fontWeight: FontWeight.bold,
-                              fontStyle: FontStyle.italic,
-                              fontSize: 18,
-                              letterSpacing: 0.6,
+                          _Pop(
+                            key: ValueKey('head-$_step'),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    const Text('HOW IT WORKS', style: _kickerWhite),
+                                    const SizedBox(width: 14),
+                                    Container(width: 1, height: 16, color: AppColors.goldOnRed),
+                                    const SizedBox(width: 14),
+                                    Text('${_step + 1} OF ${_steps.length}', style: _kickerWhite),
+                                  ],
+                                ),
+                                const SizedBox(height: 20),
+                                Transform.translate(
+                                  offset: const Offset(-4, 0),
+                                  child: Text(
+                                    current.title.toUpperCase(),
+                                    style: const TextStyle(
+                                        fontSize: 72, height: 76 / 72, fontWeight: FontWeight.w500, letterSpacing: 0.72, color: Colors.white),
+                                  ),
+                                ),
+                                const SizedBox(height: 12),
+                                Text(
+                                  current.sub.toUpperCase(),
+                                  style: const TextStyle(
+                                    fontSize: 20,
+                                    height: 24 / 20,
+                                    fontWeight: FontWeight.w700,
+                                    fontStyle: FontStyle.italic,
+                                    letterSpacing: 20 * 0.08,
+                                    color: AppColors.goldOnRed,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                         ],
                       ),
-                      Positioned(
-                        right: 0,
-                        bottom: 24,
-                        child: _Halo(key: ValueKey('halo-$_step'), step: _step),
-                      ),
+                      if (!shortScreen)
+                        // bottom-6 right-6 of the hero for the 112px disc; this box
+                        // adds 36px of ring on each side and sits inside px-4.
+                        Positioned(
+                          right: 24 - 16 - 36,
+                          bottom: 24 - 36,
+                          child: _Pop(key: ValueKey('halo-$_step'), child: _Halo(mark: current.mark)),
+                        ),
                     ],
                   ),
                 ),
               ),
             ),
-          ),
-          // ── Paper body: copy, pin legend (step 0 only), dots, CTA ──
-          Expanded(
-            flex: 100,
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
-              child: SafeArea(
-                top: false,
+            // ── Paper body ──
+            Expanded(
+              flex: 100,
+              child: Padding(
+                padding: EdgeInsets.fromLTRB(16, 24, 16, 32 + MediaQuery.of(context).padding.bottom),
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(current.body, key: ValueKey('body-$_step'), style: const TextStyle(fontSize: 16, height: 1.4, color: AppColors.ink)),
-                          if (_step == 0) ...[
-                            const SizedBox(height: 20),
-                            Wrap(
-                              spacing: 8,
-                              runSpacing: 8,
-                              children: const [
-                                _Legend(color: AppColors.lineStrong, label: 'Not visited', icon: null),
-                                _Legend(color: Color(0xFF2F4AA8), label: 'Planned', icon: Icons.flag),
-                                _Legend(color: AppColors.visited, label: 'Visited', icon: Icons.check),
+                      child: SingleChildScrollView(
+                        physics: const NeverScrollableScrollPhysics(),
+                        child: _Pop(
+                          key: ValueKey('body-$_step'),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(current.body, style: const TextStyle(fontSize: 16, height: 24 / 16, color: AppColors.ink)),
+                              if (_step == 0) ...[
+                                const SizedBox(height: 24),
+                                const Wrap(
+                                  spacing: 8,
+                                  runSpacing: 8,
+                                  children: [_LegendChip(_Mark.pin), _LegendChip(_Mark.book), _LegendChip(_Mark.check)],
+                                ),
                               ],
+                              if (_last) ...[
+                                const SizedBox(height: 24),
+                                GestureDetector(
+                                  onTap: () {
+                                    final article = articles.firstWhere((a) => a.slug == 'get-the-booklet');
+                                    Navigator.of(context).push(MaterialPageRoute(builder: (_) => ArticleScreen(article: article)));
+                                  },
+                                  child: GlassCard(
+                                    borderRadius: const BorderRadius.all(Radius.circular(16)),
+                                    padding: const EdgeInsets.all(16),
+                                    child: Text.rich(
+                                      const TextSpan(
+                                        style: TextStyle(fontSize: 14, height: 20 / 14, color: AppColors.ink),
+                                        children: [
+                                          TextSpan(text: 'No booklet yet?', style: TextStyle(fontWeight: FontWeight.w700)),
+                                          TextSpan(text: " Philatrail goes with Karnataka's Philately Passport, sold by Karnataka Postal Circle. "),
+                                          TextSpan(
+                                            text: 'See where to get it',
+                                            style: TextStyle(
+                                              fontWeight: FontWeight.w700,
+                                              color: AppColors.postal,
+                                              decoration: TextDecoration.underline,
+                                              decorationColor: AppColors.postal,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: Row(
+                        children: [
+                          for (var i = 0; i < _steps.length; i++)
+                            Semantics(
+                              button: true,
+                              label: 'Go to step ${i + 1}: ${_steps[i].title}',
+                              child: GestureDetector(
+                                behavior: HitTestBehavior.opaque,
+                                onTap: () => setState(() => _step = i),
+                                child: Container(
+                                  height: 36,
+                                  constraints: const BoxConstraints(minWidth: 24),
+                                  padding: const EdgeInsets.only(right: 6),
+                                  alignment: Alignment.center,
+                                  child: AnimatedContainer(
+                                    duration: const Duration(milliseconds: 150),
+                                    width: i == _step ? 28 : 8,
+                                    height: 8,
+                                    decoration: BoxDecoration(
+                                      color: i == _step ? AppColors.postal : AppColors.warmBrown.withValues(alpha: 0.25),
+                                      borderRadius: BorderRadius.circular(999),
+                                    ),
+                                  ),
+                                ),
+                              ),
                             ),
-                          ],
                         ],
                       ),
                     ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: List.generate(
-                        _steps.length,
-                        (i) => Padding(
-                          padding: const EdgeInsets.only(right: 6),
-                          child: GestureDetector(
-                            onTap: () => setState(() => _step = i),
-                            child: AnimatedContainer(
-                              duration: const Duration(milliseconds: 200),
-                              height: 8,
-                              width: i == _step ? 28 : 8,
-                              decoration: BoxDecoration(
-                                color: i == _step ? AppColors.postal : const Color(0xFF785A1E).withValues(alpha: 0.25),
-                                borderRadius: BorderRadius.circular(999),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 12),
                     SizedBox(
-                      width: double.infinity,
                       height: 62,
-                      child: DecoratedBox(
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(28),
-                          gradient: const LinearGradient(
-                            begin: Alignment.topCenter,
-                            end: Alignment.bottomCenter,
-                            colors: [Color(0xFFE0334A), AppColors.postal],
-                          ),
-                          boxShadow: [
-                            BoxShadow(color: AppColors.postal.withValues(alpha: 0.35), blurRadius: 18, offset: const Offset(0, 8)),
-                          ],
-                        ),
-                        child: Material(
-                          color: Colors.transparent,
-                          child: InkWell(
-                            borderRadius: BorderRadius.circular(28),
-                            onTap: _next,
-                            child: Center(
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Text(
-                                    _last ? 'START COLLECTING' : 'NEXT',
-                                    style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16, letterSpacing: 2.2),
-                                  ),
-                                  const SizedBox(width: 8),
-                                  const Icon(Icons.arrow_forward, color: Colors.white, size: 20),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
+                      child: RedCtaButton(
+                        label: _last ? 'Start collecting' : 'Next',
+                        icon: AppIcon.arrowRight,
+                        onTap: _next,
                       ),
                     ),
-                    const SizedBox(height: 14),
                   ],
                 ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
 }
 
-/// The mark of each step: a glowing halo with the thing you're looking for
-/// inside — port of WelcomeTour.tsx's Halo component.
-class _Halo extends StatelessWidget {
-  final int step;
-  const _Halo({super.key, required this.step});
+const _kickerWhite = TextStyle(fontSize: 12, height: 16 / 12, fontWeight: FontWeight.w700, letterSpacing: 12 * 0.18, color: Colors.white);
+
+/// `kpt-pop`: rises 18px, scales from 0.92 and fades in over 0.6s with a slight overshoot.
+class _Pop extends StatelessWidget {
+  final Widget child;
+  const _Pop({super.key, required this.child});
 
   @override
   Widget build(BuildContext context) {
-    final (color, icon) = switch (step) {
-      0 => (const Color(0xFF2F4AA8), null),
-      1 => (AppColors.visited, Icons.check),
-      _ => (AppColors.postal, Icons.menu_book),
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0, end: 1),
+      duration: const Duration(milliseconds: 600),
+      curve: const Cubic(0.2, 1.3, 0.4, 1),
+      child: child,
+      builder: (context, t, child) => Opacity(
+        opacity: t.clamp(0.0, 1.0),
+        child: Transform.translate(
+          offset: Offset(0, 18 * (1 - t)),
+          child: Transform.scale(scale: 0.92 + 0.08 * t, child: child),
+        ),
+      ),
+    );
+  }
+}
+
+/// The glowing halo with the step's mark: a 112px `#2f4aa8`/25 disc with two
+/// faint white rings outside it, and a 52px mark with a 5px white border.
+class _Halo extends StatelessWidget {
+  final _Mark mark;
+  const _Halo({required this.mark});
+
+  @override
+  Widget build(BuildContext context) {
+    final (Color fill, Widget? inner, List<BoxShadow> shadow) = switch (mark) {
+      _Mark.pin => (AppColors.pinBlue, null, [cssShadow(0, 3, 10, 0, AppColors.pinBlue.withValues(alpha: 0.6))]),
+      _Mark.check => (
+          AppColors.stampGreen,
+          const AppIconView(AppIcon.check, size: 24, color: Colors.white, strokeWidth: 3.4),
+          [cssShadow(0, 3, 10, 0, AppColors.stampGreen.withValues(alpha: 0.6))]
+        ),
+      _Mark.book => (
+          AppColors.postal,
+          const AppIconView(AppIcon.book, size: 24, color: Colors.white),
+          [cssShadow(0, 10, 15, -3, Colors.black.withValues(alpha: 0.1)), cssShadow(0, 4, 6, -4, Colors.black.withValues(alpha: 0.1))]
+        ),
     };
     return SizedBox(
-      width: 112,
-      height: 112,
+      width: 112 + 72,
+      height: 112 + 72,
       child: Stack(
         alignment: Alignment.center,
         children: [
-          Container(
-            width: 112,
-            height: 112,
-            decoration: BoxDecoration(shape: BoxShape.circle, color: const Color(0xFF2F4AA8).withValues(alpha: 0.25)),
-          ),
-          Container(
-            width: 94,
-            height: 94,
-            decoration: BoxDecoration(shape: BoxShape.circle, border: Border.all(color: Colors.white.withValues(alpha: 0.1))),
-          ),
-          Container(
-            width: 70,
-            height: 70,
-            decoration: BoxDecoration(shape: BoxShape.circle, border: Border.all(color: Colors.white.withValues(alpha: 0.1))),
-          ),
+          _ring(112 + 72),
+          _ring(112 + 32),
+          Container(width: 112, height: 112, decoration: BoxDecoration(color: AppColors.pinBlue.withValues(alpha: 0.25), shape: BoxShape.circle)),
           Container(
             width: 52,
             height: 52,
-            decoration: BoxDecoration(shape: BoxShape.circle, color: color, border: Border.all(color: Colors.white, width: 5)),
-            child: icon != null ? Icon(icon, color: Colors.white, size: 22) : null,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(color: fill, shape: BoxShape.circle, border: Border.all(color: Colors.white, width: 5), boxShadow: shadow),
+            child: inner,
           ),
         ],
       ),
     );
   }
+
+  Widget _ring(double size) => Container(
+        width: size,
+        height: size,
+        decoration: BoxDecoration(shape: BoxShape.circle, border: Border.all(color: Colors.white.withValues(alpha: 0.1))),
+      );
 }
 
-class _Legend extends StatelessWidget {
-  final Color color;
-  final String label;
-  final IconData? icon;
-  const _Legend({required this.color, required this.label, required this.icon});
+class _LegendChip extends StatelessWidget {
+  final _Mark kind; // pin = not visited, book = planned, check = visited
+  const _LegendChip(this.kind);
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      decoration: BoxDecoration(color: AppColors.card, borderRadius: BorderRadius.circular(999), border: Border.all(color: AppColors.line)),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          icon != null
-              ? Icon(icon, size: 14, color: color)
-              : Container(width: 12, height: 12, decoration: BoxDecoration(shape: BoxShape.circle, border: Border.all(color: color, width: 2))),
-          const SizedBox(width: 6),
-          Text(label, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
-        ],
+    final (Widget icon, String label) = switch (kind) {
+      _Mark.pin => (
+          Container(width: 14, height: 14, decoration: BoxDecoration(shape: BoxShape.circle, border: Border.all(color: AppColors.muted, width: 2))),
+          'Not visited'
+        ),
+      _Mark.book => (const AppIconView(AppIcon.flag, size: 16, color: AppColors.pinBlue), 'Planned'),
+      _Mark.check => (const AppIconView(AppIcon.check, size: 16, color: AppColors.stampGreen, strokeWidth: 3), 'Visited'),
+    };
+    return GlassCard(
+      borderRadius: const BorderRadius.all(Radius.circular(999)),
+      child: SizedBox(
+        height: 40,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 14),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              icon,
+              const SizedBox(width: 8),
+              Text(label, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.ink)),
+            ],
+          ),
+        ),
       ),
     );
   }

@@ -104,6 +104,11 @@
       var(--wm-sw) * 161 / 553 + 8px + var(--wm-sw) * 161 / 628
     );
   }
+  .kpl-mark:not(.kpl-mark--hero) {
+    /* The stacked mark is wider than the one-line title's box (--wm-w), so reserve its own
+       width, or it spills out over the nav icons beside it. */
+    width: var(--wm-sw);
+  }
   .kpl-wm {
     display: none;
   }

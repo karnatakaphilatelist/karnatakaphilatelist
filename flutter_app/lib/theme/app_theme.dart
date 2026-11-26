@@ -34,6 +34,11 @@ class AppColors {
   static const warnSoft = Color(0xFFFDEBD3);
 
   static const focus = Color(0xFF16204F);
+
+  /// Not a global token on the web app — a one-off (#f7c96b) used only on
+  /// red "kp-red" surfaces (Passport header stamped count/progress bar,
+  /// sign-in sheet's gold tagline). Keep it separate from `planned`.
+  static const goldOnRed = Color(0xFFF7C96B);
 }
 
 /// Font families match `--font-display` (Fraunces, headlines), `--font-sans`

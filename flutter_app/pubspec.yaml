@@ -63,6 +63,12 @@ dependencies:
   # see DESIGN.md / CLAUDE.md widget note; this only pushes data + triggers reloads)
   home_widget: ^0.7.0
 
+  # Renders the real brand SVGs (guilloche security-print texture, wordmark)
+  # vendored straight from the web app's public/brand/ — so the Passport
+  # header and sign-in sheet match philatrail.com pixel-for-pixel instead of
+  # an approximated gradient.
+  flutter_svg: ^2.0.10+1
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -75,6 +81,10 @@ flutter:
     # rendered to PNG — see assets/icons/README.txt), used on the Google
     # sign-in button instead of Material's unrelated "g_mobiledata" glyph.
     - assets/icons/google_logo.png
+    # The exact guilloche security-print texture (public/brand/guilloche.svg)
+    # the web app lays over its red surfaces (.kp-red: Passport header,
+    # sign-in sheet hero, guest "save progress" card).
+    - assets/brand/guilloche.svg
   # Same brand fonts as the web app (see lib/theme/app_theme.dart and the
   # reconciled DESIGN.md): Fraunces for headlines, Figtree for body, Courier
   # Prime for tabular/postal details. Vendored from the exact @fontsource-variable

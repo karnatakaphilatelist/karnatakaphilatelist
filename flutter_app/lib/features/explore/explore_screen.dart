@@ -8,6 +8,7 @@ import '../../core/office_status.dart';
 import '../../data/nearby_notifications.dart';
 import '../../models/post_office.dart';
 import '../../theme/app_theme.dart';
+import '../../widgets/account_avatar.dart';
 import '../office/office_detail_screen.dart';
 import '../office/visit_dialog.dart';
 import 'filter_chips.dart';
@@ -203,32 +204,40 @@ class _ExploreScreenState extends State<ExploreScreen> {
                 right: 16,
                 child: Column(
                   children: [
-                    Container(
-                      height: 48,
-                      decoration: BoxDecoration(
-                        color: AppColors.card,
-                        borderRadius: BorderRadius.circular(16),
-                        boxShadow: const [BoxShadow(color: Color(0x1A000000), blurRadius: 10, offset: Offset(0, 2))],
-                      ),
-                      child: TextField(
-                        controller: _searchController,
-                        onChanged: (v) => setState(() => _query = v),
-                        decoration: InputDecoration(
-                          hintText: 'Search name, district or pincode',
-                          prefixIcon: const Icon(Icons.search, color: AppColors.muted, size: 20),
-                          suffixIcon: _query.isEmpty
-                              ? null
-                              : IconButton(
-                                  icon: const Icon(Icons.close, size: 18),
-                                  onPressed: () {
-                                    _searchController.clear();
-                                    setState(() => _query = '');
-                                  },
-                                ),
-                          border: InputBorder.none,
-                          contentPadding: const EdgeInsets.symmetric(vertical: 14),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Container(
+                            height: 56,
+                            decoration: BoxDecoration(
+                              color: AppColors.card,
+                              borderRadius: BorderRadius.circular(28),
+                              boxShadow: const [BoxShadow(color: Color(0x1A000000), blurRadius: 10, offset: Offset(0, 2))],
+                            ),
+                            child: TextField(
+                              controller: _searchController,
+                              onChanged: (v) => setState(() => _query = v),
+                              decoration: InputDecoration(
+                                hintText: 'Search post offices',
+                                prefixIcon: const Icon(Icons.search, color: AppColors.muted, size: 20),
+                                suffixIcon: _query.isEmpty
+                                    ? null
+                                    : IconButton(
+                                        icon: const Icon(Icons.close, size: 18),
+                                        onPressed: () {
+                                          _searchController.clear();
+                                          setState(() => _query = '');
+                                        },
+                                      ),
+                                border: InputBorder.none,
+                                contentPadding: const EdgeInsets.symmetric(vertical: 16),
+                              ),
+                            ),
+                          ),
                         ),
-                      ),
+                        const SizedBox(width: 10),
+                        const AccountAvatarButton(size: 56),
+                      ],
                     ),
                     const SizedBox(height: 10),
                     StatusFilterChips(

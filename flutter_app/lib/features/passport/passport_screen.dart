@@ -6,6 +6,9 @@ import '../../core/states.dart';
 import '../../data/state_controller.dart';
 import '../../models/post_office.dart';
 import '../../theme/app_theme.dart';
+import '../../widgets/account_avatar.dart';
+import '../../widgets/glass_card.dart';
+import '../../widgets/postal_texture.dart';
 import '../explore/explore_screen.dart';
 import '../office/visit_dialog.dart';
 import 'district_progress.dart';
@@ -85,77 +88,85 @@ class _PassportScreenState extends State<PassportScreen> {
       body: CustomScrollView(
         slivers: [
           SliverToBoxAdapter(
-            child: Container(
-              decoration: const BoxDecoration(
-                color: AppColors.postal,
-                borderRadius: BorderRadius.vertical(bottom: Radius.circular(28)),
-              ),
-              padding: EdgeInsets.fromLTRB(16, MediaQuery.of(context).padding.top + 24, 16, 24),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      const Text('MY PASSPORT',
-                          style: TextStyle(color: Colors.white70, fontWeight: FontWeight.bold, fontSize: 12, letterSpacing: 1.4)),
-                      const SizedBox(width: 14),
-                      Container(width: 1, height: 14, color: Colors.white38),
-                      const SizedBox(width: 14),
-                      TextButton(
-                        style: TextButton.styleFrom(padding: EdgeInsets.zero, foregroundColor: Colors.white),
-                        onPressed: () => showShareProgressSheet(
-                          context,
-                          stamped: visited.length,
-                          total: total,
-                          stateName: stateName(stateCode),
-                          onResult: (_) {},
+            child: PostalTexture(
+              borderRadius: const BorderRadius.vertical(bottom: Radius.circular(28)),
+              child: Padding(
+                padding: EdgeInsets.fromLTRB(16, MediaQuery.of(context).padding.top + 24, 16, 24),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text('PHILATRAIL',
+                            style: TextStyle(color: Colors.white, fontWeight: FontWeight.w800, fontSize: 12, letterSpacing: 2.4)),
+                        AccountAvatarButton(onWhite: true),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    Row(
+                      children: [
+                        const Text('MY PASSPORT',
+                            style: TextStyle(color: Colors.white70, fontWeight: FontWeight.bold, fontSize: 12, letterSpacing: 1.4)),
+                        const SizedBox(width: 14),
+                        Container(width: 1, height: 14, color: AppColors.goldOnRed),
+                        const SizedBox(width: 14),
+                        TextButton(
+                          style: TextButton.styleFrom(padding: EdgeInsets.zero, foregroundColor: Colors.white),
+                          onPressed: () => showShareProgressSheet(
+                            context,
+                            stamped: visited.length,
+                            total: total,
+                            stateName: stateName(stateCode),
+                            onResult: (_) {},
+                          ),
+                          child: const Text('SHARE PROGRESS', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, letterSpacing: 1.4)),
                         ),
-                        child: const Text('SHARE PROGRESS', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, letterSpacing: 1.4)),
+                      ],
+                    ),
+                    const SizedBox(height: 6),
+                    DropdownButtonHideUnderline(
+                      child: DropdownButton<String>(
+                        value: stateCode,
+                        dropdownColor: AppColors.card,
+                        style: const TextStyle(color: Colors.white, fontSize: 40, fontWeight: FontWeight.w500, letterSpacing: 0.2),
+                        iconEnabledColor: AppColors.goldOnRed,
+                        isExpanded: true,
+                        items: states
+                            .map((s) => DropdownMenuItem(value: s.code, child: Text(s.name.toUpperCase())))
+                            .toList(),
+                        onChanged: (code) {
+                          if (code != null) stateController.choose(code);
+                        },
                       ),
-                    ],
-                  ),
-                  const SizedBox(height: 10),
-                  DropdownButtonHideUnderline(
-                    child: DropdownButton<String>(
-                      value: stateCode,
-                      dropdownColor: AppColors.card,
-                      style: const TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.w600),
-                      iconEnabledColor: Colors.white,
-                      isExpanded: true,
-                      items: states
-                          .map((s) => DropdownMenuItem(value: s.code, child: Text(s.name.toUpperCase())))
-                          .toList(),
-                      onChanged: (code) {
-                        if (code != null) stateController.choose(code);
-                      },
                     ),
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    '${visited.length} of $total',
-                    style: const TextStyle(
-                      color: Color(0xFFF7C96B),
-                      fontWeight: FontWeight.bold,
-                      fontStyle: FontStyle.italic,
-                      fontSize: 20,
+                    const SizedBox(height: 6),
+                    Text(
+                      '${visited.length} of $total',
+                      style: const TextStyle(
+                        color: AppColors.goldOnRed,
+                        fontWeight: FontWeight.bold,
+                        fontStyle: FontStyle.italic,
+                        fontSize: 20,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 10),
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(999),
-                    child: LinearProgressIndicator(
-                      value: percent / 100,
-                      minHeight: 4,
-                      backgroundColor: Colors.white24,
-                      valueColor: const AlwaysStoppedAnimation(Color(0xFFF7C96B)),
+                    const SizedBox(height: 10),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(999),
+                      child: LinearProgressIndicator(
+                        value: percent / 100,
+                        minHeight: 4,
+                        backgroundColor: Colors.white24,
+                        valueColor: const AlwaysStoppedAnimation(AppColors.goldOnRed),
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 8),
-                  Center(
-                    child: Text('$toGo TO GO',
-                        style: const TextStyle(color: Colors.white70, fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 1.6)),
-                  ),
-                ],
+                    const SizedBox(height: 8),
+                    Center(
+                      child: Text('$toGo TO GO',
+                          style: const TextStyle(color: Colors.white70, fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 1.6)),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
@@ -170,10 +181,15 @@ class _PassportScreenState extends State<PassportScreen> {
                     spacing: 8,
                     runSpacing: 8,
                     children: upNext
-                        .map((o) => Chip(
-                              label: Text(o.name),
-                              backgroundColor: AppColors.card,
-                              side: BorderSide.none,
+                        .map((o) => GlassCard(
+                              borderRadius: BorderRadius.circular(999),
+                              padding: const EdgeInsets.symmetric(horizontal: 14),
+                              child: SizedBox(
+                                height: 40,
+                                child: Center(
+                                  child: Text(o.name, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
+                                ),
+                              ),
                             ))
                         .toList(),
                   ),

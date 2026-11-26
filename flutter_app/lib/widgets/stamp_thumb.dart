@@ -2,60 +2,66 @@ import 'package:flutter/material.dart';
 
 import '../core/stamp_image.dart';
 import '../theme/app_theme.dart';
+import 'app_icons.dart';
 
-/// Port of src/components/office/StampThumb.tsx: the office's official PPC
-/// stamp image, always shown in full colour (the green verified badge
-/// elsewhere is the visited indicator) — falls back to a mail icon when
-/// there is no image yet or it fails to load. `errorBuilder` on
-/// Image.network replaces the web version's onError+useState dance.
+/// Port of src/components/office/StampThumb.tsx: the office's PPC stamp
+/// image on a sand tile (rounded-xl), always full colour; a mail outline at
+/// half size when there's no image or it fails to load.
+///
+/// [hero] adds the office-detail treatment from OfficeDetail.tsx
+/// (`rounded-2xl border border-ink/10 shadow-[0_2px_8px_rgb(22_32_79/0.06)]`).
 class StampThumb extends StatelessWidget {
   final String? path;
-  /// Fixed square side when not [natural]. Ignored when [natural] is true.
+
+  /// Fixed square side when not [natural].
   final double size;
-  /// When true, the container sizes to the image's own aspect ratio
-  /// (bounded to a max box) instead of a fixed square — used for the
-  /// office-detail hero, where each stamp keeps its own proportions.
+
+  /// Size to the image's own proportions (max 160×180, 4px inset) instead
+  /// of a fixed square; the fallback is a 52px square.
   final bool natural;
-  const StampThumb({super.key, required this.path, this.size = 52, this.natural = false});
+  final bool hero;
+  const StampThumb({super.key, required this.path, this.size = 52, this.natural = false, this.hero = false});
 
   @override
   Widget build(BuildContext context) {
     final url = stampImageUrl(path);
-    final fallback = Container(
-      width: natural ? 52 : size,
-      height: natural ? 52 : size,
-      alignment: Alignment.center,
-      decoration: BoxDecoration(color: AppColors.sand, borderRadius: BorderRadius.circular(12)),
-      child: Icon(Icons.mail_outline, color: AppColors.muted, size: (natural ? 52 : size) / 2),
+    final side = natural ? 52.0 : size;
+    final fallback = SizedBox(
+      width: side,
+      height: side,
+      child: Center(child: AppIconView(AppIcon.mail, size: side / 2, color: AppColors.muted)),
     );
+    Widget inner;
     if (url == null) {
-      return natural
-          ? fallback
-          : ClipRRect(borderRadius: BorderRadius.circular(12), child: fallback);
-    }
-
-    final image = Image.network(
-      url,
-      fit: natural ? BoxFit.contain : BoxFit.contain,
-      errorBuilder: (context, error, stackTrace) => fallback,
-    );
-
-    if (natural) {
-      return ConstrainedBox(
+      inner = fallback;
+    } else if (natural) {
+      inner = ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 160, maxHeight: 180),
-        child: Container(
+        child: Padding(
           padding: const EdgeInsets.all(4),
-          decoration: BoxDecoration(color: AppColors.sand, borderRadius: BorderRadius.circular(12)),
-          child: image,
+          child: Image.network(url, errorBuilder: (_, __, ___) => fallback),
+        ),
+      );
+    } else {
+      inner = SizedBox(
+        width: size,
+        height: size,
+        child: Padding(
+          padding: const EdgeInsets.all(4),
+          child: Image.network(url, fit: BoxFit.contain, errorBuilder: (_, __, ___) => fallback),
         ),
       );
     }
+    final radius = BorderRadius.circular(hero ? 16 : 12);
     return Container(
-      width: size,
-      height: size,
-      padding: const EdgeInsets.all(4),
-      decoration: BoxDecoration(color: AppColors.sand, borderRadius: BorderRadius.circular(12)),
-      child: image,
+      clipBehavior: Clip.antiAlias,
+      decoration: BoxDecoration(
+        color: AppColors.sand,
+        borderRadius: radius,
+        border: hero ? Border.all(color: AppColors.ink.withValues(alpha: 0.1)) : null,
+        boxShadow: hero ? [cssShadow(0, 2, 8, 0, AppColors.ink.withValues(alpha: 0.06))] : null,
+      ),
+      child: inner,
     );
   }
 }

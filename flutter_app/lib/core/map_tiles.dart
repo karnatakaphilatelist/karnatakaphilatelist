@@ -21,10 +21,17 @@ class TileConfig {
   });
 }
 
-const String _maptilerKey = String.fromEnvironment(
-  'MAPTILER_KEY',
-  defaultValue: 'R0dDhO97QPuaVDHuLXe2',
-);
+// An *empty* --dart-define still counts as defined, so `defaultValue` alone
+// never kicks in when CI passes `--dart-define=MAPTILER_KEY=""` from an
+// unset secret — which is exactly what silently swapped every CI build to
+// the plain OSM tiles. Treat empty as "not set".
+const String _maptilerKeyDefine = String.fromEnvironment('MAPTILER_KEY');
+const String _maptilerKey =
+    _maptilerKeyDefine == '' ? 'R0dDhO97QPuaVDHuLXe2' : _maptilerKeyDefine;
+
+/// MapTiler keys can be locked to allowed origins; the web app's requests
+/// come from philatrail.com, so the native app identifies the same way.
+const Map<String, String> tileHeaders = {'Referer': 'https://philatrail.com/'};
 
 /// MapTiler's "Dataviz" style: clean, detail-rich, same OSM data, CDN-backed.
 const TileConfig _maptilerConfig = TileConfig(

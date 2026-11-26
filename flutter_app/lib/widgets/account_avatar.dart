@@ -1,14 +1,43 @@
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
-import '../features/account/account_screen.dart';
+import '../app_shell.dart' show goToTab;
 import '../features/office/visit_dialog.dart' show authControllerOf;
 import '../theme/app_theme.dart';
+import 'app_icons.dart';
 
-/// Port of src/components/layout/AccountAvatar.tsx: the round account button
-/// used on Explore's search bar and the Passport header. Initial when signed
-/// in (no profile-photo fetch wired up yet — falls back to the person icon),
-/// a plain person glyph as a guest. `onWhite` flips it for use on the red
-/// Passport header, matching the web component's `onWhite` prop exactly.
+String? _metadataString(User user, List<String> keys) {
+  for (final key in keys) {
+    final value = user.userMetadata?[key];
+    if (value is String && value.trim().isNotEmpty) return value.trim();
+  }
+  return null;
+}
+
+/// Port of src/lib/user-display.ts.
+String? displayName(User user) => _metadataString(user, ['full_name', 'name']) ?? user.email;
+
+String? avatarUrl(User user) {
+  final url = _metadataString(user, ['avatar_url', 'picture']);
+  if (url == null || url.length > 2048) return null;
+  return url.toLowerCase().startsWith('https://') ? url : null;
+}
+
+String userInitial(User user) {
+  final label = displayName(user);
+  return (label == null || label.isEmpty) ? '?' : label.substring(0, 1).toUpperCase();
+}
+
+String? firstName(User user) {
+  final name = _metadataString(user, ['full_name', 'name']);
+  final first = name?.split(RegExp(r'\s+')).first;
+  if (first == null || first.isEmpty) return null;
+  return first.length > 40 ? first.substring(0, 40) : first;
+}
+
+/// Port of src/components/layout/AccountAvatar.tsx: the round red account
+/// button (photo, initial, or a person outline for guests). Like the web's
+/// `<Link href="/account">` it switches to the Account tab.
 class AccountAvatarButton extends StatelessWidget {
   final double size;
   final bool onWhite;
@@ -17,42 +46,36 @@ class AccountAvatarButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final auth = authControllerOf(context);
+    final fg = onWhite ? AppColors.postal : Colors.white;
     return AnimatedBuilder(
       animation: auth,
       builder: (context, _) {
         final user = auth.user;
-        final initial = user == null
-            ? null
-            : (user.userMetadata?['full_name'] as String? ?? user.email ?? '?')
-                .trim()
-                .substring(0, 1)
-                .toUpperCase();
-        return Material(
-          color: onWhite ? Colors.white : AppColors.postal,
-          shape: const CircleBorder(),
-          child: InkWell(
-            customBorder: const CircleBorder(),
-            onTap: () => Navigator.of(context).push(
-              MaterialPageRoute(builder: (_) => const AccountScreen()),
-            ),
-            child: SizedBox(
+        final photo = user == null ? null : avatarUrl(user);
+        final initialStyle = TextStyle(color: fg, fontSize: 16, fontWeight: FontWeight.w700);
+        Widget content;
+        if (photo != null) {
+          content = Image.network(photo, width: size, height: size, fit: BoxFit.cover,
+              errorBuilder: (_, __, ___) => Center(child: Text(userInitial(user!), style: initialStyle)));
+        } else if (user != null) {
+          content = Center(child: Text(userInitial(user), style: initialStyle));
+        } else {
+          content = Center(child: AppIconView(AppIcon.user, size: 20, color: fg));
+        }
+        return Semantics(
+          button: true,
+          label: 'Your account',
+          excludeSemantics: true,
+          child: GestureDetector(
+            onTap: () => goToTab(context, 3),
+            child: Container(
               width: size,
               height: size,
-              child: Center(
-                child: initial != null
-                    ? Text(
-                        initial,
-                        style: TextStyle(
-                          color: onWhite ? AppColors.postal : Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: size * 0.4,
-                        ),
-                      )
-                    : Icon(
-                        Icons.person_outline,
-                        color: onWhite ? AppColors.postal : Colors.white,
-                        size: size * 0.5,
-                      ),
+              clipBehavior: Clip.antiAlias,
+              decoration: BoxDecoration(color: onWhite ? Colors.white : AppColors.postal, shape: BoxShape.circle),
+              child: CustomPaint(
+                foregroundPainter: _InsetTopLine(),
+                child: content,
               ),
             ),
           ),
@@ -60,4 +83,23 @@ class AccountAvatarButton extends StatelessWidget {
       },
     );
   }
+}
+
+/// `shadow-[inset_0_1px_0_rgb(255_255_255/0.25)]` on a circle.
+class _InsetTopLine extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final rect = Offset.zero & size;
+    final path = Path()..addOval(rect);
+    canvas.save();
+    canvas.clipPath(path);
+    canvas.saveLayer(rect, Paint());
+    canvas.drawOval(rect, Paint()..color = const Color(0x40FFFFFF));
+    canvas.drawOval(rect.shift(const Offset(0, 1)), Paint()..blendMode = BlendMode.dstOut);
+    canvas.restore();
+    canvas.restore();
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

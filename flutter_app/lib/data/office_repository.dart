@@ -1,70 +1,68 @@
+import 'dart:convert';
+
+import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart' show rootBundle;
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../core/format.dart';
 import '../models/post_office.dart';
 
-/// Port of src/lib/offices.ts, minus the bundled-snapshot fallback (that
-/// snapshot is a build-time JSON file baked into the Next.js app; porting it
-/// here means vendoring a copy into flutter_app/assets/ — deliberately
-/// deferred until there's a real asset pipeline, so the "database
-/// unreachable" case currently surfaces as a thrown error/empty state
-/// instead of silently falling back. Track this gap before shipping.
+/// Port of src/lib/offices.ts, including its bundled-snapshot fallback: when
+/// the database can't be reached (a paused free-tier project, no signal on
+/// first launch), the copy shipped in assets/data/ is used instead of
+/// failing, exactly as the web app does.
 class OfficeRepository {
-  final SupabaseClient _client;
+  final SupabaseClient? _client;
   const OfficeRepository(this._client);
 
   static const _baseColumns = 'id, name, pincode, district, lat, lng';
   static const _undefinedColumn = '42703'; // Postgres: column does not exist
 
-  /// The master list of passport post offices, same columns/fallback
-  /// sequence as loadFromDatabase() in offices.ts (so this keeps working
-  /// against a database that hasn't had every migration run yet).
   Future<List<PostOffice>> getPostOffices() async {
+    List<Map<String, dynamic>> rows;
+    try {
+      rows = await _loadFromDatabase();
+    } catch (error) {
+      debugPrint('[offices] Database unavailable, showing the bundled list of post offices. $error');
+      final raw = await rootBundle.loadString('assets/data/post-offices.snapshot.json');
+      rows = List<Map<String, dynamic>>.from(jsonDecode(raw) as List);
+    }
+    final offices = rows.map(_toPostOffice).toList()
+      ..sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
+    return offices;
+  }
+
+  /// Same columns/fallback sequence as loadFromDatabase() in offices.ts, so
+  /// this keeps working against a database that hasn't had every migration.
+  Future<List<Map<String, dynamic>>> _loadFromDatabase() async {
+    final client = _client;
+    if (client == null) throw StateError('No database client');
     const columnSets = [
       '$_baseColumns, state_code, stamp_image_path, about_place',
       '$_baseColumns, state_code, stamp_image_path',
       '$_baseColumns, stamp_image_path',
       _baseColumns,
     ];
-
-    List<Map<String, dynamic>>? rows;
-    Object? lastError;
     for (final columns in columnSets) {
       try {
-        final result = await _client
-            .from('post_offices')
-            .select(columns)
-            .order('name')
-            .timeout(const Duration(seconds: 4));
-        rows = List<Map<String, dynamic>>.from(result as List);
-        break;
+        final result = await client.from('post_offices').select(columns).order('name').timeout(const Duration(seconds: 4));
+        final rows = List<Map<String, dynamic>>.from(result as List);
+        if (rows.isEmpty) throw StateError('Could not load post offices: the table returned no rows');
+        return rows;
       } on PostgrestException catch (e) {
-        lastError = e;
         if (e.code != _undefinedColumn) rethrow;
-        // Column doesn't exist yet on this database — try the next, narrower column set.
       }
     }
-
-    if (rows == null) {
-      throw StateError('Could not load post offices: $lastError');
-    }
-    if (rows.isEmpty) {
-      throw StateError('Could not load post offices: the table returned no rows');
-    }
-
-    final offices = rows.map(_toPostOffice).toList()
-      ..sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
-    return offices;
+    throw StateError('Could not load post offices');
   }
 
   PostOffice _toPostOffice(Map<String, dynamic> row) {
+    final district = row['district'] as String?;
     return PostOffice(
       id: row['id'] as int,
-      // formatPlaceName() in format.ts does title-casing; row data is assumed
-      // already stored title-cased in practice today — revisit if raw rows
-      // ever come back inconsistently cased.
-      name: row['name'] as String,
+      name: formatPlaceName(row['name'] as String),
       pincode: row['pincode']?.toString() ?? '',
-      district: (row['district'] as String?) ?? 'Unknown district',
+      district: (district == null || district.isEmpty) ? 'Unknown district' : formatPlaceName(district),
       state: (row['state_code'] as String?) ?? 'KA',
       lat: (row['lat'] as num?)?.toDouble(),
       lng: (row['lng'] as num?)?.toDouble(),

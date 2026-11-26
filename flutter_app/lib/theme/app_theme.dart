@@ -39,6 +39,47 @@ class AppColors {
   /// red "kp-red" surfaces (Passport header stamped count/progress bar,
   /// sign-in sheet's gold tagline). Keep it separate from `planned`.
   static const goldOnRed = Color(0xFFF7C96B);
+
+  // ── One-off literals the web components use directly (not @theme tokens),
+  // named here so every screen uses the exact same value. ──
+
+  /// `#2f4aa8` — unvisited pins, clusters, Plan flag, in-panel text links.
+  static const pinBlue = Color(0xFF2F4AA8);
+
+  /// `#1f8a4d` — visited pins/clusters, list check marks, Explore progress fill.
+  static const stampGreen = Color(0xFF1F8A4D);
+
+  /// `#785a1e` — the warm brown used at low alpha for dividers, the sheet's
+  /// pill button, planned list marks and progress tracks.
+  static const warmBrown = Color(0xFF785A1E);
+
+  /// `#b8861b` — the thin gold separators between meta values.
+  static const goldRule = Color(0xFFB8861B);
+
+  /// `#c7c7cc` — sheet grab handles.
+  static const handle = Color(0xFFC7C7CC);
+
+  /// `#f3e2bd` — the active filter chip fill.
+  static const chipActive = Color(0xFFF3E2BD);
+
+  /// `#8f640f` — "Not yet stamped" badge text/tint.
+  static const unstampedGold = Color(0xFF8F640F);
+
+  /// `#e0334a` — top stop of the red CTA gradient (bottom stop is postal).
+  static const postalTop = Color(0xFFE0334A);
+
+  /// `#fffaf0` — warm white (glass bottom stop, lite-mode solid surface).
+  static const warmWhite = Color(0xFFFFFAF0);
+}
+
+/// Converts a CSS `box-shadow` (blur radius in CSS px) to a Flutter
+/// [BoxShadow]. CSS blurs with sigma = blur/2; Flutter derives sigma from
+/// blurRadius as `r * 0.57735 + 0.5`, so the radius is converted rather than
+/// copied, or every shadow comes out ~15% softer and larger than the web's.
+BoxShadow cssShadow(double x, double y, double blur, double spread, Color color) {
+  final sigma = blur / 2;
+  final radius = sigma <= 0.5 ? 0.0 : (sigma - 0.5) / 0.57735;
+  return BoxShadow(color: color, offset: Offset(x, y), blurRadius: radius, spreadRadius: spread);
 }
 
 /// Font families match `--font-display` (Fraunces, headlines), `--font-sans`

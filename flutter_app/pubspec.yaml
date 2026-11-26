@@ -85,30 +85,71 @@ flutter:
     # the web app lays over its red surfaces (.kp-red: Passport header,
     # sign-in sheet hero, guest "save progress" card).
     - assets/brand/guilloche.svg
-  # Same brand fonts as the web app (see lib/theme/app_theme.dart and the
-  # reconciled DESIGN.md): Fraunces for headlines, Figtree for body, Courier
-  # Prime for tabular/postal details. Vendored from the exact @fontsource-variable
-  # npm packages the web app itself loads (same upstream Google Fonts files,
-  # woff2 decompressed to ttf with fonttools — see assets/fonts/LICENSE-*.txt,
-  # SIL OFL). Figtree/Fraunces keep their variable "wght" axis, so Flutter
-  # resolves the right weight per TextStyle(fontWeight:) from one file each.
+    # src/data/post-offices.snapshot.json, the list the web app falls back to
+    # when the database can't be reached (see office_repository.dart).
+    - assets/data/post-offices.snapshot.json
+  # Same brand fonts as the web app: Fraunces (display), Figtree (body),
+  # Courier Prime (mono) — cut from the exact fontsource "latin" files the web
+  # serves for English text (node_modules/@fontsource-variable/*/files/
+  # *-latin-wght-*.woff2, @fontsource/courier-prime latin 400). An earlier
+  # copy here was the latin-ext subset, which has no basic a–z, so every
+  # lowercase letter silently fell back to Roboto. The variable files are
+  # instanced to one static file per weight (fontTools varLib.instancer)
+  # because their default instances are Figtree 300 / Fraunces 900 and
+  # Flutter doesn't reliably drive a variable font's wght axis from
+  # TextStyle.fontWeight. Courier Prime ships 400 only, like the web, so
+  # bold mono is synthesized the same way the browser does it.
   fonts:
     - family: Fraunces
       fonts:
-        - asset: assets/fonts/Fraunces-Variable.ttf
-        - asset: assets/fonts/Fraunces-Variable.ttf
+        - asset: assets/fonts/Fraunces-Light.ttf
+          weight: 300
+        - asset: assets/fonts/Fraunces-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/Fraunces-Medium.ttf
           weight: 500
-        - asset: assets/fonts/Fraunces-Variable.ttf
+        - asset: assets/fonts/Fraunces-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/Fraunces-Bold.ttf
           weight: 700
-        - asset: assets/fonts/Fraunces-Variable.ttf
+        - asset: assets/fonts/Fraunces-ExtraBold.ttf
           weight: 800
+        - asset: assets/fonts/Fraunces-Black.ttf
+          weight: 900
+        - asset: assets/fonts/Fraunces-RegularItalic.ttf
+          weight: 400
+          style: italic
+        - asset: assets/fonts/Fraunces-MediumItalic.ttf
+          weight: 500
+          style: italic
+        - asset: assets/fonts/Fraunces-SemiBoldItalic.ttf
+          weight: 600
+          style: italic
+        - asset: assets/fonts/Fraunces-BoldItalic.ttf
+          weight: 700
+          style: italic
+        - asset: assets/fonts/Fraunces-ExtraBoldItalic.ttf
+          weight: 800
+          style: italic
+        - asset: assets/fonts/Fraunces-BlackItalic.ttf
+          weight: 900
+          style: italic
     - family: Figtree
       fonts:
-        - asset: assets/fonts/Figtree-Variable.ttf
-        - asset: assets/fonts/Figtree-Variable.ttf
+        - asset: assets/fonts/Figtree-Light.ttf
+          weight: 300
+        - asset: assets/fonts/Figtree-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/Figtree-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/Figtree-SemiBold.ttf
           weight: 600
-        - asset: assets/fonts/Figtree-Variable.ttf
+        - asset: assets/fonts/Figtree-Bold.ttf
           weight: 700
+        - asset: assets/fonts/Figtree-ExtraBold.ttf
+          weight: 800
+        - asset: assets/fonts/Figtree-Black.ttf
+          weight: 900
     - family: CourierPrime
       fonts:
         - asset: assets/fonts/CourierPrime-Regular.ttf

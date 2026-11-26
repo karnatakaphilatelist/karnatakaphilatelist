@@ -1,44 +1,49 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../app_shell.dart';
 import '../../core/constants.dart';
 import '../../core/haptics.dart';
+import '../../core/in_app_review.dart';
 import '../../core/office_status.dart';
 import '../../core/states.dart';
+import '../../data/auth_controller.dart';
 import '../../data/nearby_notifications.dart';
 import '../../data/state_controller.dart';
 import '../../models/post_office.dart';
 import '../../theme/app_theme.dart';
-import '../../widgets/account_avatar.dart';
+import '../../widgets/account_avatar.dart' show firstName;
+import '../../widgets/app_icons.dart';
+import '../../widgets/glass_card.dart';
+import '../auth/sign_in_sheet.dart';
 import '../office/office_detail_screen.dart';
+import '../office/stamped_sheet.dart';
 import '../office/visit_dialog.dart';
 import 'filter_chips.dart';
 import 'location_sheet.dart';
 import 'office_list.dart';
 import 'office_map.dart';
 
-/// Port of src/components/explore/ExploreView.tsx, scoped to this stage's
-/// plan: map + search + filter + list + "locate me" (now with the
-/// location-priming/denied sheets) + selection, state-filtered (via the
-/// shared StateController — see offices_controller.dart/state_controller.dart),
-/// visit-aware (via VisitsController, wired in Stage 2), and geofence-aware
-/// (NearbyNotificationService). Deliberately NOT yet ported from the web
-/// version: the draggable sheet's 3-way snap points (this uses a fixed
-/// DraggableScrollableSheet instead) — a later pass if wanted.
+/// Ask Explore to open one office (the web's `/explore?office=<id>` link, used
+/// by the Passport). Explore switches to that office's state and selects it.
+final ValueNotifier<int?> exploreOpenOffice = ValueNotifier<int?>(null);
+
+/// Ask Explore to search one district with the list open (`/explore?district=`).
+final ValueNotifier<String?> exploreOpenDistrict = ValueNotifier<String?>(null);
+
+const double _peek = 108; // 6.75rem
+const double _topGap = 120; // calc(100% - 7.5rem)
+
+/// Port of src/components/explore/ExploreView.tsx (phone layout).
 class ExploreScreen extends StatefulWidget {
   const ExploreScreen({super.key});
 
   @override
   State<ExploreScreen> createState() => _ExploreScreenState();
 }
-
-// Phone list sheet snap points — mirrors ExploreView.tsx's snap stops (peek /
-// half / nearly full), collapsed to the two that matter for the header's
-// "Show list" / "Show map" toggle.
-const double _sheetPeek = 0.14;
-const double _sheetOpenSize = 0.55;
-const double _sheetMax = 0.9;
 
 class _ExploreScreenState extends State<ExploreScreen> {
   StatusFilterValue _filter;
@@ -48,55 +53,75 @@ class _ExploreScreenState extends State<ExploreScreen> {
   String? _watchedSignature;
   String _query = '';
   final _searchController = TextEditingController();
-  final _sheetController = DraggableScrollableController();
-  bool _sheetOpen = false;
+
+  // The list sheet: 0 = peek, 1 = half, 2 = nearly full (ExploreView's `snap`).
+  int _snap = 0;
+  double? _dragHeight;
+  _Drag? _drag;
+  bool _sheetVisible = false; // the sheet waits for the map, then fades in
 
   _ExploreScreenState() : _filter = null;
+
+  bool get _sheetOpen => _snap > 0;
 
   @override
   void initState() {
     super.initState();
-    // Mirrors ExploreView.tsx's mount-time effect: start the watcher once;
-    // a tap on its notification just highlights the office, same as the web
-    // app (it doesn't jump straight into the detail screen).
     NearbyNotificationService.init(onOfficeTap: (id) {
       if (mounted) setState(() => _selectedId = id);
     });
-    _sheetController.addListener(_onSheetSizeChanged);
-  }
-
-  void _onSheetSizeChanged() {
-    final open = _sheetController.size > (_sheetPeek + 0.05);
-    if (open != _sheetOpen) setState(() => _sheetOpen = open);
-  }
-
-  void _toggleSheet() {
-    // The toggle button lives inside the sheet's own builder, so by the
-    // time anyone can tap it the controller is attached — this guard is
-    // just cheap insurance against DraggableScrollableController's "not
-    // attached" assertion on an edge-case early tap.
-    if (!_sheetController.isAttached) return;
-    hapticSelect();
-    _sheetController.animateTo(
-      _sheetOpen ? _sheetPeek : _sheetOpenSize,
-      duration: const Duration(milliseconds: 260),
-      curve: Curves.easeOut,
-    );
+    exploreReset.addListener(_reset);
+    exploreOpenOffice.addListener(_openLinkedOffice);
+    exploreOpenDistrict.addListener(_openLinkedDistrict);
+    Timer(const Duration(milliseconds: 1000), () {
+      if (mounted) setState(() => _sheetVisible = true);
+    });
   }
 
   @override
   void dispose() {
     NearbyNotificationService.stop();
+    exploreReset.removeListener(_reset);
+    exploreOpenOffice.removeListener(_openLinkedOffice);
+    exploreOpenDistrict.removeListener(_openLinkedDistrict);
     _searchController.dispose();
-    _sheetController.removeListener(_onSheetSizeChanged);
-    _sheetController.dispose();
     super.dispose();
   }
 
-  /// Keeps the background watcher's office list in sync, same reasoning as
-  /// ExploreView.tsx's setWatchedOffices effect — called from build() since
-  /// that's where the current state-filtered office list and visited set
-  /// are computed, but only actually sent when something changed.
+  void _reset() {
+    setState(() {
+      _query = '';
+      _searchController.clear();
+      _filter = null;
+      _selectedId = null;
+      _snap = 0;
+    });
+  }
+
+  void _openLinkedOffice() {
+    final id = exploreOpenOffice.value;
+    if (id == null) return;
+    exploreOpenOffice.value = null;
+    final offices = officesControllerOf(context).offices;
+    final linked = offices.where((o) => o.id == id).firstOrNull;
+    if (linked == null) return;
+    stateControllerOf(context).choose(linked.state);
+    setState(() => _selectedId = linked.id);
+  }
+
+  void _openLinkedDistrict() {
+    final district = exploreOpenDistrict.value;
+    if (district == null) return;
+    exploreOpenDistrict.value = null;
+    setState(() {
+      _query = district;
+      _searchController.text = district;
+      _snap = 1;
+    });
+  }
+
+  void _setSheetOpen(bool open) => setState(() => _snap = open ? 1 : 0);
+
   void _syncWatchedOffices(List<PostOffice> stateOffices, Set<int> visitedIds) {
     final signature = '${stateOffices.length}:${(visitedIds.toList()..sort()).join(",")}';
     if (signature == _watchedSignature) return;
@@ -104,21 +129,27 @@ class _ExploreScreenState extends State<ExploreScreen> {
     Future.microtask(() => NearbyNotificationService.setWatchedOffices(stateOffices, visitedIds));
   }
 
-  /// List rows carry a chevron (see office_list.dart) — tapping one opens the
-  /// full detail/stamping screen, not just a map highlight. Tapping a map pin
-  /// (OfficeMap's onSelect) only selects/centers, matching the web app's
-  /// lighter-weight map-tap behavior; opening OfficeDetail from the map is a
-  /// later pass if wanted.
-  void _openDetail(OfficeWithStatus office) {
+  void _selectOffice(int id) {
     hapticSelect();
-    setState(() => _selectedId = office.id);
-    Navigator.of(context).push(
-      MaterialPageRoute(builder: (_) => OfficeDetailScreen(office: office)),
+    setState(() => _selectedId = id);
+  }
+
+  Future<void> _markVisited(int officeId, int collectedBefore, int total) async {
+    final visits = visitsControllerOf(context);
+    final saved = await visits.markVisited(officeId);
+    if (!saved || !mounted) return;
+    hapticCollect();
+    unawaited(maybeRequestReview(visits.visits.length));
+    final office = officesControllerOf(context).offices.firstWhere((o) => o.id == officeId);
+    await showStampedSheet(
+      context,
+      office: OfficeWithStatus.from(office, status: OfficeStatus.visited, distanceKm: null),
+      collected: collectedBefore + 1,
+      total: total,
     );
   }
 
-  /// Port of handleFindNearMe(): explain why we ask, once per device,
-  /// before the system prompt ever shows.
+  /// Explain first, once, so the system prompt is never a surprise.
   Future<void> _findNearMe() async {
     final prefs = await SharedPreferences.getInstance();
     if (!mounted) return;
@@ -136,77 +167,22 @@ class _ExploreScreenState extends State<ExploreScreen> {
     );
   }
 
-  /// Port of StateSwitcher.tsx's picker sheet — the state list itself (not
-  /// just the current one) is the part Explore was missing entirely.
-  Future<void> _pickState(
-    BuildContext context,
-    StateController stateController,
-    List<StateOption> states,
-    String currentCode,
-  ) async {
-    final chosen = await showModalBottomSheet<String>(
-      context: context,
-      backgroundColor: AppColors.paper,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
-      builder: (sheetContext) => SafeArea(
-        child: ListView(
-          shrinkWrap: true,
-          padding: const EdgeInsets.symmetric(vertical: 8),
-          children: [
-            const Padding(
-              padding: EdgeInsets.fromLTRB(20, 8, 20, 4),
-              child: Text(
-                'SWITCH STATE',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12, letterSpacing: 1.6, color: AppColors.muted),
-              ),
-            ),
-            for (final s in states)
-              ListTile(
-                title: Text(
-                  s.name,
-                  style: TextStyle(
-                    fontFamily: AppFonts.display,
-                    fontWeight: FontWeight.w500,
-                    fontSize: 18,
-                    color: s.code == currentCode ? AppColors.postal : AppColors.ink,
-                  ),
-                ),
-                trailing: Text('${s.count}', style: const TextStyle(color: AppColors.muted, fontFamily: AppFonts.mono)),
-                onTap: () => Navigator.of(sheetContext).pop(s.code),
-              ),
-          ],
-        ),
-      ),
-    );
-    if (chosen != null && chosen != currentCode) {
-      hapticSelect();
-      stateController.choose(chosen);
-    }
-  }
-
   Future<void> _requestLocation() async {
     if (_locating) return;
     setState(() => _locating = true);
     try {
-      final permission = await Geolocator.checkPermission();
-      var granted = permission == LocationPermission.always ||
-          permission == LocationPermission.whileInUse;
-      if (!granted) {
-        final requested = await Geolocator.requestPermission();
-        granted = requested == LocationPermission.always ||
-            requested == LocationPermission.whileInUse;
-      }
+      var permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) permission = await Geolocator.requestPermission();
+      final granted = permission == LocationPermission.always || permission == LocationPermission.whileInUse;
       if (!granted) {
         if (mounted) await showLocationSheet(context, mode: LocationSheetMode.denied, onContinue: null);
         return;
       }
-      final position = await Geolocator.getCurrentPosition();
+      final position = await Geolocator.getCurrentPosition(
+        locationSettings: const LocationSettings(accuracy: LocationAccuracy.medium, timeLimit: Duration(seconds: 10)),
+      );
       if (!mounted) return;
-      setState(() {
-        _userLocation = Coordinates(lat: position.latitude, lng: position.longitude);
-      });
+      setState(() => _userLocation = Coordinates(lat: position.latitude, lng: position.longitude));
     } catch (_) {
       if (mounted) await showLocationSheet(context, mode: LocationSheetMode.denied, onContinue: null);
     } finally {
@@ -214,34 +190,92 @@ class _ExploreScreenState extends State<ExploreScreen> {
     }
   }
 
+  /// The state switcher's choice list — the web uses a native `<select>`,
+  /// which Android shows as a plain single-choice dialog.
+  Future<void> _pickState(StateController stateController, List<StateOption> states, String current) async {
+    final chosen = await showDialog<String>(
+      context: context,
+      builder: (dialogContext) => SimpleDialog(
+        backgroundColor: AppColors.warmWhite,
+        surfaceTintColor: Colors.transparent,
+        children: [
+          for (final s in states)
+            RadioListTile<String>(
+              value: s.code,
+              groupValue: current,
+              activeColor: AppColors.postal,
+              title: Text(s.name, style: const TextStyle(fontSize: 16, color: AppColors.ink)),
+              onChanged: (v) => Navigator.of(dialogContext).pop(v),
+            ),
+        ],
+      ),
+    );
+    if (chosen != null && chosen != current) {
+      hapticSelect();
+      stateController.choose(chosen);
+    }
+  }
+
+  // ── Sheet drag: same rules as ExploreView's dragProps/finishDrag ──
+  void _dragStart(DragStartDetails d, double sheetHeight) {
+    _drag = _Drag(d.globalPosition.dy, sheetHeight);
+  }
+
+  void _dragUpdate(DragUpdateDetails d, double parent) {
+    final drag = _drag;
+    if (drag == null) return;
+    final dy = drag.y - d.globalPosition.dy;
+    if (!drag.moved && dy.abs() < 8) return;
+    drag.moved = true;
+    drag.lastY = d.globalPosition.dy;
+    final maxH = (parent - _topGap).clamp(_peek, double.infinity);
+    setState(() => _dragHeight = (drag.h + dy).clamp(_peek, maxH));
+  }
+
+  void _dragEnd(double parent) {
+    final drag = _drag;
+    _drag = null;
+    if (drag == null || !drag.moved) return;
+    final stops = [_peek, parent * 0.5, (parent - _topGap).clamp(_peek, double.infinity)];
+    // A flick counts: lean the landing spot the way the finger was heading.
+    final flick = (drag.y - drag.lastY) * 1.5;
+    final target = (drag.h + flick).clamp(_peek, stops[2]);
+    var nearest = 0;
+    for (var i = 1; i < stops.length; i++) {
+      if ((stops[i] - target).abs() < (stops[nearest] - target).abs()) nearest = i;
+    }
+    setState(() {
+      _snap = nearest;
+      _dragHeight = null;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final officesController = officesControllerOf(context);
     final stateController = stateControllerOf(context);
     final visitsController = visitsControllerOf(context);
+    final auth = authControllerOf(context);
 
     return AnimatedBuilder(
-      animation: Listenable.merge([officesController, stateController, visitsController]),
+      animation: Listenable.merge([officesController, stateController, visitsController, auth]),
       builder: (context, _) {
         if (officesController.loading) {
-          return const Scaffold(body: Center(child: CircularProgressIndicator()));
+          return const Scaffold(backgroundColor: AppColors.sand, body: Center(child: CircularProgressIndicator(color: AppColors.postal)));
         }
         if (officesController.error != null) {
           return Scaffold(
+            backgroundColor: AppColors.paper,
             body: Center(
               child: Padding(
                 padding: const EdgeInsets.all(24),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Icon(Icons.wifi_off, color: AppColors.muted, size: 32),
-                    const SizedBox(height: 12),
-                    const Text('Could not load post offices. Check your connection and try again.'),
+                    const Text('Could not load post offices. Check your connection and try again.',
+                        textAlign: TextAlign.center, style: TextStyle(fontSize: 14, color: AppColors.muted)),
                     const SizedBox(height: 16),
-                    FilledButton(
-                      onPressed: officesController.reload,
-                      child: const Text('Retry'),
-                    ),
+                    RedCtaButton(label: 'Retry', onTap: officesController.reload),
                   ],
                 ),
               ),
@@ -252,245 +286,480 @@ class _ExploreScreenState extends State<ExploreScreen> {
         final states = stateController.statesFor(officesController.offices);
         final stateCode = stateController.stateCodeFor(officesController.offices);
         final stateOffices = stateController.officesFor(officesController.offices);
-        final stampedInState = stateOffices.where((o) => visitsController.visits.containsKey(o.id)).length;
-        _syncWatchedOffices(stateOffices, visitsController.visits.keys.toSet());
-        final allOffices = withStatus(
-          stateOffices,
-          visitsController.visits,
-          visitsController.plannedIds,
-          _userLocation,
-        );
+        final visits = visitsController.visits;
+        final stampedCount = stateOffices.where((o) => visits.containsKey(o.id)).length;
+        _syncWatchedOffices(stateOffices, visits.keys.toSet());
+        final allOffices = withStatus(stateOffices, visits, visitsController.plannedIds, _userLocation);
         final needle = _query.trim().toLowerCase();
-        final visibleOffices = allOffices.where((o) {
+        final matches = allOffices.where((o) {
           if (_filter != null && o.status != _filter) return false;
           if (needle.isEmpty) return true;
-          return o.name.toLowerCase().contains(needle) ||
-              o.district.toLowerCase().contains(needle) ||
-              o.pincode.contains(needle);
+          return o.name.toLowerCase().contains(needle) || o.district.toLowerCase().contains(needle) || o.pincode.contains(needle);
         }).toList();
-        final listOffices = _userLocation != null ? sortByDistance(visibleOffices) : visibleOffices;
+        final visibleOffices = _userLocation != null ? sortByDistance(matches) : matches;
 
+        // The detail card follows the filter and search: it closes by itself
+        // when the selected office drops out of the visible list.
+        final selected = visibleOffices.where((o) => o.id == _selectedId).firstOrNull;
+        if (_selectedId != null && selected == null) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) setState(() => _selectedId = null);
+          });
+        }
+        if (detailSheetOpen.value != (selected != null)) {
+          WidgetsBinding.instance.addPostFrameCallback((_) => detailSheetOpen.value = selected != null);
+        }
+
+        final safeTop = MediaQuery.of(context).padding.top;
         return Scaffold(
-          body: Stack(
-            children: [
-              Positioned.fill(
-                child: OfficeMap(
-                  offices: visibleOffices,
-                  selectedId: _selectedId,
-                  userLocation: _userLocation,
-                  onSelect: (id) {
-                    hapticSelect();
-                    setState(() => _selectedId = id);
-                  },
+          backgroundColor: AppColors.sand,
+          resizeToAvoidBottomInset: false,
+          body: LayoutBuilder(builder: (context, constraints) {
+            final parent = constraints.maxHeight;
+            final sheetHeight = _dragHeight ??
+                (_snap == 0 ? _peek : _snap == 1 ? parent * 0.5 : (parent - _topGap).clamp(_peek, double.infinity));
+            return Stack(
+              children: [
+                Positioned.fill(
+                  child: OfficeMap(
+                    offices: visibleOffices,
+                    selectedId: _selectedId,
+                    userLocation: _userLocation,
+                    onSelect: _selectOffice,
+                  ),
                 ),
-              ),
-              Positioned(
-                top: MediaQuery.of(context).padding.top + 12,
-                left: 16,
-                right: 16,
-                child: Column(
-                  children: [
-                    Row(
+                // Map credit: quiet glass pill, bottom-left, above the peeking sheet.
+                Positioned(
+                  left: 0,
+                  bottom: _peek,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 5),
+                    decoration: const BoxDecoration(
+                      color: Color(0xB3FFFAF0),
+                      borderRadius: BorderRadius.only(topRight: Radius.circular(8)),
+                    ),
+                    child: const Text('© MapTiler © OpenStreetMap',
+                        style: TextStyle(fontSize: 10, height: 1.4, color: AppColors.muted)),
+                  ),
+                ),
+                if (!_sheetOpen)
+                  Positioned(
+                    top: safeTop + 24,
+                    left: 0,
+                    right: 0,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        Expanded(
-                          child: Container(
-                            height: 56,
-                            decoration: BoxDecoration(
-                              color: AppColors.card,
-                              borderRadius: BorderRadius.circular(28),
-                              boxShadow: const [BoxShadow(color: Color(0x1A000000), blurRadius: 10, offset: Offset(0, 2))],
-                            ),
-                            child: TextField(
-                              controller: _searchController,
-                              onChanged: (v) => setState(() => _query = v),
-                              decoration: InputDecoration(
-                                hintText: 'Search post offices',
-                                prefixIcon: const Icon(Icons.search, color: AppColors.muted, size: 20),
-                                suffixIcon: _query.isEmpty
-                                    ? null
-                                    : IconButton(
-                                        icon: const Icon(Icons.close, size: 18),
-                                        onPressed: () {
-                                          _searchController.clear();
-                                          setState(() => _query = '');
-                                        },
-                                      ),
-                                border: InputBorder.none,
-                                contentPadding: const EdgeInsets.symmetric(vertical: 16),
-                              ),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          child: ExploreSearchBar(controller: _searchController, onChanged: (v) => setState(() => _query = v)),
+                        ),
+                        const SizedBox(height: 12 - chipRowPadTop),
+                        StatusFilterChips(value: _filter, onChanged: (v) => setState(() => _filter = v)),
+                      ],
+                    ),
+                  ),
+                if (selected == null && !_sheetOpen && _dragHeight == null)
+                  Positioned(
+                    right: 16,
+                    bottom: sheetHeight + 16,
+                    child: Semantics(
+                      button: true,
+                      label: 'Show post offices near me',
+                      excludeSemantics: true,
+                      child: GestureDetector(
+                        onTap: _locating ? null : _findNearMe,
+                        child: Opacity(
+                          opacity: _locating ? 0.6 : 1,
+                          child: const GlassCard(
+                            borderRadius: BorderRadius.all(Radius.circular(999)),
+                            child: SizedBox(
+                              width: 52,
+                              height: 52,
+                              child: Center(child: AppIconView(AppIcon.locate, size: 24, color: AppColors.postal)),
                             ),
                           ),
                         ),
-                        const SizedBox(width: 10),
-                        const AccountAvatarButton(size: 56),
+                      ),
+                    ),
+                  ),
+                if (selected == null)
+                  AnimatedPositioned(
+                    duration: _dragHeight == null ? const Duration(milliseconds: 300) : Duration.zero,
+                    curve: Curves.easeOut,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    height: sheetHeight,
+                    child: AnimatedOpacity(
+                      opacity: _sheetVisible ? 1 : 0,
+                      duration: const Duration(milliseconds: 300),
+                      child: IgnorePointer(
+                        ignoring: !_sheetVisible,
+                        child: _sheet(
+                          parent: parent,
+                          sheetHeight: sheetHeight,
+                          states: states,
+                          stateCode: stateCode,
+                          stateController: stateController,
+                          stampedCount: stampedCount,
+                          total: stateOffices.length,
+                          visibleOffices: visibleOffices,
+                          signedIn: auth.user != null,
+                          greetingName: auth.user == null ? null : firstName(auth.user!),
+                        ),
+                      ),
+                    ),
+                  ),
+                if (selected != null)
+                  Positioned(
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    child: OfficeDetailPanel(
+                      key: ValueKey(selected.id),
+                      office: selected,
+                      onClose: () => setState(() => _selectedId = null),
+                      onCheckDistance: _findNearMe,
+                      collected: allOffices.where((o) => o.status == OfficeStatus.visited).length,
+                      total: allOffices.length,
+                      stateName: stateName(stateCode),
+                      onMarkVisited: (id) => _markVisited(
+                        id,
+                        allOffices.where((o) => o.status == OfficeStatus.visited).length,
+                        allOffices.length,
+                      ),
+                    ),
+                  ),
+              ],
+            );
+          }),
+        );
+      },
+    );
+  }
+
+  Widget _sheet({
+    required double parent,
+    required double sheetHeight,
+    required List<StateOption> states,
+    required String stateCode,
+    required StateController stateController,
+    required int stampedCount,
+    required int total,
+    required List<OfficeWithStatus> visibleOffices,
+    required bool signedIn,
+    required String? greetingName,
+  }) {
+    final header = GestureDetector(
+      behavior: HitTestBehavior.translucent,
+      onVerticalDragStart: (d) => _dragStart(d, sheetHeight),
+      onVerticalDragUpdate: (d) => _dragUpdate(d, parent),
+      onVerticalDragEnd: (_) => _dragEnd(parent),
+      onVerticalDragCancel: () => _dragEnd(parent),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // Grab bar: tap to toggle.
+          Semantics(
+            button: true,
+            label: _sheetOpen ? 'Collapse the list' : 'Expand the list',
+            excludeSemantics: true,
+            child: GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap: () => _setSheetOpen(!_sheetOpen),
+              child: SizedBox(
+                height: 28,
+                child: Center(
+                  child: Container(
+                    width: 40,
+                    height: 4,
+                    decoration: BoxDecoration(color: AppColors.handle, borderRadius: BorderRadius.circular(999)),
+                  ),
+                ),
+              ),
+            ),
+          ),
+          if (_sheetOpen)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+              child: ExploreSearchBar(controller: _searchController, onChanged: (v) => setState(() => _query = v)),
+            ),
+          if (_sheetOpen)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: _ProgressStrip(
+                signedIn: signedIn,
+                firstName: greetingName,
+                stamped: stampedCount,
+                total: total,
+                stateCode: stateCode,
+                onFindNext: () => setState(() => _filter = OfficeStatus.unvisited),
+                onSignIn: () => showSignInSheet(context, reason: SignInReason.manual),
+              ),
+            ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 4, 16, 12),
+            child: Row(
+              children: [
+                Expanded(
+                  child: _sheetOpen
+                      ? _listHeading(visibleOffices.length, total)
+                      : _peekSummary(states, stateCode, stateController, stampedCount, total),
+                ),
+                const SizedBox(width: 12),
+                GestureDetector(
+                  onTap: () => _setSheetOpen(!_sheetOpen),
+                  child: Container(
+                    height: 44,
+                    padding: const EdgeInsets.symmetric(horizontal: 18),
+                    decoration: BoxDecoration(
+                      color: AppColors.warmBrown.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(999),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(_sheetOpen ? 'Show map' : 'Show list',
+                            style: const TextStyle(fontSize: 14, height: 20 / 14, fontWeight: FontWeight.w700, color: AppColors.ink)),
+                        const SizedBox(width: 6),
+                        ChevronDown20(size: 14, color: AppColors.ink, strokeWidth: 2.6, up: !_sheetOpen),
                       ],
                     ),
-                    const SizedBox(height: 10),
-                    StatusFilterChips(
-                      value: _filter,
-                      onChanged: (v) => setState(() => _filter = v),
-                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          if (_sheetOpen)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 4),
+              child: StatusFilterChips(value: _filter, onChanged: (v) => setState(() => _filter = v)),
+            ),
+        ],
+      ),
+    );
+
+    return GlassCard(
+      kind: GlassKind.panel,
+      borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+      child: ClipRRect(
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+        child: OverflowBox(
+          alignment: Alignment.topCenter,
+          maxHeight: double.infinity,
+          child: SizedBox(
+            height: sheetHeight < 300 ? 300 : sheetHeight,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                header,
+                Expanded(
+                  child: OfficeListView(
+                    offices: visibleOffices,
+                    selectedId: _selectedId,
+                    onSelect: _selectOffice,
+                    physics: _sheetOpen ? const ClampingScrollPhysics() : const NeverScrollableScrollPhysics(),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _listHeading(int shown, int total) {
+    const style = TextStyle(fontSize: 12, height: 16 / 12, fontWeight: FontWeight.w700, letterSpacing: 12 * 0.18, color: AppColors.ink);
+    return Row(
+      children: [
+        Text(_userLocation != null ? 'NEARBY' : 'POST OFFICES', style: style),
+        if (shown != total) ...[
+          const SizedBox(width: 12),
+          Container(width: 1, height: 14, color: AppColors.goldRule),
+          const SizedBox(width: 12),
+          Text('$shown SHOWN', style: style.copyWith(color: AppColors.muted)),
+        ],
+      ],
+    );
+  }
+
+  Widget _peekSummary(List<StateOption> states, String stateCode, StateController stateController, int stamped, int total) {
+    final fraction = total == 0 ? 0.0 : (stamped / total).clamp(stamped > 0 ? 0.04 : 0.0, 1.0);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        // StateSwitcher `title`: bold state name + chevron over an invisible select.
+        Semantics(
+          button: true,
+          label: 'State',
+          value: stateName(stateCode),
+          child: GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: () => _pickState(stateController, states, stateCode),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(minHeight: 44),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    states.where((s) => s.code == stateCode).firstOrNull?.name ?? stateName(stateCode),
+                    style: const TextStyle(fontSize: 20, height: 24 / 20, fontWeight: FontWeight.w700, letterSpacing: -0.5, color: AppColors.ink),
+                  ),
+                  const SizedBox(width: 6),
+                  const ChevronDown20(size: 16, color: AppColors.ink),
+                ],
+              ),
+            ),
+          ),
+        ),
+        Row(
+          children: [
+            Container(
+              width: 96,
+              height: 6,
+              clipBehavior: Clip.antiAlias,
+              decoration: BoxDecoration(color: AppColors.warmBrown.withValues(alpha: 0.15), borderRadius: BorderRadius.circular(999)),
+              alignment: Alignment.centerLeft,
+              child: FractionallySizedBox(widthFactor: fraction, heightFactor: 1, child: Container(color: AppColors.stampGreen)),
+            ),
+            const SizedBox(width: 8),
+            Flexible(
+              child: Text.rich(
+                TextSpan(
+                  style: const TextStyle(fontFamily: AppFonts.mono, fontSize: 13, height: 1.5, color: AppColors.muted),
+                  children: [
+                    TextSpan(text: '$stamped', style: const TextStyle(fontWeight: FontWeight.w700, color: AppColors.stampGreen)),
+                    TextSpan(text: ' of $total stamped'),
                   ],
                 ),
               ),
-              // Tracks the sheet's live size (not just the peek/open snap points, which
-              // only update once dragging settles) so the locate button always floats
-              // just above the sheet's current top edge, dragged or animated.
-              AnimatedBuilder(
-                animation: _sheetController,
-                builder: (context, _) {
-                  final sheetSize = _sheetController.isAttached ? _sheetController.size : _sheetPeek;
-                  return Positioned(
-                    right: 16,
-                    bottom: MediaQuery.of(context).size.height * sheetSize + 16,
-                    child: FloatingActionButton(
-                      heroTag: 'locate',
-                      backgroundColor: AppColors.card,
-                      foregroundColor: AppColors.ink,
-                      onPressed: _findNearMe,
-                      child: _locating
-                          ? const SizedBox(
-                              width: 20,
-                              height: 20,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            )
-                          : const Icon(Icons.my_location),
-                    ),
-                  );
-                },
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+class _Drag {
+  final double y;
+  final double h;
+  double lastY;
+  bool moved = false;
+  _Drag(this.y, this.h) : lastY = y;
+}
+
+/// Port of ProgressStrip.tsx — shown above the list when it's open: signed-in
+/// progress + "Find next", or a guest's "sign in so you don't lose them".
+class _ProgressStrip extends StatelessWidget {
+  final bool signedIn;
+  final String? firstName;
+  final int stamped;
+  final int total;
+  final String stateCode;
+  final VoidCallback onFindNext;
+  final VoidCallback onSignIn;
+  const _ProgressStrip({
+    required this.signedIn,
+    required this.firstName,
+    required this.stamped,
+    required this.total,
+    required this.stateCode,
+    required this.onFindNext,
+    required this.onSignIn,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    if (!signedIn) {
+      if (stamped == 0) return const SizedBox.shrink();
+      return Container(
+        margin: const EdgeInsets.only(bottom: 8),
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(color: AppColors.plannedSoft, borderRadius: BorderRadius.circular(16)),
+        child: Row(
+          children: [
+            Expanded(
+              child: Text(
+                'You have stamped $stamped as a guest. Sign in so you do not lose ${stamped == 1 ? 'it' : 'them'}.',
+                style: const TextStyle(fontSize: 14, height: 18 / 14, color: AppColors.plannedInk),
               ),
-              DraggableScrollableSheet(
-                controller: _sheetController,
-                initialChildSize: _sheetPeek,
-                minChildSize: _sheetPeek,
-                maxChildSize: _sheetMax,
-                builder: (context, scrollController) {
-                  return Container(
-                    decoration: const BoxDecoration(
-                      color: AppColors.card,
-                      borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-                      boxShadow: [
-                        BoxShadow(color: Color(0x1A000000), blurRadius: 12, offset: Offset(0, -2)),
-                      ],
-                    ),
-                    child: Column(
+            ),
+            const SizedBox(width: 12),
+            _SmallPill(label: 'Sign in', color: AppColors.ink, onTap: onSignIn),
+          ],
+        ),
+      );
+    }
+    final greeting = greetingWord(stateCode);
+    final percent = total > 0 ? (stamped / total * 100).round() : 0;
+    return Container(
+      margin: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(color: AppColors.sand, borderRadius: BorderRadius.circular(16)),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(firstName != null ? '$greeting, $firstName' : greeting,
+                        style: const TextStyle(fontSize: 14, height: 20 / 14, fontWeight: FontWeight.w600, color: AppColors.ink)),
+                    Text.rich(TextSpan(
+                      style: const TextStyle(fontSize: 14, height: 20 / 14, color: AppColors.muted),
                       children: [
-                        Container(
-                          margin: const EdgeInsets.only(top: 10, bottom: 4),
-                          width: 36,
-                          height: 4,
-                          decoration: BoxDecoration(
-                            color: AppColors.line,
-                            borderRadius: BorderRadius.circular(2),
-                          ),
-                        ),
-                        // Port of ExploreView.tsx's phone panel header (direction D): peek
-                        // shows state + progress + "Show list"; open shows the list heading
-                        // + "Show map". This is the state switcher's only home on phones now
-                        // — the floating card that used to sit above the search bar is gone.
-                        Padding(
-                          padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
-                          child: Row(
-                            children: [
-                              Expanded(
-                                child: _sheetOpen
-                                    ? Text(
-                                        _userLocation != null ? 'Nearby' : 'Post offices',
-                                        style: const TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 12,
-                                          letterSpacing: 1.6,
-                                          color: AppColors.ink,
-                                        ),
-                                      )
-                                    : InkWell(
-                                        onTap: states.length > 1
-                                            ? () => _pickState(context, stateController, states, stateCode)
-                                            : null,
-                                        child: Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            Row(
-                                              mainAxisSize: MainAxisSize.min,
-                                              children: [
-                                                Text(
-                                                  stateName(stateCode),
-                                                  style: const TextStyle(
-                                                    fontFamily: AppFonts.display,
-                                                    fontWeight: FontWeight.w500,
-                                                    fontSize: 20,
-                                                  ),
-                                                ),
-                                                if (states.length > 1) ...[
-                                                  const SizedBox(width: 4),
-                                                  const Icon(Icons.expand_more, size: 18, color: AppColors.ink),
-                                                ],
-                                              ],
-                                            ),
-                                            const SizedBox(height: 4),
-                                            Row(
-                                              children: [
-                                                ClipRRect(
-                                                  borderRadius: BorderRadius.circular(999),
-                                                  child: SizedBox(
-                                                    width: 96,
-                                                    child: LinearProgressIndicator(
-                                                      value: stateOffices.isEmpty ? 0 : stampedInState / stateOffices.length,
-                                                      minHeight: 6,
-                                                      backgroundColor: AppColors.line,
-                                                      color: AppColors.visited,
-                                                    ),
-                                                  ),
-                                                ),
-                                                const SizedBox(width: 8),
-                                                Text(
-                                                  '$stampedInState of ${stateOffices.length} stamped',
-                                                  style: const TextStyle(fontFamily: AppFonts.mono, color: AppColors.muted, fontSize: 13),
-                                                ),
-                                              ],
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                              ),
-                              TextButton.icon(
-                                onPressed: _toggleSheet,
-                                style: TextButton.styleFrom(
-                                  backgroundColor: AppColors.lineStrong.withValues(alpha: 0.35),
-                                  foregroundColor: AppColors.ink,
-                                  shape: const StadiumBorder(),
-                                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                                  minimumSize: const Size(0, 40),
-                                ),
-                                icon: Icon(_sheetOpen ? Icons.map_outlined : Icons.list, size: 16),
-                                label: Text(
-                                  _sheetOpen ? 'Show map' : 'Show list',
-                                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        Expanded(
-                          child: OfficeListView(
-                            controller: scrollController,
-                            offices: listOffices,
-                            selectedId: _selectedId,
-                            onSelect: (id) => _openDetail(
-                              listOffices.firstWhere((o) => o.id == id),
-                            ),
-                          ),
-                        ),
+                        TextSpan(
+                            text: '$stamped',
+                            style: const TextStyle(fontFamily: AppFonts.display, fontSize: 18, fontWeight: FontWeight.w700, color: AppColors.ink)),
+                        TextSpan(text: ' of $total stamped'),
                       ],
-                    ),
-                  );
-                },
+                    )),
+                  ],
+                ),
               ),
+              if (stamped < total) _SmallPill(label: 'Find next', color: AppColors.postal, onTap: onFindNext),
             ],
           ),
-        );
-      },
+          const SizedBox(height: 10),
+          Container(
+            height: 8,
+            clipBehavior: Clip.antiAlias,
+            alignment: Alignment.centerLeft,
+            decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(999)),
+            child: FractionallySizedBox(
+              widthFactor: percent / 100,
+              heightFactor: 1,
+              child: Container(decoration: BoxDecoration(color: AppColors.visited, borderRadius: BorderRadius.circular(999))),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SmallPill extends StatelessWidget {
+  final String label;
+  final Color color;
+  final VoidCallback onTap;
+  const _SmallPill({required this.label, required this.color, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        constraints: const BoxConstraints(minHeight: 44),
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        alignment: Alignment.center,
+        decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(999)),
+        child: Text(label, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.white)),
+      ),
     );
   }
 }

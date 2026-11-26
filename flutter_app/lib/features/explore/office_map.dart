@@ -5,6 +5,7 @@ import 'package:latlong2/latlong.dart' as ll;
 import '../../core/cluster.dart';
 import '../../core/map_tiles.dart';
 import '../../models/post_office.dart';
+import '../../theme/app_theme.dart';
 import 'pin_icons.dart';
 
 /// Port of src/components/map/OfficeMap.tsx. Where the web version leans on
@@ -75,13 +76,16 @@ class _OfficeMapState extends State<OfficeMap> {
       if (!mounted) return;
       if (points.length > 1) {
         final bounds = LatLngBounds.fromPoints(points);
-        _mapController.fitCamera(
-          CameraFit.bounds(
-            bounds: bounds,
-            // Leave room for the search bar above and the list sheet below.
-            padding: const EdgeInsets.fromLTRB(40, 130, 40, 160),
-          ),
-        );
+        // Leave room for the search bar above and the list sheet below.
+        final fitted = CameraFit.bounds(
+          bounds: bounds,
+          padding: const EdgeInsets.fromLTRB(40, 130, 40, 160),
+        ).fit(_mapController.camera);
+        // Leaflet's zoomSnap={0.25}: fitBounds rounds the zoom *down* to the
+        // nearest quarter level, so the web shows a touch more area than an
+        // exact fit — match it, or the pins cluster differently.
+        final snapped = (fitted.zoom * 4).floorToDouble() / 4;
+        _mapController.move(fitted.center, snapped);
       } else {
         _mapController.move(points.first, _focusZoom);
       }
@@ -117,17 +121,31 @@ class _OfficeMapState extends State<OfficeMap> {
     final clusters = clusterPoints(
       located.map((o) => ClusterInput(id: o.id, lat: o.lat!, lng: o.lng!)).toList(),
       _zoom,
+      cellPx: 64, // OfficeMarkers passes 64, not clusterPoints' default 52
       keepSingle: widget.selectedId == null ? {} : {widget.selectedId!},
     );
 
     return FlutterMap(
       mapController: _mapController,
       options: MapOptions(
+        backgroundColor: AppColors.sand,
+        // Leaflet never rotates; pinch, pan and double-tap zoom only.
+        interactionOptions: const InteractionOptions(flags: InteractiveFlag.all & ~InteractiveFlag.rotate),
         initialCenter: _startCenter,
         initialZoom: _startZoom,
         onMapEvent: (event) {
-          if (event is MapEventMoveEnd || event is MapEventFlingAnimationEnd) {
-            final newZoom = _mapController.camera.zoom;
+          // Re-cluster at Leaflet's `zoomend`: when a gesture finishes, and
+          // after every programmatic move (the initial fit, fly-to-office,
+          // fly-to-location) — those never emit a MoveEnd, so without this
+          // the pins kept clustering at the starting zoom of 5.
+          final settled = event is MapEventMoveEnd ||
+              event is MapEventFlingAnimationEnd ||
+              event is MapEventDoubleTapZoomEnd ||
+              event is MapEventScrollWheelZoom ||
+              event.source == MapEventSource.mapController ||
+              event.source == MapEventSource.fitCamera;
+          if (settled) {
+            final newZoom = event.camera.zoom;
             if (newZoom != _zoom) setState(() => _zoom = newZoom);
           }
         },
@@ -137,6 +155,7 @@ class _OfficeMapState extends State<OfficeMap> {
           urlTemplate: tiles.urlTemplate,
           userAgentPackageName: 'app.vinvi.philatrail',
           maxZoom: tiles.maxZoom,
+          tileProvider: NetworkTileProvider(headers: tileHeaders),
         ),
         MarkerLayer(
           markers: [
@@ -145,8 +164,8 @@ class _OfficeMapState extends State<OfficeMap> {
                 Marker(
                   key: ValueKey('c${cluster.key}-${cluster.ids.length}'),
                   point: ll.LatLng(cluster.lat, cluster.lng),
-                  width: 48,
-                  height: 48,
+                  width: clusterSize(cluster.ids.length),
+                  height: clusterSize(cluster.ids.length),
                   child: GestureDetector(
                     onTap: () {
                       final bounds = LatLngBounds.fromPoints([
@@ -172,8 +191,8 @@ class _OfficeMapState extends State<OfficeMap> {
                 Marker(
                   key: ValueKey(cluster.ids.first),
                   point: ll.LatLng(cluster.lat, cluster.lng),
-                  width: 34,
-                  height: 34,
+                  width: 30,
+                  height: 30,
                   child: GestureDetector(
                     onTap: () => widget.onSelect(cluster.ids.first),
                     child: OfficePin(

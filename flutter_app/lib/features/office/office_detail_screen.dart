@@ -39,6 +39,13 @@ class OfficeDetailScreen extends StatefulWidget {
 
 enum _DetailTab { about, notes, public }
 
+/// The one hardcoded accent OfficeDetail.tsx uses outside the app's named
+/// tokens — "plan"/link blue (#2f4aa8), for the Plan button, its planned
+/// ring, and the two text links below. Not in app_theme.dart because
+/// nothing else in the app uses it; kept local rather than promoted to a
+/// shared token for a single-file accent.
+const _planBlue = Color(0xFF2F4AA8);
+
 class _OfficeDetailScreenState extends State<OfficeDetailScreen> {
   bool _checking = false;
   double? _lastCheckKm;
@@ -119,6 +126,13 @@ class _OfficeDetailScreenState extends State<OfficeDetailScreen> {
         final visit = controller.visits[office.id];
         final visited = visit != null;
         final isPlanned = controller.plannedIds.contains(office.id);
+        // office.status is a one-time snapshot taken when this screen was
+        // pushed, so it goes stale the moment a stamp or a plan/unplan
+        // happens here (the stamped-sheet's "Done" button just pops back to
+        // this same, still-mounted screen) — derive the pill's status from
+        // the live controller state instead, or it contradicts every other
+        // piece of UI on the screen right after the action that matters most.
+        final liveStatus = visited ? OfficeStatus.visited : (isPlanned ? OfficeStatus.planned : OfficeStatus.unvisited);
         return Scaffold(
           backgroundColor: AppColors.paper,
           body: SafeArea(
@@ -220,7 +234,7 @@ class _OfficeDetailScreenState extends State<OfficeDetailScreen> {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  _StatusPill(status: office.status, stampedOn: visit != null ? formatVisitDate(visit.visitedAt) : null),
+                                  _StatusPill(status: liveStatus, stampedOn: visit != null ? formatVisitDate(visit.visitedAt) : null),
                                   const SizedBox(height: 8),
                                   if (visited)
                                     const Text(
@@ -297,7 +311,7 @@ class _OfficeDetailScreenState extends State<OfficeDetailScreen> {
                             _RoundAction(
                               icon: isPlanned ? Icons.flag : Icons.flag_outlined,
                               label: isPlanned ? 'Planned' : 'Plan',
-                              iconColor: AppColors.focus,
+                              iconColor: _planBlue,
                               selected: isPlanned,
                               onTap: () {
                                 hapticSelectionChanged();
@@ -345,7 +359,7 @@ class _StatusPill extends StatelessWidget {
   Widget build(BuildContext context) {
     final (bg, fg, label) = switch (status) {
       OfficeStatus.visited => (AppColors.visited.withValues(alpha: 0.12), AppColors.visitedInk, 'STAMPED'),
-      OfficeStatus.planned => (AppColors.focus.withValues(alpha: 0.1), AppColors.focus, 'PLANNED'),
+      OfficeStatus.planned => (_planBlue.withValues(alpha: 0.1), _planBlue, 'PLANNED'),
       OfficeStatus.unvisited => (AppColors.warn.withValues(alpha: 0.12), AppColors.warn, 'NOT YET STAMPED'),
     };
     final suffix = status == OfficeStatus.visited && stampedOn != null ? ' $stampedOn' : '';
@@ -597,7 +611,7 @@ class _AboutTab extends StatelessWidget {
             const SizedBox(height: 4),
             GestureDetector(
               onTap: onExpand,
-              child: const Text('Read more', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13, color: Color(0xFF2F4AA8))),
+              child: const Text('Read more', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13, color: _planBlue)),
             ),
           ],
         ],
@@ -646,7 +660,7 @@ class _NotesTab extends StatelessWidget {
             onTap: onEdit,
             child: Text(
               (v.note.isNotEmpty || v.photoPath != null) ? 'Edit note & photo' : 'Add a note',
-              style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13, color: Color(0xFF2F4AA8)),
+              style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13, color: _planBlue),
             ),
           ),
         ],
@@ -873,7 +887,7 @@ class _RoundAction extends StatelessWidget {
             customBorder: const CircleBorder(),
             child: Container(
               decoration: selected
-                  ? BoxDecoration(shape: BoxShape.circle, border: Border.all(color: AppColors.focus, width: 2))
+                  ? BoxDecoration(shape: BoxShape.circle, border: Border.all(color: _planBlue, width: 2))
                   : null,
               child: GlassCard(
                 borderRadius: BorderRadius.circular(999),

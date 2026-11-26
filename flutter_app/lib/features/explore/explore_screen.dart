@@ -71,6 +71,11 @@ class _ExploreScreenState extends State<ExploreScreen> {
   }
 
   void _toggleSheet() {
+    // The toggle button lives inside the sheet's own builder, so by the
+    // time anyone can tap it the controller is attached — this guard is
+    // just cheap insurance against DraggableScrollableController's "not
+    // attached" assertion on an edge-case early tap.
+    if (!_sheetController.isAttached) return;
     hapticSelect();
     _sheetController.animateTo(
       _sheetOpen ? _sheetPeek : _sheetOpenSize,

@@ -5,10 +5,13 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../core/constants.dart';
 import '../../core/haptics.dart';
 import '../../core/office_status.dart';
+import '../../core/states.dart';
 import '../../data/nearby_notifications.dart';
+import '../../data/state_controller.dart';
 import '../../models/post_office.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/account_avatar.dart';
+import '../../widgets/glass_card.dart';
 import '../office/office_detail_screen.dart';
 import '../office/visit_dialog.dart';
 import 'filter_chips.dart';
@@ -103,6 +106,56 @@ class _ExploreScreenState extends State<ExploreScreen> {
     );
   }
 
+  /// Port of StateSwitcher.tsx's picker sheet — the state list itself (not
+  /// just the current one) is the part Explore was missing entirely.
+  Future<void> _pickState(
+    BuildContext context,
+    StateController stateController,
+    List<StateOption> states,
+    String currentCode,
+  ) async {
+    final chosen = await showModalBottomSheet<String>(
+      context: context,
+      backgroundColor: AppColors.paper,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (sheetContext) => SafeArea(
+        child: ListView(
+          shrinkWrap: true,
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          children: [
+            const Padding(
+              padding: EdgeInsets.fromLTRB(20, 8, 20, 4),
+              child: Text(
+                'SWITCH STATE',
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12, letterSpacing: 1.6, color: AppColors.muted),
+              ),
+            ),
+            for (final s in states)
+              ListTile(
+                title: Text(
+                  s.name,
+                  style: TextStyle(
+                    fontFamily: AppFonts.display,
+                    fontWeight: FontWeight.w500,
+                    fontSize: 18,
+                    color: s.code == currentCode ? AppColors.postal : AppColors.ink,
+                  ),
+                ),
+                trailing: Text('${s.count}', style: const TextStyle(color: AppColors.muted, fontFamily: AppFonts.mono)),
+                onTap: () => Navigator.of(sheetContext).pop(s.code),
+              ),
+          ],
+        ),
+      ),
+    );
+    if (chosen != null && chosen != currentCode) {
+      hapticSelect();
+      stateController.choose(chosen);
+    }
+  }
+
   Future<void> _requestLocation() async {
     if (_locating) return;
     setState(() => _locating = true);
@@ -166,7 +219,10 @@ class _ExploreScreenState extends State<ExploreScreen> {
           );
         }
 
+        final states = stateController.statesFor(officesController.offices);
+        final stateCode = stateController.stateCodeFor(officesController.offices);
         final stateOffices = stateController.officesFor(officesController.offices);
+        final stampedInState = stateOffices.where((o) => visitsController.visits.containsKey(o.id)).length;
         _syncWatchedOffices(stateOffices, visitsController.visits.keys.toSet());
         final allOffices = withStatus(
           stateOffices,
@@ -204,6 +260,65 @@ class _ExploreScreenState extends State<ExploreScreen> {
                 right: 16,
                 child: Column(
                   children: [
+                    if (states.length > 1 || stateOffices.isNotEmpty)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 10),
+                        child: GlassCard(
+                          borderRadius: BorderRadius.circular(20),
+                          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: InkWell(
+                                      onTap: states.length > 1
+                                          ? () => _pickState(context, stateController, states, stateCode)
+                                          : null,
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Flexible(
+                                            child: Text(
+                                              stateName(stateCode).toUpperCase(),
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
+                                              style: const TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 15,
+                                                letterSpacing: 0.3,
+                                              ),
+                                            ),
+                                          ),
+                                          if (states.length > 1) ...[
+                                            const SizedBox(width: 2),
+                                            const Icon(Icons.expand_more, size: 18, color: AppColors.muted),
+                                          ],
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                  Text(
+                                    '$stampedInState of ${stateOffices.length} stamped',
+                                    style: const TextStyle(color: AppColors.muted, fontSize: 12, fontWeight: FontWeight.w600),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 6),
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(999),
+                                child: LinearProgressIndicator(
+                                  value: stateOffices.isEmpty ? 0 : stampedInState / stateOffices.length,
+                                  minHeight: 4,
+                                  backgroundColor: AppColors.line,
+                                  color: AppColors.visited,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
                     Row(
                       children: [
                         Expanded(

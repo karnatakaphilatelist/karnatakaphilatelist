@@ -3,19 +3,23 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../core/constants.dart';
 import '../../theme/app_theme.dart';
+import '../../widgets/postal_texture.dart';
 
 /// Port of src/components/welcome/WelcomeTour.tsx: a 3-step first-launch
-/// intro, shown once before the main app shell. Simplified from the web
+/// intro, shown once before the main app shell. Reconciled against the live
+/// component on 2026-11-26 after it was flagged as not matching the real
+/// Capacitor-shell app at all — the previous version of this file used a
+/// single flat paper background throughout; the real design is a two-part
+/// screen (a postal-red hero with a huge white headline on top, a paper
+/// body below), which is what this rewrite ports. Simplified from the web
 /// version (acceptable gaps, not silently dropped): no swipe-gesture layer
-/// (PageView already swipes natively), no map-prefetch warmup (nothing to
-/// prefetch in a native app), and a plain Material icon instead of the
-/// halo/glow decoration.
+/// (PageView already swipes natively) and no map-prefetch warmup (nothing
+/// to prefetch in a native app).
 class _Step {
   final String title;
   final String sub;
   final String body;
-  final IconData icon;
-  const _Step({required this.title, required this.sub, required this.body, required this.icon});
+  const _Step({required this.title, required this.sub, required this.body});
 }
 
 const _steps = [
@@ -23,19 +27,16 @@ const _steps = [
     title: 'Find it.',
     sub: 'A post office near you',
     body: 'Open the map and spot a post office close by. Green pins are places you have already stamped.',
-    icon: Icons.location_on,
   ),
   _Step(
     title: 'Visit it.',
     sub: 'Go in person',
     body: 'Visit the post office, ask for the postmark, then tap Stamp it. Add a note or photo if you like.',
-    icon: Icons.check_circle,
   ),
   _Step(
     title: 'Stamp it.',
     sub: 'Fill your passport',
     body: 'Each stamp lands in your passport. Watch your count grow, one post office at a time.',
-    icon: Icons.menu_book,
   ),
 ];
 
@@ -80,16 +81,9 @@ class WelcomeTourScreen extends StatefulWidget {
 }
 
 class _WelcomeTourScreenState extends State<WelcomeTourScreen> {
-  final _pageController = PageController();
   int _step = 0;
 
   bool get _last => _step == _steps.length - 1;
-
-  @override
-  void dispose() {
-    _pageController.dispose();
-    super.dispose();
-  }
 
   Future<void> _finish() async {
     final prefs = await SharedPreferences.getInstance();
@@ -100,126 +94,255 @@ class _WelcomeTourScreenState extends State<WelcomeTourScreen> {
   void _next() {
     if (_last) {
       _finish();
-      return;
+    } else {
+      setState(() => _step += 1);
     }
-    _pageController.nextPage(duration: const Duration(milliseconds: 280), curve: Curves.easeOut);
   }
 
   @override
   Widget build(BuildContext context) {
+    final current = _steps[_step];
     return Scaffold(
       backgroundColor: AppColors.paper,
-      body: SafeArea(
-        child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 8, 12, 0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text('PHILATRAIL',
-                      style: TextStyle(fontWeight: FontWeight.w800, fontSize: 12, letterSpacing: 2, color: AppColors.postal)),
-                  TextButton(
-                    onPressed: _finish,
-                    child: const Text('Skip', style: TextStyle(fontWeight: FontWeight.bold)),
+      body: Column(
+        children: [
+          // ── Red hero: wordmark/skip row, step eyebrow, huge headline, gold sub, halo mark ──
+          Expanded(
+            flex: 115,
+            child: PostalTexture(
+              child: SafeArea(
+                bottom: false,
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
+                  child: Stack(
+                    children: [
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          SizedBox(
+                            height: 40,
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                const Text(
+                                  'PHILATRAIL',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w800,
+                                    fontSize: 12,
+                                    letterSpacing: 2.2,
+                                  ),
+                                ),
+                                TextButton(
+                                  onPressed: _finish,
+                                  style: TextButton.styleFrom(foregroundColor: Colors.white, minimumSize: const Size(0, 44)),
+                                  child: const Text(
+                                    'SKIP',
+                                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12, letterSpacing: 1.8),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 24),
+                          Row(
+                            key: ValueKey(_step),
+                            children: [
+                              const Text(
+                                'HOW IT WORKS',
+                                style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12, letterSpacing: 1.8),
+                              ),
+                              const SizedBox(width: 14),
+                              Container(width: 1, height: 14, color: AppColors.goldOnRed),
+                              const SizedBox(width: 14),
+                              Text(
+                                '${_step + 1} of ${_steps.length}',
+                                style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12, letterSpacing: 1.8),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 14),
+                          FittedBox(
+                            key: ValueKey('headline-$_step'),
+                            fit: BoxFit.scaleDown,
+                            alignment: Alignment.centerLeft,
+                            child: Text(
+                              current.title.toUpperCase(),
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w500,
+                                fontSize: 64,
+                                height: 1.05,
+                                letterSpacing: 0.2,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            current.sub.toUpperCase(),
+                            key: ValueKey('sub-$_step'),
+                            style: const TextStyle(
+                              color: AppColors.goldOnRed,
+                              fontWeight: FontWeight.bold,
+                              fontStyle: FontStyle.italic,
+                              fontSize: 18,
+                              letterSpacing: 0.6,
+                            ),
+                          ),
+                        ],
+                      ),
+                      Positioned(
+                        right: 0,
+                        bottom: 24,
+                        child: _Halo(key: ValueKey('halo-$_step'), step: _step),
+                      ),
+                    ],
                   ),
-                ],
+                ),
               ),
             ),
-            Expanded(
-              child: PageView.builder(
-                controller: _pageController,
-                itemCount: _steps.length,
-                onPageChanged: (i) => setState(() => _step = i),
-                itemBuilder: (context, i) => _StepView(step: _steps[i], index: i),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
-              child: Column(
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: List.generate(
-                      _steps.length,
-                      (i) => AnimatedContainer(
-                        duration: const Duration(milliseconds: 200),
-                        margin: const EdgeInsets.symmetric(horizontal: 3),
-                        height: 8,
-                        width: i == _step ? 28 : 8,
-                        decoration: BoxDecoration(
-                          color: i == _step ? AppColors.postal : AppColors.lineStrong,
-                          borderRadius: BorderRadius.circular(999),
+          ),
+          // ── Paper body: copy, pin legend (step 0 only), dots, CTA ──
+          Expanded(
+            flex: 100,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+              child: SafeArea(
+                top: false,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(current.body, key: ValueKey('body-$_step'), style: const TextStyle(fontSize: 16, height: 1.4, color: AppColors.ink)),
+                          if (_step == 0) ...[
+                            const SizedBox(height: 20),
+                            Wrap(
+                              spacing: 8,
+                              runSpacing: 8,
+                              children: const [
+                                _Legend(color: AppColors.lineStrong, label: 'Not visited', icon: null),
+                                _Legend(color: Color(0xFF2F4AA8), label: 'Planned', icon: Icons.flag),
+                                _Legend(color: AppColors.visited, label: 'Visited', icon: Icons.check),
+                              ],
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: List.generate(
+                        _steps.length,
+                        (i) => Padding(
+                          padding: const EdgeInsets.only(right: 6),
+                          child: GestureDetector(
+                            onTap: () => setState(() => _step = i),
+                            child: AnimatedContainer(
+                              duration: const Duration(milliseconds: 200),
+                              height: 8,
+                              width: i == _step ? 28 : 8,
+                              decoration: BoxDecoration(
+                                color: i == _step ? AppColors.postal : const Color(0xFF785A1E).withValues(alpha: 0.25),
+                                borderRadius: BorderRadius.circular(999),
+                              ),
+                            ),
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                  const SizedBox(height: 20),
-                  SizedBox(
-                    width: double.infinity,
-                    height: 56,
-                    child: FilledButton(
-                      style: FilledButton.styleFrom(
-                        backgroundColor: AppColors.postal,
-                        shape: const StadiumBorder(),
+                    const SizedBox(height: 12),
+                    SizedBox(
+                      width: double.infinity,
+                      height: 62,
+                      child: DecoratedBox(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(28),
+                          gradient: const LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            colors: [Color(0xFFE0334A), AppColors.postal],
+                          ),
+                          boxShadow: [
+                            BoxShadow(color: AppColors.postal.withValues(alpha: 0.35), blurRadius: 18, offset: const Offset(0, 8)),
+                          ],
+                        ),
+                        child: Material(
+                          color: Colors.transparent,
+                          child: InkWell(
+                            borderRadius: BorderRadius.circular(28),
+                            onTap: _next,
+                            child: Center(
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    _last ? 'START COLLECTING' : 'NEXT',
+                                    style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16, letterSpacing: 2.2),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  const Icon(Icons.arrow_forward, color: Colors.white, size: 20),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
                       ),
-                      onPressed: _next,
-                      child: Text(_last ? 'Start collecting' : 'Next',
-                          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, letterSpacing: 0.4)),
                     ),
-                  ),
-                ],
+                    const SizedBox(height: 14),
+                  ],
+                ),
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
 }
 
-class _StepView extends StatelessWidget {
-  final _Step step;
-  final int index;
-  const _StepView({required this.step, required this.index});
+/// The mark of each step: a glowing halo with the thing you're looking for
+/// inside — port of WelcomeTour.tsx's Halo component.
+class _Halo extends StatelessWidget {
+  final int step;
+  const _Halo({super.key, required this.step});
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 28),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.center,
+    final (color, icon) = switch (step) {
+      0 => (const Color(0xFF2F4AA8), null),
+      1 => (AppColors.visited, Icons.check),
+      _ => (AppColors.postal, Icons.menu_book),
+    };
+    return SizedBox(
+      width: 112,
+      height: 112,
+      child: Stack(
+        alignment: Alignment.center,
         children: [
           Container(
-            width: 72,
-            height: 72,
-            decoration: const BoxDecoration(color: AppColors.postalSoft, shape: BoxShape.circle),
-            child: Icon(step.icon, color: AppColors.postal, size: 34),
+            width: 112,
+            height: 112,
+            decoration: BoxDecoration(shape: BoxShape.circle, color: const Color(0xFF2F4AA8).withValues(alpha: 0.25)),
           ),
-          const SizedBox(height: 28),
-          Text('${index + 1} of ${_steps.length}',
-              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12, letterSpacing: 1.6, color: AppColors.muted)),
-          const SizedBox(height: 8),
-          Text(step.title,
-              style: const TextStyle(fontSize: 40, fontWeight: FontWeight.w700, color: AppColors.ink, height: 1.05)),
-          const SizedBox(height: 6),
-          Text(step.sub,
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, fontStyle: FontStyle.italic, color: AppColors.postal)),
-          const SizedBox(height: 18),
-          Text(step.body, style: const TextStyle(fontSize: 16, height: 1.4, color: AppColors.ink)),
-          if (index == 0) ...[
-            const SizedBox(height: 20),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: [
-                _Legend(color: AppColors.lineStrong, label: 'Not visited', icon: null),
-                _Legend(color: AppColors.planned, label: 'Planned', icon: Icons.flag),
-                _Legend(color: AppColors.visited, label: 'Visited', icon: Icons.check),
-              ],
-            ),
-          ],
+          Container(
+            width: 94,
+            height: 94,
+            decoration: BoxDecoration(shape: BoxShape.circle, border: Border.all(color: Colors.white.withValues(alpha: 0.1))),
+          ),
+          Container(
+            width: 70,
+            height: 70,
+            decoration: BoxDecoration(shape: BoxShape.circle, border: Border.all(color: Colors.white.withValues(alpha: 0.1))),
+          ),
+          Container(
+            width: 52,
+            height: 52,
+            decoration: BoxDecoration(shape: BoxShape.circle, color: color, border: Border.all(color: Colors.white, width: 5)),
+            child: icon != null ? Icon(icon, color: Colors.white, size: 22) : null,
+          ),
         ],
       ),
     );

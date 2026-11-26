@@ -11,7 +11,6 @@ import '../../data/state_controller.dart';
 import '../../models/post_office.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/account_avatar.dart';
-import '../../widgets/glass_card.dart';
 import '../office/office_detail_screen.dart';
 import '../office/visit_dialog.dart';
 import 'filter_chips.dart';
@@ -34,6 +33,13 @@ class ExploreScreen extends StatefulWidget {
   State<ExploreScreen> createState() => _ExploreScreenState();
 }
 
+// Phone list sheet snap points — mirrors ExploreView.tsx's snap stops (peek /
+// half / nearly full), collapsed to the two that matter for the header's
+// "Show list" / "Show map" toggle.
+const double _sheetPeek = 0.14;
+const double _sheetOpenSize = 0.55;
+const double _sheetMax = 0.9;
+
 class _ExploreScreenState extends State<ExploreScreen> {
   StatusFilterValue _filter;
   int? _selectedId;
@@ -42,6 +48,8 @@ class _ExploreScreenState extends State<ExploreScreen> {
   String? _watchedSignature;
   String _query = '';
   final _searchController = TextEditingController();
+  final _sheetController = DraggableScrollableController();
+  bool _sheetOpen = false;
 
   _ExploreScreenState() : _filter = null;
 
@@ -54,12 +62,29 @@ class _ExploreScreenState extends State<ExploreScreen> {
     NearbyNotificationService.init(onOfficeTap: (id) {
       if (mounted) setState(() => _selectedId = id);
     });
+    _sheetController.addListener(_onSheetSizeChanged);
+  }
+
+  void _onSheetSizeChanged() {
+    final open = _sheetController.size > (_sheetPeek + 0.05);
+    if (open != _sheetOpen) setState(() => _sheetOpen = open);
+  }
+
+  void _toggleSheet() {
+    hapticSelect();
+    _sheetController.animateTo(
+      _sheetOpen ? _sheetPeek : _sheetOpenSize,
+      duration: const Duration(milliseconds: 260),
+      curve: Curves.easeOut,
+    );
   }
 
   @override
   void dispose() {
     NearbyNotificationService.stop();
     _searchController.dispose();
+    _sheetController.removeListener(_onSheetSizeChanged);
+    _sheetController.dispose();
     super.dispose();
   }
 
@@ -260,65 +285,6 @@ class _ExploreScreenState extends State<ExploreScreen> {
                 right: 16,
                 child: Column(
                   children: [
-                    if (states.length > 1 || stateOffices.isNotEmpty)
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 10),
-                        child: GlassCard(
-                          borderRadius: BorderRadius.circular(20),
-                          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                children: [
-                                  Expanded(
-                                    child: InkWell(
-                                      onTap: states.length > 1
-                                          ? () => _pickState(context, stateController, states, stateCode)
-                                          : null,
-                                      child: Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          Flexible(
-                                            child: Text(
-                                              stateName(stateCode).toUpperCase(),
-                                              maxLines: 1,
-                                              overflow: TextOverflow.ellipsis,
-                                              style: const TextStyle(
-                                                fontWeight: FontWeight.bold,
-                                                fontSize: 15,
-                                                letterSpacing: 0.3,
-                                              ),
-                                            ),
-                                          ),
-                                          if (states.length > 1) ...[
-                                            const SizedBox(width: 2),
-                                            const Icon(Icons.expand_more, size: 18, color: AppColors.muted),
-                                          ],
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                  Text(
-                                    '$stampedInState of ${stateOffices.length} stamped',
-                                    style: const TextStyle(color: AppColors.muted, fontSize: 12, fontWeight: FontWeight.w600),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 6),
-                              ClipRRect(
-                                borderRadius: BorderRadius.circular(999),
-                                child: LinearProgressIndicator(
-                                  value: stateOffices.isEmpty ? 0 : stampedInState / stateOffices.length,
-                                  minHeight: 4,
-                                  backgroundColor: AppColors.line,
-                                  color: AppColors.visited,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
                     Row(
                       children: [
                         Expanded(
@@ -362,27 +328,37 @@ class _ExploreScreenState extends State<ExploreScreen> {
                   ],
                 ),
               ),
-              Positioned(
-                right: 16,
-                bottom: MediaQuery.of(context).size.height * 0.42 + 16,
-                child: FloatingActionButton(
-                  heroTag: 'locate',
-                  backgroundColor: AppColors.card,
-                  foregroundColor: AppColors.ink,
-                  onPressed: _findNearMe,
-                  child: _locating
-                      ? const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : const Icon(Icons.my_location),
-                ),
+              // Tracks the sheet's live size (not just the peek/open snap points, which
+              // only update once dragging settles) so the locate button always floats
+              // just above the sheet's current top edge, dragged or animated.
+              AnimatedBuilder(
+                animation: _sheetController,
+                builder: (context, _) {
+                  final sheetSize = _sheetController.isAttached ? _sheetController.size : _sheetPeek;
+                  return Positioned(
+                    right: 16,
+                    bottom: MediaQuery.of(context).size.height * sheetSize + 16,
+                    child: FloatingActionButton(
+                      heroTag: 'locate',
+                      backgroundColor: AppColors.card,
+                      foregroundColor: AppColors.ink,
+                      onPressed: _findNearMe,
+                      child: _locating
+                          ? const SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : const Icon(Icons.my_location),
+                    ),
+                  );
+                },
               ),
               DraggableScrollableSheet(
-                initialChildSize: 0.4,
-                minChildSize: 0.12,
-                maxChildSize: 0.9,
+                controller: _sheetController,
+                initialChildSize: _sheetPeek,
+                minChildSize: _sheetPeek,
+                maxChildSize: _sheetMax,
                 builder: (context, scrollController) {
                   return Container(
                     decoration: const BoxDecoration(
@@ -395,12 +371,100 @@ class _ExploreScreenState extends State<ExploreScreen> {
                     child: Column(
                       children: [
                         Container(
-                          margin: const EdgeInsets.symmetric(vertical: 10),
+                          margin: const EdgeInsets.only(top: 10, bottom: 4),
                           width: 36,
                           height: 4,
                           decoration: BoxDecoration(
                             color: AppColors.line,
                             borderRadius: BorderRadius.circular(2),
+                          ),
+                        ),
+                        // Port of ExploreView.tsx's phone panel header (direction D): peek
+                        // shows state + progress + "Show list"; open shows the list heading
+                        // + "Show map". This is the state switcher's only home on phones now
+                        // — the floating card that used to sit above the search bar is gone.
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: _sheetOpen
+                                    ? Text(
+                                        _userLocation != null ? 'Nearby' : 'Post offices',
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 12,
+                                          letterSpacing: 1.6,
+                                          color: AppColors.ink,
+                                        ),
+                                      )
+                                    : InkWell(
+                                        onTap: states.length > 1
+                                            ? () => _pickState(context, stateController, states, stateCode)
+                                            : null,
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Row(
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                Text(
+                                                  stateName(stateCode),
+                                                  style: const TextStyle(
+                                                    fontFamily: AppFonts.display,
+                                                    fontWeight: FontWeight.w500,
+                                                    fontSize: 20,
+                                                  ),
+                                                ),
+                                                if (states.length > 1) ...[
+                                                  const SizedBox(width: 4),
+                                                  const Icon(Icons.expand_more, size: 18, color: AppColors.ink),
+                                                ],
+                                              ],
+                                            ),
+                                            const SizedBox(height: 4),
+                                            Row(
+                                              children: [
+                                                ClipRRect(
+                                                  borderRadius: BorderRadius.circular(999),
+                                                  child: SizedBox(
+                                                    width: 96,
+                                                    child: LinearProgressIndicator(
+                                                      value: stateOffices.isEmpty ? 0 : stampedInState / stateOffices.length,
+                                                      minHeight: 6,
+                                                      backgroundColor: AppColors.line,
+                                                      color: AppColors.visited,
+                                                    ),
+                                                  ),
+                                                ),
+                                                const SizedBox(width: 8),
+                                                Text(
+                                                  '$stampedInState of ${stateOffices.length} stamped',
+                                                  style: const TextStyle(fontFamily: AppFonts.mono, color: AppColors.muted, fontSize: 13),
+                                                ),
+                                              ],
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                              ),
+                              TextButton.icon(
+                                onPressed: _toggleSheet,
+                                style: TextButton.styleFrom(
+                                  backgroundColor: AppColors.lineStrong.withValues(alpha: 0.35),
+                                  foregroundColor: AppColors.ink,
+                                  shape: const StadiumBorder(),
+                                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                                  minimumSize: const Size(0, 40),
+                                ),
+                                icon: Icon(_sheetOpen ? Icons.map_outlined : Icons.list, size: 16),
+                                label: Text(
+                                  _sheetOpen ? 'Show map' : 'Show list',
+                                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                         Expanded(

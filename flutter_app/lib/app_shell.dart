@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 
 import 'features/account/account_screen.dart';
 import 'features/auth/guest_sign_in_nudge.dart';
+import 'features/coach/coach_tour.dart';
+import 'features/office/visit_dialog.dart' show authControllerOf;
 import 'features/explore/explore_screen.dart';
 import 'features/home/home_widget_bridge.dart';
 import 'features/learn/learn_screen.dart';
@@ -39,12 +41,16 @@ class AppShell extends StatelessWidget {
       child: GuestSignInNudge(
         child: ValueListenableBuilder<int>(
           valueListenable: appTabIndex,
-          builder: (context, index, _) => Scaffold(
-            backgroundColor: AppColors.paper,
-            body: IndexedStack(index: index, children: _screens),
-            bottomNavigationBar: ValueListenableBuilder<bool>(
-              valueListenable: detailSheetOpen,
-              builder: (context, hidden, _) => hidden ? const SizedBox.shrink() : AppTabBar(index: index),
+          builder: (context, index, _) => CoachTour(
+            auth: authControllerOf(context),
+            onExplore: index == 0,
+            child: Scaffold(
+              backgroundColor: AppColors.paper,
+              body: IndexedStack(index: index, children: _screens),
+              bottomNavigationBar: ValueListenableBuilder<bool>(
+                valueListenable: detailSheetOpen,
+                builder: (context, hidden, _) => hidden ? const SizedBox.shrink() : AppTabBar(index: index),
+              ),
             ),
           ),
         ),
@@ -79,10 +85,15 @@ class AppTabBar extends StatelessWidget {
           children: [
             for (var i = 0; i < _items.length; i++) ...[
               if (i > 0) const SizedBox(width: 4),
-              Expanded(child: _TabItem(icon: _items[i].$1, label: _items[i].$2, active: i == index, onTap: () {
-                if (i == index && i == 0) exploreReset.value++;
-                appTabIndex.value = i;
-              })),
+              Expanded(
+                child: KeyedSubtree(
+                  key: i == 1 ? coachTargets['tab-passport'] : (i == 3 ? coachTargets['tab-account'] : null),
+                  child: _TabItem(icon: _items[i].$1, label: _items[i].$2, active: i == index, onTap: () {
+                    if (i == index && i == 0) exploreReset.value++;
+                    appTabIndex.value = i;
+                  }),
+                ),
+              ),
             ],
           ],
         ),

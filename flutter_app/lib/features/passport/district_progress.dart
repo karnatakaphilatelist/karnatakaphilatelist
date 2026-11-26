@@ -8,33 +8,31 @@ class _DistrictRow {
   final String district;
   final int visited;
   final int total;
-  const _DistrictRow({required this.district, required this.visited, required this.total});
+  const _DistrictRow(this.district, this.visited, this.total);
 }
 
-/// Port of src/components/passport/DistrictProgress.tsx.
+/// Port of src/components/passport/DistrictProgress.tsx: fullest districts
+/// first; each row (name, "n of m" or "· complete", 8px bar) opens that
+/// district's offices on Explore.
 class DistrictProgress extends StatelessWidget {
   final List<PostOffice> offices;
   final Map<int, Visit> visits;
-  const DistrictProgress({super.key, required this.offices, required this.visits});
+  final ValueChanged<String>? onDistrict;
+  const DistrictProgress({super.key, required this.offices, required this.visits, this.onDistrict});
 
   List<_DistrictRow> _summarise() {
-    final rows = <String, _DistrictRow>{};
+    final totals = <String, int>{};
+    final visitedCounts = <String, int>{};
     for (final office in offices) {
-      final existing = rows[office.district] ??
-          _DistrictRow(district: office.district, visited: 0, total: 0);
-      rows[office.district] = _DistrictRow(
-        district: existing.district,
-        visited: existing.visited + (visits[office.id] != null ? 1 : 0),
-        total: existing.total + 1,
-      );
+      totals[office.district] = (totals[office.district] ?? 0) + 1;
+      if (visits.containsKey(office.id)) visitedCounts[office.district] = (visitedCounts[office.district] ?? 0) + 1;
     }
-    final list = rows.values.toList();
-    list.sort((a, b) {
-      final ratioCompare = (b.visited / b.total).compareTo(a.visited / a.total);
-      if (ratioCompare != 0) return ratioCompare;
-      return a.district.compareTo(b.district);
+    final rows = [for (final d in totals.keys) _DistrictRow(d, visitedCounts[d] ?? 0, totals[d]!)];
+    rows.sort((a, b) {
+      final byRatio = (b.visited / b.total).compareTo(a.visited / a.total);
+      return byRatio != 0 ? byRatio : a.district.toLowerCase().compareTo(b.district.toLowerCase());
     });
-    return list;
+    return rows;
   }
 
   @override
@@ -42,37 +40,62 @@ class DistrictProgress extends StatelessWidget {
     final rows = _summarise();
     return Column(
       children: [
-        for (final row in rows) ...[
+        for (var i = 0; i < rows.length; i++)
           Padding(
-            padding: const EdgeInsets.only(bottom: 6),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.baseline,
-              textBaseline: TextBaseline.alphabetic,
-              children: [
-                Expanded(
-                  child: Text(row.district, style: const TextStyle(fontWeight: FontWeight.w600)),
+            padding: EdgeInsets.only(top: i == 0 ? 0 : 12),
+            child: Semantics(
+              button: true,
+              label: 'See ${rows[i].district} on the map',
+              child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: onDistrict == null ? null : () => onDistrict!(rows[i].district),
+                child: Container(
+                  constraints: const BoxConstraints(minHeight: 44),
+                  padding: const EdgeInsets.symmetric(vertical: 6),
+                  child: _row(rows[i]),
                 ),
-                Text(
-                  '${row.visited} of ${row.total}${row.visited == row.total ? " · complete" : ""}',
-                  style: TextStyle(
-                    color: row.visited == row.total ? AppColors.visited : AppColors.muted,
-                    fontWeight: row.visited == row.total ? FontWeight.bold : FontWeight.normal,
-                  ),
-                ),
-              ],
+              ),
             ),
           ),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(999),
-            child: LinearProgressIndicator(
-              value: row.total == 0 ? 0 : row.visited / row.total,
-              minHeight: 8,
-              backgroundColor: AppColors.sand,
-              valueColor: const AlwaysStoppedAnimation(AppColors.visited),
+      ],
+    );
+  }
+
+  Widget _row(_DistrictRow r) {
+    final complete = r.visited == r.total;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.baseline,
+          textBaseline: TextBaseline.alphabetic,
+          children: [
+            Expanded(
+              child: Text(r.district, style: const TextStyle(fontSize: 14, height: 20 / 14, fontWeight: FontWeight.w600, color: AppColors.ink)),
             ),
+            Text(
+              '${r.visited} of ${r.total}${complete ? ' · complete' : ''}',
+              style: TextStyle(
+                fontSize: 14,
+                height: 20 / 14,
+                fontWeight: complete ? FontWeight.w700 : FontWeight.w400,
+                color: complete ? AppColors.visitedInk : AppColors.muted,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 6),
+        Container(
+          height: 8,
+          alignment: Alignment.centerLeft,
+          clipBehavior: Clip.antiAlias,
+          decoration: BoxDecoration(color: AppColors.sand, borderRadius: BorderRadius.circular(999)),
+          child: FractionallySizedBox(
+            widthFactor: r.total == 0 ? 0 : r.visited / r.total,
+            heightFactor: 1,
+            child: Container(decoration: BoxDecoration(color: AppColors.visited, borderRadius: BorderRadius.circular(999))),
           ),
-          const SizedBox(height: 12),
-        ],
+        ),
       ],
     );
   }

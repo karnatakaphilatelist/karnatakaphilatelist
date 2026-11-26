@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import '../theme/app_theme.dart';
+import 'glass_card.dart' show liteMode;
 
 /// Port of globals.css's `.kp-red` — the engraved security-print texture
 /// (assets/brand/guilloche.svg, vendored straight from the web app's
@@ -25,18 +26,24 @@ class PostalTexture extends StatelessWidget {
         child: Stack(
           fit: StackFit.passthrough,
           children: [
+            // `[data-lite] .kp-red { background-image: none }`
             Positioned.fill(
-              child: Align(
-                alignment: Alignment.topRight,
-                child: FittedBox(
-                  fit: BoxFit.cover,
-                  alignment: Alignment.topRight,
-                  child: SvgPicture.asset(
-                    'assets/brand/guilloche.svg',
-                    width: 800,
-                    height: 360,
-                  ),
-                ),
+              child: ValueListenableBuilder<bool>(
+                valueListenable: liteMode,
+                builder: (context, lite, _) => lite
+                    ? const SizedBox.shrink()
+                    : Align(
+                        alignment: Alignment.topRight,
+                        child: FittedBox(
+                          fit: BoxFit.cover,
+                          alignment: Alignment.topRight,
+                          child: SvgPicture.asset(
+                            'assets/brand/guilloche.svg',
+                            width: 800,
+                            height: 360,
+                          ),
+                        ),
+                      ),
               ),
             ),
             if (child != null) child!,

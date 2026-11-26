@@ -7,6 +7,7 @@ import '../../core/constants.dart';
 import '../../data/auth_controller.dart';
 import '../office/visit_dialog.dart';
 import 'sign_in_sheet.dart';
+import '../coach/coach_tour.dart' show coachRunning;
 
 /// Port of src/components/auth/GuestSignInPrompt.tsx: invites a guest to
 /// sign in once, either shortly after opening the app or once they've
@@ -45,12 +46,19 @@ class _GuestSignInNudgeState extends State<GuestSignInNudge> {
     final prefs = await SharedPreferences.getInstance();
     if (!mounted || auth.user != null) return;
     if (prefs.getBool(StorageKeys.welcomePrompted) ?? false) return;
-    _welcomeTimer = Timer(const Duration(seconds: 10), () async {
+    Future<void> attempt() async {
       if (!mounted || _shown || auth.user != null) return;
+      // Never interrupt the walkthrough (when replayed) or another sheet/dialog.
+      if (coachRunning.value || Navigator.of(context, rootNavigator: true).canPop()) {
+        _welcomeTimer = Timer(const Duration(seconds: 2), attempt);
+        return;
+      }
       _shown = true;
       await prefs.setBool(StorageKeys.welcomePrompted, true);
       if (mounted) showSignInSheet(context, reason: SignInReason.welcome);
-    });
+    }
+
+    _welcomeTimer = Timer(const Duration(seconds: 10), attempt);
   }
 
   /// Called from build() each time the visits count changes — cheap and
@@ -61,12 +69,18 @@ class _GuestSignInNudgeState extends State<GuestSignInNudge> {
     if (visitCount < guestSignInThreshold) return;
     final prefs = await SharedPreferences.getInstance();
     if (!mounted || (prefs.getBool(StorageKeys.signInPrompted) ?? false)) return;
-    _progressTimer = Timer(const Duration(seconds: 7), () async {
+    Future<void> attempt() async {
       if (!mounted || _shown || auth.user != null) return;
+      if (Navigator.of(context, rootNavigator: true).canPop()) {
+        _progressTimer = Timer(const Duration(seconds: 2), attempt);
+        return;
+      }
       _shown = true;
       await prefs.setBool(StorageKeys.signInPrompted, true);
       if (mounted) showSignInSheet(context, reason: SignInReason.saveProgress);
-    });
+    }
+
+    _progressTimer = Timer(const Duration(seconds: 7), attempt);
   }
 
   @override

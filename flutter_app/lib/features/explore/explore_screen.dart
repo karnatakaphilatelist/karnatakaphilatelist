@@ -19,6 +19,7 @@ import '../../widgets/account_avatar.dart' show firstName;
 import '../../widgets/app_icons.dart';
 import '../../widgets/glass_card.dart';
 import '../auth/sign_in_sheet.dart';
+import '../coach/coach_tour.dart' show coachTargets;
 import '../office/office_detail_screen.dart';
 import '../office/stamped_sheet.dart';
 import '../office/visit_dialog.dart';
@@ -352,10 +353,17 @@ class _ExploreScreenState extends State<ExploreScreen> {
                       children: [
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 16),
-                          child: ExploreSearchBar(controller: _searchController, onChanged: (v) => setState(() => _query = v)),
+                          child: KeyedSubtree(
+                            key: coachTargets['search'],
+                            child: ExploreSearchBar(controller: _searchController, onChanged: (v) => setState(() => _query = v)),
+                          ),
                         ),
                         const SizedBox(height: 12 - chipRowPadTop),
-                        StatusFilterChips(value: _filter, onChanged: (v) => setState(() => _filter = v)),
+                        StatusFilterChips(
+                          value: _filter,
+                          onChanged: (v) => setState(() => _filter = v),
+                          tourKey: coachTargets['filters'],
+                        ),
                       ],
                     ),
                   ),
@@ -363,7 +371,9 @@ class _ExploreScreenState extends State<ExploreScreen> {
                   Positioned(
                     right: 16,
                     bottom: sheetHeight + 16,
-                    child: Semantics(
+                    child: KeyedSubtree(
+                     key: coachTargets['near-me'],
+                     child: Semantics(
                       button: true,
                       label: 'Show post offices near me',
                       excludeSemantics: true,
@@ -381,6 +391,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
                           ),
                         ),
                       ),
+                     ),
                     ),
                   ),
                 if (selected == null)
@@ -461,7 +472,9 @@ class _ExploreScreenState extends State<ExploreScreen> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           // Grab bar: tap to toggle.
-          Semantics(
+          KeyedSubtree(
+           key: coachTargets['sheet'],
+           child: Semantics(
             button: true,
             label: _sheetOpen ? 'Collapse the list' : 'Expand the list',
             excludeSemantics: true,
@@ -479,6 +492,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
                 ),
               ),
             ),
+           ),
           ),
           if (_sheetOpen)
             Padding(

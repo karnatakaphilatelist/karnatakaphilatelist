@@ -9,6 +9,7 @@ import 'data/visits_repository.dart';
 import 'features/office/visit_dialog.dart';
 import 'features/welcome/welcome_tour_screen.dart';
 import 'theme/app_theme.dart';
+import 'widgets/glass_card.dart' show loadLiteMode;
 
 /// Same Supabase project the web app uses (src/lib/supabase/public.ts) —
 /// read via --dart-define so the anon key isn't hardcoded into source,
@@ -24,6 +25,7 @@ Future<void> main() async {
   if (_supabaseUrl.isNotEmpty && _supabaseAnonKey.isNotEmpty) {
     await Supabase.initialize(url: _supabaseUrl, publishableKey: _supabaseAnonKey);
   }
+  await loadLiteMode();
   runApp(const PhilatrailApp());
 }
 

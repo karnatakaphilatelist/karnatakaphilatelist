@@ -22,11 +22,14 @@ const _filters = <(StatusFilterValue, String)>[
 class StatusFilterChips extends StatelessWidget {
   final StatusFilterValue value;
   final ValueChanged<StatusFilterValue> onChanged;
-  const StatusFilterChips({super.key, required this.value, required this.onChanged});
+
+  /// Marks the 44px chip row for the walkthrough (the web's `data-tour`).
+  final GlobalKey? tourKey;
+  const StatusFilterChips({super.key, required this.value, required this.onChanged, this.tourKey});
 
   @override
   Widget build(BuildContext context) {
-    return Semantics(
+    final chips = Semantics(
       container: true,
       label: 'Filter by status',
       child: ShaderMask(
@@ -51,6 +54,19 @@ class StatusFilterChips extends StatelessWidget {
           ),
         ),
       ),
+    );
+    if (tourKey == null) return chips;
+    return Stack(
+      children: [
+        chips,
+        Positioned(
+          left: 0,
+          right: 0,
+          top: chipRowPadTop,
+          height: 44,
+          child: IgnorePointer(child: KeyedSubtree(key: tourKey, child: const SizedBox.expand())),
+        ),
+      ],
     );
   }
 }

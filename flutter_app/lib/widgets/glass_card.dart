@@ -1,12 +1,27 @@
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../theme/app_theme.dart';
 
 /// Lite mode (Account → "Lighter map, less data"): like `[data-lite]` on the
 /// web, glass surfaces drop their backdrop blur and become solid warm white.
 final ValueNotifier<bool> liteMode = ValueNotifier<bool>(false);
+
+const _liteModeKey = 'kp:lite:v1';
+
+/// Reads the saved Lite mode choice (call once at startup).
+Future<void> loadLiteMode() async {
+  final prefs = await SharedPreferences.getInstance();
+  liteMode.value = prefs.getBool(_liteModeKey) ?? false;
+}
+
+Future<void> saveLiteMode(bool on) async {
+  liteMode.value = on;
+  final prefs = await SharedPreferences.getInstance();
+  await prefs.setBool(_liteModeKey, on);
+}
 
 /// `backdrop-filter: blur(28px) saturate(180%)`.
 final ui.ImageFilter _glassFilter = ui.ImageFilter.compose(

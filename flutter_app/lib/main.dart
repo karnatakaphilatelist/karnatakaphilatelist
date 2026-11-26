@@ -67,19 +67,32 @@ class _PhilatrailAppState extends State<PhilatrailApp> {
     final stateController = _stateController;
     final officesController = _officesController;
     final authController = _authController;
-    return MaterialApp(
+    final app = MaterialApp(
       title: 'Philatrail',
       theme: buildAppTheme(),
       home: controller != null && stateController != null && officesController != null && authController != null
-          ? VisitsScope(
-              controller: controller,
-              stateController: stateController,
-              officesController: officesController,
-              authController: authController,
-              child: const WelcomeGate(child: AppShell()),
-            )
+          ? const WelcomeGate(child: AppShell())
           : const _MissingConfigScreen(),
     );
+    // Wraps the WHOLE MaterialApp — including its internally-created
+    // Navigator — not just `home`. Scoping this around `home` instead (as
+    // an earlier version of this file did) only covers the first route:
+    // MaterialApp's Navigator renders every pushed route as a sibling
+    // OverlayEntry, not a descendant of `home`'s subtree, so any screen
+    // reached via Navigator.push (e.g. OfficeDetailScreen, AccountScreen)
+    // would crash with "No VisitsScope found in context" the moment it
+    // called visitsControllerOf/officesControllerOf/etc. Wrapping the
+    // Navigator itself (by wrapping MaterialApp) makes every route a
+    // descendant, fixing that crash app-wide.
+    return controller != null && stateController != null && officesController != null && authController != null
+        ? VisitsScope(
+            controller: controller,
+            stateController: stateController,
+            officesController: officesController,
+            authController: authController,
+            child: app,
+          )
+        : app;
   }
 }
 

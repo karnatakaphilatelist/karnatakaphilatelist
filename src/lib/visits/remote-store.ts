@@ -52,6 +52,58 @@ export async function fetchVisits(
   return data.map(toVisit);
 }
 
+/** A public note on an office, with the author's profile for attribution. */
+export interface PublicVisitNote {
+  userId: string;
+  visitedAt: string;
+  note: string;
+  photoPath: string | null;
+  author: { fullName: string | null; avatarUrl: string | null } | null;
+}
+
+interface PublicVisitRow {
+  user_id: string;
+  visited_at: string;
+  note: string;
+  photo_path: string | null;
+  profile: { full_name: string | null; avatar_url: string | null } | { full_name: string | null; avatar_url: string | null }[] | null;
+}
+
+/**
+ * Public notes left on one office by any user, newest first. Relies on the
+ * "Users read own or public visits" policy on `visits` and the "Anyone can
+ * read the profile behind a public visit" policy on `profiles` — both must
+ * be applied for this to return other people's notes.
+ */
+export async function fetchPublicVisitsForOffice(
+  client: SupabaseClient,
+  officeId: number
+): Promise<PublicVisitNote[]> {
+  const { data, error } = await client
+    .from("visits")
+    .select(
+      "user_id, visited_at, note, photo_path, profile:profiles(full_name, avatar_url)"
+    )
+    .eq("post_office_id", officeId)
+    .eq("is_public", true)
+    .not("note", "is", null)
+    .neq("note", "")
+    .order("visited_at", { ascending: false })
+    .overrideTypes<PublicVisitRow[], { merge: false }>();
+  if (error) throw new Error(error.message);
+  return data.map((row) => {
+    // Supabase types the embed as an array even for a to-one relation.
+    const profile = Array.isArray(row.profile) ? (row.profile[0] ?? null) : row.profile;
+    return {
+      userId: row.user_id,
+      visitedAt: row.visited_at,
+      note: row.note,
+      photoPath: row.photo_path,
+      author: profile ? { fullName: profile.full_name, avatarUrl: profile.avatar_url } : null,
+    };
+  });
+}
+
 /**
  * Records a first visit. If the user already has a visit for this office (for
  * example it was stamped on another device or tab), the existing row, with its

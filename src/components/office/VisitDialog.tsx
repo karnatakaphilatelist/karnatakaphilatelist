@@ -188,7 +188,7 @@ function VisitForm({ visit, onDone }: { visit: Visit; onDone: () => void }) {
         </div>
         <p className="mt-2 text-sm text-muted">
           {isPublic
-            ? "Your note and photo can appear in the community gallery and on your public profile."
+            ? "Your note and photo show on this office's Public tab for other collectors to see."
             : "Only you can see this note and photo."}
         </p>
       </fieldset>

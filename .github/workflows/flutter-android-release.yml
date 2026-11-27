@@ -10,8 +10,8 @@ name: Flutter Android release bundle (Play)
 # versionCode/versionName come from flutter_app/pubspec.yaml's own
 # `version: X.Y.Z+N`, NOT from github.run_number — a new workflow file's
 # run_number starts at 1, which would collide with the versionCodes
-# already live/drafted on the Capacitor app's track (5 and 7 as of
-# 24 Nov 2026). Bump pubspec.yaml's build number by hand before each
+# already live/drafted on the Capacitor app's track (1-9 as of
+# 27 Nov 2026; the Flutter build number starts at 100). Bump pubspec.yaml's build number by hand before each
 # release and keep it strictly higher than whatever's live.
 
 on:
@@ -54,9 +54,15 @@ jobs:
           KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
           KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
           KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
-        run: flutter build appbundle --release
+        run: |
+          flutter build appbundle --release
+          flutter build apk --release
 
       - uses: actions/upload-artifact@v4
         with:
           name: philatrail-flutter-release-aab
           path: flutter_app/build/app/outputs/bundle/release/app-release.aab
+      - uses: actions/upload-artifact@v4
+        with:
+          name: philatrail-flutter-release-apk
+          path: flutter_app/build/app/outputs/flutter-apk/app-release.apk

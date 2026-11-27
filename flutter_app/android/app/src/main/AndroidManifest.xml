@@ -1,4 +1,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Only the debug/profile manifests declare this by default, so a release
+         build had no network at all: no map tiles, no Supabase. -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <!-- geolocator doesn't declare these itself (confirmed against its own
          plugin manifest) — without them Geolocator.checkPermission() /
          requestPermission() are silently denied, so "find near me",
@@ -12,7 +16,7 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
     <application
-        android:label="philatrail"
+        android:label="Philatrail"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity

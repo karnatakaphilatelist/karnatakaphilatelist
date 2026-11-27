@@ -1,18 +1,16 @@
-// Smoke test for the scaffold entry point. Replace once real screens land —
-// see flutter_app/README.md and the project doc's file-level implementation
-// plan for what's next.
-
 import 'package:flutter_test/flutter_test.dart';
-
-import 'package:philatrail/main.dart';
+import 'package:philatrail/core/env.dart';
+import 'package:philatrail/core/stamp_image.dart';
 
 void main() {
-  testWidgets(
-      'PhilatrailApp builds and shows the missing-config screen '
-      'when SUPABASE_URL/SUPABASE_ANON_KEY are not provided',
-      (WidgetTester tester) async {
-    await tester.pumpWidget(const PhilatrailApp());
+  // A build made without --dart-define once shipped with no backend at all.
+  test('Supabase config has usable defaults', () {
+    expect(supabaseUrl, startsWith('https://'));
+    expect(supabaseAnonKey, isNotEmpty);
+  });
 
-    expect(find.textContaining('Missing SUPABASE_URL'), findsOneWidget);
+  test('stamp image URL is built from the default project', () {
+    expect(stampImageUrl(null), isNull);
+    expect(stampImageUrl('a b.png'), startsWith('$supabaseUrl/storage/v1/object/public/'));
   });
 }

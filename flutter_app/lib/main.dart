@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'app_shell.dart';
+import 'core/env.dart';
 import 'data/auth_controller.dart';
 import 'data/offices_controller.dart';
 import 'data/state_controller.dart';
@@ -17,13 +18,11 @@ import 'widgets/glass_card.dart' show loadLiteMode;
 /// values from `mcp__Supabase__get_project_url` / `get_publishable_keys`, or
 /// from the same place the web app's NEXT_PUBLIC_SUPABASE_URL/ANON_KEY come
 /// from (these are the public/anon values, not service-role secrets).
-const _supabaseUrl = String.fromEnvironment('SUPABASE_URL');
-const _supabaseAnonKey = String.fromEnvironment('SUPABASE_ANON_KEY');
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  if (_supabaseUrl.isNotEmpty && _supabaseAnonKey.isNotEmpty) {
-    await Supabase.initialize(url: _supabaseUrl, publishableKey: _supabaseAnonKey);
+  if (supabaseUrl.isNotEmpty && supabaseAnonKey.isNotEmpty) {
+    await Supabase.initialize(url: supabaseUrl, publishableKey: supabaseAnonKey);
   }
   await loadLiteMode();
   runApp(const PhilatrailApp());
@@ -45,7 +44,7 @@ class _PhilatrailAppState extends State<PhilatrailApp> {
   @override
   void initState() {
     super.initState();
-    if (_supabaseUrl.isNotEmpty && _supabaseAnonKey.isNotEmpty) {
+    if (supabaseUrl.isNotEmpty && supabaseAnonKey.isNotEmpty) {
       final client = Supabase.instance.client;
       _visitsController = VisitsController(client);
       _stateController = StateController();

@@ -2,6 +2,7 @@ import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { OfficeDetail } from "@/components/office/OfficeDetail";
 import type { OfficeWithStatus, Visit } from "@/types";
+import type { PublicVisitNote } from "@/lib/visits/remote-store";
 
 const mockVisits = vi.hoisted(() => ({ current: {} as Record<number, Visit> }));
 
@@ -22,11 +23,22 @@ const stampImage = vi.hoisted(() => ({
 }));
 vi.mock("@/lib/stamp-image", () => stampImage);
 
+// The real hook fetches from Supabase, which never resolves under jsdom, so
+// the Public tab would sit on "Loading public notes…" forever here. Driving it
+// from a ref keeps both of its states testable without a network round trip.
+const publicNotes = vi.hoisted(() => ({
+  current: [] as PublicVisitNote[] | null,
+}));
+vi.mock("@/hooks/usePublicNotes", () => ({
+  usePublicNotes: () => publicNotes.current,
+}));
+
 afterEach(cleanup);
 
 beforeEach(() => {
   stampImage.stampImageUrl.mockReset().mockReturnValue(null);
   mockVisits.current = {};
+  publicNotes.current = [];
 });
 
 function renderAt(distanceKm: number | null) {
@@ -247,5 +259,19 @@ describe("OfficeDetail tabs", () => {
     );
     fireEvent.click(screen.getByRole("button", { name: "Public" }));
     expect(screen.getByText("No public notes yet")).toBeTruthy();
+  });
+
+  it("says it is still loading before the public notes arrive", () => {
+    publicNotes.current = null;
+    render(
+      <OfficeDetail
+        office={baseOffice()}
+        onClose={vi.fn()}
+        onMarkVisited={vi.fn()}
+      />
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Public" }));
+    expect(screen.getByText("Loading public notes…")).toBeTruthy();
+    expect(screen.queryByText("No public notes yet")).toBeNull();
   });
 });

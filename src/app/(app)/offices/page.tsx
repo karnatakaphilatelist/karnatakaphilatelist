@@ -68,8 +68,8 @@ export default async function OfficesPage() {
         </h1>
         <p className="mt-3 text-base leading-7">
           {offices.length} post offices across both states&apos; Philately
-          Passports, grouped by state and district. Open one for its
-          pincode, its neighbours and a link to the map. New to this?{" "}
+          Passports, grouped by state and district. Open one for its pincode,
+          its neighbours and a link to the map. New to this?{" "}
           <Link href="/learn" className="font-bold underline">
             Read the beginner&apos;s guide
           </Link>
@@ -78,10 +78,7 @@ export default async function OfficesPage() {
 
         {byState(offices).map(([state, stateOffices]) => (
           <section key={state} className="mt-10" aria-labelledby={`s-${state}`}>
-            <h2
-              id={`s-${state}`}
-              className="font-display text-2xl font-bold"
-            >
+            <h2 id={`s-${state}`} className="font-display text-2xl font-bold">
               {stateName(state)}
             </h2>
             {PILLAR_PATH[state] && (

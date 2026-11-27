@@ -644,7 +644,7 @@ export function Landing({ offices }: { offices: PostOffice[] }) {
               </a>
             )}
             <Link href={PASSPORT_PATH[stateCode] ?? PASSPORT_PATH.KA}>
-              The Passport
+              Philately Passport
             </Link>
             <Link href="/offices">Post offices</Link>
             <Link href="/learn">Guide</Link>

@@ -5,6 +5,7 @@ import { JsonLd } from "@/components/seo/JsonLd";
 import { DISCLAIMER, OG_IMAGE, SITE_URL } from "@/lib/constants";
 import { directionsUrl, formatDistance } from "@/lib/geo";
 import { getPostOffices } from "@/lib/offices";
+import { passportStateFor } from "@/lib/passport-states";
 import {
   findOfficeBySlug,
   nearestOffices,
@@ -31,8 +32,12 @@ export async function generateMetadata(
   if (!office) return {};
 
   const state = stateNameFor(office);
-  const title = `${office.name}, ${office.district} (${office.pincode})`;
-  const description = `${office.name} post office in ${office.district}, ${state}, pincode ${office.pincode}. One of the ${offices.length} post offices in Karnataka's Philately Passport: how the visit works and which offices are nearby.`;
+  const passport = passportStateFor(office.state);
+  const count = offices.filter((other) => other.state === office.state).length;
+  const title = `${office.name}, ${office.district} (${office.pincode}): ${state} Philately Passport postmark`;
+  const description = passport
+    ? `${office.name} post office in ${office.district}, ${state}, pincode ${office.pincode}. One of the ${count} post offices in the ${passport.name} Philately Passport: how to get its postmark and which offices are nearby.`
+    : `${office.name} post office in ${office.district}, ${state}, pincode ${office.pincode}. How the visit works and which offices are nearby.`;
   return {
     title,
     description,
@@ -56,6 +61,8 @@ export default async function OfficePage(props: PageProps<"/offices/[slug]">) {
   if (!office) notFound();
 
   const state = stateNameFor(office);
+  const passport = passportStateFor(office.state);
+  const count = offices.filter((other) => other.state === office.state).length;
   const hasPlace = office.lat != null && office.lng != null;
   const nearby = nearestOffices(office, offices, 4);
 
@@ -90,6 +97,14 @@ export default async function OfficePage(props: PageProps<"/offices/[slug]">) {
           <Link href="/offices" className="underline">
             All post offices
           </Link>
+          {passport && (
+            <>
+              {" › "}
+              <Link href={passport.officesPath} className="underline">
+                {passport.name} Philately Passport
+              </Link>
+            </>
+          )}
         </nav>
         <p className="mt-4 text-xs font-bold uppercase tracking-[0.18em] text-muted">
           {office.district} · {state}
@@ -99,8 +114,17 @@ export default async function OfficePage(props: PageProps<"/offices/[slug]">) {
         </h1>
         <p className="mt-3 text-base leading-7">
           {office.name} is a post office in {office.district}, {state}, with the
-          pincode {office.pincode}. It is one of the {offices.length} post
-          offices in Karnataka Postal Circle&apos;s Philately Passport.
+          pincode {office.pincode}.
+          {passport && (
+            <>
+              {" "}
+              It is one of the {count} post offices in the{" "}
+              <Link href={passport.path} className="underline">
+                {passport.name} Philately Passport
+              </Link>{" "}
+              from {passport.circle}.
+            </>
+          )}
         </p>
 
         <div className="mt-4 flex flex-wrap gap-2">
@@ -112,7 +136,10 @@ export default async function OfficePage(props: PageProps<"/offices/[slug]">) {
           </Link>
           {hasPlace && (
             <a
-              href={directionsUrl({ lat: office.lat as number, lng: office.lng as number })}
+              href={directionsUrl({
+                lat: office.lat as number,
+                lng: office.lng as number,
+              })}
               target="_blank"
               rel="noopener noreferrer"
               className={`${BUTTON} border-[1.5px] border-ink/25 text-ink`}
@@ -138,7 +165,9 @@ export default async function OfficePage(props: PageProps<"/offices/[slug]">) {
           <ol className="mt-2 list-decimal space-y-1.5 pl-5 text-base leading-7">
             <li>Go to the post office with your Philately Passport booklet.</li>
             <li>Buy a stamp at the counter.</li>
-            <li>Ask for this place&apos;s pictorial postmark in your booklet.</li>
+            <li>
+              Ask for this place&apos;s pictorial postmark in your booklet.
+            </li>
           </ol>
           <p className="mt-3 text-base leading-7 text-muted">
             Opening hours and what is available can change, so check with the
@@ -164,7 +193,10 @@ export default async function OfficePage(props: PageProps<"/offices/[slug]">) {
                   >
                     <span>
                       <span className="font-semibold">{other.name}</span>
-                      <span className="text-sm text-muted"> · {other.district}</span>
+                      <span className="text-sm text-muted">
+                        {" "}
+                        · {other.district}
+                      </span>
                     </span>
                     <span className="shrink-0 text-sm text-muted">
                       {formatDistance(km)} away

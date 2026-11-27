@@ -37,8 +37,8 @@ export default function PrivacyPage() {
               Analytics to count visits and see which parts are used: the pages
               you open, your device and browser type, roughly where you are
               (city level), and a few actions such as finishing the tour or
-              collecting a stamp. We do not send your name, email address,
-              notes or photos to Google Analytics.
+              collecting a stamp. We do not send your name, email address, notes
+              or photos to Google Analytics.
             </>,
             <>
               <strong>On your own device.</strong> Stamps you collect before

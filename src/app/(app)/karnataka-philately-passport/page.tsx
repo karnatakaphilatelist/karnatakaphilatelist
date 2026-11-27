@@ -32,6 +32,14 @@ const FAQ: { q: string; a: string }[] = [
     a: "It is a pocket-sized booklet from Karnataka Postal Circle. It lists 100 post offices at historical and tourist places in Karnataka. At each one you buy a postage stamp and get that office's pictorial postmark struck in the booklet.",
   },
   {
+    q: "Is there an app for the Karnataka Philately Passport?",
+    a: "Yes. Philatrail is a free, independent map and tracker for it. It shows all 100 post offices on a map, helps you plan visits and keeps count of the postmarks you collect. It does not replace the booklet.",
+  },
+  {
+    q: "Which post offices are in the Karnataka Philately Passport?",
+    a: "The booklet lists 100 post offices at historical and tourist places across Karnataka, from Bengaluru and Mysuru to Hampi, Badami, Udupi and Bidar. The full list, by district, is on the page linked above.",
+  },
+  {
     q: "Where can I buy the Philately Passport?",
     a: "News reports say it is sold at the Bengaluru GPO Philatelic Bureau and at the head post offices in Mysuru, Mangaluru and Belagavi. Call ahead, because stock and prices can change.",
   },
@@ -45,7 +53,7 @@ const FAQ: { q: string; a: string }[] = [
   },
   {
     q: "Are these all the post offices in Karnataka?",
-    a: "No. The Passport lists 100 chosen offices. Karnataka has many more post offices.",
+    a: "No. The Philately Passport lists 100 chosen offices. Karnataka has many more post offices.",
   },
 ];
 
@@ -89,7 +97,7 @@ export default async function PassportPillarPage() {
             Open the map
           </Link>
           <Link
-            href="/offices"
+            href="/karnataka-philately-passport/post-offices"
             className="inline-flex min-h-11 items-center rounded-full border border-ink/20 px-5 font-bold"
           >
             See all {offices.length} offices
@@ -131,7 +139,10 @@ export default async function PassportPillarPage() {
         <p className="mt-3 text-base leading-7">
           The list covers {districts} districts, from Bengaluru and Mysuru to
           Hampi, Badami, Udupi, Bidar and Belagavi. Browse them{" "}
-          <Link href="/offices" className="font-bold underline">
+          <Link
+            href="/karnataka-philately-passport/post-offices"
+            className="font-bold underline"
+          >
             by district
           </Link>{" "}
           or find the ones near you on the{" "}
@@ -145,10 +156,10 @@ export default async function PassportPillarPage() {
           Where Philatrail fits
         </h2>
         <p className="mt-3 text-base leading-7">
-          Philatrail is a free, independent map and tracker for the Passport. It
-          shows every office on a map, helps you plan the next trip and keeps
-          count of the postmarks you have collected. It works without an
-          account.
+          Philatrail is a free, independent map and tracker for the Philately
+          Passport. It shows every office on a map, helps you plan the next trip
+          and keeps count of the postmarks you have collected. It works without
+          an account.
         </p>
 
         <h2 className="mt-10 font-display text-2xl font-bold">

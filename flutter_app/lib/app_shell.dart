@@ -89,6 +89,8 @@ class AppTabBar extends StatelessWidget {
                 child: KeyedSubtree(
                   key: i == 1 ? coachTargets['tab-passport'] : (i == 3 ? coachTargets['tab-account'] : null),
                   child: _TabItem(icon: _items[i].$1, label: _items[i].$2, active: i == index, onTap: () {
+                    // Also closes any article page pushed over the shell.
+                    Navigator.of(context).popUntil((route) => route.isFirst);
                     if (i == index && i == 0) exploreReset.value++;
                     appTabIndex.value = i;
                   }),

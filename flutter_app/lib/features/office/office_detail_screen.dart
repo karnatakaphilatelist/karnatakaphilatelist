@@ -6,6 +6,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../app_shell.dart' show goToTab;
+import '../../core/counter_hours.dart';
 import '../../core/date.dart';
 import '../../core/geo.dart';
 import '../../core/haptics.dart';
@@ -253,6 +254,7 @@ class _OfficeDetailPanelState extends State<OfficeDetailPanel> with SingleTicker
             ],
           ),
         ),
+        const _CounterHoursLine(),
         // ── Status row: badge + proximity/progress | PPC image ──
         Padding(
           padding: const EdgeInsets.only(top: 12),
@@ -983,6 +985,67 @@ class OfficeDetailScreen extends StatelessWidget {
             ),
           );
         },
+      ),
+    );
+  }
+}
+
+
+/// Whether the counter is probably open now (typical hours, see
+/// core/counter_hours.dart). Refreshes each minute.
+class _CounterHoursLine extends StatefulWidget {
+  const _CounterHoursLine();
+
+  @override
+  State<_CounterHoursLine> createState() => _CounterHoursLineState();
+}
+
+class _CounterHoursLineState extends State<_CounterHoursLine> {
+  late CounterStatus _status = counterStatus(DateTime.now());
+  Timer? _timer;
+
+  @override
+  void initState() {
+    super.initState();
+    _timer = Timer.periodic(const Duration(minutes: 1), (_) {
+      if (mounted) setState(() => _status = counterStatus(DateTime.now()));
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final color = switch (_status.state) {
+      CounterState.open => AppColors.stampGreen,
+      CounterState.closed => AppColors.muted,
+      _ => AppColors.warn,
+    };
+    return Padding(
+      padding: const EdgeInsets.only(top: 8),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(top: 7),
+            child: Container(width: 8, height: 8, decoration: BoxDecoration(color: color, shape: BoxShape.circle)),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(_status.label, style: const TextStyle(fontSize: 13, height: 20 / 13, color: AppColors.muted)),
+                Text('Typical hours; check locally before a long trip.',
+                    style: TextStyle(fontSize: 12, height: 16 / 12, color: AppColors.muted.withValues(alpha: 0.8))),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

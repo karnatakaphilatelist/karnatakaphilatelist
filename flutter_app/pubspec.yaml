@@ -7,7 +7,7 @@ publish_to: "none"
 # (v1.0.4) was drafted but not yet sent for review, release 5 (v1.0.2) is the
 # one currently live to testers. Using 8 (not 6) keeps this safe even if 7
 # ships first. Confirm/bump this again before the first real Flutter build.
-version: 1.1.0+105
+version: 1.1.0+106
 
 environment:
   sdk: ">=3.4.0 <4.0.0"
@@ -86,6 +86,8 @@ flutter:
     # the web app lays over its red surfaces (.kp-red: Passport header,
     # sign-in sheet hero, guest "save progress" card).
     - assets/brand/guilloche.svg
+    - assets/brand/wordmark-1.svg
+    - assets/brand/wordmark-2.svg
     # src/data/post-offices.snapshot.json, the list the web app falls back to
     # when the database can't be reached (see office_repository.dart).
     - assets/data/post-offices.snapshot.json

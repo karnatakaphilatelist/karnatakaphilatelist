@@ -8,6 +8,7 @@ import 'data/offices_controller.dart';
 import 'data/state_controller.dart';
 import 'data/visits_repository.dart';
 import 'features/office/visit_dialog.dart';
+import 'features/welcome/intro_banner.dart';
 import 'features/welcome/welcome_tour_screen.dart';
 import 'theme/app_theme.dart';
 import 'widgets/glass_card.dart' show loadLiteMode;
@@ -72,7 +73,7 @@ class _PhilatrailAppState extends State<PhilatrailApp> {
       title: 'Philatrail',
       theme: buildAppTheme(),
       home: controller != null && stateController != null && officesController != null && authController != null
-          ? const WelcomeGate(child: AppShell())
+          ? const IntroBanner(child: WelcomeGate(child: AppShell()))
           : const _MissingConfigScreen(),
     );
     // Wraps the WHOLE MaterialApp — including its internally-created

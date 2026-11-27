@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
+import { counterStatus, type CounterState, type CounterStatus } from "@/lib/counter-hours";
 import Link from "next/link";
 import { StampThumb } from "@/components/office/StampThumb";
 import { StatusBadge } from "@/components/office/StatusBadge";
@@ -242,6 +243,8 @@ export function OfficeDetail({
             </>
           ) : null}
         </p>
+
+        <CounterHours />
 
         {/* ── Status row: left (badge + proximity/progress) | right (PPC image) ──
             Always side by side — the image never pushes the badge to its own line.
@@ -618,6 +621,39 @@ function ProximityButton({
     ) : null;
   }
   return null;
+}
+
+const COUNTER_TONE: Record<CounterState, string> = {
+  open: "bg-visited-ink",
+  closing: "bg-warn",
+  lunch: "bg-warn",
+  "stamps-closed": "bg-warn",
+  closed: "bg-muted",
+};
+
+/**
+ * Whether the counter is probably open right now, from typical India Post
+ * hours (see lib/counter-hours.ts). Computed after mount so server and client
+ * never disagree about the time, and refreshed each minute.
+ */
+function CounterHours() {
+  const [status, setStatus] = useState<CounterStatus | null>(null);
+  useEffect(() => {
+    const tick = () => setStatus(counterStatus(new Date()));
+    tick();
+    const id = window.setInterval(tick, 60_000);
+    return () => window.clearInterval(id);
+  }, []);
+  if (!status) return null;
+  return (
+    <p className="mt-2 flex items-start gap-2 text-[13px] leading-5 text-muted" data-testid="counter-hours">
+      <span aria-hidden className={`mt-[7px] size-2 shrink-0 rounded-full ${COUNTER_TONE[status.state]}`} />
+      <span>
+        {status.label}
+        <span className="block text-xs text-muted/80">Typical hours; check locally before a long trip.</span>
+      </span>
+    </p>
+  );
 }
 
 /** Warning banner shown below the status row when the person is far from the office. */

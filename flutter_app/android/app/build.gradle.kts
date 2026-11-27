@@ -70,6 +70,10 @@ android {
 
     buildTypes {
         release {
+            // R8 strips classes that flutter_local_notifications / flutter_foreground_task
+            // load by reflection, which crashes release builds only. Size cost is small.
+            isMinifyEnabled = false
+            isShrinkResources = false
             signingConfig =
                 if (System.getenv("KEYSTORE_FILE") != null) {
                     signingConfigs.getByName("release")

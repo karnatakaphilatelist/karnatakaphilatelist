@@ -624,17 +624,15 @@ function ProximityButton({
 }
 
 const COUNTER_TONE: Record<CounterState, string> = {
-  open: "bg-visited-ink",
-  closing: "bg-warn",
-  lunch: "bg-warn",
-  "stamps-closed": "bg-warn",
-  closed: "bg-muted",
+  open: "text-visited-ink",
+  lunch: "text-warn",
+  closed: "text-muted",
 };
 
 /**
- * Whether the counter is probably open right now, from typical India Post
- * hours (see lib/counter-hours.ts). Computed after mount so server and client
- * never disagree about the time, and refreshed each minute.
+ * One line, never wrapping, so the stamp image below it keeps its place:
+ * "Timings: 9 AM – 5 PM · OPEN". Hours are placeholders (lib/counter-hours.ts).
+ * Computed after mount so server and client never disagree about the time.
  */
 function CounterHours() {
   const [status, setStatus] = useState<CounterStatus | null>(null);
@@ -646,12 +644,9 @@ function CounterHours() {
   }, []);
   if (!status) return null;
   return (
-    <p className="mt-2 flex items-start gap-2 text-[13px] leading-5 text-muted" data-testid="counter-hours">
-      <span aria-hidden className={`mt-[7px] size-2 shrink-0 rounded-full ${COUNTER_TONE[status.state]}`} />
-      <span>
-        {status.label}
-        <span className="block text-xs text-muted/80">Typical hours; check locally before a long trip.</span>
-      </span>
+    <p className="mt-2 truncate text-[13px] leading-5 text-muted" data-testid="counter-hours">
+      Timings: {status.hours} ·{" "}
+      <b className={`font-bold tracking-[0.04em] ${COUNTER_TONE[status.state]}`}>{status.word}</b>
     </p>
   );
 }

@@ -991,8 +991,8 @@ class OfficeDetailScreen extends StatelessWidget {
 }
 
 
-/// Whether the counter is probably open now (typical hours, see
-/// core/counter_hours.dart). Refreshes each minute.
+/// One non-wrapping line, so the stamp image below keeps its place:
+/// "Timings: 9 AM – 5 PM · OPEN". Placeholder hours, see core/counter_hours.dart.
 class _CounterHoursLine extends StatefulWidget {
   const _CounterHoursLine();
 
@@ -1022,30 +1022,19 @@ class _CounterHoursLineState extends State<_CounterHoursLine> {
   Widget build(BuildContext context) {
     final color = switch (_status.state) {
       CounterState.open => AppColors.stampGreen,
+      CounterState.lunch => AppColors.warn,
       CounterState.closed => AppColors.muted,
-      _ => AppColors.warn,
     };
+    const base = TextStyle(fontSize: 13, height: 20 / 13, color: AppColors.muted);
     return Padding(
       padding: const EdgeInsets.only(top: 8),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.only(top: 7),
-            child: Container(width: 8, height: 8, decoration: BoxDecoration(color: color, shape: BoxShape.circle)),
-          ),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(_status.label, style: const TextStyle(fontSize: 13, height: 20 / 13, color: AppColors.muted)),
-                Text('Typical hours; check locally before a long trip.',
-                    style: TextStyle(fontSize: 12, height: 16 / 12, color: AppColors.muted.withValues(alpha: 0.8))),
-              ],
-            ),
-          ),
-        ],
+      child: Text.rich(
+        TextSpan(style: base, children: [
+          TextSpan(text: 'Timings: ${_status.hours} · '),
+          TextSpan(text: _status.word, style: TextStyle(fontWeight: FontWeight.w700, letterSpacing: 13 * 0.04, color: color)),
+        ]),
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
       ),
     );
   }

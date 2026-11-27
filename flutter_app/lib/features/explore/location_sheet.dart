@@ -4,7 +4,10 @@ import '../../theme/app_theme.dart';
 import '../../widgets/app_icons.dart';
 import '../../widgets/app_sheet.dart';
 
-enum LocationSheetMode { prime, denied }
+/// [noFix]: permission is granted but the phone returned no position (indoors,
+/// no signal, an emulator with no point set) — saying "Location is off" there
+/// sent people to settings that were already right.
+enum LocationSheetMode { prime, denied, noFix }
 
 /// Port of src/components/explore/LocationSheet.tsx: plain-words sheets around
 /// the location permission, so the system prompt is never a surprise.
@@ -15,7 +18,11 @@ Future<void> showLocationSheet(
 }) {
   return showAppSheet<void>(
     context,
-    title: mode == LocationSheetMode.denied ? 'Location is off' : 'Find post offices near you',
+    title: switch (mode) {
+      LocationSheetMode.denied => 'Location is off',
+      LocationSheetMode.noFix => "Can't find you yet",
+      LocationSheetMode.prime => 'Find post offices near you',
+    },
     builder: (sheetContext) => switch (mode) {
       LocationSheetMode.prime => Column(
           mainAxisSize: MainAxisSize.min,
@@ -34,7 +41,9 @@ Future<void> showLocationSheet(
                 const SizedBox(width: 12),
                 const Expanded(
                   child: Text(
-                    'We use your location only to sort post offices by distance and to show how far you are from one. It is not stored or shared.',
+                    'We use your location to sort post offices by distance and to show how far you are from one. '
+                    'If you allow notifications, Philatrail also keeps checking in the background and alerts you when you are near a post office you have not stamped yet, with a notification showing while it does. '
+                    'Your location stays on your phone: it is not stored or shared.',
                     style: TextStyle(fontSize: 16, height: 24 / 16, color: AppColors.muted),
                   ),
                 ),
@@ -54,22 +63,25 @@ Future<void> showLocationSheet(
             _SheetButton(label: 'Not now', minHeight: 48, onTap: () => Navigator.of(sheetContext).pop()),
           ],
         ),
-      LocationSheetMode.denied => Column(
+      LocationSheetMode.denied || LocationSheetMode.noFix => Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(color: AppColors.warnSoft, borderRadius: BorderRadius.circular(16)),
-              child: const Row(
+              child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Padding(padding: EdgeInsets.only(top: 2), child: AppIconView(AppIcon.alert, size: 20, color: AppColors.warn)),
                   SizedBox(width: 12),
                   Expanded(
                     child: Text(
-                      "To see what is near you, open your phone's Settings, choose this app, then turn Location on. "
-                      'You can still browse and search every post office.',
+                      mode == LocationSheetMode.noFix
+                          ? "Your phone couldn't get a position just now. Try again in a moment, or step outside or "
+                              'near a window. You can still browse and search every post office.'
+                          : "To see what is near you, open your phone's Settings, choose this app, then turn Location on. "
+                              'You can still browse and search every post office.',
                       style: TextStyle(fontSize: 14, height: 20 / 14, color: AppColors.warn),
                     ),
                   ),

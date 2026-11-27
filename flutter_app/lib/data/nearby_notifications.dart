@@ -4,7 +4,9 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_foreground_task/flutter_foreground_task.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
+import '../core/constants.dart';
 import '../models/post_office.dart';
 import 'nearby_task_handler.dart';
 
@@ -41,6 +43,12 @@ class NearbyNotificationService {
     // with it, so every failure degrades to the same "quietly do nothing" the denied-
     // permission path already uses below.
     try {
+      // No permission prompts before the person has read the location sheet
+      // (it names the background watching): this used to fire on first launch,
+      // on top of the welcome tour, and Play requires the disclosure first.
+      final prefs = await SharedPreferences.getInstance();
+      if (!(prefs.getBool(StorageKeys.locationPrimed) ?? false)) return;
+
       final notifPermission = await FlutterForegroundTask.checkNotificationPermission();
       if (notifPermission != NotificationPermission.granted) {
         await FlutterForegroundTask.requestNotificationPermission();

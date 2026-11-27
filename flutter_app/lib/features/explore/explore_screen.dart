@@ -185,8 +185,14 @@ class _ExploreScreenState extends State<ExploreScreen> {
       );
       if (!mounted) return;
       setState(() => _userLocation = Coordinates(lat: position.latitude, lng: position.longitude));
-    } catch (_) {
+      // Permission is in hand and the disclosure sheet has been seen, so the
+      // background watcher can start now (it declines to before that).
+      unawaited(NearbyNotificationService.init());
+    } on LocationServiceDisabledException {
       if (mounted) await showLocationSheet(context, mode: LocationSheetMode.denied, onContinue: null);
+    } catch (_) {
+      // Permission was granted above, so this is a timeout or an empty fix.
+      if (mounted) await showLocationSheet(context, mode: LocationSheetMode.noFix, onContinue: null);
     } finally {
       if (mounted) setState(() => _locating = false);
     }

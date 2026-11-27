@@ -80,6 +80,10 @@ class AuthController extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// False in builds made without GOOGLE_WEB_CLIENT_ID; the sign-in sheet
+  /// then hides the Google button instead of showing one that always errors.
+  static bool get googleSignInConfigured => _googleWebClientId.isNotEmpty;
+
   Future<void> signInWithGoogle() async {
     if (_googleWebClientId.isEmpty) {
       throw Exception(

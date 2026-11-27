@@ -362,6 +362,7 @@ class _SignInSheetState extends State<_SignInSheet> {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          if (AuthController.googleSignInConfigured) ...[
           GestureDetector(
             onTap: _openingGoogle ? null : _handleGoogle,
             child: Opacity(
@@ -386,6 +387,7 @@ class _SignInSheetState extends State<_SignInSheet> {
             ),
           ),
           const SizedBox(height: 12),
+          ],
           _PrimaryPillButton(label: 'Continue with email', icon: AppIcon.mail, onTap: () => setState(() => _step = _Step.email)),
           if (_error != null) ...[
             const SizedBox(height: 12),

@@ -704,6 +704,14 @@ html[data-intro-seen] .kpl-intro {
 }
 .kpl-top {
   clip-path: inset(0 0 38% 0);
+  /* Same top offset as the masthead (.kpl-head), so the banner's wordmark clears the
+     top edge, notch and status bar instead of sitting flush against them and being cut. */
+  padding-top: calc(24px + env(safe-area-inset-top, 0px));
+}
+@media (max-width: 640px) {
+  .kpl-top {
+    padding-top: calc(16px + env(safe-area-inset-top, 0px));
+  }
 }
 .kpl-bot {
   clip-path: inset(62% 0 0 0);

@@ -8,6 +8,8 @@ import { CONTACT_EMAIL, LEGAL_LAST_UPDATED } from "@/lib/constants";
 
 export const metadata: Metadata = {
   title: "Terms of Use",
+  description:
+    "The terms for using Philatrail, the free map and tracker for the Philately Passport.",
   alternates: { canonical: "/terms" },
 };
 

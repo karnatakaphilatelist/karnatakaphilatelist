@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { LEARN_OG_IMAGE as OG_IMAGE } from "@/lib/learn-articles";
 import { LearnHub } from "@/components/learn/LearnHub";
+import { JsonLd } from "@/components/seo/JsonLd";
+import { breadcrumbJsonLd } from "@/lib/seo";
 
 const TITLE = "Learn about philately";
 const DESCRIPTION =
@@ -27,5 +29,15 @@ export const metadata: Metadata = {
 };
 
 export default function LearnPage() {
-  return <LearnHub />;
+  return (
+    <>
+      <JsonLd
+        data={breadcrumbJsonLd([
+          { name: "Philatrail", path: "/" },
+          { name: "Learn", path: "/learn" },
+        ])}
+      />
+      <LearnHub />
+    </>
+  );
 }

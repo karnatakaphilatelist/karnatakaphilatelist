@@ -215,7 +215,12 @@ export function ArticleView({ article }: { article: Article }) {
           </ul>
         </section>
 
-        <p className="mt-6 border-t border-line pt-4 text-sm text-muted">
+        <p className="mt-6 text-sm text-muted">
+          Written by Bhavishya, a collector who built Philatrail because the
+          Passport needed a proper map and tracker.
+        </p>
+
+        <p className="mt-3 border-t border-line pt-4 text-sm text-muted">
           Details come from the sources above and may change. {DISCLAIMER}
         </p>
       </article>

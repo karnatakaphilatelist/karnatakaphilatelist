@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { JsonLd } from "@/components/seo/JsonLd";
 import { OG_IMAGE } from "@/lib/constants";
 import { getPostOffices } from "@/lib/offices";
-import { officePath } from "@/lib/seo";
+import { breadcrumbJsonLd, officePath } from "@/lib/seo";
 import { stateName } from "@/lib/states";
 import type { PostOffice } from "@/types";
 
@@ -59,6 +60,12 @@ export default async function OfficesPage() {
   const offices = await getPostOffices();
   return (
     <div className="h-full overflow-y-auto">
+      <JsonLd
+        data={breadcrumbJsonLd([
+          { name: "Philatrail", path: "/" },
+          { name: "All post offices", path: "/offices" },
+        ])}
+      />
       <div className="mx-auto max-w-2xl px-5 pb-[calc(3rem+env(safe-area-inset-bottom))] pt-6">
         <p className="text-xs font-bold uppercase tracking-[0.18em] text-muted">
           Karnataka &amp; Tamil Nadu

@@ -1,11 +1,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { StampThumb } from "@/components/office/StampThumb";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { DISCLAIMER, OG_IMAGE, SITE_URL } from "@/lib/constants";
 import { directionsUrl, formatDistance } from "@/lib/geo";
 import { getPostOffices } from "@/lib/offices";
 import {
+  breadcrumbJsonLd,
   findOfficeBySlug,
   nearestOffices,
   officePath,
@@ -31,8 +33,9 @@ export async function generateMetadata(
   if (!office) return {};
 
   const state = stateNameFor(office);
+  const stateCount = offices.filter((o) => o.state === office.state).length;
   const title = `${office.name}, ${office.district} (${office.pincode})`;
-  const description = `${office.name} post office in ${office.district}, ${state}, pincode ${office.pincode}. One of the ${offices.length} post offices in Karnataka's Philately Passport: how the visit works and which offices are nearby.`;
+  const description = `${office.name} post office in ${office.district}, ${state}, pincode ${office.pincode}. One of the ${stateCount} post offices in ${state}'s Philately Passport: how the visit works and which offices are nearby.`;
   return {
     title,
     description,
@@ -56,6 +59,7 @@ export default async function OfficePage(props: PageProps<"/offices/[slug]">) {
   if (!office) notFound();
 
   const state = stateNameFor(office);
+  const stateCount = offices.filter((o) => o.state === office.state).length;
   const hasPlace = office.lat != null && office.lng != null;
   const nearby = nearestOffices(office, offices, 4);
 
@@ -85,11 +89,20 @@ export default async function OfficePage(props: PageProps<"/offices/[slug]">) {
             : {}),
         }}
       />
+      <JsonLd
+        data={breadcrumbJsonLd([
+          { name: "Philatrail", path: "/" },
+          { name: "All post offices", path: "/offices" },
+          { name: office.name, path: officePath(office) },
+        ])}
+      />
       <article className="mx-auto max-w-2xl px-5 pb-[calc(3rem+env(safe-area-inset-bottom))] pt-6">
         <nav aria-label="Breadcrumb" className="text-sm text-muted">
           <Link href="/offices" className="underline">
             All post offices
           </Link>
+          <span aria-hidden> › </span>
+          <span aria-current="page">{office.name}</span>
         </nav>
         <p className="mt-4 text-xs font-bold uppercase tracking-[0.18em] text-muted">
           {office.district} · {state}
@@ -99,9 +112,23 @@ export default async function OfficePage(props: PageProps<"/offices/[slug]">) {
         </h1>
         <p className="mt-3 text-base leading-7">
           {office.name} is a post office in {office.district}, {state}, with the
-          pincode {office.pincode}. It is one of the {offices.length} post
-          offices in Karnataka Postal Circle&apos;s Philately Passport.
+          pincode {office.pincode}. It is one of the {stateCount} post
+          offices in {state}&apos;s Philately Passport.
         </p>
+
+        {office.stampImagePath && (
+          <figure className="mt-4">
+            <StampThumb
+              path={office.stampImagePath}
+              status="visited"
+              className="h-[188px] w-[168px]"
+              alt={`Pictorial postmark of ${office.name}, ${office.district}`}
+            />
+            <figcaption className="mt-1 text-xs text-muted">
+              The pictorial postmark you collect here.
+            </figcaption>
+          </figure>
+        )}
 
         <div className="mt-4 flex flex-wrap gap-2">
           <Link

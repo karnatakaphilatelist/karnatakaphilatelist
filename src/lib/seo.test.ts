@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
+import { SITE_URL } from "@/lib/constants";
 import {
+  breadcrumbJsonLd,
   findOfficeBySlug,
   nearestOffices,
   officePath,
@@ -70,5 +72,18 @@ describe("nearestOffices", () => {
 describe("stateNameFor", () => {
   it("maps a state code to its name", () => {
     expect(stateNameFor(office({ id: 1 }))).toBe("Karnataka");
+  });
+});
+
+
+describe("breadcrumbJsonLd", () => {
+  it("numbers the steps from 1 and uses absolute URLs", () => {
+    const data = breadcrumbJsonLd([
+      { name: "Home", path: "/" },
+      { name: "Learn", path: "/learn" },
+    ]) as { itemListElement: { position: number; item: string; name: string }[] };
+    expect(data.itemListElement.map((i) => i.position)).toEqual([1, 2]);
+    expect(data.itemListElement[1].item).toBe(`${SITE_URL}/learn`);
+    expect(data.itemListElement[1].name).toBe("Learn");
   });
 });

@@ -9,6 +9,8 @@ import { CONTACT_EMAIL, LEGAL_LAST_UPDATED } from "@/lib/constants";
 
 export const metadata: Metadata = {
   title: "Privacy Policy",
+  description:
+    "What Philatrail collects, why, how long it is kept, and how to delete your account and data.",
   alternates: { canonical: "/privacy" },
 };
 

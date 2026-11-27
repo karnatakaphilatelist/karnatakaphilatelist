@@ -4,6 +4,7 @@ import { JsonLd } from "@/components/seo/JsonLd";
 import { WebSignInNudge } from "@/components/web/WebSignInNudge";
 import { DISCLAIMER, OG_IMAGE, SITE_URL } from "@/lib/constants";
 import { getPostOffices } from "@/lib/offices";
+import { breadcrumbJsonLd } from "@/lib/seo";
 
 const PATH = "/karnataka-philately-passport";
 const TITLE =
@@ -55,6 +56,12 @@ export default async function PassportPillarPage() {
 
   return (
     <div className="h-full overflow-y-auto">
+      <JsonLd
+        data={breadcrumbJsonLd([
+          { name: "Philatrail", path: "/" },
+          { name: "Karnataka Philately Passport", path: PATH },
+        ])}
+      />
       <JsonLd
         data={{
           "@context": "https://schema.org",

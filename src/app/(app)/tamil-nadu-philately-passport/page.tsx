@@ -4,6 +4,7 @@ import { JsonLd } from "@/components/seo/JsonLd";
 import { WebSignInNudge } from "@/components/web/WebSignInNudge";
 import { DISCLAIMER, OG_IMAGE, SITE_URL } from "@/lib/constants";
 import { getPostOffices } from "@/lib/offices";
+import { breadcrumbJsonLd } from "@/lib/seo";
 
 const PATH = "/tamil-nadu-philately-passport";
 const TITLE =
@@ -56,6 +57,12 @@ export default async function TamilNaduPassportPillarPage() {
 
   return (
     <div className="h-full overflow-y-auto">
+      <JsonLd
+        data={breadcrumbJsonLd([
+          { name: "Philatrail", path: "/" },
+          { name: "Tamil Nadu Philately Passport", path: PATH },
+        ])}
+      />
       <JsonLd
         data={{
           "@context": "https://schema.org",

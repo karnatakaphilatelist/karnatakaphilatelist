@@ -20,6 +20,12 @@ interface StampThumbProps {
    * should show at its own aspect ratio (e.g. the OfficeDetail hero).
    */
   natural?: boolean;
+  /**
+   * Describes the stamp for search engines and screen readers. Omit it (the
+   * default) where the stamp is decoration beside the office name, as in the
+   * app's lists and cards.
+   */
+  alt?: string;
 }
 
 /**
@@ -32,6 +38,7 @@ export function StampThumb({
   path,
   className = "size-[52px]",
   natural = false,
+  alt = "",
 }: StampThumbProps) {
   const [failed, setFailed] = useState(false);
   const url = failed ? null : stampImageUrl(path);
@@ -41,14 +48,14 @@ export function StampThumb({
     // The container only provides the rounded corners, background and border styling.
     return (
       <span
-        aria-hidden="true"
+        aria-hidden={alt ? undefined : true}
         className={`block shrink-0 overflow-hidden rounded-xl bg-sand text-muted ${className}`}
       >
         {url ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
             src={url}
-            alt=""
+            alt={alt}
             loading="lazy"
             onError={() => setFailed(true)}
             className="block max-h-[180px] max-w-[160px] p-1"
@@ -64,7 +71,7 @@ export function StampThumb({
 
   return (
     <span
-      aria-hidden="true"
+      aria-hidden={alt ? undefined : true}
       className={`grid shrink-0 place-items-center overflow-hidden rounded-xl bg-sand text-muted ${className}`}
     >
       {url ? (
@@ -72,7 +79,7 @@ export function StampThumb({
         // eslint-disable-next-line @next/next/no-img-element
         <img
           src={url}
-          alt=""
+          alt={alt}
           loading="lazy"
           onError={() => setFailed(true)}
           className="size-full object-contain p-1"

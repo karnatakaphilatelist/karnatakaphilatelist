@@ -1,3 +1,4 @@
+import { SITE_URL } from "@/lib/constants";
 import { distanceKm } from "@/lib/geo";
 import { STATE_NAMES } from "@/lib/states";
 import type { PostOffice } from "@/types";
@@ -49,4 +50,20 @@ export function nearestOffices(
     }))
     .sort((a, b) => a.km - b.km)
     .slice(0, count);
+}
+
+/** schema.org BreadcrumbList for a trail like Home > Learn > Article. `path` is the site path of each step. */
+export function breadcrumbJsonLd(
+  trail: { name: string; path: string }[]
+): Record<string, unknown> {
+  return {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: trail.map((step, index) => ({
+      "@type": "ListItem",
+      position: index + 1,
+      name: step.name,
+      item: `${SITE_URL}${step.path}`,
+    })),
+  };
 }

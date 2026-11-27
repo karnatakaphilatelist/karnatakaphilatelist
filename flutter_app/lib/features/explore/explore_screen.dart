@@ -14,6 +14,7 @@ import '../../data/auth_controller.dart';
 import '../../data/nearby_notifications.dart';
 import '../../data/state_controller.dart';
 import '../../models/post_office.dart';
+import '../../core/map_tiles.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/account_avatar.dart' show firstName;
 import '../../widgets/app_icons.dart';
@@ -339,8 +340,13 @@ class _ExploreScreenState extends State<ExploreScreen> {
                       color: Color(0xB3FFFAF0),
                       borderRadius: BorderRadius.only(topRight: Radius.circular(8)),
                     ),
-                    child: const Text('© MapTiler © OpenStreetMap',
-                        style: TextStyle(fontSize: 10, height: 1.4, color: AppColors.muted)),
+                    // Names whoever is actually serving the tiles: the map
+                    // drops to plain OSM when MapTiler refuses them.
+                    child: ValueListenableBuilder<bool>(
+                      valueListenable: tilesRefused,
+                      builder: (context, _, __) => Text(activeTileConfig().attribution,
+                          style: const TextStyle(fontSize: 10, height: 1.4, color: AppColors.muted)),
+                    ),
                   ),
                 ),
                 if (!_sheetOpen)

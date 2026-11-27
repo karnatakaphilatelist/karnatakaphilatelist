@@ -36,13 +36,35 @@ class _OfficeMapState extends State<OfficeMap> {
   double _zoom = 5;
   bool _hasFitted = false;
 
+  int _tileErrors = 0;
+
   // Karnataka-ish starting view, matching MAP_START_CENTER/MAP_START_ZOOM.
   static const _startCenter = ll.LatLng(22.5, 79);
   static const _startZoom = 5.0;
   static const _focusZoom = 12.0;
   static const _nearMeZoom = 11.0;
+  static const _minZoom = 2.0;
+
+  /// CameraFit returns an infinite zoom for bounds with no extent (every
+  /// office at one point, or a single point), and NaN when the padding is
+  /// taller than the map itself. Either value reaches `.floor()` deeper in
+  /// flutter_map and throws "Unsupported operation: Infinity or NaN toInt",
+  /// so no zoom leaves this class without passing through here.
+  double _safeZoom(double zoom, {double fallback = _focusZoom}) {
+    if (zoom.isNaN || zoom.isInfinite) return fallback;
+    return zoom.clamp(_minZoom, activeTileConfig().maxZoom);
+  }
 
   List<OfficeWithStatus> get _located => widget.offices.where((o) => o.hasCoordinates).toList();
+
+  /// A handful of tiles always fail on a flaky connection, so only a sustained
+  /// run of failures counts as MapTiler refusing us.
+  void _onTileError(TileImage tile, Object error, StackTrace? stackTrace) {
+    if (tilesRefused.value || ++_tileErrors < 8) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) tilesRefused.value = true;
+    });
+  }
 
   @override
   void didUpdateWidget(OfficeMap oldWidget) {
@@ -84,7 +106,8 @@ class _OfficeMapState extends State<OfficeMap> {
         // Leaflet's zoomSnap={0.25}: fitBounds rounds the zoom *down* to the
         // nearest quarter level, so the web shows a touch more area than an
         // exact fit — match it, or the pins cluster differently.
-        final snapped = (fitted.zoom * 4).floorToDouble() / 4;
+        final safe = _safeZoom(fitted.zoom);
+        final snapped = (safe * 4).floorToDouble() / 4;
         _mapController.move(fitted.center, snapped);
       } else {
         _mapController.move(points.first, _focusZoom);
@@ -102,7 +125,8 @@ class _OfficeMapState extends State<OfficeMap> {
       }
     }
     if (office != null && office.hasCoordinates) {
-      final targetZoom = _zoom > _focusZoom ? _zoom : _focusZoom;
+      final current = _safeZoom(_zoom, fallback: _startZoom);
+      final targetZoom = current > _focusZoom ? current : _focusZoom;
       _mapController.move(ll.LatLng(office.lat!, office.lng!), targetZoom);
     }
   }
@@ -110,12 +134,23 @@ class _OfficeMapState extends State<OfficeMap> {
   @override
   void initState() {
     super.initState();
+    tilesRefused.addListener(_onTileSourceChanged);
     WidgetsBinding.instance.addPostFrameCallback((_) => _fitToOffices());
   }
 
   @override
+  void dispose() {
+    tilesRefused.removeListener(_onTileSourceChanged);
+    super.dispose();
+  }
+
+  void _onTileSourceChanged() {
+    if (mounted) setState(() {});
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final tiles = getTileConfig();
+    final tiles = activeTileConfig();
     final located = _located;
     final byId = {for (final o in located) o.id: o};
     final clusters = clusterPoints(
@@ -145,17 +180,20 @@ class _OfficeMapState extends State<OfficeMap> {
               event.source == MapEventSource.mapController ||
               event.source == MapEventSource.fitCamera;
           if (settled) {
-            final newZoom = event.camera.zoom;
+            final newZoom = _safeZoom(event.camera.zoom, fallback: _zoom);
             if (newZoom != _zoom) setState(() => _zoom = newZoom);
           }
         },
       ),
       children: [
         TileLayer(
+          // Keyed on the URL so swapping to the fallback actually reloads.
+          key: ValueKey(tiles.urlTemplate),
           urlTemplate: tiles.urlTemplate,
           userAgentPackageName: 'app.vinvi.philatrail',
           maxZoom: tiles.maxZoom,
           tileProvider: NetworkTileProvider(headers: tileHeaders),
+          errorTileCallback: tilesRefused.value ? null : _onTileError,
         ),
         MarkerLayer(
           markers: [
@@ -172,11 +210,16 @@ class _OfficeMapState extends State<OfficeMap> {
                         for (final id in cluster.ids)
                           if (byId[id] != null) ll.LatLng(byId[id]!.lat!, byId[id]!.lng!),
                       ]);
-                      _mapController.fitCamera(CameraFit.bounds(
+                      // Not fitCamera: a cluster of offices that share one
+                      // coordinate fits at an infinite zoom, and `maxZoom`
+                      // does not rescue NaN either, so the zoom goes
+                      // through _safeZoom before it reaches the camera.
+                      final fitted = CameraFit.bounds(
                         bounds: bounds,
                         padding: const EdgeInsets.all(70),
                         maxZoom: 14,
-                      ));
+                      ).fit(_mapController.camera);
+                      _mapController.move(fitted.center, _safeZoom(fitted.zoom, fallback: 14));
                     },
                     child: ClusterBubble(
                       count: cluster.ids.length,

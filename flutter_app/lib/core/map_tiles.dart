@@ -1,3 +1,5 @@
+import 'package:flutter/foundation.dart';
+
 /// Port of src/lib/map-tiles.ts. Same tile sources as the web app, so the
 /// map looks the same and shares the same MapTiler account/quota.
 ///
@@ -51,3 +53,14 @@ const TileConfig _osmConfig = TileConfig(
 TileConfig getTileConfig() {
   return _maptilerKey.isNotEmpty ? _maptilerConfig : _osmConfig;
 }
+
+/// Set once MapTiler has refused enough tiles to call it refused (key
+/// revoked, quota spent, or the account's allowed-origins list not matching
+/// the Referer this app sends). The map then falls back to plain OSM, which
+/// is duller and rate-limited but beats a blank map. App-wide rather than
+/// map-local so the attribution line can name whoever is actually serving
+/// the tiles.
+final ValueNotifier<bool> tilesRefused = ValueNotifier<bool>(false);
+
+/// The config whose tiles are on screen right now.
+TileConfig activeTileConfig() => tilesRefused.value ? _osmConfig : getTileConfig();

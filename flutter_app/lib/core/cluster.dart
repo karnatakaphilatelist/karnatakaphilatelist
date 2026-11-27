@@ -44,10 +44,15 @@ const double clusterMaxZoom = 12;
 /// office) are never merged.
 List<Cluster> clusterPoints(
   List<ClusterInput> points,
-  double zoom, {
+  double rawZoom, {
   double cellPx = 52,
   Set<int> keepSingle = const {},
 }) {
+  // JS's `Math.floor(Infinity)` is Infinity, but Dart's `.floor()` throws
+  // "Unsupported operation: Infinity or NaN toInt", so a non-finite zoom the
+  // web app would merely render oddly takes the whole map down here. Treat
+  // NaN as the starting zoom and clamp everything else into the tile range.
+  final zoom = rawZoom.isNaN ? 5.0 : rawZoom.clamp(0.0, 22.0);
   if (zoom >= clusterMaxZoom) {
     return points
         .map((p) => Cluster(key: p.id, lat: p.lat, lng: p.lng, ids: [p.id]))

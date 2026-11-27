@@ -15,7 +15,10 @@ double distanceKm(Coordinates a, Coordinates b) {
   final dLng = _toRadians(b.lng - a.lng);
   final h = pow(sin(dLat / 2), 2) +
       cos(_toRadians(a.lat)) * cos(_toRadians(b.lat)) * pow(sin(dLng / 2), 2);
-  return 2 * earthRadiusKm * asin(sqrt(h));
+  // Rounding can push h a hair above 1 for near-antipodal points, and asin()
+  // then gives NaN. JS shrugs that off as a "NaN km" label; Dart's `.round()`
+  // in formatDistance throws "Unsupported operation: NaN" instead.
+  return 2 * earthRadiusKm * asin(sqrt(h.clamp(0.0, 1.0)));
 }
 
 String formatDistance(double km) {

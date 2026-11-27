@@ -156,11 +156,11 @@ describe("the bundled list", () => {
       expect(office.name.trim().length).toBeGreaterThan(0);
       expect(office.district.trim().length).toBeGreaterThan(0);
       expect(office.pincode).toMatch(/^\d{6}$/);
-      // Roughly inside Karnataka's bounding box.
-      expect(office.lat).toBeGreaterThan(11);
+      // Roughly inside the bounding box of Karnataka and Tamil Nadu.
+      expect(office.lat).toBeGreaterThan(8);
       expect(office.lat).toBeLessThan(19);
       expect(office.lng).toBeGreaterThan(74);
-      expect(office.lng).toBeLessThan(79);
+      expect(office.lng).toBeLessThan(81);
     }
   });
 

@@ -32,8 +32,16 @@ const FAQ: { q: string; a: string }[] = [
     a: "It is a pocket-sized booklet from Tamil Nadu Postal Circle, on sale since 28 October 2026. It lists 58 post offices across Tamil Nadu. At each one you buy a postage stamp and get that office's pictorial postmark struck in the booklet.",
   },
   {
-    q: "Where can I buy the Tamil Nadu Philately Passport?",
-    a: "It launched at the Chennai GPO Philatelic Bureau. Call or visit ahead to confirm stock, price and whether other head post offices have started selling it too.",
+    q: "Is there an app for the Tamil Nadu Philately Passport?",
+    a: "Yes. Philatrail is a free, independent map and tracker for it. It shows all 58 post offices on a map, helps you plan visits and keeps count of the postmarks you collect. It does not replace the booklet.",
+  },
+  {
+    q: "Which post offices are in the Tamil Nadu Philately Passport?",
+    a: "The booklet lists 58 locations, from Chennai, Mamallapuram and Kanchipuram to Madurai, Thanjavur, Rameswaram and Kanniyakumari. The full list, by district, is on the page linked above.",
+  },
+  {
+    q: "How much is the Tamil Nadu Philately Passport and where is it sold?",
+    a: "News reports put the price at ₹650 and say it is sold at the Philatelic Bureau at Anna Salai Head Post Office in Chennai. Call ahead, because price and sales points can change.",
   },
   {
     q: "Do I need the booklet to use Philatrail?",
@@ -45,7 +53,7 @@ const FAQ: { q: string; a: string }[] = [
   },
   {
     q: "Are these all the post offices in Tamil Nadu?",
-    a: "No. The Passport lists 58 chosen offices. Tamil Nadu has many more post offices.",
+    a: "No. The Philately Passport lists 58 chosen offices. Tamil Nadu has many more post offices.",
   },
 ];
 
@@ -76,11 +84,11 @@ export default async function TamilNaduPassportPillarPage() {
           The Tamil Nadu Philately Passport
         </h1>
         <p className="mt-4 text-lg leading-8">
-          The Tamil Nadu Philately Passport is a booklet from Tamil Nadu
-          Postal Circle, on sale since 28 October 2026. It lists{" "}
+          The Tamil Nadu Philately Passport is a booklet from Tamil Nadu Postal
+          Circle, on sale since 28 October 2026. It lists{" "}
           {tnOffices.length || 58} post offices across the state. At each one
-          you buy a postage stamp and get that office&apos;s pictorial
-          postmark struck in the booklet.
+          you buy a postage stamp and get that office&apos;s pictorial postmark
+          struck in the booklet.
         </p>
 
         <div className="mt-5 flex flex-wrap gap-3">
@@ -91,7 +99,7 @@ export default async function TamilNaduPassportPillarPage() {
             Open the map
           </Link>
           <Link
-            href="/offices"
+            href="/tamil-nadu-philately-passport/post-offices"
             className="inline-flex min-h-11 items-center rounded-full border border-ink/20 px-5 font-bold"
           >
             See all {tnOffices.length || 58} offices
@@ -100,15 +108,17 @@ export default async function TamilNaduPassportPillarPage() {
 
         <h2 className="mt-10 font-display text-2xl font-bold">How it works</h2>
         <ol className="mt-3 list-decimal space-y-2 pl-6 text-base leading-7">
-          <li>Buy the booklet at a participating post office or Philatelic Bureau.</li>
+          <li>
+            Buy the booklet at a participating post office or Philatelic Bureau.
+          </li>
           <li>Travel to a place listed in it and find its post office.</li>
           <li>Buy a postage stamp and stick it on that place&apos;s page.</li>
           <li>Ask the staff for the place&apos;s pictorial postmark.</li>
           <li>Move on to the next place.</li>
         </ol>
         <p className="mt-3 text-base leading-7">
-          Each postmark is available only at its own post office, so you have
-          to go there. The booklet&apos;s own pages are the final word on any
+          Each postmark is available only at its own post office, so you have to
+          go there. The booklet&apos;s own pages are the final word on any
           rules.
         </p>
 
@@ -116,18 +126,30 @@ export default async function TamilNaduPassportPillarPage() {
           Where to get the booklet
         </h2>
         <p className="mt-3 text-base leading-7">
-          It launched at the Chennai GPO Philatelic Bureau. Stock and which
-          other head post offices carry it can change, so call or visit
-          ahead before you travel.
+          News reports put the price at ₹650 and say it is sold at the
+          Philatelic Bureau at Anna Salai Head Post Office in Chennai. They also
+          say it was introduced at the Philatelic Bureaus in Coimbatore,
+          Madurai, Tiruchirappalli and Puducherry. Stock and sales points can
+          change, so call ahead before you travel.{" "}
+          <Link
+            href="/learn/get-the-tamil-nadu-philately-passport"
+            className="font-bold underline"
+          >
+            More on where to get it
+          </Link>
+          .
         </p>
 
         <h2 className="mt-10 font-display text-2xl font-bold">
           The {tnOffices.length || 58} post offices
         </h2>
         <p className="mt-3 text-base leading-7">
-          The list covers {districts || 28} districts, from Chennai and
-          Madurai to Coimbatore, Thanjavur and Kanniyakumari. Browse them{" "}
-          <Link href="/offices" className="font-bold underline">
+          The list covers {districts || 28} districts, from Chennai and Madurai
+          to Coimbatore, Thanjavur and Kanniyakumari. Browse them{" "}
+          <Link
+            href="/tamil-nadu-philately-passport/post-offices"
+            className="font-bold underline"
+          >
             by district
           </Link>{" "}
           or find the ones near you on the{" "}
@@ -141,9 +163,9 @@ export default async function TamilNaduPassportPillarPage() {
           Where Philatrail fits
         </h2>
         <p className="mt-3 text-base leading-7">
-          Philatrail is a free, independent map and tracker for the Passport.
-          It shows every office on a map, helps you plan the next trip and
-          keeps count of the postmarks you have collected. It works without
+          Philatrail is a free, independent map and tracker for the Philately
+          Passport. It shows every office on a map, helps you plan the next trip
+          and keeps count of the postmarks you have collected. It works without
           an account.
         </p>
 
@@ -166,6 +188,13 @@ export default async function TamilNaduPassportPillarPage() {
           Start with{" "}
           <Link href="/learn" className="font-bold underline">
             the beginner&apos;s guide
+          </Link>
+          , or read{" "}
+          <Link
+            href="/learn/how-the-tamil-nadu-philately-passport-works"
+            className="font-bold underline"
+          >
+            how the Tamil Nadu Philately Passport works
           </Link>
           . Looking for Karnataka instead? See{" "}
           <Link

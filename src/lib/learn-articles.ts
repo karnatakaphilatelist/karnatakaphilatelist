@@ -66,6 +66,19 @@ const HANS_INDIA: Source = {
   url: "https://www.thehansindia.com/news/cities/bengaluru/karnataka-postal-dept-sells-8000-philately-passports-in-two-days-1131947",
 };
 
+const DT_NEXT_TN: Source = {
+  label: "DT Next: A passport to explore Tamil Nadu",
+  url: "https://www.dtnext.in/news/chennai/a-passport-to-explore-tamil-nadu",
+};
+const LIVECHENNAI_TN: Source = {
+  label: "Live Chennai: Philately Passport to revive stamp collecting",
+  url: "https://www.livechennai.com/detailnews.asp?newsid=84419",
+};
+const TN_POSTAL_PPC_LIST: Source = {
+  label: "Tamil Nadu Postal Circle: list of Permanent Pictorial Cancellations",
+  url: "https://tamilnadupost.cept.gov.in/philatelic-bureaus.php",
+};
+
 export const ARTICLES: Article[] = [
   {
     slug: "what-is-philately",
@@ -335,6 +348,166 @@ export const ARTICLES: Article[] = [
       },
     ],
     sources: [DECCAN_HERALD_PPC, NEWS_KARNATAKA],
+    next: { label: "Open the map", href: "/explore" },
+  },
+  {
+    slug: "how-the-tamil-nadu-philately-passport-works",
+    title: "How the Tamil Nadu Philately Passport works",
+    summary: "A booklet, 58 places and a dated postmark from each.",
+    minutes: 3,
+    blocks: [
+      {
+        type: "p",
+        text: "The Tamil Nadu Philately Passport is a booklet from Tamil Nadu Postal Circle, launched on 28 October 2026. It covers 58 locations, among them historic places and heritage post office buildings. News reports put the price at ₹650.",
+      },
+      { type: "h2", text: "What it is" },
+      {
+        type: "p",
+        text: "The booklet brings together the circle's existing Permanent Pictorial Cancellations (PPCs). Each is a postmark with a picture linked to its place. At every office you collect a dated impression as a record of your visit, and the aim is to visit all 58 locations.",
+      },
+      { type: "h2", text: "Step by step" },
+      {
+        type: "ol",
+        items: [
+          "Buy the booklet at a Philatelic Bureau.",
+          "Pick a place from the booklet and travel to its post office.",
+          "Ask for that place's pictorial postmark and have it struck in your booklet.",
+          "Check that the place name and the date are clear before you leave.",
+        ],
+      },
+      { type: "h2", text: "Good to know" },
+      {
+        type: "ul",
+        items: [
+          "Each postmark is available only at its own post office, so you have to go there.",
+          "The booklet's own pages are the final word on how it works. Check them for any rules, such as whether to stick a stamp first.",
+          "The postal circle has said more locations may follow, depending on public response.",
+        ],
+      },
+      { type: "h2", text: "Where Philatrail fits" },
+      {
+        type: "p",
+        text: "Philatrail is an independent app that goes with the booklet. It shows the 58 post offices on a map, helps you plan trips and keeps count of the postmarks you have collected. It does not replace the booklet, and a tap in the app is not an official stamp.",
+      },
+      {
+        type: "link",
+        text: "Full overview: the Tamil Nadu Philately Passport",
+        href: "/tamil-nadu-philately-passport",
+      },
+    ],
+    sources: [DT_NEXT_TN, LIVECHENNAI_TN],
+    next: {
+      label: "Next: where to get the Tamil Nadu booklet",
+      href: "/learn/get-the-tamil-nadu-philately-passport",
+    },
+  },
+  {
+    slug: "get-the-tamil-nadu-philately-passport",
+    title: "Where to get the Tamil Nadu Philately Passport",
+    summary: "The price, where it is sold, and why to call ahead.",
+    minutes: 2,
+    blocks: [
+      {
+        type: "p",
+        text: "News reports put the Tamil Nadu Philately Passport at ₹650. It is sold at the Philatelic Bureau at Anna Salai Head Post Office in Chennai, which one report also calls the Anna Road Philatelic Bureau.",
+      },
+      { type: "h2", text: "Other bureaus" },
+      {
+        type: "p",
+        text: "Another report says the Philately Passport was introduced at the Philatelic Bureaus in Chennai, Coimbatore, Madurai, Tiruchirappalli and Puducherry. It does not spell out which of them sell the booklet, so ask the bureau you plan to visit.",
+      },
+      { type: "h2", text: "Before you go" },
+      {
+        type: "ul",
+        items: [
+          "Call the bureau to confirm that copies are in stock.",
+          "Ask the price and the opening hours.",
+          "Carry cash or ask which payments they accept.",
+        ],
+      },
+      {
+        type: "p",
+        text: "Prices and sales points can change, so treat this page as a starting point and trust what the post office tells you.",
+      },
+      {
+        type: "link",
+        text: "See all 58 post offices in the Tamil Nadu Philately Passport",
+        href: "/tamil-nadu-philately-passport/post-offices",
+      },
+    ],
+    sources: [DT_NEXT_TN, LIVECHENNAI_TN],
+    next: {
+      label: "Next: Tamil Nadu's pictorial postmarks",
+      href: "/learn/tamil-nadu-pictorial-postmarks",
+    },
+  },
+  {
+    slug: "tamil-nadu-pictorial-postmarks",
+    title: "Tamil Nadu's pictorial postmarks",
+    summary: "What the 58 postmarks are and where the official list lives.",
+    minutes: 2,
+    blocks: [
+      {
+        type: "p",
+        text: "A Permanent Pictorial Cancellation (PPC) is a postmark with a picture of a place, kept permanently at a post office near a heritage, tourist or nature site. The Tamil Nadu Philately Passport gathers the circle's existing PPCs, 58 in all, into one booklet.",
+      },
+      { type: "h2", text: "What you will find" },
+      {
+        type: "p",
+        text: "The postmarks sit at offices across the state, from Chennai and Mamallapuram to Madurai, Thanjavur, Rameswaram and Kanniyakumari. The circle's official list describes what each design shows. For Mamallapuram, for example, the list says the cancellation depicts the Shore Temple.",
+      },
+      { type: "h2", text: "Check the official list" },
+      {
+        type: "p",
+        text: "Tamil Nadu Postal Circle publishes its list of pictorial cancellations on its website, under its philately pages. It is the best place to confirm an office and its design before you travel.",
+      },
+      {
+        type: "link",
+        text: "Browse all 58 offices by district",
+        href: "/tamil-nadu-philately-passport/post-offices",
+      },
+    ],
+    sources: [TN_POSTAL_PPC_LIST, DT_NEXT_TN],
+    next: { label: "Open the map", href: "/explore" },
+  },
+  {
+    slug: "philately-passport-app",
+    title: "Is there an app for the Philately Passport?",
+    summary:
+      "Yes: a free, independent map and tracker for Karnataka and Tamil Nadu.",
+    minutes: 1,
+    blocks: [
+      {
+        type: "p",
+        text: "Yes. Philatrail is a free, independent map and tracker for the Philately Passport. It covers the 100 post offices of the Karnataka Philately Passport and the 58 of the Tamil Nadu Philately Passport.",
+      },
+      { type: "h2", text: "What it does" },
+      {
+        type: "ul",
+        items: [
+          "Shows every office in the booklet on a map.",
+          "Helps you plan your next visit and see which offices are nearby.",
+          "Keeps count of the postmarks you have collected.",
+          "Works without an account.",
+        ],
+      },
+      { type: "h2", text: "What it does not do" },
+      {
+        type: "p",
+        text: "It does not replace the booklet and it does not issue postmarks. You still collect each postmark in person at the post office. Philatrail is independent: India Post and the postal circles did not make it and do not run it.",
+      },
+      {
+        type: "link",
+        text: "Karnataka: all 100 post offices",
+        href: "/karnataka-philately-passport/post-offices",
+      },
+      {
+        type: "link",
+        text: "Tamil Nadu: all 58 post offices",
+        href: "/tamil-nadu-philately-passport/post-offices",
+      },
+    ],
+    sources: [THE_WEEK, DT_NEXT_TN],
     next: { label: "Open the map", href: "/explore" },
   },
 ];

@@ -92,8 +92,8 @@ export function SupportProjectSection() {
           </p>
           <p>
             <strong className="text-ink">Who&apos;s behind this?</strong>{" "}
-            Bhavishya, a collector who built Philatrail because the Passport
-            needed a proper map and tracker.
+            Bhavishya, a collector who built Philatrail because the Philately
+            Passport needed a proper map and tracker.
           </p>
           <p>
             <strong className="text-ink">Where does the money go?</strong>{" "}

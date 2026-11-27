@@ -15,6 +15,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     page("/", 1),
     page("/karnataka-philately-passport", 0.9),
     page("/tamil-nadu-philately-passport", 0.9),
+    page("/karnataka-philately-passport/post-offices", 0.8),
+    page("/tamil-nadu-philately-passport/post-offices", 0.8),
     page("/learn", 0.8),
     ...ARTICLES.map((article) => page(`/learn/${article.slug}`, 0.7)),
     page("/offices", 0.8),

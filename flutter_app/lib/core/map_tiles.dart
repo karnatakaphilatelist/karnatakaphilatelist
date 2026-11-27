@@ -28,8 +28,10 @@ class TileConfig {
 // unset secret — which is exactly what silently swapped every CI build to
 // the plain OSM tiles. Treat empty as "not set".
 const String _maptilerKeyDefine = String.fromEnvironment('MAPTILER_KEY');
-const String _maptilerKey =
-    _maptilerKeyDefine == '' ? 'R0dDhO97QPuaVDHuLXe2' : _maptilerKeyDefine;
+// No baked-in default: the shared web key rendered flat grey tiles on Android
+// (27 Nov 2026 emulator test) while OpenStreetMap tiles rendered fine. MapTiler
+// is opt-in via --dart-define=MAPTILER_KEY until its key allows native apps.
+const String _maptilerKey = _maptilerKeyDefine;
 
 /// MapTiler keys can be locked to allowed origins; the web app's requests
 /// come from philatrail.com, so the native app identifies the same way.

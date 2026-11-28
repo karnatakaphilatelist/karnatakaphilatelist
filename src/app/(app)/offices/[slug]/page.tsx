@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { PublicNotes } from "@/components/office/PublicNotes";
 import { StampThumb } from "@/components/office/StampThumb";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { DISCLAIMER, OG_IMAGE, SITE_URL } from "@/lib/constants";
@@ -176,6 +177,8 @@ export default async function OfficePage(props: PageProps<"/offices/[slug]">) {
             says where it is sold.
           </p>
         </section>
+
+        <PublicNotes officeId={office.id} />
 
         {nearby.length > 0 && (
           <section className="mt-8" aria-labelledby="nearby-heading">

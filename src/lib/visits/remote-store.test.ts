@@ -1,6 +1,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { describe, expect, it, vi } from "vitest";
 import {
+  fetchPublicVisitsForOffice,
   insertVisitIfMissing,
   mergeGuestVisits,
   updateVisitDetails,
@@ -146,5 +147,29 @@ describe("updateVisitDetails", () => {
     await expect(updateVisitDetails(client, "u1", visit(5))).rejects.toThrow(
       "nope"
     );
+  });
+});
+
+describe("fetchPublicVisitsForOffice", () => {
+  it("reads through the public notes function and maps the author", async () => {
+    const rpc = vi.fn(async () => ({
+      data: [
+        { user_id: "u1", visited_at: "2026-11-01", note: "Counter closes at 3", photo_path: null, full_name: "Asha", avatar_url: null },
+        { user_id: "u2", visited_at: "2026-10-01", note: "Lovely", photo_path: "u2/1.jpg", full_name: null, avatar_url: null },
+      ],
+      error: null,
+    }));
+    const notes = await fetchPublicVisitsForOffice({ rpc } as unknown as SupabaseClient, 7);
+    expect(rpc).toHaveBeenCalledWith("public_notes_for_office", { p_office_id: 7 });
+    expect(notes[0].author).toEqual({ fullName: "Asha", avatarUrl: null });
+    expect(notes[1].author).toBeNull();
+    expect(notes[1].photoPath).toBe("u2/1.jpg");
+  });
+
+  it("returns an empty list when there are none and throws on an error", async () => {
+    const ok = { rpc: async () => ({ data: null, error: null }) } as unknown as SupabaseClient;
+    expect(await fetchPublicVisitsForOffice(ok, 1)).toEqual([]);
+    const bad = { rpc: async () => ({ data: null, error: { message: "boom" } }) } as unknown as SupabaseClient;
+    await expect(fetchPublicVisitsForOffice(bad, 1)).rejects.toThrow("boom");
   });
 });

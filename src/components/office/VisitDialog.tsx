@@ -181,15 +181,20 @@ function VisitForm({ visit, onDone }: { visit: Visit; onDone: () => void }) {
           />
           <VisibilityOption
             checked={isPublic}
-            onSelect={() => setIsPublic(true)}
+            // A signed-out collector's visit lives only on this phone, so sharing needs an account.
+            onSelect={() => (user ? setIsPublic(true) : openSignIn())}
             label="Public"
             icon={<GlobeIcon className="size-4" />}
           />
         </div>
         <p className="mt-2 text-sm text-muted">
-          {isPublic
-            ? "Your note and photo show on this office's Public tab for other collectors to see."
-            : "Only you can see this note and photo."}
+          {!user
+            ? "Sign in to share a note publicly. Until then it stays on this phone."
+            : isPublic
+              ? note.trim()
+                ? "Your note and photo show on this office's Public tab, for anyone to see, signed in or not."
+                : "Add a note to appear on this office's Public tab. A photo alone is not shown."
+              : "Only you can see this note and photo."}
         </p>
       </fieldset>
 

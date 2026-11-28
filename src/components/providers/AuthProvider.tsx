@@ -99,7 +99,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const ignore = () => undefined;
-    if (hasStoredSession()) {
+    // Google can send the person back to the site root as `/?code=…` instead of /auth/callback
+    // (seen in production when the redirect is not matched). The code is single-use, so load the
+    // client at once: it exchanges the code with the verifier saved when sign-in began, then the
+    // address is tidied so a refresh does not retry a spent code.
+    const returning =
+      !isNativeApp() && new URLSearchParams(window.location.search).has("code");
+    if (returning) {
+      getClient()
+        .then((client) => client.auth.getSession())
+        .catch(ignore)
+        .finally(() => {
+          const url = new URL(window.location.href);
+          url.searchParams.delete("code");
+          window.history.replaceState(null, "", url.pathname + url.search + url.hash);
+        });
+    } else if (hasStoredSession()) {
       getClient().catch(ignore);
     } else {
       // No saved session means a guest: no need to download the auth library to find that out.
